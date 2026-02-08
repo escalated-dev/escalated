@@ -10,11 +10,86 @@ Pick your framework:
 
 | Framework | Repo | Install |
 |-----------|------|---------|
-| **Laravel** | [escalated-dev/escalated-laravel](https://github.com/escalated-dev/escalated-laravel) | `composer require escalated/escalated-laravel` |
+| **Laravel** | [escalated-dev/escalated-laravel](https://github.com/escalated-dev/escalated-laravel) | `composer require escalated-dev/escalated-laravel` |
 | **Rails** | [escalated-dev/escalated-rails](https://github.com/escalated-dev/escalated-rails) | `gem "escalated"` |
 | **Django** | [escalated-dev/escalated-django](https://github.com/escalated-dev/escalated-django) | `pip install escalated-django` |
 
-Each backend repo has full setup instructions — install command, migrations, config, and how to publish these frontend assets into your app.
+Each backend repo has full setup instructions — install command, migrations, config, and frontend integration.
+
+## Theming
+
+Escalated renders inside a standalone layout by default. To integrate it into your app's design system, use the `EscalatedPlugin`:
+
+```js
+import { createApp } from 'vue'
+import { EscalatedPlugin } from '@escalated-dev/escalated'
+import AppLayout from '@/Layouts/AppLayout.vue'
+
+const app = createApp(...)
+
+app.use(EscalatedPlugin, {
+    layout: AppLayout,
+    theme: {
+        primary: '#3b82f6',
+        radius: '0.75rem',
+    }
+})
+```
+
+### Layout Integration
+
+Pass your app's layout component and all Escalated pages render inside it automatically. The layout component must accept a `#header` slot and a default slot:
+
+```vue
+<!-- Your layout must support these slots -->
+<template>
+    <div>
+        <nav>...</nav>
+        <header><slot name="header" /></header>
+        <main><slot /></main>
+    </div>
+</template>
+```
+
+When no layout is provided, Escalated uses its own built-in navigation bar.
+
+### CSS Custom Properties
+
+The `theme` option sets CSS custom properties you can reference in your own styles:
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--esc-primary` | `#4f46e5` | Primary action color |
+| `--esc-primary-hover` | auto-darkened | Primary hover color |
+| `--esc-radius` | `0.5rem` | Border radius for inputs and buttons |
+| `--esc-radius-lg` | auto-scaled | Border radius for cards and panels |
+| `--esc-font-family` | inherit | Font family override |
+
+### Framework Examples
+
+**Laravel** (Inertia + Vue 3):
+```js
+import { EscalatedPlugin } from '@escalated-dev/escalated'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+
+app.use(EscalatedPlugin, { layout: AuthenticatedLayout })
+```
+
+**Rails** (Inertia + Vue 3):
+```js
+import { EscalatedPlugin } from '@escalated-dev/escalated'
+import AppLayout from '@/layouts/AppLayout.vue'
+
+app.use(EscalatedPlugin, { layout: AppLayout })
+```
+
+**Django** (Inertia + Vue 3):
+```js
+import { EscalatedPlugin } from '@escalated-dev/escalated'
+import BaseLayout from '@/layouts/BaseLayout.vue'
+
+app.use(EscalatedPlugin, { layout: BaseLayout })
+```
 
 ## What's in This Repo
 
@@ -60,7 +135,13 @@ Reusable building blocks used across the pages above.
 | `FileDropzone` | Drag-and-drop file upload |
 | `AttachmentList` | File attachment display with download links |
 | `StatsCard` | Metric card with label, value, and trend |
-| `EscalatedLayout` | Top-level layout with navigation |
+| `EscalatedLayout` | Top-level layout with navigation (supports host layout injection) |
+
+### Plugin
+
+| Export | Description |
+|--------|-------------|
+| `EscalatedPlugin` | Vue plugin for layout injection and CSS theming |
 
 ## For Package Maintainers
 
@@ -71,6 +152,9 @@ npm install @escalated-dev/escalated
 ```
 
 ```js
+// Import the plugin
+import { EscalatedPlugin } from '@escalated-dev/escalated'
+
 // Import individual components
 import { StatusBadge, SlaTimer } from '@escalated-dev/escalated'
 
