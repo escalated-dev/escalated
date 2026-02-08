@@ -1,0 +1,37 @@
+{
+  "name": "@escalated-dev/escalated",
+  "version": "0.1.0",
+  "description": "Vue 3 + Inertia.js UI components for Escalated — the embeddable support ticket system",
+  "author": "Escalated Dev <hello@escalated.dev>",
+  "license": "MIT",
+  "homepage": "https://github.com/escalated-dev/escalated",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/escalated-dev/escalated.git"
+  },
+  "keywords": [
+    "vue",
+    "inertia",
+    "support",
+    "tickets",
+    "helpdesk",
+    "escalated"
+  ],
+  "type": "module",
+  "exports": {
+    "./components/*": "./src/components/*",
+    "./pages/*": "./src/pages/*",
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "peerDependencies": {
+    "vue": "^3.3.0",
+    "@inertiajs/vue3": "^1.0.0 || ^2.0.0"
+  },
+  "devDependencies": {
+    "vue": "^3.5.0",
+    "@inertiajs/vue3": "^2.0.0"
+  }
+}
