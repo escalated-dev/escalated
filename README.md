@@ -21,6 +21,22 @@ Pick your framework:
 
 Each backend repo has full setup instructions — install command, migrations, config, and frontend integration.
 
+## Tailwind CSS
+
+Escalated components use Tailwind CSS classes. You **must** add this package to your Tailwind `content` config so its classes aren't purged:
+
+```js
+// tailwind.config.js
+export default {
+    content: [
+        // ... your existing paths
+        './node_modules/@escalated-dev/escalated/src/**/*.vue',
+    ],
+}
+```
+
+Without this, Escalated UI will render but styles like button backgrounds and badge colors will be missing.
+
 ## Theming
 
 Escalated renders inside a standalone layout by default. To integrate it into your app's design system, use the `EscalatedPlugin`:
