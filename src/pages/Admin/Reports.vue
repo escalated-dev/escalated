@@ -1,6 +1,6 @@
 <script setup>
-import EscalatedLayout from '../../../Components/Escalated/EscalatedLayout.vue';
-import StatsCard from '../../../Components/Escalated/StatsCard.vue';
+import EscalatedLayout from '../../components/EscalatedLayout.vue';
+import StatsCard from '../../components/StatsCard.vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({

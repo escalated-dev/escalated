@@ -1,5 +1,5 @@
 <script setup>
-import EscalatedLayout from '../../../../Components/Escalated/EscalatedLayout.vue';
+import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 

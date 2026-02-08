@@ -1,6 +1,6 @@
 <script setup>
-import EscalatedLayout from '../../../Components/Escalated/EscalatedLayout.vue';
-import FileDropzone from '../../../Components/Escalated/FileDropzone.vue';
+import EscalatedLayout from '../../components/EscalatedLayout.vue';
+import FileDropzone from '../../components/FileDropzone.vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({

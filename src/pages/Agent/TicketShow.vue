@@ -1,11 +1,11 @@
 <script setup>
-import EscalatedLayout from '../../../Components/Escalated/EscalatedLayout.vue';
-import StatusBadge from '../../../Components/Escalated/StatusBadge.vue';
-import PriorityBadge from '../../../Components/Escalated/PriorityBadge.vue';
-import ReplyThread from '../../../Components/Escalated/ReplyThread.vue';
-import ReplyComposer from '../../../Components/Escalated/ReplyComposer.vue';
-import TicketSidebar from '../../../Components/Escalated/TicketSidebar.vue';
-import AttachmentList from '../../../Components/Escalated/AttachmentList.vue';
+import EscalatedLayout from '../../components/EscalatedLayout.vue';
+import StatusBadge from '../../components/StatusBadge.vue';
+import PriorityBadge from '../../components/PriorityBadge.vue';
+import ReplyThread from '../../components/ReplyThread.vue';
+import ReplyComposer from '../../components/ReplyComposer.vue';
+import TicketSidebar from '../../components/TicketSidebar.vue';
+import AttachmentList from '../../components/AttachmentList.vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 

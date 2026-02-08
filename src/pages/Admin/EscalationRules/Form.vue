@@ -1,5 +1,5 @@
 <script setup>
-import EscalatedLayout from '../../../../Components/Escalated/EscalatedLayout.vue';
+import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({ rule: { type: Object, default: null } });

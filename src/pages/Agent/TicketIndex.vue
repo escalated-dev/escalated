@@ -1,7 +1,7 @@
 <script setup>
-import EscalatedLayout from '../../../Components/Escalated/EscalatedLayout.vue';
-import TicketList from '../../../Components/Escalated/TicketList.vue';
-import TicketFilters from '../../../Components/Escalated/TicketFilters.vue';
+import EscalatedLayout from '../../components/EscalatedLayout.vue';
+import TicketList from '../../components/TicketList.vue';
+import TicketFilters from '../../components/TicketFilters.vue';
 
 defineProps({
     tickets: Object,

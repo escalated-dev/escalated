@@ -1,5 +1,5 @@
 <script setup>
-import EscalatedLayout from '../../../../Components/Escalated/EscalatedLayout.vue';
+import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 
 defineProps({ departments: Array });
