@@ -64,7 +64,7 @@ const buttonLabel = computed(() => {
 
 <template>
     <!-- Dark mode -->
-    <div v-if="escDark.value" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4">
+    <div v-if="escDark" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4">
         <div v-if="allowNotes" class="mb-3 flex gap-2">
             <button @click="isNote = false"
                     :class="['rounded-lg px-3 py-1.5 text-sm font-medium transition-colors', !isNote ? 'bg-cyan-500/15 text-white ring-1 ring-cyan-500/20' : 'text-gray-400 hover:bg-white/[0.04]']">

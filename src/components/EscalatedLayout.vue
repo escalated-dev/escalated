@@ -54,10 +54,10 @@ function isActive(href) {
         <aside class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-white/[0.06] bg-neutral-950">
             <!-- Logo -->
             <div class="flex h-16 items-center gap-3 px-5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500">
-                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                        <polyline points="17 11 12 6 7 11" />
-                        <polyline points="17 18 12 13 7 18" />
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <defs><linearGradient id="esc-rainbow-admin" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="30%" stop-color="#eab308"/><stop offset="50%" stop-color="#22c55e"/><stop offset="70%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+                        <g transform="translate(12,12) scale(1.35) translate(-12,-12)"><polyline points="17 11 12 6 7 11" stroke="url(#esc-rainbow-admin)"/><polyline points="17 18 12 13 7 18" stroke="url(#esc-rainbow-admin)"/></g>
                     </svg>
                 </div>
                 <div>
@@ -125,10 +125,10 @@ function isActive(href) {
             <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <!-- Left: branding -->
                 <div class="flex items-center gap-3">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500">
-                        <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                            <polyline points="17 11 12 6 7 11" />
-                            <polyline points="17 18 12 13 7 18" />
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <defs><linearGradient id="esc-rainbow-agent" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="30%" stop-color="#eab308"/><stop offset="50%" stop-color="#22c55e"/><stop offset="70%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+                            <g transform="translate(12,12) scale(1.35) translate(-12,-12)"><polyline points="17 11 12 6 7 11" stroke="url(#esc-rainbow-agent)"/><polyline points="17 18 12 13 7 18" stroke="url(#esc-rainbow-agent)"/></g>
                         </svg>
                     </div>
                     <span class="text-sm font-bold text-white tracking-wide">Escalated</span>

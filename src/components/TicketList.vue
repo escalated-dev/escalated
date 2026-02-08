@@ -15,7 +15,7 @@ const escDark = inject('esc-dark', computed(() => false));
 
 <template>
     <!-- Dark mode -->
-    <div v-if="escDark.value" class="overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/60">
+    <div v-if="escDark" class="overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/60">
         <table class="min-w-full divide-y divide-white/[0.06]">
             <thead>
                 <tr class="bg-white/[0.02]">

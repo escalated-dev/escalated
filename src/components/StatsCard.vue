@@ -27,7 +27,7 @@ const lightColorMap = {
 
 <template>
     <!-- Dark mode -->
-    <div v-if="escDark.value" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
+    <div v-if="escDark" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
         <div class="text-[13px] font-medium text-neutral-500">{{ displayLabel }}</div>
         <div class="mt-2 text-2xl font-bold tracking-tight text-white">{{ value }}</div>
         <div v-if="trend" class="mt-2 inline-flex items-center rounded-full bg-white/[0.06] px-2 py-0.5 text-xs font-medium text-neutral-400">
