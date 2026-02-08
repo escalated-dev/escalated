@@ -42,17 +42,17 @@ function assignToMe() {
 <template>
     <EscalatedLayout :title="ticket.subject">
         <div class="mb-5 flex flex-wrap items-center gap-3">
-            <span class="text-sm font-mono font-medium text-cyan-400">{{ ticket.reference }}</span>
+            <span class="text-sm font-mono font-medium text-white">{{ ticket.reference }}</span>
             <StatusBadge :status="ticket.status" />
             <PriorityBadge :priority="ticket.priority" />
-            <span class="text-sm text-gray-500">by {{ ticket.requester?.name }}</span>
+            <span class="text-sm text-neutral-500">by {{ ticket.requester?.name }}</span>
             <div class="ml-auto flex gap-2">
                 <button v-if="!ticket.assigned_to" @click="assignToMe"
-                        class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-cyan-500/20 transition-all hover:from-cyan-400 hover:to-violet-400">
+                        class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400">
                     Assign to Me
                 </button>
                 <select @change="changeStatus($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border border-white/10 bg-gray-950 px-3 py-1.5 text-sm text-gray-200 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30">
+                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
                     <option value="">Change Status...</option>
                     <option value="in_progress">In Progress</option>
                     <option value="waiting_on_customer">Waiting on Customer</option>
@@ -60,7 +60,7 @@ function assignToMe() {
                     <option value="closed">Closed</option>
                 </select>
                 <select @change="changePriority($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border border-white/10 bg-gray-950 px-3 py-1.5 text-sm text-gray-200 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30">
+                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
                     <option value="">Change Priority...</option>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -72,18 +72,18 @@ function assignToMe() {
         </div>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-6">
-                <div class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-5">
-                    <p class="whitespace-pre-wrap text-sm text-gray-300">{{ ticket.description }}</p>
+                <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
+                    <p class="whitespace-pre-wrap text-sm text-neutral-300">{{ ticket.description }}</p>
                     <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />
                 </div>
                 <div>
                     <div class="mb-4 flex gap-4 border-b border-white/[0.06]">
                         <button @click="activeTab = 'reply'"
-                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'reply' ? 'border-b-2 border-cyan-500 text-cyan-400' : 'text-gray-500 hover:text-gray-300']">
+                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'reply' ? 'border-b-2 border-cyan-500 text-white' : 'text-neutral-500 hover:text-neutral-300']">
                             Reply
                         </button>
                         <button @click="activeTab = 'note'"
-                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'note' ? 'border-b-2 border-amber-500 text-amber-400' : 'text-gray-500 hover:text-gray-300']">
+                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'note' ? 'border-b-2 border-amber-500 text-amber-400' : 'text-neutral-500 hover:text-neutral-300']">
                             Internal Note
                         </button>
                     </div>
@@ -96,7 +96,7 @@ function assignToMe() {
                                    submit-label="Add Note" />
                 </div>
                 <div>
-                    <h2 class="mb-4 text-lg font-semibold text-gray-200">Conversation</h2>
+                    <h2 class="mb-4 text-lg font-semibold text-neutral-200">Conversation</h2>
                     <ReplyThread :replies="ticket.replies || []" :current-user-id="page.props.auth?.user?.id" />
                 </div>
             </div>

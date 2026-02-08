@@ -18,7 +18,7 @@ function formatDate(date) {
     <div class="space-y-4">
         <div v-for="reply in replies" :key="reply.id"
              :class="['rounded-xl border p-4', escDark.value
-                 ? (reply.is_internal_note ? 'border-amber-500/20 bg-amber-500/5' : 'border-white/[0.06] bg-gray-900/60')
+                 ? (reply.is_internal_note ? 'border-amber-500/20 bg-amber-500/5' : 'border-white/[0.06] bg-neutral-900/60')
                  : (reply.is_internal_note ? 'border-yellow-200 bg-yellow-50' : 'border-gray-200 bg-white')]">
             <div class="mb-2 flex items-center justify-between">
                 <div class="flex items-center gap-2">

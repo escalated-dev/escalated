@@ -25,12 +25,12 @@ watch(filters, (val) => {
 }, { deep: true });
 
 const inputClass = computed(() => escDark.value
-    ? 'rounded-lg border border-white/10 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 placeholder-gray-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30'
+    ? 'rounded-lg border border-white/10 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10'
     : 'rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none'
 );
 
 const selectClass = computed(() => escDark.value
-    ? 'rounded-lg border border-white/10 bg-gray-900 px-2 py-1.5 text-sm text-gray-200 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30'
+    ? 'rounded-lg border border-white/10 bg-gray-900 px-2 py-1.5 text-sm text-gray-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10'
     : 'rounded-md border border-gray-300 px-2 py-1.5 text-sm'
 );
 </script>

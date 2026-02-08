@@ -64,10 +64,10 @@ const buttonLabel = computed(() => {
 
 <template>
     <!-- Dark mode -->
-    <div v-if="escDark.value" class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-4">
+    <div v-if="escDark.value" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4">
         <div v-if="allowNotes" class="mb-3 flex gap-2">
             <button @click="isNote = false"
-                    :class="['rounded-lg px-3 py-1.5 text-sm font-medium transition-colors', !isNote ? 'bg-cyan-500/15 text-cyan-400 ring-1 ring-cyan-500/20' : 'text-gray-400 hover:bg-white/[0.04]']">
+                    :class="['rounded-lg px-3 py-1.5 text-sm font-medium transition-colors', !isNote ? 'bg-cyan-500/15 text-white ring-1 ring-cyan-500/20' : 'text-gray-400 hover:bg-white/[0.04]']">
                 Reply
             </button>
             <button @click="isNote = true"
@@ -81,7 +81,7 @@ const buttonLabel = computed(() => {
         </div>
 
         <textarea v-model="body" rows="4" :placeholder="placeholder"
-                  class="w-full rounded-lg border border-white/10 bg-gray-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30"></textarea>
+                  class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"></textarea>
 
         <FileDropzone @files="handleFiles" class="mt-2" />
 

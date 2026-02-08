@@ -19,7 +19,7 @@ const emit = defineEmits(['assign', 'tags', 'priority', 'department', 'status'])
 const escDark = inject('esc-dark', computed(() => false));
 
 const cardClass = computed(() => escDark.value
-    ? 'rounded-xl border border-white/[0.06] bg-gray-900/60 p-4'
+    ? 'rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4'
     : 'rounded-lg border border-gray-200 bg-white p-4'
 );
 </script>
@@ -27,27 +27,27 @@ const cardClass = computed(() => escDark.value
 <template>
     <aside class="space-y-4">
         <div :class="cardClass">
-            <h3 :class="['mb-3 text-sm font-semibold', escDark.value ? 'text-gray-200' : 'text-gray-900']">Details</h3>
+            <h3 :class="['mb-3 text-sm font-semibold', escDark.value ? 'text-white' : 'text-gray-900']">Details</h3>
             <dl class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                    <dt :class="escDark.value ? 'text-gray-400' : 'text-gray-500'">Status</dt>
+                    <dt :class="escDark.value ? 'text-neutral-500' : 'text-gray-500'">Status</dt>
                     <dd><StatusBadge :status="ticket.status" /></dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt :class="escDark.value ? 'text-gray-400' : 'text-gray-500'">Priority</dt>
+                    <dt :class="escDark.value ? 'text-neutral-500' : 'text-gray-500'">Priority</dt>
                     <dd><PriorityBadge :priority="ticket.priority" /></dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt :class="escDark.value ? 'text-gray-400' : 'text-gray-500'">Reference</dt>
-                    <dd :class="['font-mono text-xs', escDark.value ? 'text-cyan-400' : '']">{{ ticket.reference }}</dd>
+                    <dt :class="escDark.value ? 'text-neutral-500' : 'text-gray-500'">Reference</dt>
+                    <dd :class="['font-mono text-xs', escDark.value ? 'text-white' : '']">{{ ticket.reference }}</dd>
                 </div>
                 <div v-if="ticket.department" class="flex justify-between">
-                    <dt :class="escDark.value ? 'text-gray-400' : 'text-gray-500'">Department</dt>
-                    <dd :class="escDark.value ? 'text-gray-300' : ''">{{ ticket.department.name }}</dd>
+                    <dt :class="escDark.value ? 'text-neutral-500' : 'text-gray-500'">Department</dt>
+                    <dd :class="escDark.value ? 'text-neutral-300' : ''">{{ ticket.department.name }}</dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt :class="escDark.value ? 'text-gray-400' : 'text-gray-500'">Created</dt>
-                    <dd :class="escDark.value ? 'text-gray-300' : ''">{{ new Date(ticket.created_at).toLocaleDateString() }}</dd>
+                    <dt :class="escDark.value ? 'text-neutral-500' : 'text-gray-500'">Created</dt>
+                    <dd :class="escDark.value ? 'text-neutral-300' : ''">{{ new Date(ticket.created_at).toLocaleDateString() }}</dd>
                 </div>
             </dl>
         </div>
@@ -70,7 +70,7 @@ const cardClass = computed(() => escDark.value
         </div>
 
         <div v-if="activities.length" :class="cardClass">
-            <h3 :class="['mb-3 text-sm font-semibold', escDark.value ? 'text-gray-200' : 'text-gray-900']">Activity</h3>
+            <h3 :class="['mb-3 text-sm font-semibold', escDark.value ? 'text-white' : 'text-gray-900']">Activity</h3>
             <ActivityTimeline :activities="activities" />
         </div>
     </aside>

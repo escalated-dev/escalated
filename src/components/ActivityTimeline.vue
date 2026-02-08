@@ -1,7 +1,11 @@
 <script setup>
+import { computed, inject } from 'vue';
+
 defineProps({
     activities: { type: Array, required: true },
 });
+
+const dark = inject('esc-dark', computed(() => false));
 
 const typeLabels = {
     status_changed: 'changed status',
@@ -51,12 +55,12 @@ function describeActivity(activity) {
 <template>
     <div class="space-y-3">
         <div v-for="activity in activities" :key="activity.id" class="flex gap-3 text-sm">
-            <div class="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-gray-400"></div>
+            <div :class="['mt-1 h-2 w-2 flex-shrink-0 rounded-full', dark ? 'bg-neutral-600' : 'bg-gray-400']"></div>
             <div class="flex-1">
-                <p class="text-gray-700">{{ describeActivity(activity) }}</p>
-                <p class="text-xs text-gray-400">{{ formatDate(activity.created_at) }}</p>
+                <p :class="dark ? 'text-neutral-300' : 'text-gray-700'">{{ describeActivity(activity) }}</p>
+                <p :class="['text-xs', dark ? 'text-neutral-600' : 'text-gray-400']">{{ formatDate(activity.created_at) }}</p>
             </div>
         </div>
-        <div v-if="!activities?.length" class="py-4 text-center text-sm text-gray-500">No activity yet.</div>
+        <div v-if="!activities?.length" :class="['py-4 text-center text-sm', dark ? 'text-neutral-600' : 'text-gray-500']">No activity yet.</div>
     </div>
 </template>

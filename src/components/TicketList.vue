@@ -15,37 +15,37 @@ const escDark = inject('esc-dark', computed(() => false));
 
 <template>
     <!-- Dark mode -->
-    <div v-if="escDark.value" class="overflow-hidden rounded-xl border border-white/[0.06] bg-gray-900/60">
+    <div v-if="escDark.value" class="overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/60">
         <table class="min-w-full divide-y divide-white/[0.06]">
             <thead>
                 <tr class="bg-white/[0.02]">
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">Reference</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">Subject</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">Priority</th>
-                    <th v-if="showAssignee" class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">Assignee</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">Created</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Reference</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Subject</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Status</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Priority</th>
+                    <th v-if="showAssignee" class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Assignee</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Created</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/[0.04]">
                 <tr v-for="ticket in tickets.data" :key="ticket.id" class="transition-colors hover:bg-white/[0.03]">
                     <td class="whitespace-nowrap px-4 py-3 text-sm font-medium">
-                        <Link :href="route(`${routePrefix}.show`, ticket.reference)" class="text-cyan-400 hover:text-cyan-300">
+                        <Link :href="route(`${routePrefix}.show`, ticket.reference)" class="text-white hover:text-neutral-300">
                             {{ ticket.reference }}
                         </Link>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-300">{{ ticket.subject }}</td>
+                    <td class="px-4 py-3 text-sm text-neutral-300">{{ ticket.subject }}</td>
                     <td class="px-4 py-3"><StatusBadge :status="ticket.status" /></td>
                     <td class="px-4 py-3"><PriorityBadge :priority="ticket.priority" /></td>
-                    <td v-if="showAssignee" class="px-4 py-3 text-sm text-gray-400">
+                    <td v-if="showAssignee" class="px-4 py-3 text-sm text-neutral-500">
                         {{ ticket.assignee?.name || 'Unassigned' }}
                     </td>
-                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+                    <td class="whitespace-nowrap px-4 py-3 text-sm text-neutral-600">
                         {{ new Date(ticket.created_at).toLocaleDateString() }}
                     </td>
                 </tr>
                 <tr v-if="!tickets.data?.length">
-                    <td :colspan="showAssignee ? 6 : 5" class="px-4 py-8 text-center text-sm text-gray-500">
+                    <td :colspan="showAssignee ? 6 : 5" class="px-4 py-8 text-center text-sm text-neutral-600">
                         No tickets found.
                     </td>
                 </tr>

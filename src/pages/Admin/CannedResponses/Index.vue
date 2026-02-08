@@ -26,39 +26,39 @@ function destroy(id) {
         <div class="mb-4 flex justify-end">
             <button @click="showForm = !showForm"
                     :class="showForm
-                        ? 'rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white/[0.06]'
-                        : 'rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-cyan-500/20 transition-all hover:from-cyan-400 hover:to-violet-400'">
+                        ? 'rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/[0.06]'
+                        : 'rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400'">
                 {{ showForm ? 'Cancel' : 'Add Response' }}
             </button>
         </div>
-        <form v-if="showForm" @submit.prevent="create" class="mb-6 space-y-3 rounded-xl border border-white/[0.06] bg-gray-900/60 p-5">
+        <form v-if="showForm" @submit.prevent="create" class="mb-6 space-y-3 rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
             <input v-model="form.title" type="text" placeholder="Title" required
-                   class="w-full rounded-lg border border-white/10 bg-gray-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30" />
+                   class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10" />
             <textarea v-model="form.body" rows="4" placeholder="Response body..." required
-                      class="w-full rounded-lg border border-white/10 bg-gray-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30"></textarea>
+                      class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"></textarea>
             <div class="flex items-center gap-3">
                 <input v-model="form.category" type="text" placeholder="Category (optional)"
-                       class="rounded-lg border border-white/10 bg-gray-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30" />
+                       class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10" />
                 <label class="flex items-center gap-2">
-                    <input v-model="form.is_shared" type="checkbox" class="rounded border-white/20 bg-gray-900 text-cyan-500 focus:ring-cyan-500/30" />
-                    <span class="text-sm text-gray-300">Shared</span>
+                    <input v-model="form.is_shared" type="checkbox" class="rounded border-white/20 bg-neutral-900 text-white focus:ring-white/10" />
+                    <span class="text-sm text-neutral-300">Shared</span>
                 </label>
                 <button type="submit" :disabled="form.processing"
-                        class="ml-auto rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-cyan-500/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50">
+                        class="ml-auto rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50">
                     Create
                 </button>
             </div>
         </form>
         <div class="space-y-3">
-            <div v-for="resp in responses" :key="resp.id" class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-4 transition-colors hover:bg-gray-900/80">
+            <div v-for="resp in responses" :key="resp.id" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4 transition-colors hover:bg-gray-900/80">
                 <div class="mb-2 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-200">{{ resp.title }}</span>
-                        <span v-if="resp.category" class="rounded-md bg-white/[0.06] px-2 py-0.5 text-xs text-gray-400 ring-1 ring-white/[0.06]">{{ resp.category }}</span>
+                        <span class="font-medium text-neutral-200">{{ resp.title }}</span>
+                        <span v-if="resp.category" class="rounded-md bg-white/[0.06] px-2 py-0.5 text-xs text-neutral-400 ring-1 ring-white/[0.06]">{{ resp.category }}</span>
                     </div>
                     <button @click="destroy(resp.id)" class="text-sm text-rose-400 hover:text-rose-300">Delete</button>
                 </div>
-                <p class="text-sm text-gray-400">{{ resp.body }}</p>
+                <p class="text-sm text-neutral-400">{{ resp.body }}</p>
             </div>
         </div>
     </EscalatedLayout>

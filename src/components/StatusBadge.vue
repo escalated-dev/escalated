@@ -8,14 +8,14 @@ const props = defineProps({
 const escDark = inject('esc-dark', computed(() => false));
 
 const darkConfig = {
-    open: { label: 'Open', color: 'bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20' },
+    open: { label: 'Open', color: 'bg-cyan-500/10 text-white ring-1 ring-cyan-500/20' },
     in_progress: { label: 'In Progress', color: 'bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20' },
     waiting_on_customer: { label: 'Waiting on Customer', color: 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20' },
     waiting_on_agent: { label: 'Waiting on Agent', color: 'bg-orange-500/10 text-orange-400 ring-1 ring-orange-500/20' },
     escalated: { label: 'Escalated', color: 'bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20' },
     resolved: { label: 'Resolved', color: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20' },
     closed: { label: 'Closed', color: 'bg-gray-500/10 text-gray-400 ring-1 ring-gray-500/20' },
-    reopened: { label: 'Reopened', color: 'bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20' },
+    reopened: { label: 'Reopened', color: 'bg-cyan-500/10 text-white ring-1 ring-cyan-500/20' },
 };
 
 const lightConfig = {

@@ -48,33 +48,30 @@ function isActive(href) {
 
 <template>
     <!-- MODE 1: Admin — dark sidebar layout -->
-    <div v-if="isAdminSection" class="flex min-h-screen bg-gray-950">
+    <div v-if="isAdminSection" class="flex min-h-screen bg-black">
         <!-- Sidebar -->
-        <aside class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-gray-900/95 backdrop-blur-xl">
-            <!-- Rainbow top accent -->
-            <div class="h-[2px] bg-gradient-to-r from-orange-500 via-cyan-500 to-violet-500"></div>
-
+        <aside class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-white/[0.06] bg-neutral-950">
             <!-- Logo -->
             <div class="flex h-16 items-center gap-3 px-5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500 shadow-lg shadow-cyan-500/20">
+                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500">
                     <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                     </svg>
                 </div>
                 <div>
-                    <span class="text-sm font-bold text-white">Escalated</span>
-                    <span class="ml-1.5 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold text-gray-400">ADMIN</span>
+                    <span class="text-sm font-bold text-white tracking-wide">Escalated</span>
+                    <span class="ml-1.5 rounded bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-semibold text-neutral-500">ADMIN</span>
                 </div>
             </div>
 
             <!-- Nav -->
             <nav class="mt-1 flex-1 space-y-0.5 overflow-y-auto px-3">
                 <Link v-for="link in adminLinks" :key="link.href" :href="link.href"
-                      :class="['group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200',
+                      :class="['group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all',
                                isActive(link.href)
-                                   ? 'bg-gradient-to-r from-cyan-500/15 to-violet-500/15 text-white shadow-sm shadow-cyan-500/5 ring-1 ring-white/10'
-                                   : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-200']">
-                    <svg :class="['h-[18px] w-[18px] shrink-0 transition-colors', isActive(link.href) ? 'text-cyan-400' : 'text-gray-500 group-hover:text-gray-400']"
+                                   ? 'bg-white/[0.08] text-white'
+                                   : 'text-neutral-500 hover:bg-white/[0.04] hover:text-neutral-300']">
+                    <svg :class="['h-[18px] w-[18px] shrink-0', isActive(link.href) ? 'text-white' : 'text-neutral-600 group-hover:text-neutral-400']"
                          fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" :d="link.icon" />
                     </svg>
@@ -85,22 +82,22 @@ function isActive(href) {
             <!-- Bottom section -->
             <div class="border-t border-white/[0.06] p-3">
                 <Link v-if="isAgent" :href="`${prefix}/agent`"
-                      class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-gray-200">
+                      class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-neutral-500 transition-colors hover:bg-white/[0.04] hover:text-neutral-300">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>
                     Agent Panel
                 </Link>
                 <Link :href="prefix"
-                      class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] text-gray-400 transition-colors hover:bg-white/[0.04] hover:text-gray-200">
+                      class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-neutral-500 transition-colors hover:bg-white/[0.04] hover:text-neutral-300">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
                     Back to App
                 </Link>
 
                 <!-- User -->
-                <div class="mt-2 flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-violet-500 text-xs font-bold text-white">
+                <div class="mt-2 flex items-center gap-3 rounded-lg bg-white/[0.03] px-3 py-2.5">
+                    <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white/[0.08] text-xs font-semibold text-neutral-400">
                         {{ userInitial }}
                     </div>
-                    <span class="text-sm font-medium text-gray-300">{{ userName }}</span>
+                    <span class="text-sm text-neutral-400">{{ userName }}</span>
                 </div>
             </div>
         </aside>
@@ -108,8 +105,8 @@ function isActive(href) {
         <!-- Main content -->
         <div class="flex flex-1 flex-col pl-64">
             <!-- Top bar -->
-            <header class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-white/[0.06] bg-gray-950/80 px-6 backdrop-blur-xl">
-                <h1 class="text-base font-semibold text-white">{{ title }}</h1>
+            <header class="sticky top-0 z-20 flex h-14 items-center border-b border-white/[0.06] bg-black/80 px-6 backdrop-blur-xl">
+                <h1 class="text-sm font-semibold text-white">{{ title }}</h1>
             </header>
 
             <!-- Page content -->
@@ -120,27 +117,27 @@ function isActive(href) {
     </div>
 
     <!-- MODE 2: Agent — dark top-nav layout -->
-    <div v-else-if="isAgentSection" class="min-h-screen bg-gray-950">
+    <div v-else-if="isAgentSection" class="min-h-screen bg-black">
         <!-- Top nav -->
-        <nav class="sticky top-0 z-30 border-b border-white/[0.06] bg-gray-900/95 backdrop-blur-xl">
+        <nav class="sticky top-0 z-30 border-b border-white/[0.06] bg-neutral-950/95 backdrop-blur-xl">
             <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <!-- Left: branding -->
                 <div class="flex items-center gap-3">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500 shadow-lg shadow-cyan-500/20">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500">
                         <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                         </svg>
                     </div>
-                    <span class="text-sm font-bold text-white">Escalated</span>
+                    <span class="text-sm font-bold text-white tracking-wide">Escalated</span>
                 </div>
 
                 <!-- Center: nav links -->
                 <div class="flex items-center gap-1">
                     <Link v-for="link in agentLinks" :key="link.href" :href="link.href"
-                          :class="['flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all duration-200',
+                          :class="['flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all',
                                    isActive(link.href)
-                                       ? 'bg-gradient-to-r from-cyan-500/15 to-violet-500/15 text-white ring-1 ring-white/10'
-                                       : 'text-gray-400 hover:bg-white/[0.04] hover:text-gray-200']">
+                                       ? 'bg-white/[0.08] text-white'
+                                       : 'text-neutral-500 hover:bg-white/[0.04] hover:text-neutral-300']">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" :d="link.icon" />
                         </svg>
@@ -151,24 +148,22 @@ function isActive(href) {
                 <!-- Right: user + links -->
                 <div class="flex items-center gap-3">
                     <Link v-if="isAdmin" :href="`${prefix}/admin/reports`"
-                          class="text-[13px] text-gray-400 transition-colors hover:text-white">
+                          class="text-[13px] text-neutral-500 transition-colors hover:text-white">
                         Admin
                     </Link>
                     <Link :href="prefix"
-                          class="text-[13px] text-gray-400 transition-colors hover:text-white">
+                          class="text-[13px] text-neutral-500 transition-colors hover:text-white">
                         Back to App
                     </Link>
-                    <div class="ml-1 h-5 w-px bg-white/10"></div>
+                    <div class="ml-1 h-5 w-px bg-white/[0.08]"></div>
                     <div class="flex items-center gap-2">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-violet-500 text-[10px] font-bold text-white">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-white/[0.08] text-[10px] font-semibold text-neutral-400">
                             {{ userInitial }}
                         </div>
-                        <span class="text-[13px] font-medium text-gray-300">{{ userName }}</span>
+                        <span class="text-[13px] text-neutral-400">{{ userName }}</span>
                     </div>
                 </div>
             </div>
-            <!-- Rainbow accent line -->
-            <div class="h-[2px] bg-gradient-to-r from-orange-500 via-cyan-500 to-violet-500"></div>
         </nav>
 
         <!-- Page content -->

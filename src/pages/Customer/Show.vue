@@ -22,10 +22,10 @@ function reopenTicket() {
 <template>
     <EscalatedLayout :title="ticket.subject">
         <div class="mb-4 flex flex-wrap items-center gap-3">
-            <span class="text-sm font-medium text-gray-500">{{ ticket.reference }}</span>
+            <span class="text-sm font-medium text-neutral-500">{{ ticket.reference }}</span>
             <StatusBadge :status="ticket.status" />
             <PriorityBadge :priority="ticket.priority" />
-            <span v-if="ticket.department" class="text-sm text-gray-500">{{ ticket.department.name }}</span>
+            <span v-if="ticket.department" class="text-sm text-neutral-500">{{ ticket.department.name }}</span>
             <div class="ml-auto flex gap-2">
                 <button v-if="ticket.status === 'resolved' || ticket.status === 'closed'"
                         @click="reopenTicket"

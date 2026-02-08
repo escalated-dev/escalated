@@ -9,7 +9,7 @@ const escDark = inject('esc-dark', computed(() => false));
 
 const darkConfig = {
     low: { label: 'Low', color: 'bg-gray-500/10 text-gray-400 ring-1 ring-gray-500/20' },
-    medium: { label: 'Medium', color: 'bg-cyan-500/10 text-cyan-400 ring-1 ring-cyan-500/20' },
+    medium: { label: 'Medium', color: 'bg-cyan-500/10 text-white ring-1 ring-cyan-500/20' },
     high: { label: 'High', color: 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20' },
     urgent: { label: 'Urgent', color: 'bg-orange-500/10 text-orange-400 ring-1 ring-orange-500/20' },
     critical: { label: 'Critical', color: 'bg-rose-500/10 text-rose-300 ring-1 ring-rose-500/20' },

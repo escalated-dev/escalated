@@ -23,8 +23,8 @@ function changePeriod(days) {
         <div class="mb-6 flex gap-2">
             <button v-for="d in [7, 30, 90]" :key="d" @click="changePeriod(d)"
                     :class="['rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all', period_days === d
-                        ? 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-lg shadow-cyan-500/20'
-                        : 'border border-white/10 bg-white/[0.03] text-gray-400 hover:bg-white/[0.06] hover:text-gray-200']">
+                        ? 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-lg shadow-black/20'
+                        : 'border border-white/10 bg-white/[0.03] text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200']">
                 Last {{ d }} days
             </button>
         </div>
@@ -35,17 +35,17 @@ function changePeriod(days) {
             <StatsCard label="SLA Breaches" :value="sla_breach_count" color="red" />
         </div>
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-5">
-                <h3 class="mb-4 text-sm font-semibold text-gray-200">By Status</h3>
+            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
+                <h3 class="mb-4 text-sm font-semibold text-neutral-200">By Status</h3>
                 <div v-for="(count, status) in by_status" :key="status" class="mb-2.5 flex items-center justify-between">
-                    <span class="text-sm capitalize text-gray-400">{{ status.replace('_', ' ') }}</span>
+                    <span class="text-sm capitalize text-neutral-400">{{ status.replace('_', ' ') }}</span>
                     <span class="text-sm font-semibold text-white">{{ count }}</span>
                 </div>
             </div>
-            <div class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-5">
-                <h3 class="mb-4 text-sm font-semibold text-gray-200">By Priority</h3>
+            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
+                <h3 class="mb-4 text-sm font-semibold text-neutral-200">By Priority</h3>
                 <div v-for="(count, priority) in by_priority" :key="priority" class="mb-2.5 flex items-center justify-between">
-                    <span class="text-sm capitalize text-gray-400">{{ priority }}</span>
+                    <span class="text-sm capitalize text-neutral-400">{{ priority }}</span>
                     <span class="text-sm font-semibold text-white">{{ count }}</span>
                 </div>
             </div>
