@@ -1,4 +1,7 @@
-# Escalated
+<h1>
+  <img src="https://escalated.dev/apple-touch-icon.png" width="28" style="vertical-align:middle;" />
+  Escalated
+</h1>
 
 Escalated is an embeddable support ticket system with SLA tracking, escalation rules, agent workflows, and a customer portal. This repo contains all the shared frontend assets (Vue 3 + Inertia.js) used across every supported backend framework.
 
