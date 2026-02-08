@@ -11,7 +11,10 @@ const hostLayout = inject('escalated-layout', null);
 
 const isAgent = computed(() => page.props.escalated?.is_agent);
 const isAdmin = computed(() => page.props.escalated?.is_admin);
-const prefix = computed(() => page.props.escalated?.prefix || '/support');
+const prefix = computed(() => {
+    const p = page.props.escalated?.prefix || 'support';
+    return p.startsWith('/') ? p : `/${p}`;
+});
 </script>
 
 <template>
