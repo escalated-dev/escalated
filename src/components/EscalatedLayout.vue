@@ -7,13 +7,7 @@ const props = defineProps({
 });
 
 const page = usePage();
-const staticLayout = inject('escalated-layout', null);
-const layoutResolver = inject('escalated-layout-resolver', null);
-
-const hostLayout = computed(() => {
-    if (layoutResolver) return layoutResolver();
-    return staticLayout;
-});
+const hostLayout = inject('escalated-layout', null);
 
 const isAgent = computed(() => page.props.escalated?.is_agent);
 const isAdmin = computed(() => page.props.escalated?.is_admin);
@@ -50,26 +44,8 @@ function isActive(href) {
 </script>
 
 <template>
-    <!-- MODE 1: Host layout provided (customer pages within host app) -->
-    <component :is="hostLayout" v-if="hostLayout">
-        <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="esc-heading text-xl font-semibold leading-tight text-gray-800">{{ title }}</h2>
-                <nav class="flex items-center gap-4 text-sm">
-                    <Link :href="prefix" class="text-gray-600 hover:text-gray-900">My Tickets</Link>
-                    <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">Agent Panel</Link>
-                    <Link v-if="isAdmin" :href="`${prefix}/admin/reports`" class="text-gray-600 hover:text-gray-900">Admin</Link>
-                </nav>
-            </div>
-        </template>
-
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <slot />
-        </div>
-    </component>
-
-    <!-- MODE 2: Admin standalone — dark sidebar layout -->
-    <div v-else-if="isAdminSection" class="esc-root flex min-h-screen bg-gray-950">
+    <!-- MODE 1: Admin standalone — dark sidebar layout (always standalone, ignores host layout) -->
+    <div v-if="isAdminSection" class="esc-root flex min-h-screen bg-gray-950">
         <!-- Sidebar -->
         <aside class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-white/10 bg-gray-900">
             <!-- Logo -->
@@ -131,7 +107,7 @@ function isActive(href) {
         </div>
     </div>
 
-    <!-- MODE 3: Agent standalone — dark top-nav layout -->
+    <!-- MODE 2: Agent standalone — dark top-nav layout (always standalone, ignores host layout) -->
     <div v-else-if="isAgentSection" class="esc-root min-h-screen bg-gray-950">
         <!-- Top nav -->
         <nav class="sticky top-0 z-30 border-b border-white/10 bg-gray-900">
@@ -188,7 +164,25 @@ function isActive(href) {
         </main>
     </div>
 
-    <!-- MODE 4: Customer standalone fallback (no host layout, not admin/agent) -->
+    <!-- MODE 3: Customer pages — use host app layout if provided -->
+    <component :is="hostLayout" v-else-if="hostLayout">
+        <template #header>
+            <div class="flex items-center justify-between">
+                <h2 class="esc-heading text-xl font-semibold leading-tight text-gray-800">{{ title }}</h2>
+                <nav class="flex items-center gap-4 text-sm">
+                    <Link :href="prefix" class="text-gray-600 hover:text-gray-900">My Tickets</Link>
+                    <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">Agent Panel</Link>
+                    <Link v-if="isAdmin" :href="`${prefix}/admin/reports`" class="text-gray-600 hover:text-gray-900">Admin</Link>
+                </nav>
+            </div>
+        </template>
+
+        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <slot />
+        </div>
+    </component>
+
+    <!-- MODE 4: Customer standalone fallback (no host layout) -->
     <div v-else class="esc-root min-h-screen bg-gray-50">
         <nav class="border-b border-gray-200 bg-white">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
