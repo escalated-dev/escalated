@@ -22,29 +22,31 @@ function changePeriod(days) {
     <EscalatedLayout title="Reports">
         <div class="mb-6 flex gap-2">
             <button v-for="d in [7, 30, 90]" :key="d" @click="changePeriod(d)"
-                    :class="['rounded-lg px-3 py-1.5 text-sm', period_days === d ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50']">
+                    :class="['rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all', period_days === d
+                        ? 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-lg shadow-cyan-500/20'
+                        : 'border border-white/10 bg-white/[0.03] text-gray-400 hover:bg-white/[0.06] hover:text-gray-200']">
                 Last {{ d }} days
             </button>
         </div>
         <div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-            <StatsCard title="Total Tickets" :value="total_tickets" color="indigo" />
-            <StatsCard title="Resolved" :value="resolved_tickets" color="green" />
-            <StatsCard title="Avg First Response" :value="`${avg_first_response_hours}h`" color="yellow" />
-            <StatsCard title="SLA Breaches" :value="sla_breach_count" color="red" />
+            <StatsCard label="Total Tickets" :value="total_tickets" color="indigo" />
+            <StatsCard label="Resolved" :value="resolved_tickets" color="green" />
+            <StatsCard label="Avg First Response" :value="`${avg_first_response_hours}h`" color="yellow" />
+            <StatsCard label="SLA Breaches" :value="sla_breach_count" color="red" />
         </div>
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div class="rounded-lg border border-gray-200 bg-white p-4">
-                <h3 class="mb-3 text-sm font-medium text-gray-700">By Status</h3>
-                <div v-for="(count, status) in by_status" :key="status" class="mb-2 flex items-center justify-between">
-                    <span class="text-sm capitalize text-gray-600">{{ status.replace('_', ' ') }}</span>
-                    <span class="text-sm font-medium text-gray-900">{{ count }}</span>
+            <div class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-5">
+                <h3 class="mb-4 text-sm font-semibold text-gray-200">By Status</h3>
+                <div v-for="(count, status) in by_status" :key="status" class="mb-2.5 flex items-center justify-between">
+                    <span class="text-sm capitalize text-gray-400">{{ status.replace('_', ' ') }}</span>
+                    <span class="text-sm font-semibold text-white">{{ count }}</span>
                 </div>
             </div>
-            <div class="rounded-lg border border-gray-200 bg-white p-4">
-                <h3 class="mb-3 text-sm font-medium text-gray-700">By Priority</h3>
-                <div v-for="(count, priority) in by_priority" :key="priority" class="mb-2 flex items-center justify-between">
-                    <span class="text-sm capitalize text-gray-600">{{ priority }}</span>
-                    <span class="text-sm font-medium text-gray-900">{{ count }}</span>
+            <div class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-5">
+                <h3 class="mb-4 text-sm font-semibold text-gray-200">By Priority</h3>
+                <div v-for="(count, priority) in by_priority" :key="priority" class="mb-2.5 flex items-center justify-between">
+                    <span class="text-sm capitalize text-gray-400">{{ priority }}</span>
+                    <span class="text-sm font-semibold text-white">{{ count }}</span>
                 </div>
             </div>
         </div>

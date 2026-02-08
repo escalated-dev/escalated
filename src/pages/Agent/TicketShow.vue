@@ -41,18 +41,18 @@ function assignToMe() {
 
 <template>
     <EscalatedLayout :title="ticket.subject">
-        <div class="mb-4 flex flex-wrap items-center gap-3">
-            <span class="text-sm font-medium text-gray-500">{{ ticket.reference }}</span>
+        <div class="mb-5 flex flex-wrap items-center gap-3">
+            <span class="text-sm font-mono font-medium text-cyan-400">{{ ticket.reference }}</span>
             <StatusBadge :status="ticket.status" />
             <PriorityBadge :priority="ticket.priority" />
             <span class="text-sm text-gray-500">by {{ ticket.requester?.name }}</span>
             <div class="ml-auto flex gap-2">
                 <button v-if="!ticket.assigned_to" @click="assignToMe"
-                        class="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-700">
+                        class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-cyan-500/20 transition-all hover:from-cyan-400 hover:to-violet-400">
                     Assign to Me
                 </button>
                 <select @change="changeStatus($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border-gray-300 text-sm">
+                        class="rounded-lg border border-white/10 bg-gray-950 px-3 py-1.5 text-sm text-gray-200 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30">
                     <option value="">Change Status...</option>
                     <option value="in_progress">In Progress</option>
                     <option value="waiting_on_customer">Waiting on Customer</option>
@@ -60,7 +60,7 @@ function assignToMe() {
                     <option value="closed">Closed</option>
                 </select>
                 <select @change="changePriority($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border-gray-300 text-sm">
+                        class="rounded-lg border border-white/10 bg-gray-950 px-3 py-1.5 text-sm text-gray-200 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/30">
                     <option value="">Change Priority...</option>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -72,18 +72,18 @@ function assignToMe() {
         </div>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-6">
-                <div class="rounded-lg border border-gray-200 bg-white p-4">
-                    <p class="whitespace-pre-wrap text-sm text-gray-700">{{ ticket.description }}</p>
+                <div class="rounded-xl border border-white/[0.06] bg-gray-900/60 p-5">
+                    <p class="whitespace-pre-wrap text-sm text-gray-300">{{ ticket.description }}</p>
                     <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />
                 </div>
                 <div>
-                    <div class="mb-4 flex gap-4 border-b border-gray-200">
+                    <div class="mb-4 flex gap-4 border-b border-white/[0.06]">
                         <button @click="activeTab = 'reply'"
-                                :class="['pb-2 text-sm font-medium', activeTab === 'reply' ? 'border-b-2 border-indigo-500 text-indigo-600' : 'text-gray-500']">
+                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'reply' ? 'border-b-2 border-cyan-500 text-cyan-400' : 'text-gray-500 hover:text-gray-300']">
                             Reply
                         </button>
                         <button @click="activeTab = 'note'"
-                                :class="['pb-2 text-sm font-medium', activeTab === 'note' ? 'border-b-2 border-yellow-500 text-yellow-600' : 'text-gray-500']">
+                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'note' ? 'border-b-2 border-amber-500 text-amber-400' : 'text-gray-500 hover:text-gray-300']">
                             Internal Note
                         </button>
                     </div>
@@ -96,7 +96,7 @@ function assignToMe() {
                                    submit-label="Add Note" />
                 </div>
                 <div>
-                    <h2 class="mb-4 text-lg font-semibold text-gray-900">Conversation</h2>
+                    <h2 class="mb-4 text-lg font-semibold text-gray-200">Conversation</h2>
                     <ReplyThread :replies="ticket.replies || []" :current-user-id="page.props.auth?.user?.id" />
                 </div>
             </div>
