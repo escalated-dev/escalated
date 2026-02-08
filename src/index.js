@@ -1,3 +1,6 @@
+// Plugin
+export { EscalatedPlugin } from './plugin'
+
 // Components
 export { default as ActivityTimeline } from './components/ActivityTimeline.vue'
 export { default as AssigneeSelect } from './components/AssigneeSelect.vue'
