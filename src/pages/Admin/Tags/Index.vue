@@ -70,6 +70,13 @@ function destroy(id) {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/[0.04]">
+                    <tr v-if="!tags?.length">
+                        <td colspan="4" class="px-4 py-12 text-center">
+                            <svg class="mx-auto mb-3 h-8 w-8 text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z" /></svg>
+                            <p class="text-sm text-neutral-500">No tags yet</p>
+                            <p class="mt-1 text-xs text-neutral-600">Create tags to categorize and filter tickets</p>
+                        </td>
+                    </tr>
                     <tr v-for="tag in tags" :key="tag.id" class="transition-colors hover:bg-white/[0.03]">
                         <td class="px-4 py-3">
                             <span class="inline-block h-4 w-4 rounded-full ring-1 ring-white/10" :style="{ backgroundColor: tag.color }"></span>

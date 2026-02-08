@@ -32,6 +32,13 @@ function destroy(id) {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/[0.04]">
+                    <tr v-if="!policies?.length">
+                        <td colspan="6" class="px-4 py-12 text-center">
+                            <svg class="mx-auto mb-3 h-8 w-8 text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <p class="text-sm text-neutral-500">No SLA policies yet</p>
+                            <p class="mt-1 text-xs text-neutral-600">Define response and resolution time targets</p>
+                        </td>
+                    </tr>
                     <tr v-for="policy in policies" :key="policy.id" class="transition-colors hover:bg-white/[0.03]">
                         <td class="px-4 py-3 text-sm font-medium text-neutral-200">{{ policy.name }}</td>
                         <td class="px-4 py-3 text-sm text-neutral-400">{{ policy.is_default ? 'Yes' : 'No' }}</td>

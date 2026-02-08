@@ -37,16 +37,28 @@ function changePeriod(days) {
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
                 <h3 class="mb-4 text-sm font-semibold text-neutral-200">By Status</h3>
-                <div v-for="(count, status) in by_status" :key="status" class="mb-2.5 flex items-center justify-between">
-                    <span class="text-sm capitalize text-neutral-400">{{ status.replace('_', ' ') }}</span>
-                    <span class="text-sm font-semibold text-white">{{ count }}</span>
+                <template v-if="by_status && Object.keys(by_status).length">
+                    <div v-for="(count, status) in by_status" :key="status" class="mb-2.5 flex items-center justify-between">
+                        <span class="text-sm capitalize text-neutral-400">{{ status.replace('_', ' ') }}</span>
+                        <span class="text-sm font-semibold text-white">{{ count }}</span>
+                    </div>
+                </template>
+                <div v-else class="flex flex-col items-center py-6 text-center">
+                    <svg class="mb-2 h-8 w-8 text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                    <p class="text-sm text-neutral-500">No ticket data for this period</p>
                 </div>
             </div>
             <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
                 <h3 class="mb-4 text-sm font-semibold text-neutral-200">By Priority</h3>
-                <div v-for="(count, priority) in by_priority" :key="priority" class="mb-2.5 flex items-center justify-between">
-                    <span class="text-sm capitalize text-neutral-400">{{ priority }}</span>
-                    <span class="text-sm font-semibold text-white">{{ count }}</span>
+                <template v-if="by_priority && Object.keys(by_priority).length">
+                    <div v-for="(count, priority) in by_priority" :key="priority" class="mb-2.5 flex items-center justify-between">
+                        <span class="text-sm capitalize text-neutral-400">{{ priority }}</span>
+                        <span class="text-sm font-semibold text-white">{{ count }}</span>
+                    </div>
+                </template>
+                <div v-else class="flex flex-col items-center py-6 text-center">
+                    <svg class="mb-2 h-8 w-8 text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12" /></svg>
+                    <p class="text-sm text-neutral-500">No ticket data for this period</p>
                 </div>
             </div>
         </div>

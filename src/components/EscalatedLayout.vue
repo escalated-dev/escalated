@@ -30,6 +30,7 @@ const adminLinks = computed(() => [
     { href: `${prefix.value}/admin/escalation-rules`, label: 'Escalation Rules', icon: 'M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12' },
     { href: `${prefix.value}/admin/tags`, label: 'Tags', icon: 'M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z' },
     { href: `${prefix.value}/admin/canned-responses`, label: 'Canned Responses', icon: 'M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z' },
+    { href: `${prefix.value}/admin/settings`, label: 'Settings', icon: 'M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.204-.107-.397.165-.71.505-.781.93l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894zM15 12a3 3 0 11-6 0 3 3 0 016 0z' },
 ]);
 
 const agentLinks = computed(() => [
@@ -48,14 +49,15 @@ function isActive(href) {
 
 <template>
     <!-- MODE 1: Admin — dark sidebar layout -->
-    <div v-if="isAdminSection" class="flex min-h-screen bg-black">
+    <div v-if="isAdminSection" class="flex min-h-screen bg-black" style="color-scheme: dark">
         <!-- Sidebar -->
         <aside class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-white/[0.06] bg-neutral-950">
             <!-- Logo -->
             <div class="flex h-16 items-center gap-3 px-5">
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500">
-                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <polyline points="17 11 12 6 7 11" />
+                        <polyline points="17 18 12 13 7 18" />
                     </svg>
                 </div>
                 <div>
@@ -117,15 +119,16 @@ function isActive(href) {
     </div>
 
     <!-- MODE 2: Agent — dark top-nav layout -->
-    <div v-else-if="isAgentSection" class="min-h-screen bg-black">
+    <div v-else-if="isAgentSection" class="min-h-screen bg-black" style="color-scheme: dark">
         <!-- Top nav -->
         <nav class="sticky top-0 z-30 border-b border-white/[0.06] bg-neutral-950/95 backdrop-blur-xl">
             <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <!-- Left: branding -->
                 <div class="flex items-center gap-3">
                     <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 via-cyan-500 to-violet-500">
-                        <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <polyline points="17 11 12 6 7 11" />
+                            <polyline points="17 18 12 13 7 18" />
                         </svg>
                     </div>
                     <span class="text-sm font-bold text-white tracking-wide">Escalated</span>

@@ -31,6 +31,13 @@ function destroy(id) {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/[0.04]">
+                    <tr v-if="!rules?.length">
+                        <td colspan="5" class="px-4 py-12 text-center">
+                            <svg class="mx-auto mb-3 h-8 w-8 text-neutral-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12" /></svg>
+                            <p class="text-sm text-neutral-500">No escalation rules yet</p>
+                            <p class="mt-1 text-xs text-neutral-600">Set up automatic escalation for overdue tickets</p>
+                        </td>
+                    </tr>
                     <tr v-for="rule in rules" :key="rule.id" class="transition-colors hover:bg-white/[0.03]">
                         <td class="px-4 py-3 text-sm text-neutral-400">{{ rule.order }}</td>
                         <td class="px-4 py-3 text-sm font-medium text-neutral-200">{{ rule.name }}</td>
