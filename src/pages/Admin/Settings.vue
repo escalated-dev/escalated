@@ -10,6 +10,7 @@ const form = useForm({
     auto_close_resolved_after_days: props.settings.auto_close_resolved_after_days,
     max_attachments_per_reply: props.settings.max_attachments_per_reply,
     max_attachment_size_kb: props.settings.max_attachment_size_kb,
+    ticket_reference_prefix: props.settings.ticket_reference_prefix,
 });
 
 function submit() {
@@ -78,6 +79,19 @@ function submit() {
                                    class="w-32 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10" />
                             <span class="text-sm text-neutral-500">KB ({{ Math.round(form.max_attachment_size_kb / 1024) }} MB)</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets -->
+            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
+                <h3 class="mb-5 text-sm font-semibold text-white">Tickets</h3>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-200">Reference Prefix</label>
+                        <p class="mt-0.5 text-xs text-neutral-500">Prefix for ticket references (e.g. ESC produces ESC-00001)</p>
+                        <input v-model="form.ticket_reference_prefix" type="text" maxlength="10"
+                               class="mt-2 w-32 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 uppercase focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10" />
                     </div>
                 </div>
             </div>
