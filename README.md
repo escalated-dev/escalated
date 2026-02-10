@@ -18,6 +18,7 @@ Pick your framework:
 | **Laravel** | [escalated-dev/escalated-laravel](https://github.com/escalated-dev/escalated-laravel) | `composer require escalated-dev/escalated-laravel` |
 | **Rails** | [escalated-dev/escalated-rails](https://github.com/escalated-dev/escalated-rails) | `gem "escalated"` |
 | **Django** | [escalated-dev/escalated-django](https://github.com/escalated-dev/escalated-django) | `pip install escalated-django` |
+| **AdonisJS** | [escalated-dev/escalated-adonis](https://github.com/escalated-dev/escalated-adonis) | `npm install @escalated-dev/escalated-adonis` |
 
 Each backend repo has full setup instructions — install command, migrations, config, and frontend integration.
 
@@ -112,9 +113,17 @@ import BaseLayout from '@/layouts/BaseLayout.vue'
 app.use(EscalatedPlugin, { layout: BaseLayout })
 ```
 
+**AdonisJS** (Inertia + Vue 3):
+```js
+import { EscalatedPlugin } from '@escalated-dev/escalated'
+import AppLayout from '@/layouts/AppLayout.vue'
+
+app.use(EscalatedPlugin, { layout: AppLayout })
+```
+
 ## What's in This Repo
 
-All the Vue 3 + Inertia.js components that power the Escalated UI. These are identical across Laravel, Rails, and Django — the backend framework renders them via Inertia.
+All the Vue 3 + Inertia.js components that power the Escalated UI. These are identical across Laravel, Rails, Django, and AdonisJS — the backend framework renders them via Inertia.
 
 ### Pages
 
@@ -157,6 +166,20 @@ Reusable building blocks used across the pages above.
 | `AttachmentList` | File attachment display with download links |
 | `StatsCard` | Metric card with label, value, and trend |
 | `EscalatedLayout` | Top-level layout with navigation (supports host layout injection) |
+| `BulkActionBar` | Toolbar for batch operations on selected tickets |
+| `QuickFilters` | One-click filter chips (My Tickets, Unassigned, Urgent, SLA Breaching) |
+| `MacroDropdown` | Dropdown to apply multi-step macros to a ticket |
+| `FollowButton` | Toggle button to follow/unfollow a ticket |
+| `SatisfactionRating` | 1-5 star CSAT rating input with optional comment |
+| `KeyboardShortcutHelp` | Modal overlay showing all available keyboard shortcuts |
+| `PinnedNotes` | Display pinned internal notes at the top of the thread |
+| `PresenceIndicator` | Real-time indicator showing who is viewing a ticket |
+
+### Composables
+
+| Composable | Description |
+|------------|-------------|
+| `useKeyboardShortcuts` | Registers and manages keyboard shortcuts for ticket actions |
 
 ### Plugin
 
@@ -184,6 +207,17 @@ import CustomerIndex from '@escalated-dev/escalated/pages/Customer/Index.vue'
 ```
 
 Peer dependencies: `vue` ^3.3.0, `@inertiajs/vue3` ^1.0.0 || ^2.0.0
+
+## Ecosystem
+
+This is the shared frontend for the Escalated support ticket system. Backend packages available for every major framework:
+
+- **[Escalated for Laravel](https://github.com/escalated-dev/escalated-laravel)** — Laravel Composer package
+- **[Escalated for Rails](https://github.com/escalated-dev/escalated-rails)** — Ruby on Rails engine
+- **[Escalated for Django](https://github.com/escalated-dev/escalated-django)** — Django reusable app
+- **[Escalated for AdonisJS](https://github.com/escalated-dev/escalated-adonis)** — AdonisJS v6 package
+- **[Escalated for Filament](https://github.com/escalated-dev/escalated-filament)** — Filament v3 admin panel plugin
+- **[Shared Frontend](https://github.com/escalated-dev/escalated)** — Vue 3 + Inertia.js UI components (you are here)
 
 ## License
 
