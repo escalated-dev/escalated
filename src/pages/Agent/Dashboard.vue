@@ -1,10 +1,12 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import StatsCard from '../../components/StatsCard.vue';
 import StatusBadge from '../../components/StatusBadge.vue';
 import PriorityBadge from '../../components/PriorityBadge.vue';
+import PluginSlot from '../../components/PluginSlot.vue';
+import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
 const props = defineProps({
     stats: Object,
@@ -43,10 +45,22 @@ function truncate(str, len = 50) {
 const hasSlaBreaching = computed(() => needsAttention.value?.sla_breaching?.length > 0);
 const hasUnassignedUrgent = computed(() => needsAttention.value?.unassigned_urgent?.length > 0);
 const needsAttention = computed(() => props.needsAttention);
+
+const { dashboardWidgets, getPageComponents } = usePluginExtensions();
+
+// Load a plugin widget component dynamically
+const loadWidgetComponent = (plugin, component) => {
+    return defineAsyncComponent(() =>
+        import(`../../../../../plugins/escalated/${plugin}/resources/js/Components/${component}.vue`)
+    );
+};
 </script>
 
 <template>
     <EscalatedLayout title="Agent Dashboard">
+        <!-- Plugin: dashboard header slot -->
+        <PluginSlot slot="dashboard.header" :components="getPageComponents('dashboard', 'header')" />
+
         <!-- Stats row -->
         <div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-5">
             <StatsCard label="Open Tickets" :value="stats.open" color="cyan" />
@@ -152,5 +166,21 @@ const needsAttention = computed(() => props.needsAttention);
                 </div>
             </div>
         </div>
+
+        <!-- Plugin dashboard widgets -->
+        <div v-if="dashboardWidgets.length" class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div v-for="widget in dashboardWidgets" :key="widget.id"
+                 :class="['rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5',
+                          widget.width === 'full' ? 'md:col-span-2' : '']">
+                <h3 v-if="widget.title" class="mb-3 text-sm font-semibold text-neutral-200">{{ widget.title }}</h3>
+                <component
+                    :is="loadWidgetComponent(widget.plugin, widget.component)"
+                    v-bind="widget.data || {}"
+                />
+            </div>
+        </div>
+
+        <!-- Plugin: dashboard footer slot -->
+        <PluginSlot slot="dashboard.footer" :components="getPageComponents('dashboard', 'footer')" />
     </EscalatedLayout>
 </template>

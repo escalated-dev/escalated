@@ -12,6 +12,7 @@ export { default as FollowButton } from './components/FollowButton.vue'
 export { default as KeyboardShortcutHelp } from './components/KeyboardShortcutHelp.vue'
 export { default as MacroDropdown } from './components/MacroDropdown.vue'
 export { default as PinnedNotes } from './components/PinnedNotes.vue'
+export { default as PluginSlot } from './components/PluginSlot.vue'
 export { default as PresenceIndicator } from './components/PresenceIndicator.vue'
 export { default as PriorityBadge } from './components/PriorityBadge.vue'
 export { default as QuickFilters } from './components/QuickFilters.vue'
@@ -28,3 +29,7 @@ export { default as TicketSidebar } from './components/TicketSidebar.vue'
 
 // Composables
 export { useKeyboardShortcuts } from './composables/useKeyboardShortcuts'
+export { usePluginExtensions } from './composables/usePluginExtensions'
+
+// Plugin authoring helper
+export { defineEscalatedPlugin } from './defineEscalatedPlugin'

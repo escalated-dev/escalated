@@ -11,7 +11,9 @@ import FollowButton from '../../../components/FollowButton.vue';
 import PresenceIndicator from '../../../components/PresenceIndicator.vue';
 import PinnedNotes from '../../../components/PinnedNotes.vue';
 import KeyboardShortcutHelp from '../../../components/KeyboardShortcutHelp.vue';
+import PluginSlot from '../../../components/PluginSlot.vue';
 import { useKeyboardShortcuts } from '../../../composables/useKeyboardShortcuts';
+import { usePluginExtensions } from '../../../composables/usePluginExtensions';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -56,6 +58,8 @@ function toggleFollow() {
     router.post(route('escalated.admin.tickets.follow', props.ticket.reference), {}, { preserveScroll: true });
 }
 
+const { getPageComponents } = usePluginExtensions();
+
 // Keyboard shortcuts
 useKeyboardShortcuts({
     'r': () => { activeTab.value = 'reply'; replyComposerRef.value?.$el?.querySelector('textarea')?.focus(); },
@@ -69,6 +73,9 @@ useKeyboardShortcuts({
 
 <template>
     <EscalatedLayout :title="ticket.subject">
+        <!-- Plugin: ticket show header slot -->
+        <PluginSlot slot="ticket.show.header" :components="getPageComponents('ticket.show', 'header')" />
+
         <div class="mb-5 flex flex-wrap items-center gap-3">
             <span class="text-sm font-mono font-medium text-white">{{ ticket.reference }}</span>
             <StatusBadge :status="ticket.status" />
@@ -101,6 +108,8 @@ useKeyboardShortcuts({
                     <option value="urgent">Urgent</option>
                     <option value="critical">Critical</option>
                 </select>
+                <!-- Plugin: ticket show actions slot -->
+                <PluginSlot slot="ticket.show.actions" :components="getPageComponents('ticket.show', 'actions')" />
             </div>
         </div>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -136,8 +145,10 @@ useKeyboardShortcuts({
                                  :ticket-reference="ticket.reference" route-prefix="escalated.admin" pinnable />
                 </div>
             </div>
-            <div>
+            <div class="space-y-6">
                 <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" />
+                <!-- Plugin: ticket show sidebar slot -->
+                <PluginSlot slot="ticket.show.sidebar" :components="getPageComponents('ticket.show', 'sidebar')" />
             </div>
         </div>
         <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="detail" />
