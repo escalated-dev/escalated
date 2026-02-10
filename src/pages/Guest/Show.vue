@@ -4,10 +4,13 @@ import StatusBadge from '../../components/StatusBadge.vue';
 import PriorityBadge from '../../components/PriorityBadge.vue';
 import ReplyThread from '../../components/ReplyThread.vue';
 import AttachmentList from '../../components/AttachmentList.vue';
+import SatisfactionRating from '../../components/SatisfactionRating.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({ ticket: Object, token: String });
+
+const isResolved = ['resolved', 'closed'].includes(props.ticket.status);
 
 const replyForm = useForm({ body: '', attachments: [] });
 const showCopied = ref(false);
@@ -50,6 +53,10 @@ function copyLink() {
                 <PriorityBadge :priority="ticket.priority" />
                 <span v-if="ticket.department" class="text-sm text-gray-500">{{ ticket.department.name }}</span>
             </div>
+
+            <!-- CSAT Rating -->
+            <SatisfactionRating v-if="isResolved && !ticket.satisfaction_rating"
+                                :action="route('escalated.guest.tickets.rate', token)" />
 
             <!-- Description -->
             <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4">

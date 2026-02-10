@@ -7,6 +7,7 @@ const props = defineProps({
     agents: { type: Array, default: () => [] },
     departments: { type: Array, default: () => [] },
     modelValue: { type: Object, default: () => ({}) },
+    showFollowing: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -18,6 +19,7 @@ const filters = reactive({
     assigned_to: props.modelValue.assigned_to || '',
     department_id: props.modelValue.department_id || '',
     search: props.modelValue.search || '',
+    following: props.modelValue.following || '',
 });
 
 watch(filters, (val) => {
@@ -32,6 +34,11 @@ const inputClass = computed(() => escDark.value
 const selectClass = computed(() => escDark.value
     ? 'rounded-lg border border-white/10 bg-gray-900 px-2 py-1.5 text-sm text-gray-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10'
     : 'rounded-md border border-gray-300 px-2 py-1.5 text-sm'
+);
+
+const checkboxClass = computed(() => escDark.value
+    ? 'h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20'
+    : 'h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500'
 );
 </script>
 
@@ -54,5 +61,9 @@ const selectClass = computed(() => escDark.value
             <option value="">All Departments</option>
             <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
         </select>
+        <label v-if="showFollowing" class="flex items-center gap-2">
+            <input v-model="filters.following" type="checkbox" true-value="1" false-value="" :class="checkboxClass" />
+            <span :class="['text-sm', escDark ? 'text-neutral-400' : 'text-gray-600']">Following</span>
+        </label>
     </div>
 </template>

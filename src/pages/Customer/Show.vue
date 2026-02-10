@@ -5,10 +5,13 @@ import PriorityBadge from '../../components/PriorityBadge.vue';
 import ReplyThread from '../../components/ReplyThread.vue';
 import ReplyComposer from '../../components/ReplyComposer.vue';
 import AttachmentList from '../../components/AttachmentList.vue';
+import SatisfactionRating from '../../components/SatisfactionRating.vue';
 import { router, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({ ticket: Object });
 const page = usePage();
+
+const isResolved = ['resolved', 'closed'].includes(props.ticket.status);
 
 function closeTicket() {
     router.post(route('escalated.customer.tickets.close', props.ticket.reference));
@@ -39,6 +42,11 @@ function reopenTicket() {
                 </button>
             </div>
         </div>
+
+        <!-- CSAT Rating -->
+        <SatisfactionRating v-if="isResolved && !ticket.satisfaction_rating"
+                            :action="route('escalated.customer.tickets.rate', ticket.reference)" />
+
         <div class="mb-6 rounded-lg border border-gray-200 bg-white p-4">
             <p class="whitespace-pre-wrap text-sm text-gray-700">{{ ticket.description }}</p>
             <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />

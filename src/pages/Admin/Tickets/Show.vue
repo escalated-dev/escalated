@@ -6,6 +6,12 @@ import ReplyThread from '../../../components/ReplyThread.vue';
 import ReplyComposer from '../../../components/ReplyComposer.vue';
 import TicketSidebar from '../../../components/TicketSidebar.vue';
 import AttachmentList from '../../../components/AttachmentList.vue';
+import MacroDropdown from '../../../components/MacroDropdown.vue';
+import FollowButton from '../../../components/FollowButton.vue';
+import PresenceIndicator from '../../../components/PresenceIndicator.vue';
+import PinnedNotes from '../../../components/PinnedNotes.vue';
+import KeyboardShortcutHelp from '../../../components/KeyboardShortcutHelp.vue';
+import { useKeyboardShortcuts } from '../../../composables/useKeyboardShortcuts';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -15,10 +21,17 @@ const props = defineProps({
     tags: Array,
     cannedResponses: Array,
     agents: Array,
+    macros: { type: Array, default: () => [] },
+    is_following: { type: Boolean, default: false },
+    followers_count: { type: Number, default: 0 },
 });
 
 const page = usePage();
 const activeTab = ref('reply');
+const showShortcutHelp = ref(false);
+const replyComposerRef = ref(null);
+const statusSelectRef = ref(null);
+const prioritySelectRef = ref(null);
 
 const statusForm = useForm({ status: '' });
 const priorityForm = useForm({ priority: '' });
@@ -38,6 +51,20 @@ function assignToMe() {
     assignForm.agent_id = page.props.auth.user.id;
     assignForm.post(route('escalated.admin.tickets.assign', props.ticket.reference), { preserveScroll: true });
 }
+
+function toggleFollow() {
+    router.post(route('escalated.admin.tickets.follow', props.ticket.reference), {}, { preserveScroll: true });
+}
+
+// Keyboard shortcuts
+useKeyboardShortcuts({
+    'r': () => { activeTab.value = 'reply'; replyComposerRef.value?.$el?.querySelector('textarea')?.focus(); },
+    'n': () => { activeTab.value = 'note'; },
+    's': () => { statusSelectRef.value?.focus(); },
+    'p': () => { prioritySelectRef.value?.focus(); },
+    'f': () => { toggleFollow(); },
+    '?': () => { showShortcutHelp.value = true; },
+});
 </script>
 
 <template>
@@ -47,12 +74,17 @@ function assignToMe() {
             <StatusBadge :status="ticket.status" />
             <PriorityBadge :priority="ticket.priority" />
             <span class="text-sm text-neutral-500">by {{ ticket.requester?.name }}</span>
-            <div class="ml-auto flex gap-2">
+            <PresenceIndicator :ticket-reference="ticket.reference" route-prefix="escalated.admin" />
+            <div class="ml-auto flex items-center gap-2">
+                <FollowButton :is-following="is_following" :followers-count="followers_count"
+                              :action="route('escalated.admin.tickets.follow', ticket.reference)" />
+                <MacroDropdown v-if="macros.length" :macros="macros"
+                               :action="route('escalated.admin.tickets.macro', ticket.reference)" />
                 <button v-if="!ticket.assigned_to" @click="assignToMe"
                         class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400">
                     Assign to Me
                 </button>
-                <select @change="changeStatus($event.target.value); $event.target.value = ''"
+                <select ref="statusSelectRef" @change="changeStatus($event.target.value); $event.target.value = ''"
                         class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
                     <option value="">Change Status...</option>
                     <option value="in_progress">In Progress</option>
@@ -60,7 +92,7 @@ function assignToMe() {
                     <option value="resolved">Resolved</option>
                     <option value="closed">Closed</option>
                 </select>
-                <select @change="changePriority($event.target.value); $event.target.value = ''"
+                <select ref="prioritySelectRef" @change="changePriority($event.target.value); $event.target.value = ''"
                         class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
                     <option value="">Change Priority...</option>
                     <option value="low">Low</option>
@@ -73,6 +105,8 @@ function assignToMe() {
         </div>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-6">
+                <PinnedNotes v-if="ticket.pinned_notes?.length" :notes="ticket.pinned_notes"
+                             :ticket-reference="ticket.reference" route-prefix="escalated.admin" />
                 <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
                     <p class="whitespace-pre-wrap text-sm text-neutral-300">{{ ticket.description }}</p>
                     <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />
@@ -88,7 +122,7 @@ function assignToMe() {
                             Internal Note
                         </button>
                     </div>
-                    <ReplyComposer v-if="activeTab === 'reply'"
+                    <ReplyComposer v-if="activeTab === 'reply'" ref="replyComposerRef"
                                    :action="route('escalated.admin.tickets.reply', ticket.reference)"
                                    :canned-responses="cannedResponses" />
                     <ReplyComposer v-else
@@ -98,12 +132,14 @@ function assignToMe() {
                 </div>
                 <div>
                     <h2 class="mb-4 text-lg font-semibold text-neutral-200">Conversation</h2>
-                    <ReplyThread :replies="ticket.replies || []" :current-user-id="page.props.auth?.user?.id" />
+                    <ReplyThread :replies="ticket.replies || []" :current-user-id="page.props.auth?.user?.id"
+                                 :ticket-reference="ticket.reference" route-prefix="escalated.admin" pinnable />
                 </div>
             </div>
             <div>
                 <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" />
             </div>
         </div>
+        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="detail" />
     </EscalatedLayout>
 </template>
