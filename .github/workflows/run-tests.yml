@@ -47,3 +47,6 @@ jobs:
             }
             console.log('Package structure OK — ' + imports.length + ' exports validated');
           "
+
+      - name: Run tests
+        run: npm test
