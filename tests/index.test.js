@@ -26,6 +26,27 @@ describe('index.js exports', () => {
         it('useKeyboardShortcuts is a function', () => {
             expect(typeof escalated.useKeyboardShortcuts).toBe('function');
         });
+
+        it('exports usePluginExtensions', () => {
+            expect(escalated.usePluginExtensions).toBeDefined();
+        });
+
+        it('usePluginExtensions is a function', () => {
+            expect(typeof escalated.usePluginExtensions).toBe('function');
+        });
+    });
+
+    // ----------------------------------------------------------------
+    // Plugin authoring helper
+    // ----------------------------------------------------------------
+    describe('defineEscalatedPlugin', () => {
+        it('exports defineEscalatedPlugin', () => {
+            expect(escalated.defineEscalatedPlugin).toBeDefined();
+        });
+
+        it('defineEscalatedPlugin is a function', () => {
+            expect(typeof escalated.defineEscalatedPlugin).toBe('function');
+        });
     });
 
     // ----------------------------------------------------------------
@@ -42,6 +63,7 @@ describe('index.js exports', () => {
         'KeyboardShortcutHelp',
         'MacroDropdown',
         'PinnedNotes',
+        'PluginSlot',
         'PresenceIndicator',
         'PriorityBadge',
         'QuickFilters',
@@ -68,8 +90,8 @@ describe('index.js exports', () => {
             expect(typeof component).toBe('object');
         });
 
-        it('exports exactly 23 components', () => {
-            expect(expectedComponents).toHaveLength(23);
+        it('exports exactly 24 components', () => {
+            expect(expectedComponents).toHaveLength(24);
             for (const name of expectedComponents) {
                 expect(escalated[name]).toBeDefined();
             }
@@ -87,10 +109,10 @@ describe('index.js exports', () => {
             }
         });
 
-        it('total named exports equals components + plugin + composable', () => {
+        it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 23 components + 1 plugin + 1 composable = 25
-            expect(keys).toHaveLength(25);
+            // 24 components + 1 plugin + 2 composables + 1 helper = 28
+            expect(keys).toHaveLength(28);
         });
 
         it('every export key is a non-empty string', () => {
