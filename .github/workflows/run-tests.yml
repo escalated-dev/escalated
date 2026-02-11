@@ -1,0 +1,52 @@
+name: run-tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 20]
+
+    name: Node ${{ matrix.node }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate package structure
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = require('./package.json');
+            const files = pkg.files || [];
+            for (const f of files) {
+              if (!fs.existsSync(f)) { console.error('Missing: ' + f); process.exit(1); }
+            }
+            if (!fs.existsSync('src/index.js')) { console.error('Missing entry: src/index.js'); process.exit(1); }
+            const idx = fs.readFileSync('src/index.js', 'utf8');
+            const imports = idx.match(/from ['\"]\.\/([^'\"]+)/g) || [];
+            for (const imp of imports) {
+              const rel = imp.replace(/from ['\"]\.\//, '');
+              const candidates = ['src/' + rel, 'src/' + rel + '.js', 'src/' + rel + '.vue'];
+              if (!candidates.some(c => fs.existsSync(c))) { console.error('Missing export: ' + rel); process.exit(1); }
+            }
+            console.log('Package structure OK — ' + imports.length + ' exports validated');
+          "
+
+      - name: Run tests
+        run: npm test

@@ -30,8 +30,15 @@
     "vue": "^3.3.0",
     "@inertiajs/vue3": "^1.0.0 || ^2.0.0"
   },
+  "scripts": {
+    "test": "vitest run"
+  },
   "devDependencies": {
     "vue": "^3.5.0",
-    "@inertiajs/vue3": "^2.0.0"
+    "@inertiajs/vue3": "^2.0.0",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/test-utils": "^2.4.0",
+    "happy-dom": "^15.0.0",
+    "vitest": "^2.0.0"
   }
 }
