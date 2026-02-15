@@ -125,6 +125,16 @@ app.use(EscalatedPlugin, { layout: AppLayout })
 
 All the Vue 3 + Inertia.js components that power the Escalated UI. These are identical across Laravel, Rails, Django, and AdonisJS — the backend framework renders them via Inertia.
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="docs/assets/escalated_admin_1.png" alt="Escalated Admin Screenshot 1" width="800" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/escalated_admin_2.png" alt="Escalated Admin Screenshot 2" width="800" />
+</p>
+
 ### Pages
 
 **Customer Portal** — Self-service ticket management
