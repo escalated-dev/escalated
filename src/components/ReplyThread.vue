@@ -1,14 +1,9 @@
 <script setup>
 import { inject, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
-import DOMPurify from 'dompurify';
 import AttachmentList from './AttachmentList.vue';
+import { sanitizeHtml } from '../utils/sanitizeHtml';
 import { useI18n } from '../composables/useI18n';
-
-function sanitizeHtml(html) {
-    if (!html) return '';
-    return DOMPurify.sanitize(html);
-}
 
 const props = defineProps({
     replies: { type: Array, required: true },

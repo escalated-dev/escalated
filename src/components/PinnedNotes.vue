@@ -1,13 +1,8 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
 import { router } from '@inertiajs/vue3';
-import DOMPurify from 'dompurify';
+import { sanitizeHtml } from '../utils/sanitizeHtml';
 import { useI18n } from '../composables/useI18n';
-
-function sanitizeHtml(html) {
-    if (!html) return '';
-    return DOMPurify.sanitize(html);
-}
 
 const props = defineProps({
     notes: { type: Array, default: () => [] },
