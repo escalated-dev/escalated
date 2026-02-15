@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { sanitizeHtml } from '../utils/sanitizeHtml';
+import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
     notes: { type: Array, default: () => [] },
@@ -9,6 +11,7 @@ const props = defineProps({
 });
 
 const escDark = inject('esc-dark', computed(() => false));
+const { t } = useI18n();
 const processingId = ref(null);
 
 function unpinNote(note) {
@@ -49,7 +52,7 @@ function formatDate(dateStr) {
             </svg>
             <span :class="['text-xs font-semibold uppercase tracking-wider',
                            escDark ? 'text-amber-400' : 'text-amber-700']">
-                Pinned Notes
+                {{ t('pinned_notes.title') }}
             </span>
         </div>
 
@@ -61,7 +64,7 @@ function formatDate(dateStr) {
                               ? 'border-amber-500/10 bg-amber-500/[0.04]'
                               : 'border-amber-200 bg-white']">
                 <!-- Note body -->
-                <div :class="['prose prose-sm max-w-none', escDark ? 'prose-invert text-neutral-200' : 'text-gray-800']" v-html="note.body"></div>
+                <div :class="['prose prose-sm max-w-none', escDark ? 'prose-invert text-neutral-200' : 'text-gray-800']" v-html="sanitizeHtml(note.body)"></div>
 
                 <!-- Meta row -->
                 <div class="mt-2 flex items-center justify-between">
@@ -78,7 +81,7 @@ function formatDate(dateStr) {
                                          ? 'text-amber-400 hover:bg-amber-500/10 hover:text-amber-300'
                                          : 'text-amber-600 hover:bg-amber-100 hover:text-amber-700',
                                      processingId === note.id && 'opacity-50 cursor-not-allowed']">
-                        Unpin
+                        {{ t('pinned_notes.unpin') }}
                     </button>
                 </div>
             </div>
