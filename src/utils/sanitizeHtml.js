@@ -1,51 +1,64 @@
 /**
  * Sanitize HTML to prevent stored XSS.
  *
- * Strips dangerous tags, event handlers, javascript: URIs, and CSS expressions.
- * Mirrors the server-side sanitization in the Adonis/Laravel inbound email services.
+ * Uses the DOM parser to walk the tree and strip dangerous elements and
+ * attributes rather than regex, which avoids incomplete-sanitization pitfalls.
  */
 
-const ALLOWED_TAGS = [
-  'p', 'br', 'b', 'i', 'u', 'strong', 'em', 'a', 'ul', 'ol', 'li',
-  'blockquote', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'div', 'span',
-  'hr', 'sub', 'sup', 'dl', 'dt', 'dd',
-]
+const DANGEROUS_TAGS = new Set([
+  'script', 'style', 'iframe', 'object', 'embed', 'form', 'input',
+  'textarea', 'button', 'select', 'option', 'link', 'meta', 'base',
+  'applet', 'noscript', 'noframes',
+])
 
-const TAG_PATTERN = ALLOWED_TAGS.join('|')
-const STRIP_TAGS_RE = new RegExp(`<(?!\\/?(?:${TAG_PATTERN})(?:\\s|>|\\/))\\/?[^>]*>`, 'gi')
+const URI_ATTRS = new Set(['href', 'src', 'action', 'formaction', 'xlink:href'])
 
 export function sanitizeHtml(html) {
   if (!html) return ''
 
-  let clean = html
+  const doc = new DOMParser().parseFromString(html, 'text/html')
 
-  // Strip non-allowed tags
-  clean = clean.replace(STRIP_TAGS_RE, '')
-
-  // Remove event handlers (onclick, onerror, etc.)
-  // Loop until stable to prevent bypass via nested/overlapping patterns
-  {
-    let prev
-    do {
-      prev = clean
-      clean = clean.replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '')
-      clean = clean.replace(/\s+on\w+\s*=\s*'[^']*'/gi, '')
-      clean = clean.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
-    } while (clean !== prev)
+  // Remove dangerous elements
+  for (const tag of DANGEROUS_TAGS) {
+    const els = doc.body.getElementsByTagName(tag)
+    while (els.length) els[0].remove()
   }
 
-  // Remove javascript: and vbscript: protocols from href/src/action
-  clean = clean.replace(/\b(href|src|action)\s*=\s*["']?\s*(?:javascript|vbscript)\s*:/gi, '$1="')
+  // Walk all remaining elements and strip dangerous attributes
+  const all = doc.body.querySelectorAll('*')
+  for (let i = 0; i < all.length; i++) {
+    const el = all[i]
+    const attrs = [...el.attributes]
+    for (let j = 0; j < attrs.length; j++) {
+      const name = attrs[j].name.toLowerCase()
 
-  // Remove dangerous data: URIs (allow data:image)
-  clean = clean.replace(/\b(href|src|action)\s*=\s*["']?\s*data\s*:(?!image\/)/gi, '$1="')
+      // Remove event handlers (onclick, onerror, etc.)
+      if (name.startsWith('on')) {
+        el.removeAttribute(attrs[j].name)
+        continue
+      }
 
-  // Remove CSS expressions and javascript in style attributes
-  clean = clean.replace(/style\s*=\s*"[^"]*expression\s*\([^"]*"/gi, '')
-  clean = clean.replace(/style\s*=\s*'[^']*expression\s*\([^']*'/gi, '')
-  clean = clean.replace(/style\s*=\s*"[^"]*url\s*\(\s*["']?\s*javascript:[^"]*"/gi, '')
-  clean = clean.replace(/style\s*=\s*'[^']*url\s*\(\s*['"]?\s*javascript:[^']*'/gi, '')
+      // Remove javascript: / vbscript: / dangerous data: URIs
+      if (URI_ATTRS.has(name)) {
+        const val = (attrs[j].value || '').replace(/[\s\u0000-\u001F]+/g, '').toLowerCase()
+        if (
+          val.startsWith('javascript:') ||
+          val.startsWith('vbscript:') ||
+          (val.startsWith('data:') && !val.startsWith('data:image/'))
+        ) {
+          el.removeAttribute(attrs[j].name)
+        }
+      }
 
-  return clean
+      // Remove style attributes containing expressions or javascript
+      if (name === 'style') {
+        const val = (attrs[j].value || '').toLowerCase()
+        if (val.includes('expression(') || val.includes('javascript:') || val.includes('url(')) {
+          el.removeAttribute(attrs[j].name)
+        }
+      }
+    }
+  }
+
+  return doc.body.innerHTML
 }
