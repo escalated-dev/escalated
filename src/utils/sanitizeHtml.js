@@ -24,9 +24,16 @@ export function sanitizeHtml(html) {
   clean = clean.replace(STRIP_TAGS_RE, '')
 
   // Remove event handlers (onclick, onerror, etc.)
-  clean = clean.replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '')
-  clean = clean.replace(/\s+on\w+\s*=\s*'[^']*'/gi, '')
-  clean = clean.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
+  // Loop until stable to prevent bypass via nested/overlapping patterns
+  {
+    let prev
+    do {
+      prev = clean
+      clean = clean.replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '')
+      clean = clean.replace(/\s+on\w+\s*=\s*'[^']*'/gi, '')
+      clean = clean.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
+    } while (clean !== prev)
+  }
 
   // Remove javascript: and vbscript: protocols from href/src/action
   clean = clean.replace(/\b(href|src|action)\s*=\s*["']?\s*(?:javascript|vbscript)\s*:/gi, '$1="')
