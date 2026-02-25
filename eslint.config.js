@@ -1,9 +1,11 @@
 import js from '@eslint/js';
 import pluginVue from 'eslint-plugin-vue';
+import storybook from 'eslint-plugin-storybook';
 
 export default [
     js.configs.recommended,
     ...pluginVue.configs['flat/recommended'],
+    ...storybook.configs['flat/recommended'],
     {
         languageOptions: {
             globals: {
@@ -43,6 +45,6 @@ export default [
         },
     },
     {
-        ignores: ['node_modules/', 'dist/'],
+        ignores: ['node_modules/', 'dist/', 'storybook-static/', 'screenshots/', 'playwright-screenshots.config.js'],
     },
 ];
