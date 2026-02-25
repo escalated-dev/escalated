@@ -12,6 +12,7 @@ import PresenceIndicator from '../../components/PresenceIndicator.vue';
 import PinnedNotes from '../../components/PinnedNotes.vue';
 import KeyboardShortcutHelp from '../../components/KeyboardShortcutHelp.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
+import KnowledgePanel from '../../components/KnowledgePanel.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { router, useForm, usePage } from '@inertiajs/vue3';
@@ -212,6 +213,7 @@ useKeyboardShortcuts({
             </div>
             <div class="space-y-6">
                 <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" />
+                <KnowledgePanel :ticket-reference="ticket.reference" />
                 <!-- Plugin: ticket show sidebar slot -->
                 <PluginSlot slot="ticket.show.sidebar" :components="getPageComponents('ticket.show', 'sidebar')" />
             </div>
