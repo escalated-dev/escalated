@@ -1,8 +1,8 @@
-# Zendesk Feature Parity Implementation Plan
+# platform Feature Parity Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Implement all 36 core feature gaps and scaffold all 24 plugins identified in the Zendesk comparison, with full frontend + Laravel backend implementations and TODO.md for remaining work per feature.
+**Goal:** Implement all 36 core feature gaps and scaffold all 24 plugins identified in the platform comparison, with full frontend + Laravel backend implementations and TODO.md for remaining work per feature.
 
 **Architecture:** Core features go into existing repos (escalated frontend + escalated-laravel backend). Plugins live as standalone packages under `escalated/plugins/`. Every feature gets a Vue frontend component + Laravel backend (models, migrations, controllers, routes). Other backends (Adonis, Django, Rails) get TODO stubs.
 
@@ -16,8 +16,8 @@
 
 **Step 1: Create feature branches**
 ```bash
-cd C:/Users/work/escalated/escalated && git checkout -b feature/zendesk-parity
-cd C:/Users/work/escalated/escalated-laravel && git stash && git checkout main && git checkout -b feature/zendesk-parity && git stash pop
+cd C:/Users/work/escalated/escalated && git checkout -b feature/platform-parity
+cd C:/Users/work/escalated/escalated-laravel && git stash && git checkout main && git checkout -b feature/platform-parity && git stash pop
 ```
 
 **Step 2: Create plugins directory**
@@ -613,7 +613,7 @@ Create each plugin directory with:
 
 - Run `npm test` in `escalated/`
 - Fix any failing tests
-- Commit all changes to `feature/zendesk-parity` branches
+- Commit all changes to `feature/platform-parity` branches
 - Push to remote
 
 ---

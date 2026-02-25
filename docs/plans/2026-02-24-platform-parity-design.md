@@ -1,8 +1,8 @@
-# Zendesk Feature Parity — Design Document
+# platform Feature Parity — Design Document
 
 ## Goal
 
-Implement all 36 core gaps and scaffold all 24 plugin gaps identified in the Zendesk comparison. Core features get full frontend + backend implementations across all frameworks. Plugins get their own repos under `escalated/plugins/` with frontend components and backend hooks. Each feature includes a TODO section documenting remaining work.
+Implement all 36 core gaps and scaffold all 24 plugin gaps identified in the platform comparison. Core features get full frontend + backend implementations across all frameworks. Plugins get their own repos under `escalated/plugins/` with frontend components and backend hooks. Each feature includes a TODO section documenting remaining work.
 
 ## Architecture
 
@@ -115,8 +115,8 @@ escalated-plugin-<name>/
 
 ## Branching Strategy
 
-- `escalated/` frontend: `feature/zendesk-parity` branch
-- Each backend: `feature/zendesk-parity` branch
+- `escalated/` frontend: `feature/platform-parity` branch
+- Each backend: `feature/platform-parity` branch
 - Plugins: new repos initialized in `plugins/` directory
 
 ## Success Criteria
