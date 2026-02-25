@@ -7,7 +7,9 @@ import TicketFilters from '../../components/TicketFilters.vue';
 import QuickFilters from '../../components/QuickFilters.vue';
 import BulkActionBar from '../../components/BulkActionBar.vue';
 import KeyboardShortcutHelp from '../../components/KeyboardShortcutHelp.vue';
+import PluginSlot from '../../components/PluginSlot.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
+import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
 defineProps({
     tickets: Object,
@@ -39,6 +41,8 @@ useKeyboardShortcuts({
     },
 });
 
+const { getPageComponents } = usePluginExtensions();
+
 function applyQuickFilter(filter) {
     router.get(route('escalated.agent.tickets.index'), filter, { preserveState: true });
 }
@@ -49,6 +53,10 @@ function applyQuickFilter(filter) {
         <div class="mb-4">
             <QuickFilters :current-user-id="page.props.auth?.user?.id" @filter="applyQuickFilter" />
         </div>
+        <PluginSlot
+            slot="ticket.list.before_filters"
+            :components="getPageComponents('ticket.list', 'before_filters')"
+        />
         <div class="mb-6">
             <TicketFilters
                 :filters="filters"
@@ -74,6 +82,7 @@ function applyQuickFilter(filter) {
             :departments="departments"
             @clear="selectedIds = []"
         />
+        <PluginSlot slot="ticket.list.footer" :components="getPageComponents('ticket.list', 'footer')" />
         <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" />
     </EscalatedLayout>
 </template>
