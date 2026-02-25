@@ -11,21 +11,49 @@ const props = defineProps({
     selectable: { type: Boolean, default: false },
     selectedIds: { type: Array, default: () => [] },
     assignRoute: { type: String, default: '' },
+    navigable: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:selectedIds']);
-const escDark = inject('esc-dark', computed(() => false));
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
+const focusedIndex = ref(-1);
+
+function moveDown() {
+    if (!props.tickets.data?.length) return;
+    focusedIndex.value = Math.min(focusedIndex.value + 1, props.tickets.data.length - 1);
+}
+function moveUp() {
+    if (!props.tickets.data?.length) return;
+    focusedIndex.value = Math.max(focusedIndex.value - 1, 0);
+}
+function toggleSelectFocused() {
+    if (focusedIndex.value < 0 || !props.tickets.data?.length) return;
+    toggleOne(props.tickets.data[focusedIndex.value].id);
+}
+function openFocused() {
+    if (focusedIndex.value < 0 || !props.tickets.data?.length) return;
+    const ticket = props.tickets.data[focusedIndex.value];
+    router.visit(route(`${props.routePrefix}.show`, ticket.reference));
+}
+
+defineExpose({ moveDown, moveUp, toggleSelectFocused, openFocused });
 
 const allSelected = computed(() => {
     if (!props.tickets.data?.length) return false;
-    return props.tickets.data.every(t => props.selectedIds.includes(t.id));
+    return props.tickets.data.every((t) => props.selectedIds.includes(t.id));
 });
 
 function toggleAll() {
     if (allSelected.value) {
         emit('update:selectedIds', []);
     } else {
-        emit('update:selectedIds', props.tickets.data.map(t => t.id));
+        emit(
+            'update:selectedIds',
+            props.tickets.data.map((t) => t.id),
+        );
     }
 }
 
@@ -79,28 +107,66 @@ const colCount = computed(() => {
             <thead>
                 <tr class="bg-white/[0.02]">
                     <th v-if="selectable" class="w-10 px-3 py-3">
-                        <input type="checkbox" :checked="allSelected" @change="toggleAll"
-                               class="h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20" />
+                        <input
+                            type="checkbox"
+                            :checked="allSelected"
+                            class="h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20"
+                            @change="toggleAll"
+                        />
                     </th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Reference</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Subject</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Requester</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Status</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Priority</th>
-                    <th v-if="showAssignee" class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Assignee</th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Last Reply</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                        Reference
+                    </th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                        Subject
+                    </th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                        Requester
+                    </th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                        Status
+                    </th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                        Priority
+                    </th>
+                    <th
+                        v-if="showAssignee"
+                        class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                    >
+                        Assignee
+                    </th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                        Last Reply
+                    </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/[0.04]">
-                <tr v-for="ticket in tickets.data" :key="ticket.id" class="group transition-colors hover:bg-white/[0.03]">
+                <tr
+                    v-for="(ticket, index) in tickets.data"
+                    :key="ticket.id"
+                    :class="[
+                        'group transition-colors',
+                        navigable && focusedIndex === index ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]',
+                    ]"
+                >
                     <td v-if="selectable" class="w-10 px-3 py-3">
-                        <input type="checkbox" :checked="selectedIds.includes(ticket.id)" @change="toggleOne(ticket.id)"
-                               class="h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20" />
+                        <input
+                            type="checkbox"
+                            :checked="selectedIds.includes(ticket.id)"
+                            class="h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20"
+                            @change="toggleOne(ticket.id)"
+                        />
                     </td>
                     <td class="whitespace-nowrap px-4 py-3 text-sm font-medium">
                         <div class="flex items-center gap-2">
-                            <span v-if="slaClass(ticket)" :class="['h-2 w-2 shrink-0 rounded-full', slaClass(ticket)]"></span>
-                            <Link :href="route(`${routePrefix}.show`, ticket.reference)" class="text-white hover:text-neutral-300">
+                            <span
+                                v-if="slaClass(ticket)"
+                                :class="['h-2 w-2 shrink-0 rounded-full', slaClass(ticket)]"
+                            ></span>
+                            <Link
+                                :href="route(`${routePrefix}.show`, ticket.reference)"
+                                class="text-white hover:text-neutral-300"
+                            >
                                 {{ ticket.reference }}
                             </Link>
                         </div>
@@ -108,7 +174,9 @@ const colCount = computed(() => {
                     <td class="px-4 py-3 text-sm text-neutral-300">{{ truncate(ticket.subject) }}</td>
                     <td class="px-4 py-3 text-sm text-neutral-400">
                         <div>{{ ticket.requester?.name || ticket.requester_name || 'Unknown' }}</div>
-                        <div class="truncate text-xs text-neutral-600" style="max-width: 150px">{{ ticket.requester?.email || ticket.requester_email || '' }}</div>
+                        <div class="truncate text-xs text-neutral-600" style="max-width: 150px">
+                            {{ ticket.requester?.email || ticket.requester_email || '' }}
+                        </div>
                     </td>
                     <td class="px-4 py-3"><StatusBadge :status="ticket.status" /></td>
                     <td class="px-4 py-3"><PriorityBadge :priority="ticket.priority" /></td>
@@ -117,8 +185,12 @@ const colCount = computed(() => {
                     </td>
                     <td class="whitespace-nowrap px-4 py-3 text-sm text-neutral-600">
                         <template v-if="ticket.latest_reply || ticket.last_reply_at">
-                            <div class="text-neutral-400">{{ timeAgo(ticket.latest_reply?.created_at || ticket.last_reply_at) }}</div>
-                            <div class="text-xs text-neutral-600">{{ ticket.latest_reply?.author?.name || ticket.last_reply_author || '' }}</div>
+                            <div class="text-neutral-400">
+                                {{ timeAgo(ticket.latest_reply?.created_at || ticket.last_reply_at) }}
+                            </div>
+                            <div class="text-xs text-neutral-600">
+                                {{ ticket.latest_reply?.author?.name || ticket.last_reply_author || '' }}
+                            </div>
                         </template>
                         <span v-else class="text-neutral-700">—</span>
                     </td>
@@ -138,28 +210,48 @@ const colCount = computed(() => {
             <thead class="bg-gray-50">
                 <tr>
                     <th v-if="selectable" class="w-10 px-3 py-3">
-                        <input type="checkbox" :checked="allSelected" @change="toggleAll"
-                               class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                        <input
+                            type="checkbox"
+                            :checked="allSelected"
+                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            @change="toggleAll"
+                        />
                     </th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Reference</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Subject</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Requester</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Priority</th>
-                    <th v-if="showAssignee" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Assignee</th>
+                    <th v-if="showAssignee" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                        Assignee
+                    </th>
                     <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Last Reply</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-                <tr v-for="ticket in tickets.data" :key="ticket.id" class="group hover:bg-gray-50">
+                <tr
+                    v-for="(ticket, index) in tickets.data"
+                    :key="ticket.id"
+                    :class="['group', navigable && focusedIndex === index ? 'bg-indigo-50' : 'hover:bg-gray-50']"
+                >
                     <td v-if="selectable" class="w-10 px-3 py-3">
-                        <input type="checkbox" :checked="selectedIds.includes(ticket.id)" @change="toggleOne(ticket.id)"
-                               class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                        <input
+                            type="checkbox"
+                            :checked="selectedIds.includes(ticket.id)"
+                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            @change="toggleOne(ticket.id)"
+                        />
                     </td>
                     <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
                         <div class="flex items-center gap-2">
-                            <span v-if="slaClass(ticket)" :class="['h-2 w-2 shrink-0 rounded-full', slaClass(ticket)]"></span>
-                            <Link :href="route(`${routePrefix}.show`, ticket.reference)" class="text-indigo-600 hover:text-indigo-900">
+                            <span
+                                v-if="slaClass(ticket)"
+                                :class="['h-2 w-2 shrink-0 rounded-full', slaClass(ticket)]"
+                            ></span>
+                            <Link
+                                :href="route(`${routePrefix}.show`, ticket.reference)"
+                                class="text-indigo-600 hover:text-indigo-900"
+                            >
                                 {{ ticket.reference }}
                             </Link>
                         </div>
@@ -167,7 +259,9 @@ const colCount = computed(() => {
                     <td class="px-4 py-3 text-sm text-gray-900">{{ truncate(ticket.subject) }}</td>
                     <td class="px-4 py-3 text-sm text-gray-500">
                         <div>{{ ticket.requester?.name || ticket.requester_name || 'Unknown' }}</div>
-                        <div class="truncate text-xs text-gray-400" style="max-width: 150px">{{ ticket.requester?.email || ticket.requester_email || '' }}</div>
+                        <div class="truncate text-xs text-gray-400" style="max-width: 150px">
+                            {{ ticket.requester?.email || ticket.requester_email || '' }}
+                        </div>
                     </td>
                     <td class="px-4 py-3"><StatusBadge :status="ticket.status" /></td>
                     <td class="px-4 py-3"><PriorityBadge :priority="ticket.priority" /></td>
@@ -177,15 +271,15 @@ const colCount = computed(() => {
                     <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                         <template v-if="ticket.latest_reply || ticket.last_reply_at">
                             <div>{{ timeAgo(ticket.latest_reply?.created_at || ticket.last_reply_at) }}</div>
-                            <div class="text-xs text-gray-400">{{ ticket.latest_reply?.author?.name || ticket.last_reply_author || '' }}</div>
+                            <div class="text-xs text-gray-400">
+                                {{ ticket.latest_reply?.author?.name || ticket.last_reply_author || '' }}
+                            </div>
                         </template>
                         <span v-else class="text-gray-400">—</span>
                     </td>
                 </tr>
                 <tr v-if="!tickets.data?.length">
-                    <td :colspan="colCount" class="px-4 py-8 text-center text-sm text-gray-500">
-                        No tickets found.
-                    </td>
+                    <td :colspan="colCount" class="px-4 py-8 text-center text-sm text-gray-500">No tickets found.</td>
                 </tr>
             </tbody>
         </table>
