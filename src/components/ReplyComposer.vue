@@ -9,15 +9,58 @@ const props = defineProps({
     allowNotes: { type: Boolean, default: false },
     placeholder: { type: String, default: 'Type your reply...' },
     submitLabel: { type: String, default: null },
+    typingEndpoint: { type: String, default: '' },
 });
 
 const emit = defineEmits(['submit']);
-const escDark = inject('esc-dark', computed(() => false));
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 
 const body = ref('');
 const isNote = ref(false);
 const files = ref([]);
 const submitting = ref(false);
+
+// Typing indicator: debounced POST every 5 seconds while typing
+let lastTypingSent = 0;
+let typingTimer = null;
+
+function onTyping() {
+    if (!props.typingEndpoint) return;
+    const now = Date.now();
+    if (now - lastTypingSent < 5000) return;
+    lastTypingSent = now;
+    sendTypingIndicator();
+
+    // Clear typing after 6 seconds of inactivity
+    window.clearTimeout(typingTimer);
+    typingTimer = window.setTimeout(() => {
+        lastTypingSent = 0;
+    }, 6000);
+}
+
+async function sendTypingIndicator() {
+    try {
+        await fetch(props.typingEndpoint, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+        });
+    } catch {
+        // silently ignore
+    }
+}
+
+function onBlur() {
+    window.clearTimeout(typingTimer);
+    lastTypingSent = 0;
+}
 
 function insertCanned(response) {
     body.value += response.body;
@@ -34,6 +77,8 @@ function removeFile(index) {
 function submit() {
     if (!body.value.trim() || submitting.value) return;
     submitting.value = true;
+    window.clearTimeout(typingTimer);
+    lastTypingSent = 0;
 
     const payload = {
         body: body.value,
@@ -66,45 +111,80 @@ const buttonLabel = computed(() => {
     <!-- Dark mode -->
     <div v-if="escDark" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4">
         <div v-if="allowNotes" class="mb-3 flex gap-2">
-            <button @click="isNote = false"
-                    :class="['rounded-lg px-3 py-1.5 text-sm font-medium transition-colors', !isNote ? 'bg-cyan-500/15 text-white ring-1 ring-cyan-500/20' : 'text-gray-400 hover:bg-white/[0.04]']">
+            <button
+                :class="[
+                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    !isNote
+                        ? 'bg-cyan-500/15 text-white ring-1 ring-cyan-500/20'
+                        : 'text-gray-400 hover:bg-white/[0.04]',
+                ]"
+                @click="isNote = false"
+            >
                 Reply
             </button>
-            <button @click="isNote = true"
-                    :class="['rounded-lg px-3 py-1.5 text-sm font-medium transition-colors', isNote ? 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20' : 'text-gray-400 hover:bg-white/[0.04]']">
+            <button
+                :class="[
+                    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                    isNote
+                        ? 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20'
+                        : 'text-gray-400 hover:bg-white/[0.04]',
+                ]"
+                @click="isNote = true"
+            >
                 Internal Note
             </button>
         </div>
 
-        <div v-if="isNote" class="mb-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs text-amber-400 ring-1 ring-amber-500/20">
+        <div
+            v-if="isNote"
+            class="mb-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs text-amber-400 ring-1 ring-amber-500/20"
+        >
             This note is only visible to agents.
         </div>
 
-        <textarea v-model="body" rows="4" :placeholder="placeholder"
-                  class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"></textarea>
+        <textarea
+            v-model="body"
+            rows="4"
+            :placeholder="placeholder"
+            class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+            @keydown="onTyping"
+            @blur="onBlur"
+        ></textarea>
 
-        <FileDropzone @files="handleFiles" class="mt-2" />
+        <FileDropzone class="mt-2" @files="handleFiles" />
 
         <div v-if="files.length" class="mt-2 space-y-1">
             <div v-for="(file, i) in files" :key="i" class="flex items-center gap-2 text-sm text-gray-400">
                 <span>{{ file.name }}</span>
-                <button @click="removeFile(i)" class="text-rose-400 hover:text-rose-300">&times;</button>
+                <button class="text-rose-400 hover:text-rose-300" @click="removeFile(i)">&times;</button>
             </div>
         </div>
 
         <div class="mt-3 flex items-center justify-between">
             <div v-if="cannedResponses.length">
-                <select @change="insertCanned(cannedResponses[$event.target.value]); $event.target.value = ''"
-                        class="rounded-lg border border-white/10 bg-gray-900 px-2 py-1 text-xs text-gray-400">
+                <select
+                    class="rounded-lg border border-white/10 bg-gray-900 px-2 py-1 text-xs text-gray-400"
+                    @change="
+                        insertCanned(cannedResponses[$event.target.value]);
+                        $event.target.value = '';
+                    "
+                >
                     <option value="">Canned responses...</option>
                     <option v-for="(cr, i) in cannedResponses" :key="cr.id" :value="i">{{ cr.title }}</option>
                 </select>
             </div>
             <div v-else></div>
-            <button @click="submit" :disabled="!body.trim() || submitting"
-                    :class="['rounded-lg px-4 py-2 text-sm font-medium text-white transition-all',
-                             isNote ? 'bg-amber-500 hover:bg-amber-400' : 'bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400',
-                             (!body.trim() || submitting) && 'cursor-not-allowed opacity-40']">
+            <button
+                :disabled="!body.trim() || submitting"
+                :class="[
+                    'rounded-lg px-4 py-2 text-sm font-medium text-white transition-all',
+                    isNote
+                        ? 'bg-amber-500 hover:bg-amber-400'
+                        : 'bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400',
+                    (!body.trim() || submitting) && 'cursor-not-allowed opacity-40',
+                ]"
+                @click="submit"
+            >
                 {{ buttonLabel }}
             </button>
         </div>
@@ -113,12 +193,22 @@ const buttonLabel = computed(() => {
     <!-- Light mode -->
     <div v-else class="rounded-lg border border-gray-200 bg-white p-4">
         <div v-if="allowNotes" class="mb-3 flex gap-2">
-            <button @click="isNote = false"
-                    :class="['rounded-md px-3 py-1 text-sm font-medium', !isNote ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:bg-gray-100']">
+            <button
+                :class="[
+                    'rounded-md px-3 py-1 text-sm font-medium',
+                    !isNote ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:bg-gray-100',
+                ]"
+                @click="isNote = false"
+            >
                 Reply
             </button>
-            <button @click="isNote = true"
-                    :class="['rounded-md px-3 py-1 text-sm font-medium', isNote ? 'bg-yellow-100 text-yellow-700' : 'text-gray-500 hover:bg-gray-100']">
+            <button
+                :class="[
+                    'rounded-md px-3 py-1 text-sm font-medium',
+                    isNote ? 'bg-yellow-100 text-yellow-700' : 'text-gray-500 hover:bg-gray-100',
+                ]"
+                @click="isNote = true"
+            >
                 Internal Note
             </button>
         </div>
@@ -127,31 +217,47 @@ const buttonLabel = computed(() => {
             This note is only visible to agents.
         </div>
 
-        <textarea v-model="body" rows="4" :placeholder="placeholder"
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+        <textarea
+            v-model="body"
+            rows="4"
+            :placeholder="placeholder"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            @keydown="onTyping"
+            @blur="onBlur"
+        ></textarea>
 
-        <FileDropzone @files="handleFiles" class="mt-2" />
+        <FileDropzone class="mt-2" @files="handleFiles" />
 
         <div v-if="files.length" class="mt-2 space-y-1">
             <div v-for="(file, i) in files" :key="i" class="flex items-center gap-2 text-sm text-gray-600">
                 <span>{{ file.name }}</span>
-                <button @click="removeFile(i)" class="text-red-500 hover:text-red-700">&times;</button>
+                <button class="text-red-500 hover:text-red-700" @click="removeFile(i)">&times;</button>
             </div>
         </div>
 
         <div class="mt-3 flex items-center justify-between">
             <div v-if="cannedResponses.length">
-                <select @change="insertCanned(cannedResponses[$event.target.value]); $event.target.value = ''"
-                        class="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600">
+                <select
+                    class="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600"
+                    @change="
+                        insertCanned(cannedResponses[$event.target.value]);
+                        $event.target.value = '';
+                    "
+                >
                     <option value="">Canned responses...</option>
                     <option v-for="(cr, i) in cannedResponses" :key="cr.id" :value="i">{{ cr.title }}</option>
                 </select>
             </div>
             <div v-else></div>
-            <button @click="submit" :disabled="!body.trim() || submitting"
-                    :class="['rounded-md px-4 py-2 text-sm font-medium text-white',
-                             isNote ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700',
-                             (!body.trim() || submitting) && 'cursor-not-allowed opacity-50']">
+            <button
+                :disabled="!body.trim() || submitting"
+                :class="[
+                    'rounded-md px-4 py-2 text-sm font-medium text-white',
+                    isNote ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700',
+                    (!body.trim() || submitting) && 'cursor-not-allowed opacity-50',
+                ]"
+                @click="submit"
+            >
                 {{ buttonLabel }}
             </button>
         </div>
