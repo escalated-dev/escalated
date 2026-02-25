@@ -5,6 +5,7 @@ const props = defineProps({
     fields: { type: Array, required: true },
     modelValue: { type: Object, default: () => ({}) },
     errors: { type: Object, default: () => ({}) },
+    conditions: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -21,11 +22,52 @@ function toggleMultiSelect(name, option) {
 }
 
 const sortedFields = computed(() => [...props.fields].sort((a, b) => (a.position || 0) - (b.position || 0)));
+
+/**
+ * Evaluate whether a field should be visible based on conditions.
+ * Conditions can come from the `conditions` prop or from the field's own `conditions` property.
+ */
+function isFieldVisible(field) {
+    // Merge global conditions and field-level conditions
+    const allConditions = [
+        ...props.conditions.filter((c) => c.target_field === field.name || c.target_field === field.slug),
+        ...(field.conditions || []).filter((c) => c.target_field === field.name || c.target_field === field.slug),
+    ];
+
+    // If no conditions target this field, it's always visible
+    if (allConditions.length === 0) {
+        return true;
+    }
+
+    // All conditions must be met (AND logic)
+    return allConditions.every((condition) => {
+        const currentValue = props.modelValue[condition.field];
+
+        switch (condition.operator) {
+            case 'equals':
+                return String(currentValue || '') === String(condition.value || '');
+            case 'not_equals':
+                return String(currentValue || '') !== String(condition.value || '');
+            case 'contains':
+                return String(currentValue || '').includes(String(condition.value || ''));
+            case 'is_empty':
+                return (
+                    !currentValue || currentValue === '' || (Array.isArray(currentValue) && currentValue.length === 0)
+                );
+            case 'is_not_empty':
+                return (
+                    currentValue && currentValue !== '' && !(Array.isArray(currentValue) && currentValue.length === 0)
+                );
+            default:
+                return true;
+        }
+    });
+}
 </script>
 
 <template>
     <div class="space-y-4">
-        <div v-for="field in sortedFields" :key="field.id">
+        <div v-for="field in sortedFields" v-show="isFieldVisible(field)" :key="field.id">
             <label class="block text-sm font-medium text-neutral-300">
                 {{ field.label || field.name }}
                 <span v-if="field.required" class="text-rose-400">*</span>
