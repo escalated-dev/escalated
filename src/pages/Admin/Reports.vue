@@ -2,7 +2,7 @@
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import StatsCard from '../../components/StatsCard.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
-import { router } from '@inertiajs/vue3';
+import { router, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
 const props = defineProps({
@@ -29,6 +29,35 @@ const { getPageComponents, reportWidgets } = usePluginExtensions();
 
 <template>
     <EscalatedLayout title="Reports">
+        <!-- Sub-report navigation -->
+        <div class="mb-6 flex items-center gap-3 rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
+            <span class="text-xs font-medium uppercase tracking-wider text-neutral-600">Detailed Reports:</span>
+            <Link
+                :href="route('escalated.admin.reports.dashboard')"
+                class="rounded-md px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
+            >
+                Dashboard
+            </Link>
+            <Link
+                :href="route('escalated.admin.reports.agents')"
+                class="rounded-md px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
+            >
+                Agent Metrics
+            </Link>
+            <Link
+                :href="route('escalated.admin.reports.sla')"
+                class="rounded-md px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
+            >
+                SLA Report
+            </Link>
+            <Link
+                :href="route('escalated.admin.reports.csat')"
+                class="rounded-md px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
+            >
+                CSAT Report
+            </Link>
+        </div>
+
         <div class="mb-6 flex gap-2">
             <button
                 v-for="d in [7, 30, 90]"
