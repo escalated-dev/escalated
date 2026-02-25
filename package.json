@@ -33,13 +33,30 @@
     "vue": "^3.3.0"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@inertiajs/vue3": "^2.0.0",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/test-utils": "^2.4.0",
+    "eslint": "^10.0.1",
+    "eslint-plugin-vue": "^10.8.0",
     "happy-dom": "^15.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "vitest": "^2.0.0",
     "vue": "^3.5.0"
   }
