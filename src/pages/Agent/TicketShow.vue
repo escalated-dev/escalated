@@ -15,7 +15,7 @@ import PluginSlot from '../../components/PluginSlot.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     ticket: Object,
@@ -28,7 +28,8 @@ const props = defineProps({
 });
 
 const page = usePage();
-const activeTab = ref('reply');
+const isLightAgent = computed(() => page.props.escalated?.agent_type === 'light');
+const activeTab = ref(isLightAgent.value ? 'note' : 'reply');
 const showShortcutHelp = ref(false);
 const replyComposerRef = ref(null);
 const statusSelectRef = ref(null);
@@ -61,12 +62,25 @@ const { getPageComponents } = usePluginExtensions();
 
 // Keyboard shortcuts
 useKeyboardShortcuts({
-    'r': () => { activeTab.value = 'reply'; replyComposerRef.value?.$el?.querySelector('textarea')?.focus(); },
-    'n': () => { activeTab.value = 'note'; },
-    's': () => { statusSelectRef.value?.focus(); },
-    'p': () => { prioritySelectRef.value?.focus(); },
-    'f': () => { toggleFollow(); },
-    '?': () => { showShortcutHelp.value = true; },
+    r: () => {
+        activeTab.value = 'reply';
+        replyComposerRef.value?.$el?.querySelector('textarea')?.focus();
+    },
+    n: () => {
+        activeTab.value = 'note';
+    },
+    s: () => {
+        statusSelectRef.value?.focus();
+    },
+    p: () => {
+        prioritySelectRef.value?.focus();
+    },
+    f: () => {
+        toggleFollow();
+    },
+    '?': () => {
+        showShortcutHelp.value = true;
+    },
 });
 </script>
 
@@ -82,66 +96,118 @@ useKeyboardShortcuts({
             <span class="text-sm text-neutral-500">by {{ ticket.requester?.name }}</span>
             <PresenceIndicator :ticket-reference="ticket.reference" route-prefix="escalated.agent" />
             <div class="ml-auto flex items-center gap-2">
-                <FollowButton :is-following="is_following" :followers-count="followers_count"
-                              :action="route('escalated.agent.tickets.follow', ticket.reference)" />
-                <MacroDropdown v-if="macros.length" :macros="macros"
-                               :action="route('escalated.agent.tickets.macro', ticket.reference)" />
-                <button v-if="!ticket.assigned_to" @click="assignToMe"
-                        class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400">
+                <FollowButton
+                    :is-following="is_following"
+                    :followers-count="followers_count"
+                    :action="route('escalated.agent.tickets.follow', ticket.reference)"
+                />
+                <MacroDropdown
+                    v-if="macros.length && !isLightAgent"
+                    :macros="macros"
+                    :action="route('escalated.agent.tickets.macro', ticket.reference)"
+                />
+                <button
+                    v-if="!ticket.assigned_to && !isLightAgent"
+                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400"
+                    @click="assignToMe"
+                >
                     Assign to Me
                 </button>
-                <select ref="statusSelectRef" @change="changeStatus($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
-                    <option value="">Change Status...</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="waiting_on_customer">Waiting on Customer</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                </select>
-                <select ref="prioritySelectRef" @change="changePriority($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
-                    <option value="">Change Priority...</option>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                    <option value="critical">Critical</option>
-                </select>
+                <template v-if="!isLightAgent">
+                    <select
+                        ref="statusSelectRef"
+                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                        @change="
+                            changeStatus($event.target.value);
+                            $event.target.value = '';
+                        "
+                    >
+                        <option value="">Change Status...</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="waiting_on_customer">Waiting on Customer</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <select
+                        ref="prioritySelectRef"
+                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                        @change="
+                            changePriority($event.target.value);
+                            $event.target.value = '';
+                        "
+                    >
+                        <option value="">Change Priority...</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </template>
                 <!-- Plugin: ticket show actions slot -->
                 <PluginSlot slot="ticket.show.actions" :components="getPageComponents('ticket.show', 'actions')" />
             </div>
         </div>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-6">
-                <PinnedNotes v-if="ticket.pinned_notes?.length" :notes="ticket.pinned_notes"
-                             :ticket-reference="ticket.reference" route-prefix="escalated.agent" />
+                <PinnedNotes
+                    v-if="ticket.pinned_notes?.length"
+                    :notes="ticket.pinned_notes"
+                    :ticket-reference="ticket.reference"
+                    route-prefix="escalated.agent"
+                />
                 <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
                     <p class="whitespace-pre-wrap text-sm text-neutral-300">{{ ticket.description }}</p>
                     <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />
                 </div>
                 <div>
                     <div class="mb-4 flex gap-4 border-b border-white/[0.06]">
-                        <button @click="activeTab = 'reply'"
-                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'reply' ? 'border-b-2 border-cyan-500 text-white' : 'text-neutral-500 hover:text-neutral-300']">
+                        <button
+                            v-if="!isLightAgent"
+                            :class="[
+                                'pb-2 text-sm font-medium transition-colors',
+                                activeTab === 'reply'
+                                    ? 'border-b-2 border-cyan-500 text-white'
+                                    : 'text-neutral-500 hover:text-neutral-300',
+                            ]"
+                            @click="activeTab = 'reply'"
+                        >
                             Reply
                         </button>
-                        <button @click="activeTab = 'note'"
-                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'note' ? 'border-b-2 border-amber-500 text-amber-400' : 'text-neutral-500 hover:text-neutral-300']">
+                        <button
+                            :class="[
+                                'pb-2 text-sm font-medium transition-colors',
+                                activeTab === 'note'
+                                    ? 'border-b-2 border-amber-500 text-amber-400'
+                                    : 'text-neutral-500 hover:text-neutral-300',
+                            ]"
+                            @click="activeTab = 'note'"
+                        >
                             Internal Note
                         </button>
                     </div>
-                    <ReplyComposer v-if="activeTab === 'reply'" ref="replyComposerRef"
-                                   :action="route('escalated.agent.tickets.reply', ticket.reference)"
-                                   :canned-responses="cannedResponses" />
-                    <ReplyComposer v-else
-                                   :action="route('escalated.agent.tickets.note', ticket.reference)"
-                                   placeholder="Write an internal note..."
-                                   submit-label="Add Note" />
+                    <ReplyComposer
+                        v-if="activeTab === 'reply' && !isLightAgent"
+                        ref="replyComposerRef"
+                        :action="route('escalated.agent.tickets.reply', ticket.reference)"
+                        :canned-responses="cannedResponses"
+                    />
+                    <ReplyComposer
+                        v-if="activeTab === 'note'"
+                        :action="route('escalated.agent.tickets.note', ticket.reference)"
+                        placeholder="Write an internal note..."
+                        submit-label="Add Note"
+                    />
                 </div>
                 <div>
                     <h2 class="mb-4 text-lg font-semibold text-neutral-200">Conversation</h2>
-                    <ReplyThread :replies="ticket.replies || []" :current-user-id="page.props.auth?.user?.id"
-                                 :ticket-reference="ticket.reference" route-prefix="escalated.agent" pinnable />
+                    <ReplyThread
+                        :replies="ticket.replies || []"
+                        :current-user-id="page.props.auth?.user?.id"
+                        :ticket-reference="ticket.reference"
+                        route-prefix="escalated.agent"
+                        pinnable
+                    />
                 </div>
             </div>
             <div class="space-y-6">
