@@ -18,6 +18,7 @@ export default [
                 clearTimeout: 'readonly',
                 requestAnimationFrame: 'readonly',
                 confirm: 'readonly',
+                alert: 'readonly',
                 DOMParser: 'readonly',
                 URL: 'readonly',
                 console: 'readonly',
@@ -27,6 +28,7 @@ export default [
         },
         rules: {
             'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+            'no-redeclare': 'off',
             'no-control-regex': 'off',
             'vue/multi-word-component-names': 'off',
             'vue/require-default-prop': 'off',
