@@ -13,6 +13,8 @@ import PinnedNotes from '../../components/PinnedNotes.vue';
 import KeyboardShortcutHelp from '../../components/KeyboardShortcutHelp.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
 import KnowledgePanel from '../../components/KnowledgePanel.vue';
+import ContextPanel from '../../components/ContextPanel.vue';
+import ContextPanelSection from '../../components/ContextPanelSection.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { router, useForm, usePage } from '@inertiajs/vue3';
@@ -35,6 +37,8 @@ const showShortcutHelp = ref(false);
 const replyComposerRef = ref(null);
 const statusSelectRef = ref(null);
 const prioritySelectRef = ref(null);
+
+const showContextPanel = ref(false);
 
 const statusForm = useForm({ status: '' });
 const priorityForm = useForm({ priority: '' });
@@ -145,6 +149,25 @@ useKeyboardShortcuts({
                         <option value="critical">Critical</option>
                     </select>
                 </template>
+                <!-- Context Panel Toggle -->
+                <button
+                    type="button"
+                    :class="[
+                        'rounded-lg border px-3 py-1.5 text-sm transition-colors',
+                        showContextPanel
+                            ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
+                            : 'border-white/10 text-neutral-400 hover:border-white/20 hover:text-neutral-200',
+                    ]"
+                    @click="showContextPanel = !showContextPanel"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+                        />
+                    </svg>
+                </button>
                 <!-- Plugin: ticket show actions slot -->
                 <PluginSlot slot="ticket.show.actions" :components="getPageComponents('ticket.show', 'actions')" />
             </div>
@@ -218,6 +241,67 @@ useKeyboardShortcuts({
                 <PluginSlot slot="ticket.show.sidebar" :components="getPageComponents('ticket.show', 'sidebar')" />
             </div>
         </div>
+        <!-- Context Panel -->
+        <ContextPanel v-model:visible="showContextPanel">
+            <ContextPanelSection
+                title="Customer Info"
+                icon="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+            >
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-neutral-500">Name</span>
+                        <span class="text-neutral-200">{{ ticket.requester?.name || 'Unknown' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-neutral-500">Email</span>
+                        <span class="truncate text-neutral-200">{{ ticket.requester?.email || '---' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-neutral-500">Tickets</span>
+                        <span class="text-neutral-200">{{ ticket.requester_ticket_count ?? '---' }}</span>
+                    </div>
+                </div>
+            </ContextPanelSection>
+
+            <ContextPanelSection
+                title="Related Tickets"
+                icon="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                :default-open="false"
+            >
+                <div v-if="ticket.related_tickets?.length" class="space-y-2">
+                    <div
+                        v-for="rt in ticket.related_tickets"
+                        :key="rt.reference"
+                        class="rounded-lg border border-white/[0.06] bg-neutral-950 px-3 py-2"
+                    >
+                        <span class="font-mono text-xs text-cyan-400">{{ rt.reference }}</span>
+                        <p class="mt-0.5 truncate text-xs text-neutral-400">{{ rt.subject }}</p>
+                    </div>
+                </div>
+                <p v-else class="text-xs text-neutral-600">No related tickets found.</p>
+            </ContextPanelSection>
+
+            <ContextPanelSection
+                title="Recent Activity"
+                icon="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                :default-open="false"
+            >
+                <div v-if="ticket.activities?.length" class="space-y-2">
+                    <div v-for="activity in ticket.activities.slice(0, 5)" :key="activity.id" class="text-xs">
+                        <span class="text-neutral-500">{{ activity.description }}</span>
+                        <span class="ml-1 text-neutral-600">{{ activity.created_at_human }}</span>
+                    </div>
+                </div>
+                <p v-else class="text-xs text-neutral-600">No recent activity.</p>
+            </ContextPanelSection>
+
+            <!-- Plugin: context panel slot -->
+            <PluginSlot
+                slot="ticket.show.context-panel"
+                :components="getPageComponents('ticket.show', 'context-panel')"
+            />
+        </ContextPanel>
+
         <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="detail" />
     </EscalatedLayout>
 </template>
