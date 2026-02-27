@@ -38,7 +38,10 @@
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "screenshot": "npx playwright test --config=playwright-screenshots.config.js"
   },
   "lint-staged": {
     "*.{js,vue}": [
@@ -49,14 +52,23 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@inertiajs/vue3": "^2.0.0",
+    "@playwright/test": "^1.50.0",
+    "@storybook/addon-a11y": "^10.2.12",
+    "@storybook/addon-docs": "^10.2.12",
+    "@storybook/vue3-vite": "^10.2.12",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/test-utils": "^2.4.0",
+    "autoprefixer": "^10.4.20",
     "eslint": "^10.0.1",
+    "eslint-plugin-storybook": "^10.2.12",
     "eslint-plugin-vue": "^10.8.0",
     "happy-dom": "^15.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "postcss": "^8.5.0",
     "prettier": "^3.8.1",
+    "storybook": "^10.2.12",
+    "tailwindcss": "^3.4.0",
     "vitest": "^2.0.0",
     "vue": "^3.5.0"
   }

@@ -54,14 +54,28 @@ describe('index.js exports', () => {
     // ----------------------------------------------------------------
     const expectedComponents = [
         'ActivityTimeline',
+        'AgentLoadIndicator',
+        'AgentPerformanceCard',
+        'ArticleEditor',
         'AssigneeSelect',
         'AttachmentList',
+        'AuditLogEntry',
         'BulkActionBar',
+        'CategoryTree',
+        'ChartWidget',
+        'CollisionWarning',
+        'ConditionalFieldRules',
+        'ContextPanel',
+        'ContextPanelSection',
+        'CustomFieldRenderer',
         'EscalatedLayout',
         'FileDropzone',
         'FollowButton',
         'KeyboardShortcutHelp',
+        'KnowledgePanel',
+        'KpiCard',
         'MacroDropdown',
+        'PermissionMatrix',
         'PinnedNotes',
         'PluginSlot',
         'PresenceIndicator',
@@ -70,13 +84,23 @@ describe('index.js exports', () => {
         'ReplyComposer',
         'ReplyThread',
         'SatisfactionRating',
+        'ScheduleEditor',
+        'SideConversation',
+        'SideConversationList',
+        'SkillTagManager',
+        'SlaComplianceChart',
         'SlaTimer',
         'StatsCard',
         'StatusBadge',
         'TagSelect',
         'TicketFilters',
+        'TicketLinkPanel',
         'TicketList',
+        'TicketMergeDialog',
         'TicketSidebar',
+        'TicketTypeSelector',
+        'TotpInput',
+        'TwoFactorSetup',
     ];
 
     describe('component exports', () => {
@@ -90,8 +114,8 @@ describe('index.js exports', () => {
             expect(typeof component).toBe('object');
         });
 
-        it('exports exactly 24 components', () => {
-            expect(expectedComponents).toHaveLength(24);
+        it('exports exactly 48 components', () => {
+            expect(expectedComponents).toHaveLength(48);
             for (const name of expectedComponents) {
                 expect(escalated[name]).toBeDefined();
             }
@@ -111,8 +135,8 @@ describe('index.js exports', () => {
 
         it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 24 components + 1 plugin + 2 composables + 1 helper = 28
-            expect(keys).toHaveLength(28);
+            // 48 components + 1 plugin + 3 composables + 1 helper = 53
+            expect(keys).toHaveLength(53);
         });
 
         it('every export key is a non-empty string', () => {

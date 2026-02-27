@@ -1,9 +1,11 @@
 import js from '@eslint/js';
 import pluginVue from 'eslint-plugin-vue';
+import storybook from 'eslint-plugin-storybook';
 
 export default [
     js.configs.recommended,
     ...pluginVue.configs['flat/recommended'],
+    ...storybook.configs['flat/recommended'],
     {
         languageOptions: {
             globals: {
@@ -15,7 +17,10 @@ export default [
                 setInterval: 'readonly',
                 clearInterval: 'readonly',
                 setTimeout: 'readonly',
+                clearTimeout: 'readonly',
+                requestAnimationFrame: 'readonly',
                 confirm: 'readonly',
+                alert: 'readonly',
                 DOMParser: 'readonly',
                 URL: 'readonly',
                 console: 'readonly',
@@ -25,6 +30,7 @@ export default [
         },
         rules: {
             'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+            'no-redeclare': 'off',
             'no-control-regex': 'off',
             'vue/multi-word-component-names': 'off',
             'vue/require-default-prop': 'off',
@@ -39,6 +45,6 @@ export default [
         },
     },
     {
-        ignores: ['node_modules/', 'dist/'],
+        ignores: ['node_modules/', 'dist/', 'storybook-static/', 'screenshots/', 'playwright-screenshots.config.js'],
     },
 ];
