@@ -47,13 +47,15 @@ function submit() {
     <EscalatedLayout title="Settings">
         <form class="mx-auto max-w-2xl space-y-6" @submit.prevent="submit">
             <!-- General -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-5 text-sm font-semibold text-white">General</h3>
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">General</h3>
                 <div class="space-y-5">
                     <label class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm font-medium text-neutral-200">Guest Tickets</span>
-                            <p class="mt-0.5 text-xs text-neutral-500">
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Guest Tickets</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                                 Allow visitors to submit tickets without signing in
                             </p>
                         </div>
@@ -76,8 +78,12 @@ function submit() {
 
                     <label class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm font-medium text-neutral-200">Allow Customer Close</span>
-                            <p class="mt-0.5 text-xs text-neutral-500">Let customers close their own tickets</p>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Allow Customer Close</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Let customers close their own tickets
+                            </p>
                         </div>
                         <button
                             type="button"
@@ -97,10 +103,10 @@ function submit() {
                     </label>
 
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200"
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Auto-close resolved tickets after</label
                         >
-                        <p class="mt-0.5 text-xs text-neutral-500">
+                        <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                             Days after resolution before auto-closing (0 to disable)
                         </p>
                         <div class="mt-2 flex items-center gap-2">
@@ -109,30 +115,34 @@ function submit() {
                                 type="number"
                                 min="0"
                                 max="365"
-                                class="w-24 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                class="w-24 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             />
-                            <span class="text-sm text-neutral-500">days</span>
+                            <span class="text-sm text-[var(--esc-panel-text-muted)]">days</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Limits -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-5 text-sm font-semibold text-white">Limits</h3>
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Limits</h3>
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Max attachments per reply</label>
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Max attachments per reply</label
+                        >
                         <input
                             v-model.number="form.max_attachments_per_reply"
                             type="number"
                             min="1"
                             max="20"
-                            class="mt-2 w-24 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                            class="mt-2 w-24 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                         />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Max attachment size</label>
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Max attachment size</label
+                        >
                         <div class="mt-2 flex items-center gap-2">
                             <input
                                 v-model.number="form.max_attachment_size_kb"
@@ -140,9 +150,9 @@ function submit() {
                                 min="512"
                                 max="102400"
                                 step="512"
-                                class="w-32 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                class="w-32 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             />
-                            <span class="text-sm text-neutral-500"
+                            <span class="text-sm text-[var(--esc-panel-text-muted)]"
                                 >KB ({{ Math.round(form.max_attachment_size_kb / 1024) }} MB)</span
                             >
                         </div>
@@ -151,32 +161,36 @@ function submit() {
             </div>
 
             <!-- Tickets -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-5 text-sm font-semibold text-white">Tickets</h3>
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Tickets</h3>
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Reference Prefix</label>
-                        <p class="mt-0.5 text-xs text-neutral-500">
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Reference Prefix</label
+                        >
+                        <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                             Prefix for ticket references (e.g. ESC produces ESC-00001)
                         </p>
                         <input
                             v-model="form.ticket_reference_prefix"
                             type="text"
                             maxlength="10"
-                            class="mt-2 w-32 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 uppercase focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                            class="mt-2 w-32 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] uppercase focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                         />
                     </div>
                 </div>
             </div>
 
             <!-- Inbound Email -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-5 text-sm font-semibold text-white">Inbound Email</h3>
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Inbound Email</h3>
                 <div class="space-y-5">
                     <label class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm font-medium text-neutral-200">Inbound Email</span>
-                            <p class="mt-0.5 text-xs text-neutral-500">
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Inbound Email</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                                 Allow creating and replying to tickets via email
                             </p>
                         </div>
@@ -199,11 +213,15 @@ function submit() {
 
                     <template v-if="form.inbound_email_enabled">
                         <div>
-                            <label class="block text-sm font-medium text-neutral-200">Email Provider</label>
-                            <p class="mt-0.5 text-xs text-neutral-500">How inbound emails are received</p>
+                            <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Email Provider</label
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                How inbound emails are received
+                            </p>
                             <select
                                 v-model="form.inbound_email_adapter"
-                                class="mt-2 w-48 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             >
                                 <option value="mailgun">Mailgun</option>
                                 <option value="postmark">Postmark</option>
@@ -213,38 +231,44 @@ function submit() {
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-neutral-200">Support Email Address</label>
-                            <p class="mt-0.5 text-xs text-neutral-500">
+                            <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Support Email Address</label
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                                 The email address customers will send emails to (e.g. support@example.com)
                             </p>
                             <input
                                 v-model="form.inbound_email_address"
                                 type="email"
                                 placeholder="support@example.com"
-                                class="mt-2 w-full max-w-sm rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             />
                         </div>
 
                         <!-- Mailgun -->
                         <template v-if="form.inbound_email_adapter === 'mailgun'">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Signing Key</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Signing Key</label
+                                >
                                 <input
                                     v-model="form.mailgun_signing_key"
                                     type="password"
-                                    class="mt-2 w-full max-w-sm rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Webhook URL</label>
-                                <p class="mt-0.5 text-xs text-neutral-500">
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Webhook URL</label
+                                >
+                                <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                                     Configure this URL in your Mailgun dashboard
                                 </p>
                                 <input
                                     :value="`${webhookBaseUrl}/mailgun`"
                                     type="text"
                                     readonly
-                                    class="mt-2 w-full max-w-lg rounded-lg border border-white/10 bg-neutral-950/50 px-3 py-2 text-sm text-neutral-400 select-all cursor-default focus:outline-none"
+                                    class="mt-2 w-full max-w-lg rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-tertiary)] select-all cursor-default focus:outline-none"
                                 />
                             </div>
                         </template>
@@ -252,23 +276,27 @@ function submit() {
                         <!-- Postmark -->
                         <template v-if="form.inbound_email_adapter === 'postmark'">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Inbound Token</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Inbound Token</label
+                                >
                                 <input
                                     v-model="form.postmark_inbound_token"
                                     type="password"
-                                    class="mt-2 w-full max-w-sm rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Webhook URL</label>
-                                <p class="mt-0.5 text-xs text-neutral-500">
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Webhook URL</label
+                                >
+                                <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                                     Configure this URL in your Postmark server settings
                                 </p>
                                 <input
                                     :value="`${webhookBaseUrl}/postmark`"
                                     type="text"
                                     readonly
-                                    class="mt-2 w-full max-w-lg rounded-lg border border-white/10 bg-neutral-950/50 px-3 py-2 text-sm text-neutral-400 select-all cursor-default focus:outline-none"
+                                    class="mt-2 w-full max-w-lg rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-tertiary)] select-all cursor-default focus:outline-none"
                                 />
                             </div>
                         </template>
@@ -276,33 +304,39 @@ function submit() {
                         <!-- AWS SES -->
                         <template v-if="form.inbound_email_adapter === 'ses'">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Region</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Region</label
+                                >
                                 <input
                                     v-model="form.ses_region"
                                     type="text"
                                     placeholder="us-east-1"
-                                    class="mt-2 w-48 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Topic ARN</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Topic ARN</label
+                                >
                                 <input
                                     v-model="form.ses_topic_arn"
                                     type="text"
                                     placeholder="arn:aws:sns:us-east-1:123456789:ses-inbound"
-                                    class="mt-2 w-full max-w-lg rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-full max-w-lg rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Webhook URL</label>
-                                <p class="mt-0.5 text-xs text-neutral-500">
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Webhook URL</label
+                                >
+                                <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                                     Configure this URL as your SNS subscription endpoint
                                 </p>
                                 <input
                                     :value="`${webhookBaseUrl}/ses`"
                                     type="text"
                                     readonly
-                                    class="mt-2 w-full max-w-lg rounded-lg border border-white/10 bg-neutral-950/50 px-3 py-2 text-sm text-neutral-400 select-all cursor-default focus:outline-none"
+                                    class="mt-2 w-full max-w-lg rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-tertiary)] select-all cursor-default focus:outline-none"
                                 />
                             </div>
                         </template>
@@ -310,30 +344,36 @@ function submit() {
                         <!-- IMAP -->
                         <template v-if="form.inbound_email_adapter === 'imap'">
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Host</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Host</label
+                                >
                                 <input
                                     v-model="form.imap_host"
                                     type="text"
                                     placeholder="imap.example.com"
-                                    class="mt-2 w-full max-w-sm rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div class="flex items-end gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-neutral-200">Port</label>
+                                    <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                        >Port</label
+                                    >
                                     <input
                                         v-model.number="form.imap_port"
                                         type="number"
                                         min="1"
                                         max="65535"
-                                        class="mt-2 w-24 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                        class="mt-2 w-24 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                     />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-neutral-200">Encryption</label>
+                                    <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                        >Encryption</label
+                                    >
                                     <select
                                         v-model="form.imap_encryption"
-                                        class="mt-2 w-28 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                        class="mt-2 w-28 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                     >
                                         <option value="ssl">SSL</option>
                                         <option value="tls">TLS</option>
@@ -342,28 +382,34 @@ function submit() {
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Username</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Username</label
+                                >
                                 <input
                                     v-model="form.imap_username"
                                     type="text"
-                                    class="mt-2 w-full max-w-sm rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Password</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Password</label
+                                >
                                 <input
                                     v-model="form.imap_password"
                                     type="password"
-                                    class="mt-2 w-full max-w-sm rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-neutral-200">Mailbox</label>
+                                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                    >Mailbox</label
+                                >
                                 <input
                                     v-model="form.imap_mailbox"
                                     type="text"
                                     placeholder="INBOX"
-                                    class="mt-2 w-48 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                         </template>
@@ -379,7 +425,7 @@ function submit() {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                 >
                     {{ form.processing ? 'Saving...' : 'Save Settings' }}
                 </button>

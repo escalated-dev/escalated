@@ -22,59 +22,68 @@ function submit() {
     <EscalatedLayout title="CSAT Survey Settings">
         <div class="mx-auto max-w-2xl">
             <div class="mb-6">
-                <Link :href="route('escalated.admin.settings')" class="text-sm text-neutral-500 hover:text-neutral-300">
+                <Link
+                    :href="route('escalated.admin.settings')"
+                    class="text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
+                >
                     &larr; Back to Settings
                 </Link>
             </div>
 
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h2 class="mb-6 text-lg font-semibold text-neutral-200">Customer Satisfaction Survey</h2>
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h2 class="mb-6 text-lg font-semibold text-[var(--esc-panel-text-secondary)]">
+                    Customer Satisfaction Survey
+                </h2>
 
                 <form class="space-y-6" @submit.prevent="submit">
                     <!-- Question Text -->
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-neutral-300">Survey Question</label>
+                        <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Survey Question</label
+                        >
                         <textarea
                             v-model="form.csat_question_text"
                             rows="3"
-                            class="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-sm text-neutral-200 placeholder-neutral-600 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2.5 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-accent)]/40"
                             placeholder="How would you rate your support experience?"
                         ></textarea>
                         <p v-if="form.errors.csat_question_text" class="mt-1 text-xs text-red-400">
                             {{ form.errors.csat_question_text }}
                         </p>
-                        <p class="mt-1 text-xs text-neutral-600">
+                        <p class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
                             This question will be shown to customers after their ticket is resolved.
                         </p>
                     </div>
 
                     <!-- Rating Scale -->
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-neutral-300">Rating Scale</label>
+                        <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Rating Scale</label
+                        >
                         <div class="flex gap-3">
                             <label
                                 :class="[
                                     'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 transition-all',
                                     form.csat_scale === '1-3'
-                                        ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-400'
-                                        : 'border-white/[0.06] bg-white/[0.03] text-neutral-400 hover:border-white/[0.12]',
+                                        ? 'border-[var(--esc-panel-accent)]/40 bg-[var(--esc-panel-accent)]/10 text-[var(--esc-panel-accent)]'
+                                        : 'border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] hover:border-[var(--esc-panel-border-input)]',
                                 ]"
                             >
                                 <input v-model="form.csat_scale" type="radio" value="1-3" class="sr-only" />
                                 <span class="text-sm font-medium">1-3 Scale</span>
-                                <span class="text-xs text-neutral-500">(Simple)</span>
+                                <span class="text-xs text-[var(--esc-panel-text-muted)]">(Simple)</span>
                             </label>
                             <label
                                 :class="[
                                     'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 transition-all',
                                     form.csat_scale === '1-5'
-                                        ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-400'
-                                        : 'border-white/[0.06] bg-white/[0.03] text-neutral-400 hover:border-white/[0.12]',
+                                        ? 'border-[var(--esc-panel-accent)]/40 bg-[var(--esc-panel-accent)]/10 text-[var(--esc-panel-accent)]'
+                                        : 'border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] hover:border-[var(--esc-panel-border-input)]',
                                 ]"
                             >
                                 <input v-model="form.csat_scale" type="radio" value="1-5" class="sr-only" />
                                 <span class="text-sm font-medium">1-5 Scale</span>
-                                <span class="text-xs text-neutral-500">(Detailed)</span>
+                                <span class="text-xs text-[var(--esc-panel-text-muted)]">(Detailed)</span>
                             </label>
                         </div>
                         <p v-if="form.errors.csat_scale" class="mt-1 text-xs text-red-400">
@@ -84,10 +93,12 @@ function submit() {
 
                     <!-- Delivery Trigger -->
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-neutral-300">Delivery Trigger</label>
+                        <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Delivery Trigger</label
+                        >
                         <select
                             v-model="form.csat_delivery_trigger"
-                            class="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-sm text-neutral-200 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-accent)]/40"
                         >
                             <option value="on_resolve">On ticket resolution</option>
                             <option value="delayed">Delayed after resolution</option>
@@ -100,18 +111,20 @@ function submit() {
 
                     <!-- Delay Hours (shown only for delayed trigger) -->
                     <div v-if="form.csat_delivery_trigger === 'delayed'">
-                        <label class="mb-1.5 block text-sm font-medium text-neutral-300">Delay (hours)</label>
+                        <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Delay (hours)</label
+                        >
                         <input
                             v-model.number="form.csat_delay_hours"
                             type="number"
                             min="0"
                             max="168"
-                            class="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-sm text-neutral-200 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-accent)]/40"
                         />
                         <p v-if="form.errors.csat_delay_hours" class="mt-1 text-xs text-red-400">
                             {{ form.errors.csat_delay_hours }}
                         </p>
-                        <p class="mt-1 text-xs text-neutral-600">
+                        <p class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
                             How many hours after resolution to send the survey (max 168 = 7 days).
                         </p>
                     </div>
@@ -121,7 +134,7 @@ function submit() {
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-opacity hover:opacity-90 disabled:opacity-50"
+                            class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-opacity hover:opacity-90 disabled:opacity-50"
                         >
                             Save Settings
                         </button>
@@ -130,15 +143,17 @@ function submit() {
             </div>
 
             <!-- Preview -->
-            <div class="mt-6 rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-4 text-sm font-semibold text-neutral-200">Preview</h3>
-                <div class="rounded-lg border border-white/[0.06] bg-white/[0.02] p-6 text-center">
-                    <p class="mb-4 text-sm text-neutral-300">{{ form.csat_question_text }}</p>
+            <div class="mt-6 rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-4 text-sm font-semibold text-[var(--esc-panel-text-secondary)]">Preview</h3>
+                <div
+                    class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] p-6 text-center"
+                >
+                    <p class="mb-4 text-sm text-[var(--esc-panel-text-secondary)]">{{ form.csat_question_text }}</p>
                     <div class="flex items-center justify-center gap-2">
                         <button
                             v-for="n in form.csat_scale === '1-3' ? 3 : 5"
                             :key="n"
-                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.06] text-sm font-medium text-neutral-400 transition-colors hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-amber-400"
+                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--esc-panel-border)] text-sm font-medium text-[var(--esc-panel-text-tertiary)] transition-colors hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-amber-400"
                         >
                             {{ n }}
                         </button>

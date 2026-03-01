@@ -43,15 +43,18 @@ const resolutionBreaches = computed(() => {
                     :class="[
                         'rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all',
                         period_days === d
-                            ? 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-lg shadow-black/20'
-                            : 'border border-white/10 bg-white/[0.03] text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200',
+                            ? 'bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] text-white shadow-lg shadow-[var(--esc-panel-bg)]/20'
+                            : 'border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
                     ]"
                     @click="changePeriod(d)"
                 >
                     Last {{ d }} days
                 </button>
             </div>
-            <Link :href="route('escalated.admin.reports')" class="text-sm text-neutral-500 hover:text-neutral-300">
+            <Link
+                :href="route('escalated.admin.reports')"
+                class="text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
+            >
                 &larr; Back to Reports
             </Link>
         </div>
@@ -86,35 +89,51 @@ const resolutionBreaches = computed(() => {
         </div>
 
         <!-- Breach Details Table -->
-        <div class="overflow-hidden rounded-xl border border-white/[0.06]">
-            <div class="border-b border-white/[0.06] bg-white/[0.02] px-4 py-3">
-                <h3 class="text-sm font-semibold text-neutral-200">Breach Details</h3>
+        <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+            <div class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-4 py-3">
+                <h3 class="text-sm font-semibold text-[var(--esc-panel-text-secondary)]">Breach Details</h3>
             </div>
             <table class="w-full">
                 <thead>
-                    <tr class="border-b border-white/[0.06]">
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                    <tr class="border-b border-[var(--esc-panel-border)]">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Ticket
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Subject
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             SLA Policy
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Breach Type
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Created
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/[0.04]">
-                    <tr v-for="ticket in breaches" :key="ticket.id" class="hover:bg-white/[0.02]">
-                        <td class="px-4 py-3 text-sm font-mono text-cyan-400">{{ ticket.reference }}</td>
-                        <td class="max-w-xs truncate px-4 py-3 text-sm text-neutral-300">{{ ticket.subject }}</td>
-                        <td class="px-4 py-3 text-sm text-neutral-400">{{ ticket.sla_policy?.name || '—' }}</td>
+                <tbody class="divide-y divide-[var(--esc-panel-border)]">
+                    <tr v-for="ticket in breaches" :key="ticket.id" class="hover:bg-[var(--esc-panel-hover)]">
+                        <td class="px-4 py-3 text-sm font-mono text-[var(--esc-panel-accent)]">
+                            {{ ticket.reference }}
+                        </td>
+                        <td class="max-w-xs truncate px-4 py-3 text-sm text-[var(--esc-panel-text-secondary)]">
+                            {{ ticket.subject }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            {{ ticket.sla_policy?.name || '—' }}
+                        </td>
                         <td class="px-4 py-3">
                             <div class="flex gap-1.5">
                                 <span
@@ -131,12 +150,12 @@ const resolutionBreaches = computed(() => {
                                 </span>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-sm text-neutral-500">
+                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-muted)]">
                             {{ ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : '—' }}
                         </td>
                     </tr>
                     <tr v-if="!breaches?.length">
-                        <td colspan="5" class="px-4 py-8 text-center text-sm text-neutral-500">
+                        <td colspan="5" class="px-4 py-8 text-center text-sm text-[var(--esc-panel-text-muted)]">
                             No SLA breaches in this period.
                         </td>
                     </tr>

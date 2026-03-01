@@ -46,19 +46,23 @@ const auditLogOptions = [
     <EscalatedLayout title="Data Retention">
         <form class="mx-auto max-w-2xl space-y-6" @submit.prevent="submit">
             <!-- Closed Tickets -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-5 text-sm font-semibold text-white">Retention Policies</h3>
-                <p class="mb-5 text-xs text-neutral-500">
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Retention Policies</h3>
+                <p class="mb-5 text-xs text-[var(--esc-panel-text-muted)]">
                     Configure how long data is retained before automatic purging. Records are soft-deleted first with a
                     30-day grace period before permanent removal.
                 </p>
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Closed Tickets</label>
-                        <p class="mt-0.5 text-xs text-neutral-500">How long to keep closed tickets before purging</p>
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Closed Tickets</label
+                        >
+                        <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                            How long to keep closed tickets before purging
+                        </p>
                         <select
                             v-model="form.retention_closed_tickets"
-                            class="mt-2 w-48 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                            class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                         >
                             <option v-for="opt in ticketOptions" :key="opt.value" :value="opt.value">
                                 {{ opt.label }}
@@ -67,11 +71,15 @@ const auditLogOptions = [
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Attachments</label>
-                        <p class="mt-0.5 text-xs text-neutral-500">How long to keep attachments on closed tickets</p>
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Attachments</label
+                        >
+                        <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                            How long to keep attachments on closed tickets
+                        </p>
                         <select
                             v-model="form.retention_attachments"
-                            class="mt-2 w-48 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                            class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                         >
                             <option v-for="opt in attachmentOptions" :key="opt.value" :value="opt.value">
                                 {{ opt.label }}
@@ -80,11 +88,15 @@ const auditLogOptions = [
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Audit Logs</label>
-                        <p class="mt-0.5 text-xs text-neutral-500">How long to keep audit log entries</p>
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Audit Logs</label
+                        >
+                        <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                            How long to keep audit log entries
+                        </p>
                         <select
                             v-model="form.retention_audit_logs"
-                            class="mt-2 w-48 rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                            class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                         >
                             <option v-for="opt in auditLogOptions" :key="opt.value" :value="opt.value">
                                 {{ opt.label }}
@@ -94,8 +106,10 @@ const auditLogOptions = [
 
                     <label class="flex items-center justify-between">
                         <div>
-                            <span class="text-sm font-medium text-neutral-200">GDPR User Data Handling</span>
-                            <p class="mt-0.5 text-xs text-neutral-500">
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >GDPR User Data Handling</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
                                 Anonymize user data upon account deletion to comply with GDPR
                             </p>
                         </div>
@@ -119,29 +133,35 @@ const auditLogOptions = [
             </div>
 
             <!-- Purge Preview -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-4 text-sm font-semibold text-white">Purge Preview</h3>
-                <p class="mb-4 text-xs text-neutral-500">
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-4 text-sm font-semibold text-[var(--esc-panel-text)]">Purge Preview</h3>
+                <p class="mb-4 text-xs text-[var(--esc-panel-text-muted)]">
                     Estimated records that would be purged based on current settings.
                 </p>
                 <div class="grid grid-cols-3 gap-4">
-                    <div class="rounded-lg border border-white/[0.06] bg-neutral-950 p-4 text-center">
-                        <div class="text-2xl font-bold text-neutral-200">
+                    <div
+                        class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface-alt)] p-4 text-center"
+                    >
+                        <div class="text-2xl font-bold text-[var(--esc-panel-text-secondary)]">
                             {{ purgePreview.tickets ?? 0 }}
                         </div>
-                        <div class="mt-1 text-xs text-neutral-500">Closed Tickets</div>
+                        <div class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">Closed Tickets</div>
                     </div>
-                    <div class="rounded-lg border border-white/[0.06] bg-neutral-950 p-4 text-center">
-                        <div class="text-2xl font-bold text-neutral-200">
+                    <div
+                        class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface-alt)] p-4 text-center"
+                    >
+                        <div class="text-2xl font-bold text-[var(--esc-panel-text-secondary)]">
                             {{ purgePreview.attachments ?? 0 }}
                         </div>
-                        <div class="mt-1 text-xs text-neutral-500">Attachments</div>
+                        <div class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">Attachments</div>
                     </div>
-                    <div class="rounded-lg border border-white/[0.06] bg-neutral-950 p-4 text-center">
-                        <div class="text-2xl font-bold text-neutral-200">
+                    <div
+                        class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface-alt)] p-4 text-center"
+                    >
+                        <div class="text-2xl font-bold text-[var(--esc-panel-text-secondary)]">
                             {{ purgePreview.audit_logs ?? 0 }}
                         </div>
-                        <div class="mt-1 text-xs text-neutral-500">Audit Logs</div>
+                        <div class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">Audit Logs</div>
                     </div>
                 </div>
             </div>
@@ -152,7 +172,7 @@ const auditLogOptions = [
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                 >
                     {{ form.processing ? 'Saving...' : 'Save Retention Settings' }}
                 </button>
