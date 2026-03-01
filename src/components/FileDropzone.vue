@@ -2,7 +2,10 @@
 import { ref, computed, inject } from 'vue';
 
 const emit = defineEmits(['files']);
-const dark = inject('esc-dark', computed(() => false));
+const dark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 
 const dragging = ref(false);
 const fileInput = ref(null);
@@ -27,14 +30,25 @@ function browse() {
 </script>
 
 <template>
-    <div @dragover.prevent="dragging = true" @dragleave="dragging = false" @drop.prevent="onDrop"
-         :class="['cursor-pointer rounded-lg border-2 border-dashed px-4 py-3 text-center text-xs transition-colors',
-                  dark
-                      ? (dragging ? 'border-white/20 bg-white/[0.04]' : 'border-white/[0.08] hover:border-white/[0.12]')
-                      : (dragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400')]"
-         @click="browse">
-        <p :class="dark ? 'text-neutral-500' : 'text-gray-500'">
-            Drop files here or <span :class="['font-medium', dark ? 'text-white' : 'text-blue-600']">browse</span>
+    <div
+        :class="[
+            'cursor-pointer rounded-lg border-2 border-dashed px-4 py-3 text-center text-xs transition-colors',
+            dark
+                ? dragging
+                    ? 'border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)]'
+                    : 'border-[var(--esc-panel-border)] hover:border-[var(--esc-panel-border-input)]'
+                : dragging
+                  ? 'border-blue-400 bg-blue-50'
+                  : 'border-gray-300 hover:border-gray-400',
+        ]"
+        @dragover.prevent="dragging = true"
+        @dragleave="dragging = false"
+        @drop.prevent="onDrop"
+        @click="browse"
+    >
+        <p :class="dark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'">
+            Drop files here or
+            <span :class="['font-medium', dark ? 'text-[var(--esc-panel-text)]' : 'text-blue-600']">browse</span>
         </p>
         <input ref="fileInput" type="file" multiple class="hidden" @change="onFileSelect" />
     </div>

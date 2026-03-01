@@ -9,7 +9,10 @@ const props = defineProps({
     color: { type: String, default: 'blue' },
 });
 
-const escDark = inject('esc-dark', computed(() => false));
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 const displayLabel = computed(() => props.label || props.title || '');
 
 const lightColorMap = {
@@ -27,10 +30,13 @@ const lightColorMap = {
 
 <template>
     <!-- Dark mode -->
-    <div v-if="escDark" class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
-        <div class="text-[13px] font-medium text-neutral-500">{{ displayLabel }}</div>
-        <div class="mt-2 text-2xl font-bold tracking-tight text-white">{{ value }}</div>
-        <div v-if="trend" class="mt-2 inline-flex items-center rounded-full bg-white/[0.06] px-2 py-0.5 text-xs font-medium text-neutral-400">
+    <div v-if="escDark" class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-5">
+        <div class="text-[13px] font-medium text-[var(--esc-panel-text-muted)]">{{ displayLabel }}</div>
+        <div class="mt-2 text-2xl font-bold tracking-tight text-[var(--esc-panel-text)]">{{ value }}</div>
+        <div
+            v-if="trend"
+            class="mt-2 inline-flex items-center rounded-full bg-[var(--esc-panel-hover)] px-2 py-0.5 text-xs font-medium text-[var(--esc-panel-text-tertiary)]"
+        >
             {{ trend }}
         </div>
     </div>
@@ -39,7 +45,13 @@ const lightColorMap = {
     <div v-else class="rounded-lg border border-gray-200 bg-white p-4">
         <div class="text-sm text-gray-500">{{ displayLabel }}</div>
         <div class="mt-1 text-2xl font-bold text-gray-900">{{ value }}</div>
-        <div v-if="trend" :class="['mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium', lightColorMap[color] || lightColorMap.blue]">
+        <div
+            v-if="trend"
+            :class="[
+                'mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+                lightColorMap[color] || lightColorMap.blue,
+            ]"
+        >
             {{ trend }}
         </div>
     </div>
