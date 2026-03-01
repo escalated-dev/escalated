@@ -58,26 +58,26 @@ const fieldTypes = [
 <template>
     <EscalatedLayout :title="field ? 'Edit Custom Field' : 'New Custom Field'">
         <form
-            class="mx-auto max-w-lg space-y-5 rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6"
+            class="mx-auto max-w-lg space-y-5 rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
             @submit.prevent="submit"
         >
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Name</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Name</label>
                 <input
                     v-model="form.name"
                     type="text"
                     required
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
                 <div v-if="form.errors.name" class="mt-1 text-sm text-rose-400">{{ form.errors.name }}</div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Type</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Type</label>
                 <select
                     v-model="form.type"
                     required
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 >
                     <option v-for="ft in fieldTypes" :key="ft.value" :value="ft.value">{{ ft.label }}</option>
                 </select>
@@ -85,11 +85,11 @@ const fieldTypes = [
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Context</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Context</label>
                 <select
                     v-model="form.context"
                     required
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 >
                     <option v-for="ctx in contexts" :key="ctx" :value="ctx">
                         {{ ctx.charAt(0).toUpperCase() + ctx.slice(1) }}
@@ -100,11 +100,11 @@ const fieldTypes = [
 
             <!-- Options editor for select/multi_select -->
             <div v-if="showOptionsEditor">
-                <label class="block text-sm font-medium text-neutral-300">Options</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Options</label>
                 <div class="mt-1 space-y-2">
                     <div v-for="(opt, idx) in form.options" :key="idx" class="flex items-center gap-2">
                         <span
-                            class="flex-1 rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200"
+                            class="flex-1 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-1.5 text-sm text-[var(--esc-panel-text-secondary)]"
                             >{{ opt }}</span
                         >
                         <button
@@ -120,12 +120,12 @@ const fieldTypes = [
                             v-model="newOption"
                             type="text"
                             placeholder="Add option..."
-                            class="flex-1 rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                            class="flex-1 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             @keydown.enter.prevent="addOption"
                         />
                         <button
                             type="button"
-                            class="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/[0.06]"
+                            class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] px-3 py-1.5 text-sm font-medium text-[var(--esc-panel-text-secondary)] transition-colors hover:bg-[var(--esc-panel-hover)]"
                             @click="addOption"
                         >
                             Add
@@ -136,30 +136,30 @@ const fieldTypes = [
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Placeholder</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Placeholder</label>
                 <input
                     v-model="form.placeholder"
                     type="text"
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Description</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Description</label>
                 <textarea
                     v-model="form.description"
                     rows="2"
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 ></textarea>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Position</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Position</label>
                 <input
                     v-model.number="form.position"
                     type="number"
                     min="0"
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
             </div>
 
@@ -167,25 +167,25 @@ const fieldTypes = [
                 <input
                     v-model="form.required"
                     type="checkbox"
-                    class="rounded border-white/20 bg-neutral-900 text-cyan-500 focus:ring-white/10"
+                    class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] text-cyan-500 focus:ring-[var(--esc-panel-border-input)]"
                 />
-                <span class="text-sm text-neutral-300">Required</span>
+                <span class="text-sm text-[var(--esc-panel-text-secondary)]">Required</span>
             </label>
 
             <label class="flex items-center gap-2">
                 <input
                     v-model="form.active"
                     type="checkbox"
-                    class="rounded border-white/20 bg-neutral-900 text-cyan-500 focus:ring-white/10"
+                    class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] text-cyan-500 focus:ring-[var(--esc-panel-border-input)]"
                 />
-                <span class="text-sm text-neutral-300">Active</span>
+                <span class="text-sm text-[var(--esc-panel-text-secondary)]">Active</span>
             </label>
 
             <div class="flex justify-end">
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                 >
                     {{ field ? 'Update' : 'Create' }}
                 </button>
