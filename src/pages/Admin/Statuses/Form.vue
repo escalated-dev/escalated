@@ -36,26 +36,26 @@ function submit() {
 <template>
     <EscalatedLayout :title="status ? 'Edit Status' : 'New Status'">
         <form
-            class="mx-auto max-w-lg space-y-5 rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6"
+            class="mx-auto max-w-lg space-y-5 rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
             @submit.prevent="submit"
         >
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Label</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Label</label>
                 <input
                     v-model="form.label"
                     type="text"
                     required
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
                 <div v-if="form.errors.label" class="mt-1 text-sm text-rose-400">{{ form.errors.label }}</div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Category</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Category</label>
                 <select
                     v-model="form.category"
                     required
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 >
                     <option v-for="cat in categories" :key="cat" :value="cat">{{ categoryLabels[cat] || cat }}</option>
                 </select>
@@ -63,31 +63,31 @@ function submit() {
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Color</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Color</label>
                 <input
                     v-model="form.color"
                     type="color"
-                    class="mt-1 h-10 w-16 rounded-lg border border-white/10 bg-neutral-950"
+                    class="mt-1 h-10 w-16 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)]"
                 />
                 <div v-if="form.errors.color" class="mt-1 text-sm text-rose-400">{{ form.errors.color }}</div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Description</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Description</label>
                 <textarea
                     v-model="form.description"
                     rows="2"
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 ></textarea>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Position</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Position</label>
                 <input
                     v-model.number="form.position"
                     type="number"
                     min="0"
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
             </div>
 
@@ -95,16 +95,16 @@ function submit() {
                 <input
                     v-model="form.is_default"
                     type="checkbox"
-                    class="rounded border-white/20 bg-neutral-900 text-cyan-500 focus:ring-white/10"
+                    class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] text-cyan-500 focus:ring-[var(--esc-panel-border-input)]"
                 />
-                <span class="text-sm text-neutral-300">Default status for this category</span>
+                <span class="text-sm text-[var(--esc-panel-text-secondary)]">Default status for this category</span>
             </label>
 
             <div class="flex justify-end">
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                 >
                     {{ status ? 'Update' : 'Create' }}
                 </button>

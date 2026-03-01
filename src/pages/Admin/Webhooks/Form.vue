@@ -36,39 +36,41 @@ function submit() {
     <EscalatedLayout :title="webhook ? 'Edit Webhook' : 'Create Webhook'">
         <form class="max-w-lg space-y-4" @submit.prevent="submit">
             <div>
-                <label class="block text-sm font-medium text-neutral-300">URL</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">URL</label>
                 <input
                     v-model="form.url"
                     type="url"
                     required
                     placeholder="https://example.com/webhook"
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
                 <p v-if="form.errors.url" class="mt-1 text-xs text-rose-400">{{ form.errors.url }}</p>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Secret (for HMAC signing)</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                    >Secret (for HMAC signing)</label
+                >
                 <input
                     v-model="form.secret"
                     type="text"
                     placeholder="Optional secret key"
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-medium text-neutral-300">Events</label>
+                <label class="mb-2 block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Events</label>
                 <div class="grid grid-cols-2 gap-2">
                     <label
                         v-for="event in availableEvents"
                         :key="event"
-                        class="flex items-center gap-2 text-sm text-neutral-300"
+                        class="flex items-center gap-2 text-sm text-[var(--esc-panel-text-secondary)]"
                     >
                         <input
                             type="checkbox"
                             :checked="form.events.includes(event)"
-                            class="rounded border-white/10 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20"
+                            class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-cyan-500 focus:ring-cyan-500/20"
                             @change="toggleEvent(event)"
                         />
                         {{ event }}
@@ -78,11 +80,11 @@ function submit() {
             </div>
 
             <div>
-                <label class="flex items-center gap-2 text-sm text-neutral-300">
+                <label class="flex items-center gap-2 text-sm text-[var(--esc-panel-text-secondary)]">
                     <input
                         v-model="form.active"
                         type="checkbox"
-                        class="rounded border-white/10 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20"
+                        class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-cyan-500 focus:ring-cyan-500/20"
                     />
                     Active
                 </label>
@@ -92,13 +94,13 @@ function submit() {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-4 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                 >
                     {{ webhook ? 'Update' : 'Create' }}
                 </button>
                 <a
                     :href="route('escalated.admin.webhooks.index')"
-                    class="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/[0.06]"
+                    class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] px-4 py-2 text-sm font-medium text-[var(--esc-panel-text-secondary)] transition-colors hover:bg-[var(--esc-panel-hover)]"
                 >
                     Cancel
                 </a>

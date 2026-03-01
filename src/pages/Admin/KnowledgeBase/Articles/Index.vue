@@ -52,11 +52,11 @@ const statusColors = {
                     v-model="search"
                     type="text"
                     placeholder="Search articles..."
-                    class="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-neutral-200 placeholder-neutral-600 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                    class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
                 />
                 <select
                     v-model="status"
-                    class="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-neutral-200 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                    class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
                 >
                     <option value="">All Statuses</option>
                     <option value="draft">Draft</option>
@@ -64,7 +64,7 @@ const statusColors = {
                 </select>
                 <select
                     v-model="categoryId"
-                    class="rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-sm text-neutral-200 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                    class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
                 >
                     <option value="">All Categories</option>
                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
@@ -72,78 +72,101 @@ const statusColors = {
             </div>
             <Link
                 :href="route('escalated.admin.kb-articles.create')"
-                class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-opacity hover:opacity-90"
+                class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-4 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-opacity hover:opacity-90"
             >
                 New Article
             </Link>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-white/[0.06]">
+        <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b border-white/[0.06] bg-white/[0.02]">
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                    <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Title
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Category
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Status
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Views
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Helpful
                         </th>
-                        <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Date
                         </th>
-                        <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-neutral-500">
+                        <th
+                            class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
                             Actions
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/[0.04]">
-                    <tr v-for="article in articles.data" :key="article.id" class="hover:bg-white/[0.02]">
+                <tbody class="divide-y divide-[var(--esc-panel-border)]">
+                    <tr v-for="article in articles.data" :key="article.id" class="hover:bg-[var(--esc-panel-hover)]">
                         <td class="px-4 py-3">
                             <Link
                                 :href="route('escalated.admin.kb-articles.edit', article.id)"
-                                class="text-sm font-medium text-neutral-200 hover:text-white"
+                                class="text-sm font-medium text-[var(--esc-panel-text-secondary)] hover:text-[var(--esc-panel-text)]"
                             >
                                 {{ article.title }}
                             </Link>
                         </td>
-                        <td class="px-4 py-3 text-sm text-neutral-400">{{ article.category?.name || '—' }}</td>
+                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            {{ article.category?.name || '—' }}
+                        </td>
                         <td class="px-4 py-3">
                             <span
                                 :class="[
                                     'inline-flex rounded-full border px-2 py-0.5 text-xs font-medium',
-                                    statusColors[article.status] || 'text-neutral-400',
+                                    statusColors[article.status] || 'text-[var(--esc-panel-text-tertiary)]',
                                 ]"
                             >
                                 {{ article.status }}
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-sm text-neutral-400">{{ article.view_count }}</td>
-                        <td class="px-4 py-3 text-sm text-neutral-400">{{ article.helpful_count }}</td>
-                        <td class="px-4 py-3 text-sm text-neutral-500">
+                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            {{ article.view_count }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            {{ article.helpful_count }}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-muted)]">
                             {{ article.created_at ? new Date(article.created_at).toLocaleDateString() : '—' }}
                         </td>
                         <td class="px-4 py-3 text-right">
                             <Link
                                 :href="route('escalated.admin.kb-articles.edit', article.id)"
-                                class="mr-2 text-sm text-neutral-500 hover:text-neutral-200"
-                                >Edit</Link
+                                class="mr-2 text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
                             >
+                                Edit
+                            </Link>
                             <button class="text-sm text-red-500/60 hover:text-red-400" @click="deleteArticle(article)">
                                 Delete
                             </button>
                         </td>
                     </tr>
                     <tr v-if="!articles.data?.length">
-                        <td colspan="7" class="px-4 py-8 text-center text-sm text-neutral-500">No articles found.</td>
+                        <td colspan="7" class="px-4 py-8 text-center text-sm text-[var(--esc-panel-text-muted)]">
+                            No articles found.
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -158,10 +181,10 @@ const statusColors = {
                 :class="[
                     'rounded-lg px-3 py-1.5 text-sm transition-colors',
                     link.active
-                        ? 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white'
+                        ? 'bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] text-white'
                         : link.url
-                          ? 'border border-white/[0.06] text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200'
-                          : 'cursor-default text-neutral-600',
+                          ? 'border border-[var(--esc-panel-border)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]'
+                          : 'cursor-default text-[var(--esc-panel-text-muted)]',
                 ]"
                 preserve-scroll
             >

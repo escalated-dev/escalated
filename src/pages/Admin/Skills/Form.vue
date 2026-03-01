@@ -23,12 +23,12 @@ function submit() {
     <EscalatedLayout :title="skill ? 'Edit Skill' : 'Create Skill'">
         <form class="max-w-lg space-y-4" @submit.prevent="submit">
             <div>
-                <label class="block text-sm font-medium text-neutral-300">Name</label>
+                <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Name</label>
                 <input
                     v-model="form.name"
                     type="text"
                     required
-                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 />
                 <p v-if="form.errors.name" class="mt-1 text-xs text-rose-400">{{ form.errors.name }}</p>
             </div>
@@ -37,13 +37,13 @@ function submit() {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-4 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                 >
                     {{ skill ? 'Update' : 'Create' }}
                 </button>
                 <a
                     :href="route('escalated.admin.skills.index')"
-                    class="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/[0.06]"
+                    class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] px-4 py-2 text-sm font-medium text-[var(--esc-panel-text-secondary)] transition-colors hover:bg-[var(--esc-panel-hover)]"
                 >
                     Cancel
                 </a>
