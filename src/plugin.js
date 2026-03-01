@@ -24,6 +24,16 @@ export const EscalatedPlugin = {
         if (options.theme) {
             app.provide('escalated-theme', options.theme);
             applyTheme(options.theme);
+
+            if (options.theme.panel) {
+                const panelConfig = options.theme.panel;
+                applyPanelTheme(panelConfig);
+                app.provide('escalated-panel', {
+                    appName: panelConfig.appName || 'Escalated',
+                    logo: panelConfig.logo || null,
+                    mode: panelConfig.mode || 'dark',
+                });
+            }
         }
     },
 };
@@ -55,11 +65,86 @@ function darken(hex, percent) {
     const r = Math.max(0, (num >> 16) - Math.round(2.55 * percent));
     const g = Math.max(0, ((num >> 8) & 0x00ff) - Math.round(2.55 * percent));
     const b = Math.max(0, (num & 0x0000ff) - Math.round(2.55 * percent));
-    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
 function scaleBorderRadius(radius, factor) {
     const match = radius.match(/^([\d.]+)(.*)$/);
     if (!match) return radius;
     return `${(parseFloat(match[1]) * factor).toFixed(2)}${match[2] || 'rem'}`;
+}
+
+const panelDarkDefaults = {
+    bg: '#000000',
+    sidebarBg: '#0a0a0a',
+    topbarBg: 'rgba(0,0,0,0.8)',
+    surface: 'rgba(23,23,23,0.6)',
+    surfaceAlt: '#0a0a0a',
+    border: 'rgba(255,255,255,0.06)',
+    borderInput: 'rgba(255,255,255,0.1)',
+    text: '#ffffff',
+    textSecondary: '#e5e5e5',
+    textTertiary: '#a3a3a3',
+    textMuted: '#737373',
+    accent: '#06b6d4',
+    accentSecondary: '#8b5cf6',
+    accentHover: '#22d3ee',
+    accentSecondaryHover: '#a78bfa',
+    hover: 'rgba(255,255,255,0.03)',
+    active: 'rgba(255,255,255,0.08)',
+};
+
+const panelLightDefaults = {
+    bg: '#f9fafb',
+    sidebarBg: '#ffffff',
+    topbarBg: 'rgba(255,255,255,0.95)',
+    surface: '#ffffff',
+    surfaceAlt: '#f9fafb',
+    border: '#e5e7eb',
+    borderInput: '#d1d5db',
+    text: '#111827',
+    textSecondary: '#374151',
+    textTertiary: '#6b7280',
+    textMuted: '#9ca3af',
+    accent: '#3b82f6',
+    accentSecondary: '#6366f1',
+    accentHover: '#2563eb',
+    accentSecondaryHover: '#818cf8',
+    hover: 'rgba(0,0,0,0.02)',
+    active: '#eff6ff',
+};
+
+const panelTokenMap = {
+    bg: '--esc-panel-bg',
+    sidebarBg: '--esc-panel-sidebar-bg',
+    topbarBg: '--esc-panel-topbar-bg',
+    surface: '--esc-panel-surface',
+    surfaceAlt: '--esc-panel-surface-alt',
+    border: '--esc-panel-border',
+    borderInput: '--esc-panel-border-input',
+    text: '--esc-panel-text',
+    textSecondary: '--esc-panel-text-secondary',
+    textTertiary: '--esc-panel-text-tertiary',
+    textMuted: '--esc-panel-text-muted',
+    accent: '--esc-panel-accent',
+    accentSecondary: '--esc-panel-accent-secondary',
+    accentHover: '--esc-panel-accent-hover',
+    accentSecondaryHover: '--esc-panel-accent-secondary-hover',
+    hover: '--esc-panel-hover',
+    active: '--esc-panel-active',
+};
+
+function applyPanelTheme(panelConfig) {
+    const defaults = panelConfig.mode === 'light' ? panelLightDefaults : panelDarkDefaults;
+    const overrides = {};
+    for (const key of Object.keys(panelTokenMap)) {
+        if (panelConfig[key] !== undefined) {
+            overrides[key] = panelConfig[key];
+        }
+    }
+    const merged = { ...defaults, ...overrides };
+    const style = document.documentElement.style;
+    for (const [key, cssVar] of Object.entries(panelTokenMap)) {
+        style.setProperty(cssVar, merged[key]);
+    }
 }
