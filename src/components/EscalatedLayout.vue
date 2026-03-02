@@ -9,6 +9,7 @@ const props = defineProps({
 
 const page = usePage();
 const hostLayout = inject('escalated-layout', null);
+const panelConfig = inject('escalated-panel', { appName: 'Escalated', logo: null, mode: 'dark' });
 
 const isAgent = computed(() => page.props.escalated?.is_agent);
 const isAdmin = computed(() => page.props.escalated?.is_admin);
@@ -20,7 +21,8 @@ const prefix = computed(() => {
 const currentUrl = computed(() => page.url);
 const isAdminSection = computed(() => currentUrl.value?.includes('/admin'));
 const isAgentSection = computed(() => currentUrl.value?.includes('/agent'));
-const isDark = computed(() => isAdminSection.value || isAgentSection.value);
+const isPanel = computed(() => isAdminSection.value || isAgentSection.value);
+const isDark = computed(() => isPanel.value && panelConfig.mode !== 'light');
 
 provide('esc-dark', isDark);
 
@@ -200,13 +202,22 @@ function isActive(href) {
 
 <template>
     <!-- MODE 1: Admin — dark sidebar layout -->
-    <div v-if="isAdminSection" class="flex min-h-screen bg-black" style="color-scheme: dark">
+    <div
+        v-if="isAdminSection"
+        class="flex min-h-screen bg-[var(--esc-panel-bg)]"
+        :style="{ colorScheme: panelConfig.mode === 'light' ? 'light' : 'dark' }"
+    >
         <!-- Sidebar -->
-        <aside class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-white/[0.06] bg-neutral-950">
+        <aside
+            class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)]"
+        >
             <!-- Logo -->
             <div class="flex h-16 items-center gap-3 px-5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--esc-panel-border-input)]">
+                    <img v-if="typeof panelConfig.logo === 'string'" :src="panelConfig.logo" class="h-5 w-5" alt="" />
+                    <component :is="panelConfig.logo" v-else-if="panelConfig.logo" class="h-5 w-5" />
                     <svg
+                        v-else
                         class="h-5 w-5"
                         viewBox="0 0 24 24"
                         fill="none"
@@ -230,9 +241,11 @@ function isActive(href) {
                     </svg>
                 </div>
                 <div>
-                    <span class="text-sm font-bold text-white tracking-wide">Escalated</span>
+                    <span class="text-sm font-bold text-[var(--esc-panel-text)] tracking-wide">{{
+                        panelConfig.appName
+                    }}</span>
                     <span
-                        class="ml-1.5 rounded bg-white/[0.08] px-1.5 py-0.5 text-[10px] font-semibold text-neutral-500"
+                        class="ml-1.5 rounded bg-[var(--esc-panel-active)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--esc-panel-text-muted)]"
                         >ADMIN</span
                     >
                 </div>
@@ -247,14 +260,16 @@ function isActive(href) {
                     :class="[
                         'group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all',
                         isActive(link.href)
-                            ? 'bg-white/[0.08] text-white'
-                            : 'text-neutral-500 hover:bg-white/[0.04] hover:text-neutral-300',
+                            ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]'
+                            : 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
                     ]"
                 >
                     <svg
                         :class="[
                             'h-[18px] w-[18px] shrink-0',
-                            isActive(link.href) ? 'text-white' : 'text-neutral-600 group-hover:text-neutral-400',
+                            isActive(link.href)
+                                ? 'text-[var(--esc-panel-text)]'
+                                : 'text-[var(--esc-panel-text-muted)] group-hover:text-[var(--esc-panel-text-tertiary)]',
                         ]"
                         fill="none"
                         stroke="currentColor"
@@ -266,7 +281,7 @@ function isActive(href) {
                     {{ link.label }}
                     <span
                         v-if="link.badge"
-                        class="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-cyan-500/20 px-1.5 text-[10px] font-semibold text-cyan-400"
+                        class="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--esc-panel-accent)]/20 px-1.5 text-[10px] font-semibold text-[var(--esc-panel-accent)]"
                     >
                         {{ link.badge }}
                     </span>
@@ -274,11 +289,11 @@ function isActive(href) {
             </nav>
 
             <!-- Bottom section -->
-            <div class="border-t border-white/[0.06] p-3">
+            <div class="border-t border-[var(--esc-panel-border)] p-3">
                 <Link
                     v-if="isAgent"
                     :href="`${prefix}/agent`"
-                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-neutral-500 transition-colors hover:bg-white/[0.04] hover:text-neutral-300"
+                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]"
                 >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path
@@ -291,7 +306,7 @@ function isActive(href) {
                 </Link>
                 <Link
                     :href="prefix"
-                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-neutral-500 transition-colors hover:bg-white/[0.04] hover:text-neutral-300"
+                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]"
                 >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path
@@ -304,13 +319,13 @@ function isActive(href) {
                 </Link>
 
                 <!-- User -->
-                <div class="mt-2 flex items-center gap-3 rounded-lg bg-white/[0.03] px-3 py-2.5">
+                <div class="mt-2 flex items-center gap-3 rounded-lg bg-[var(--esc-panel-hover)] px-3 py-2.5">
                     <div
-                        class="flex h-7 w-7 items-center justify-center rounded-md bg-white/[0.08] text-xs font-semibold text-neutral-400"
+                        class="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-xs font-semibold text-[var(--esc-panel-text-tertiary)]"
                     >
                         {{ userInitial }}
                     </div>
-                    <span class="text-sm text-neutral-400">{{ userName }}</span>
+                    <span class="text-sm text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
                 </div>
             </div>
         </aside>
@@ -319,9 +334,9 @@ function isActive(href) {
         <div class="flex flex-1 flex-col pl-64">
             <!-- Top bar -->
             <header
-                class="sticky top-0 z-20 flex h-14 items-center border-b border-white/[0.06] bg-black/80 px-6 backdrop-blur-xl"
+                class="sticky top-0 z-20 flex h-14 items-center border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-topbar-bg)] px-6 backdrop-blur-xl"
             >
-                <h1 class="text-sm font-semibold text-white">{{ title }}</h1>
+                <h1 class="text-sm font-semibold text-[var(--esc-panel-text)]">{{ title }}</h1>
             </header>
 
             <!-- Page content -->
@@ -332,14 +347,28 @@ function isActive(href) {
     </div>
 
     <!-- MODE 2: Agent — dark top-nav layout -->
-    <div v-else-if="isAgentSection" class="min-h-screen bg-black" style="color-scheme: dark">
+    <div
+        v-else-if="isAgentSection"
+        class="min-h-screen bg-[var(--esc-panel-bg)]"
+        :style="{ colorScheme: panelConfig.mode === 'light' ? 'light' : 'dark' }"
+    >
         <!-- Top nav -->
-        <nav class="sticky top-0 z-30 border-b border-white/[0.06] bg-neutral-950/95 backdrop-blur-xl">
+        <nav
+            class="sticky top-0 z-30 border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)] backdrop-blur-xl"
+        >
             <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <!-- Left: branding -->
                 <div class="flex items-center gap-3">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--esc-panel-border-input)]">
+                        <img
+                            v-if="typeof panelConfig.logo === 'string'"
+                            :src="panelConfig.logo"
+                            class="h-4 w-4"
+                            alt=""
+                        />
+                        <component :is="panelConfig.logo" v-else-if="panelConfig.logo" class="h-4 w-4" />
                         <svg
+                            v-else
                             class="h-4 w-4"
                             viewBox="0 0 24 24"
                             fill="none"
@@ -362,7 +391,9 @@ function isActive(href) {
                             </g>
                         </svg>
                     </div>
-                    <span class="text-sm font-bold text-white tracking-wide">Escalated</span>
+                    <span class="text-sm font-bold text-[var(--esc-panel-text)] tracking-wide">{{
+                        panelConfig.appName
+                    }}</span>
                 </div>
 
                 <!-- Center: nav links -->
@@ -374,8 +405,8 @@ function isActive(href) {
                         :class="[
                             'flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all',
                             isActive(link.href)
-                                ? 'bg-white/[0.08] text-white'
-                                : 'text-neutral-500 hover:bg-white/[0.04] hover:text-neutral-300',
+                                ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]'
+                                : 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
                         ]"
                     >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -390,21 +421,24 @@ function isActive(href) {
                     <Link
                         v-if="isAdmin"
                         :href="`${prefix}/admin/reports`"
-                        class="text-[13px] text-neutral-500 transition-colors hover:text-white"
+                        class="text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
                     >
                         Admin
                     </Link>
-                    <Link :href="prefix" class="text-[13px] text-neutral-500 transition-colors hover:text-white">
+                    <Link
+                        :href="prefix"
+                        class="text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
+                    >
                         Back to App
                     </Link>
-                    <div class="ml-1 h-5 w-px bg-white/[0.08]"></div>
+                    <div class="ml-1 h-5 w-px bg-[var(--esc-panel-active)]"></div>
                     <div class="flex items-center gap-2">
                         <div
-                            class="flex h-7 w-7 items-center justify-center rounded-md bg-white/[0.08] text-[10px] font-semibold text-neutral-400"
+                            class="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-tertiary)]"
                         >
                             {{ userInitial }}
                         </div>
-                        <span class="text-[13px] text-neutral-400">{{ userName }}</span>
+                        <span class="text-[13px] text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
                     </div>
                 </div>
             </div>
@@ -423,12 +457,12 @@ function isActive(href) {
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ title }}</h2>
                 <nav class="flex items-center gap-4 text-sm">
                     <Link :href="prefix" class="text-gray-600 hover:text-gray-900">My Tickets</Link>
-                    <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900"
-                        >Agent Panel</Link
-                    >
-                    <Link v-if="isAdmin" :href="`${prefix}/admin/reports`" class="text-gray-600 hover:text-gray-900"
-                        >Admin</Link
-                    >
+                    <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">
+                        Agent Panel
+                    </Link>
+                    <Link v-if="isAdmin" :href="`${prefix}/admin/reports`" class="text-gray-600 hover:text-gray-900">
+                        Admin
+                    </Link>
                 </nav>
             </div>
         </template>
@@ -447,15 +481,16 @@ function isActive(href) {
                         <span class="text-lg font-bold text-gray-900">{{ title }}</span>
                         <div class="flex items-center gap-4 text-sm">
                             <Link :href="prefix" class="text-gray-600 hover:text-gray-900">My Tickets</Link>
-                            <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900"
-                                >Agent Panel</Link
-                            >
+                            <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">
+                                Agent Panel
+                            </Link>
                             <Link
                                 v-if="isAdmin"
                                 :href="`${prefix}/admin/reports`"
                                 class="text-gray-600 hover:text-gray-900"
-                                >Admin</Link
                             >
+                                Admin
+                            </Link>
                         </div>
                     </div>
                 </div>

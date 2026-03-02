@@ -2,7 +2,18 @@
 import { inject, computed, reactive, watch } from 'vue';
 
 const props = defineProps({
-    statuses: { type: Array, default: () => ['open', 'in_progress', 'waiting_on_customer', 'waiting_on_agent', 'escalated', 'resolved', 'closed'] },
+    statuses: {
+        type: Array,
+        default: () => [
+            'open',
+            'in_progress',
+            'waiting_on_customer',
+            'waiting_on_agent',
+            'escalated',
+            'resolved',
+            'closed',
+        ],
+    },
     priorities: { type: Array, default: () => ['low', 'medium', 'high', 'urgent', 'critical'] },
     agents: { type: Array, default: () => [] },
     departments: { type: Array, default: () => [] },
@@ -11,7 +22,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
-const escDark = inject('esc-dark', computed(() => false));
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 
 const filters = reactive({
     status: props.modelValue.status || '',
@@ -22,23 +36,30 @@ const filters = reactive({
     following: props.modelValue.following || '',
 });
 
-watch(filters, (val) => {
-    emit('update:modelValue', { ...val });
-}, { deep: true });
-
-const inputClass = computed(() => escDark.value
-    ? 'rounded-lg border border-white/10 bg-gray-900 px-3 py-1.5 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10'
-    : 'rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none'
+watch(
+    filters,
+    (val) => {
+        emit('update:modelValue', { ...val });
+    },
+    { deep: true },
 );
 
-const selectClass = computed(() => escDark.value
-    ? 'rounded-lg border border-white/10 bg-gray-900 px-2 py-1.5 text-sm text-gray-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10'
-    : 'rounded-md border border-gray-300 px-2 py-1.5 text-sm'
+const inputClass = computed(() =>
+    escDark.value
+        ? 'rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]'
+        : 'rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none',
 );
 
-const checkboxClass = computed(() => escDark.value
-    ? 'h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20'
-    : 'h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500'
+const selectClass = computed(() =>
+    escDark.value
+        ? 'rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-2 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]'
+        : 'rounded-md border border-gray-300 px-2 py-1.5 text-sm',
+);
+
+const checkboxClass = computed(() =>
+    escDark.value
+        ? 'h-4 w-4 rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]/20'
+        : 'h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500',
 );
 </script>
 
@@ -63,7 +84,9 @@ const checkboxClass = computed(() => escDark.value
         </select>
         <label v-if="showFollowing" class="flex items-center gap-2">
             <input v-model="filters.following" type="checkbox" true-value="1" false-value="" :class="checkboxClass" />
-            <span :class="['text-sm', escDark ? 'text-neutral-400' : 'text-gray-600']">Following</span>
+            <span :class="['text-sm', escDark ? 'text-[var(--esc-panel-text-tertiary)]' : 'text-gray-600']"
+                >Following</span
+            >
         </label>
     </div>
 </template>

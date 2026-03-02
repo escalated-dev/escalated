@@ -28,8 +28,8 @@ function changePeriod(days) {
                     :class="[
                         'rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all',
                         period_days === d
-                            ? 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-lg shadow-black/20'
-                            : 'border border-white/10 bg-white/[0.03] text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200',
+                            ? 'bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] text-white shadow-lg shadow-[var(--esc-panel-bg)]/20'
+                            : 'border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
                     ]"
                     @click="changePeriod(d)"
                 >
@@ -37,10 +37,16 @@ function changePeriod(days) {
                 </button>
             </div>
             <div class="flex items-center gap-3">
-                <Link :href="route('escalated.admin.settings.csat')" class="text-sm text-cyan-400 hover:text-cyan-300">
+                <Link
+                    :href="route('escalated.admin.settings.csat')"
+                    class="text-sm text-[var(--esc-panel-accent)] hover:text-[var(--esc-panel-accent)]"
+                >
                     CSAT Settings
                 </Link>
-                <Link :href="route('escalated.admin.reports')" class="text-sm text-neutral-500 hover:text-neutral-300">
+                <Link
+                    :href="route('escalated.admin.reports')"
+                    class="text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
+                >
                     &larr; Back to Reports
                 </Link>
             </div>
@@ -70,19 +76,23 @@ function changePeriod(days) {
             <ChartWidget title="CSAT Over Time" :data="over_time" color="amber" />
 
             <!-- By Agent -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
-                <h3 class="mb-4 text-sm font-semibold text-neutral-200">Ratings by Agent</h3>
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-5">
+                <h3 class="mb-4 text-sm font-semibold text-[var(--esc-panel-text-secondary)]">Ratings by Agent</h3>
                 <div v-if="by_agent?.length" class="space-y-3">
                     <div v-for="agent in by_agent" :key="agent.agent_id" class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div
-                                class="flex h-8 w-8 items-center justify-center rounded-md bg-white/[0.06] text-xs font-semibold text-neutral-400"
+                                class="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--esc-panel-hover)] text-xs font-semibold text-[var(--esc-panel-text-tertiary)]"
                             >
                                 {{ agent.agent_name?.charAt(0)?.toUpperCase() || '?' }}
                             </div>
                             <div>
-                                <div class="text-sm font-medium text-neutral-200">{{ agent.agent_name }}</div>
-                                <div class="text-xs text-neutral-500">{{ agent.total_ratings }} ratings</div>
+                                <div class="text-sm font-medium text-[var(--esc-panel-text-secondary)]">
+                                    {{ agent.agent_name }}
+                                </div>
+                                <div class="text-xs text-[var(--esc-panel-text-muted)]">
+                                    {{ agent.total_ratings }} ratings
+                                </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
@@ -91,7 +101,11 @@ function changePeriod(days) {
                                     v-for="n in 5"
                                     :key="n"
                                     class="h-3.5 w-3.5"
-                                    :class="n <= Math.round(agent.avg_rating) ? 'text-amber-400' : 'text-neutral-700'"
+                                    :class="
+                                        n <= Math.round(agent.avg_rating)
+                                            ? 'text-amber-400'
+                                            : 'text-[var(--esc-panel-text-muted)]'
+                                    "
                                     fill="currentColor"
                                     viewBox="0 0 20 20"
                                 >
@@ -100,11 +114,13 @@ function changePeriod(days) {
                                     />
                                 </svg>
                             </div>
-                            <span class="text-sm font-bold text-white">{{ agent.avg_rating }}</span>
+                            <span class="text-sm font-bold text-[var(--esc-panel-text)]">{{ agent.avg_rating }}</span>
                         </div>
                     </div>
                 </div>
-                <div v-else class="py-6 text-center text-sm text-neutral-500">No agent ratings for this period.</div>
+                <div v-else class="py-6 text-center text-sm text-[var(--esc-panel-text-muted)]">
+                    No agent ratings for this period.
+                </div>
             </div>
         </div>
     </EscalatedLayout>

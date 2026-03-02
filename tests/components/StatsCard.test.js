@@ -137,26 +137,26 @@ describe('StatsCard', () => {
         it('uses dark mode card styling', () => {
             const wrapper = mountCard({ label: 'Test', value: 10 }, true);
             const card = wrapper.find('div');
-            expect(card.classes()).toContain('bg-neutral-900/60');
+            expect(card.classes()).toContain('bg-[var(--esc-panel-surface)]');
         });
 
-        it('renders value with text-white in dark mode', () => {
+        it('renders value with panel text token in dark mode', () => {
             const wrapper = mountCard({ label: 'Test', value: 10 }, true);
             const html = wrapper.html();
-            expect(html).toContain('text-white');
+            expect(html).toContain('text-[var(--esc-panel-text)]');
         });
 
-        it('renders label with text-neutral-500 in dark mode', () => {
+        it('renders label with panel text-muted token in dark mode', () => {
             const wrapper = mountCard({ label: 'Test', value: 10 }, true);
             const html = wrapper.html();
-            expect(html).toContain('text-neutral-500');
+            expect(html).toContain('text-[var(--esc-panel-text-muted)]');
         });
 
         it('renders trend with dark mode styling', () => {
             const wrapper = mountCard({ label: 'Test', value: 10, trend: '+5%' }, true);
             const html = wrapper.html();
-            expect(html).toContain('bg-white/[0.06]');
-            expect(html).toContain('text-neutral-400');
+            expect(html).toContain('bg-[var(--esc-panel-hover)]');
+            expect(html).toContain('text-[var(--esc-panel-text-tertiary)]');
         });
     });
 
@@ -237,8 +237,8 @@ describe('StatsCard', () => {
         it('color prop has no effect in dark mode (dark uses unified styling)', () => {
             const wrapper = mountCard({ label: 'Test', value: 10, trend: '+5%', color: 'red' }, true);
             const html = wrapper.html();
-            // Dark mode trend always uses bg-white/[0.06] regardless of color
-            expect(html).toContain('bg-white/[0.06]');
+            // Dark mode trend always uses panel hover token regardless of color
+            expect(html).toContain('bg-[var(--esc-panel-hover)]');
             expect(html).not.toContain('bg-red-50');
         });
     });

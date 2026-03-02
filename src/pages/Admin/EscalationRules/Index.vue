@@ -46,7 +46,7 @@ function toggleCategory(cat) {
             <div class="flex items-center gap-3">
                 <select
                     v-model="selectedCategory"
-                    class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 >
                     <option value="">All Categories</option>
                     <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
@@ -54,7 +54,7 @@ function toggleCategory(cat) {
             </div>
             <Link
                 :href="route('escalated.admin.escalation-rules.create')"
-                class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400"
+                class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-4 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)]"
             >
                 Add Rule
             </Link>
@@ -62,10 +62,10 @@ function toggleCategory(cat) {
 
         <div
             v-if="!rules?.length"
-            class="rounded-xl border border-white/[0.06] bg-neutral-900/60 px-4 py-12 text-center"
+            class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] px-4 py-12 text-center"
         >
             <svg
-                class="mx-auto mb-3 h-8 w-8 text-neutral-700"
+                class="mx-auto mb-3 h-8 w-8 text-[var(--esc-panel-text-muted)]"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.5"
@@ -77,19 +77,21 @@ function toggleCategory(cat) {
                     d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12"
                 />
             </svg>
-            <p class="text-sm text-neutral-500">No escalation rules yet</p>
-            <p class="mt-1 text-xs text-neutral-600">Set up automatic escalation for overdue tickets</p>
+            <p class="text-sm text-[var(--esc-panel-text-muted)]">No escalation rules yet</p>
+            <p class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
+                Set up automatic escalation for overdue tickets
+            </p>
         </div>
 
         <!-- Grouped by category -->
         <div v-for="(catRules, category) in groupedRules" :key="category" class="mb-4">
             <button
-                class="mb-2 flex w-full items-center gap-2 text-sm font-semibold text-neutral-300 hover:text-white"
+                class="mb-2 flex w-full items-center gap-2 text-sm font-semibold text-[var(--esc-panel-text-secondary)] hover:text-[var(--esc-panel-text)]"
                 @click="toggleCategory(category)"
             >
                 <svg
                     :class="[
-                        'h-4 w-4 text-neutral-500 transition-transform',
+                        'h-4 w-4 text-[var(--esc-panel-text-muted)] transition-transform',
                         !collapsedCategories[category] && 'rotate-90',
                     ]"
                     fill="none"
@@ -100,57 +102,66 @@ function toggleCategory(cat) {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
                 {{ category }}
-                <span class="text-xs text-neutral-500">({{ catRules.length }})</span>
+                <span class="text-xs text-[var(--esc-panel-text-muted)]">({{ catRules.length }})</span>
             </button>
 
             <div
                 v-if="!collapsedCategories[category]"
-                class="overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/60"
+                class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]"
             >
-                <table class="min-w-full divide-y divide-white/[0.06]">
+                <table class="min-w-full divide-y divide-[var(--esc-panel-border)]">
                     <thead>
-                        <tr class="bg-white/[0.02]">
+                        <tr class="bg-[var(--esc-panel-hover)]">
                             <th
-                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Order
                             </th>
                             <th
-                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Name
                             </th>
                             <th
-                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Trigger
                             </th>
                             <th
-                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Active
                             </th>
                             <th
-                                class="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/[0.04]">
-                        <tr v-for="rule in catRules" :key="rule.id" class="transition-colors hover:bg-white/[0.03]">
-                            <td class="px-4 py-3 text-sm text-neutral-400">{{ rule.order }}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-neutral-200">{{ rule.name }}</td>
-                            <td class="px-4 py-3 text-sm text-neutral-400">{{ rule.trigger_type }}</td>
+                    <tbody class="divide-y divide-[var(--esc-panel-border)]">
+                        <tr
+                            v-for="rule in catRules"
+                            :key="rule.id"
+                            class="transition-colors hover:bg-[var(--esc-panel-hover)]"
+                        >
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">{{ rule.order }}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-[var(--esc-panel-text-secondary)]">
+                                {{ rule.name }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                                {{ rule.trigger_type }}
+                            </td>
                             <td class="px-4 py-3 text-sm">
-                                <span :class="rule.is_active ? 'text-emerald-400' : 'text-neutral-500'">{{
-                                    rule.is_active ? 'Yes' : 'No'
-                                }}</span>
+                                <span
+                                    :class="rule.is_active ? 'text-emerald-400' : 'text-[var(--esc-panel-text-muted)]'"
+                                    >{{ rule.is_active ? 'Yes' : 'No' }}</span
+                                >
                             </td>
                             <td class="px-4 py-3 text-right text-sm">
                                 <Link
                                     :href="route('escalated.admin.escalation-rules.edit', rule.id)"
-                                    class="text-neutral-300 hover:text-white"
+                                    class="text-[var(--esc-panel-text-secondary)] hover:text-[var(--esc-panel-text)]"
                                 >
                                     Edit
                                 </Link>

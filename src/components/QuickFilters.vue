@@ -6,7 +6,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['filter']);
-const escDark = inject('esc-dark', computed(() => false));
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 const activeChip = ref(null);
 
 const chips = computed(() => {
@@ -18,7 +21,7 @@ const chips = computed(() => {
         { key: 'following', label: 'Following', filter: { following: true } },
     ];
     if (props.currentUserId) return list;
-    return list.filter(c => c.key !== 'my_tickets');
+    return list.filter((c) => c.key !== 'my_tickets');
 });
 
 function toggle(chip) {
@@ -34,15 +37,21 @@ function toggle(chip) {
 
 <template>
     <div class="flex flex-wrap items-center gap-2">
-        <button v-for="chip in chips" :key="chip.key" @click="toggle(chip)"
-                :class="['rounded-full px-3 py-1.5 text-xs font-medium transition-all',
-                         activeChip === chip.key
-                             ? (escDark
-                                 ? 'bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-white ring-1 ring-cyan-500/30'
-                                 : 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 ring-1 ring-blue-200')
-                             : (escDark
-                                 ? 'bg-white/[0.04] text-neutral-400 ring-1 ring-white/[0.06] hover:bg-white/[0.06] hover:text-neutral-300'
-                                 : 'bg-gray-50 text-gray-600 ring-1 ring-gray-200 hover:bg-gray-100')]">
+        <button
+            v-for="chip in chips"
+            :key="chip.key"
+            :class="[
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-all',
+                activeChip === chip.key
+                    ? escDark
+                        ? 'bg-gradient-to-r from-[var(--esc-panel-accent)]/20 to-[var(--esc-panel-accent-secondary)]/20 text-[var(--esc-panel-text)] ring-1 ring-[var(--esc-panel-accent)]/30'
+                        : 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 ring-1 ring-blue-200'
+                    : escDark
+                      ? 'bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] ring-1 ring-[var(--esc-panel-border)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]'
+                      : 'bg-gray-50 text-gray-600 ring-1 ring-gray-200 hover:bg-gray-100',
+            ]"
+            @click="toggle(chip)"
+        >
             {{ chip.label }}
         </button>
     </div>

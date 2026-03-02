@@ -42,27 +42,32 @@ function changePeriod(days) {
                     :class="[
                         'rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all',
                         period_days === d
-                            ? 'bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-lg shadow-black/20'
-                            : 'border border-white/10 bg-white/[0.03] text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200',
+                            ? 'bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] text-white shadow-lg shadow-[var(--esc-panel-bg)]/20'
+                            : 'border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
                     ]"
                     @click="changePeriod(d)"
                 >
                     Last {{ d }} days
                 </button>
             </div>
-            <Link :href="route('escalated.admin.reports')" class="text-sm text-neutral-500 hover:text-neutral-300">
+            <Link
+                :href="route('escalated.admin.reports')"
+                class="text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
+            >
                 Classic View
             </Link>
         </div>
 
         <!-- Tabs -->
-        <div class="mb-6 flex gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] p-1">
+        <div class="mb-6 flex gap-1 rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] p-1">
             <button
                 v-for="tab in tabs"
                 :key="tab.key"
                 :class="[
                     'rounded-md px-4 py-2 text-sm font-medium transition-all',
-                    activeTab === tab.key ? 'bg-white/[0.08] text-white' : 'text-neutral-500 hover:text-neutral-300',
+                    activeTab === tab.key
+                        ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]'
+                        : 'text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]',
                 ]"
                 @click="activeTab = tab.key"
             >
@@ -109,52 +114,66 @@ function changePeriod(days) {
             <div class="mb-4 text-right">
                 <Link
                     :href="route('escalated.admin.reports.agents', { days: period_days })"
-                    class="text-sm text-cyan-400 hover:text-cyan-300"
+                    class="text-sm text-[var(--esc-panel-accent)] hover:text-[var(--esc-panel-accent)]"
                 >
                     Full Agent Report &rarr;
                 </Link>
             </div>
-            <div class="overflow-hidden rounded-xl border border-white/[0.06]">
+            <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
                 <table class="w-full">
                     <thead>
-                        <tr class="border-b border-white/[0.06] bg-white/[0.02]">
+                        <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">
                             <th
-                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Agent
                             </th>
                             <th
-                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Tickets
                             </th>
                             <th
-                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Resolved
                             </th>
                             <th
-                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Avg Response
                             </th>
                             <th
-                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-neutral-500"
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                             >
                                 Avg Resolution
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/[0.04]">
-                        <tr v-for="agent in agent_performance" :key="agent.agent_id" class="hover:bg-white/[0.02]">
-                            <td class="px-4 py-3 text-sm font-medium text-neutral-200">{{ agent.agent_name }}</td>
-                            <td class="px-4 py-3 text-sm text-neutral-400">{{ agent.total_tickets }}</td>
-                            <td class="px-4 py-3 text-sm text-neutral-400">{{ agent.resolved_tickets }}</td>
-                            <td class="px-4 py-3 text-sm text-neutral-400">{{ agent.avg_response_hours ?? '—' }}h</td>
-                            <td class="px-4 py-3 text-sm text-neutral-400">{{ agent.avg_resolution_hours ?? '—' }}h</td>
+                    <tbody class="divide-y divide-[var(--esc-panel-border)]">
+                        <tr
+                            v-for="agent in agent_performance"
+                            :key="agent.agent_id"
+                            class="hover:bg-[var(--esc-panel-hover)]"
+                        >
+                            <td class="px-4 py-3 text-sm font-medium text-[var(--esc-panel-text-secondary)]">
+                                {{ agent.agent_name }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                                {{ agent.total_tickets }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                                {{ agent.resolved_tickets }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                                {{ agent.avg_response_hours ?? '—' }}h
+                            </td>
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                                {{ agent.avg_resolution_hours ?? '—' }}h
+                            </td>
                         </tr>
                         <tr v-if="!agent_performance?.length">
-                            <td colspan="5" class="px-4 py-8 text-center text-sm text-neutral-500">
+                            <td colspan="5" class="px-4 py-8 text-center text-sm text-[var(--esc-panel-text-muted)]">
                                 No agent data for this period.
                             </td>
                         </tr>
@@ -169,7 +188,7 @@ function changePeriod(days) {
                 <KpiCard label="Overall SLA Compliance" :value="`${sla_compliance}%`" />
                 <Link
                     :href="route('escalated.admin.reports.sla', { days: period_days })"
-                    class="text-sm text-cyan-400 hover:text-cyan-300"
+                    class="text-sm text-[var(--esc-panel-accent)] hover:text-[var(--esc-panel-accent)]"
                 >
                     Full SLA Report &rarr;
                 </Link>
@@ -182,7 +201,7 @@ function changePeriod(days) {
                 <KpiCard label="Average CSAT" :value="csat_average || '—'" />
                 <Link
                     :href="route('escalated.admin.reports.csat', { days: period_days })"
-                    class="text-sm text-cyan-400 hover:text-cyan-300"
+                    class="text-sm text-[var(--esc-panel-accent)] hover:text-[var(--esc-panel-accent)]"
                 >
                     Full CSAT Report &rarr;
                 </Link>

@@ -43,7 +43,7 @@ function generateSlug() {
             <div class="mb-6">
                 <Link
                     :href="route('escalated.admin.kb-articles.index')"
-                    class="text-sm text-neutral-500 hover:text-neutral-300"
+                    class="text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
                 >
                     &larr; Back to Articles
                 </Link>
@@ -52,11 +52,11 @@ function generateSlug() {
             <form class="space-y-6" @submit.prevent="submit">
                 <!-- Title -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-neutral-300">Title</label>
+                    <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Title</label>
                     <input
                         v-model="form.title"
                         type="text"
-                        class="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-sm text-neutral-200 placeholder-neutral-600 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                        class="w-full rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2.5 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
                         placeholder="Article title"
                         @blur="generateSlug"
                     />
@@ -65,11 +65,13 @@ function generateSlug() {
 
                 <!-- Slug -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-neutral-300">Slug (SEO URL)</label>
+                    <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                        >Slug (SEO URL)</label
+                    >
                     <input
                         v-model="form.slug"
                         type="text"
-                        class="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-sm text-neutral-200 placeholder-neutral-600 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                        class="w-full rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2.5 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
                         placeholder="article-slug"
                     />
                     <p v-if="form.errors.slug" class="mt-1 text-xs text-red-400">{{ form.errors.slug }}</p>
@@ -78,10 +80,12 @@ function generateSlug() {
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Category -->
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-neutral-300">Category</label>
+                        <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Category</label
+                        >
                         <select
                             v-model="form.category_id"
-                            class="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-sm text-neutral-200 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
                         >
                             <option value="">No Category</option>
                             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
@@ -93,10 +97,12 @@ function generateSlug() {
 
                     <!-- Status -->
                     <div>
-                        <label class="mb-1.5 block text-sm font-medium text-neutral-300">Status</label>
+                        <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Status</label
+                        >
                         <select
                             v-model="form.status"
-                            class="w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-sm text-neutral-200 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-3 py-2.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
                         >
                             <option value="draft">Draft</option>
                             <option value="published">Published</option>
@@ -107,7 +113,9 @@ function generateSlug() {
 
                 <!-- Body -->
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-neutral-300">Content</label>
+                    <label class="mb-1.5 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                        >Content</label
+                    >
                     <ArticleEditor v-model="form.body" />
                     <p v-if="form.errors.body" class="mt-1 text-xs text-red-400">{{ form.errors.body }}</p>
                 </div>
@@ -117,13 +125,13 @@ function generateSlug() {
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-opacity hover:opacity-90 disabled:opacity-50"
+                        class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-opacity hover:opacity-90 disabled:opacity-50"
                     >
                         {{ isEditing ? 'Update Article' : 'Create Article' }}
                     </button>
                     <Link
                         :href="route('escalated.admin.kb-articles.index')"
-                        class="rounded-lg border border-white/[0.06] px-5 py-2.5 text-sm font-medium text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200"
+                        class="rounded-lg border border-[var(--esc-panel-border)] px-5 py-2.5 text-sm font-medium text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]"
                     >
                         Cancel
                     </Link>

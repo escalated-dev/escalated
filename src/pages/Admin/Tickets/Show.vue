@@ -62,12 +62,25 @@ const { getPageComponents } = usePluginExtensions();
 
 // Keyboard shortcuts
 useKeyboardShortcuts({
-    'r': () => { activeTab.value = 'reply'; replyComposerRef.value?.$el?.querySelector('textarea')?.focus(); },
-    'n': () => { activeTab.value = 'note'; },
-    's': () => { statusSelectRef.value?.focus(); },
-    'p': () => { prioritySelectRef.value?.focus(); },
-    'f': () => { toggleFollow(); },
-    '?': () => { showShortcutHelp.value = true; },
+    r: () => {
+        activeTab.value = 'reply';
+        replyComposerRef.value?.$el?.querySelector('textarea')?.focus();
+    },
+    n: () => {
+        activeTab.value = 'note';
+    },
+    s: () => {
+        statusSelectRef.value?.focus();
+    },
+    p: () => {
+        prioritySelectRef.value?.focus();
+    },
+    f: () => {
+        toggleFollow();
+    },
+    '?': () => {
+        showShortcutHelp.value = true;
+    },
 });
 </script>
 
@@ -77,30 +90,51 @@ useKeyboardShortcuts({
         <PluginSlot slot="ticket.show.header" :components="getPageComponents('ticket.show', 'header')" />
 
         <div class="mb-5 flex flex-wrap items-center gap-3">
-            <span class="text-sm font-mono font-medium text-white">{{ ticket.reference }}</span>
+            <span class="text-sm font-mono font-medium text-[var(--esc-panel-text)]">{{ ticket.reference }}</span>
             <StatusBadge :status="ticket.status" />
             <PriorityBadge :priority="ticket.priority" />
-            <span class="text-sm text-neutral-500">by {{ ticket.requester?.name }}</span>
+            <span class="text-sm text-[var(--esc-panel-text-muted)]">by {{ ticket.requester?.name }}</span>
             <PresenceIndicator :ticket-reference="ticket.reference" route-prefix="escalated.admin" />
             <div class="ml-auto flex items-center gap-2">
-                <FollowButton :is-following="is_following" :followers-count="followers_count"
-                              :action="route('escalated.admin.tickets.follow', ticket.reference)" />
-                <MacroDropdown v-if="macros.length" :macros="macros"
-                               :action="route('escalated.admin.tickets.macro', ticket.reference)" />
-                <button v-if="!ticket.assigned_to" @click="assignToMe"
-                        class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400">
+                <FollowButton
+                    :is-following="is_following"
+                    :followers-count="followers_count"
+                    :action="route('escalated.admin.tickets.follow', ticket.reference)"
+                />
+                <MacroDropdown
+                    v-if="macros.length"
+                    :macros="macros"
+                    :action="route('escalated.admin.tickets.macro', ticket.reference)"
+                />
+                <button
+                    v-if="!ticket.assigned_to"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)]"
+                    @click="assignToMe"
+                >
                     Assign to Me
                 </button>
-                <select ref="statusSelectRef" @change="changeStatus($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
+                <select
+                    ref="statusSelectRef"
+                    class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                    @change="
+                        changeStatus($event.target.value);
+                        $event.target.value = '';
+                    "
+                >
                     <option value="">Change Status...</option>
                     <option value="in_progress">In Progress</option>
                     <option value="waiting_on_customer">Waiting on Customer</option>
                     <option value="resolved">Resolved</option>
                     <option value="closed">Closed</option>
                 </select>
-                <select ref="prioritySelectRef" @change="changePriority($event.target.value); $event.target.value = ''"
-                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10">
+                <select
+                    ref="prioritySelectRef"
+                    class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                    @change="
+                        changePriority($event.target.value);
+                        $event.target.value = '';
+                    "
+                >
                     <option value="">Change Priority...</option>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -114,35 +148,65 @@ useKeyboardShortcuts({
         </div>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-6">
-                <PinnedNotes v-if="ticket.pinned_notes?.length" :notes="ticket.pinned_notes"
-                             :ticket-reference="ticket.reference" route-prefix="escalated.admin" />
-                <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
-                    <p class="whitespace-pre-wrap text-sm text-neutral-300">{{ ticket.description }}</p>
+                <PinnedNotes
+                    v-if="ticket.pinned_notes?.length"
+                    :notes="ticket.pinned_notes"
+                    :ticket-reference="ticket.reference"
+                    route-prefix="escalated.admin"
+                />
+                <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-5">
+                    <p class="whitespace-pre-wrap text-sm text-[var(--esc-panel-text-secondary)]">
+                        {{ ticket.description }}
+                    </p>
                     <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />
                 </div>
                 <div>
-                    <div class="mb-4 flex gap-4 border-b border-white/[0.06]">
-                        <button @click="activeTab = 'reply'"
-                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'reply' ? 'border-b-2 border-cyan-500 text-white' : 'text-neutral-500 hover:text-neutral-300']">
+                    <div class="mb-4 flex gap-4 border-b border-[var(--esc-panel-border)]">
+                        <button
+                            :class="[
+                                'pb-2 text-sm font-medium transition-colors',
+                                activeTab === 'reply'
+                                    ? 'border-b-2 border-[var(--esc-panel-accent)] text-[var(--esc-panel-text)]'
+                                    : 'text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]',
+                            ]"
+                            @click="activeTab = 'reply'"
+                        >
                             Reply
                         </button>
-                        <button @click="activeTab = 'note'"
-                                :class="['pb-2 text-sm font-medium transition-colors', activeTab === 'note' ? 'border-b-2 border-amber-500 text-amber-400' : 'text-neutral-500 hover:text-neutral-300']">
+                        <button
+                            :class="[
+                                'pb-2 text-sm font-medium transition-colors',
+                                activeTab === 'note'
+                                    ? 'border-b-2 border-amber-500 text-amber-400'
+                                    : 'text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]',
+                            ]"
+                            @click="activeTab = 'note'"
+                        >
                             Internal Note
                         </button>
                     </div>
-                    <ReplyComposer v-if="activeTab === 'reply'" ref="replyComposerRef"
-                                   :action="route('escalated.admin.tickets.reply', ticket.reference)"
-                                   :canned-responses="cannedResponses" />
-                    <ReplyComposer v-else
-                                   :action="route('escalated.admin.tickets.note', ticket.reference)"
-                                   placeholder="Write an internal note..."
-                                   submit-label="Add Note" />
+                    <ReplyComposer
+                        v-if="activeTab === 'reply'"
+                        ref="replyComposerRef"
+                        :action="route('escalated.admin.tickets.reply', ticket.reference)"
+                        :canned-responses="cannedResponses"
+                    />
+                    <ReplyComposer
+                        v-else
+                        :action="route('escalated.admin.tickets.note', ticket.reference)"
+                        placeholder="Write an internal note..."
+                        submit-label="Add Note"
+                    />
                 </div>
                 <div>
-                    <h2 class="mb-4 text-lg font-semibold text-neutral-200">Conversation</h2>
-                    <ReplyThread :replies="ticket.replies || []" :current-user-id="page.props.auth?.user?.id"
-                                 :ticket-reference="ticket.reference" route-prefix="escalated.admin" pinnable />
+                    <h2 class="mb-4 text-lg font-semibold text-[var(--esc-panel-text-secondary)]">Conversation</h2>
+                    <ReplyThread
+                        :replies="ticket.replies || []"
+                        :current-user-id="page.props.auth?.user?.id"
+                        :ticket-reference="ticket.reference"
+                        route-prefix="escalated.admin"
+                        pinnable
+                    />
                 </div>
             </div>
             <div class="space-y-6">

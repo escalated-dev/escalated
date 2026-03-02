@@ -57,28 +57,28 @@ function submit() {
     <EscalatedLayout :title="isEdit ? 'Edit Custom Object' : 'New Custom Object'">
         <form class="mx-auto max-w-2xl space-y-6" @submit.prevent="submit">
             <!-- Basic Info -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
-                <h3 class="mb-5 text-sm font-semibold text-white">Object Details</h3>
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Object Details</h3>
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Name</label>
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Name</label>
                         <input
                             v-model="form.name"
                             type="text"
                             placeholder="e.g. Product, Contract"
-                            class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                            class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             @input="autoSlug"
                         />
                         <div v-if="form.errors.name" class="mt-1 text-sm text-rose-400">{{ form.errors.name }}</div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-neutral-200">Slug</label>
+                        <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]">Slug</label>
                         <input
                             v-model="form.slug"
                             type="text"
                             :readonly="isEdit"
-                            class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm font-mono text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
-                            :class="{ 'bg-neutral-900/50 text-neutral-500': isEdit }"
+                            class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm font-mono text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                            :class="{ 'bg-[var(--esc-panel-surface)] text-[var(--esc-panel-text-muted)]': isEdit }"
                         />
                         <div v-if="form.errors.slug" class="mt-1 text-sm text-rose-400">{{ form.errors.slug }}</div>
                     </div>
@@ -86,12 +86,12 @@ function submit() {
             </div>
 
             <!-- Fields Schema -->
-            <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-6">
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
                 <div class="mb-5 flex items-center justify-between">
-                    <h3 class="text-sm font-semibold text-white">Fields</h3>
+                    <h3 class="text-sm font-semibold text-[var(--esc-panel-text)]">Fields</h3>
                     <button
                         type="button"
-                        class="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-neutral-400 hover:border-white/20 hover:text-neutral-200"
+                        class="rounded-lg border border-[var(--esc-panel-border-input)] px-3 py-1.5 text-sm text-[var(--esc-panel-text-tertiary)] hover:border-[var(--esc-panel-border-input)] hover:text-[var(--esc-panel-text-secondary)]"
                         @click="addField"
                     >
                         + Add Field
@@ -102,23 +102,27 @@ function submit() {
                     <div
                         v-for="(field, idx) in form.fields_schema"
                         :key="idx"
-                        class="rounded-lg border border-white/[0.06] bg-neutral-950 p-4"
+                        class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface-alt)] p-4"
                     >
                         <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
                             <div class="sm:col-span-2">
-                                <label class="block text-xs font-medium text-neutral-400">Field Name</label>
+                                <label class="block text-xs font-medium text-[var(--esc-panel-text-tertiary)]"
+                                    >Field Name</label
+                                >
                                 <input
                                     v-model="field.name"
                                     type="text"
                                     placeholder="e.g. serial_number"
-                                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-neutral-400">Type</label>
+                                <label class="block text-xs font-medium text-[var(--esc-panel-text-tertiary)]"
+                                    >Type</label
+                                >
                                 <select
                                     v-model="field.type"
-                                    class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 >
                                     <option v-for="ft in fieldTypes" :key="ft.value" :value="ft.value">
                                         {{ ft.label }}
@@ -130,13 +134,13 @@ function submit() {
                                     <input
                                         v-model="field.required"
                                         type="checkbox"
-                                        class="rounded border-white/20 bg-neutral-900 text-cyan-500 focus:ring-white/10"
+                                        class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] text-cyan-500 focus:ring-[var(--esc-panel-border-input)]"
                                     />
-                                    <span class="text-xs text-neutral-400">Required</span>
+                                    <span class="text-xs text-[var(--esc-panel-text-tertiary)]">Required</span>
                                 </label>
                                 <button
                                     type="button"
-                                    class="ml-auto rounded p-1 text-neutral-500 hover:bg-red-500/10 hover:text-red-400"
+                                    class="ml-auto rounded p-1 text-[var(--esc-panel-text-muted)] hover:bg-red-500/10 hover:text-red-400"
                                     @click="removeField(idx)"
                                 >
                                     <svg
@@ -153,12 +157,14 @@ function submit() {
                         </div>
                         <!-- Options for select type -->
                         <div v-if="field.type === 'select'" class="mt-3">
-                            <label class="block text-xs font-medium text-neutral-400">Options (comma-separated)</label>
+                            <label class="block text-xs font-medium text-[var(--esc-panel-text-tertiary)]"
+                                >Options (comma-separated)</label
+                            >
                             <input
                                 :value="(field.options || []).join(', ')"
                                 type="text"
                                 placeholder="Option1, Option2, Option3"
-                                class="mt-1 w-full rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                                class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 @input="
                                     field.options = $event.target.value
                                         .split(',')
@@ -170,8 +176,13 @@ function submit() {
                     </div>
                 </div>
 
-                <div v-else class="rounded-lg border border-dashed border-white/[0.08] px-4 py-6 text-center">
-                    <p class="text-sm text-neutral-500">No fields defined yet. Click "Add Field" to start.</p>
+                <div
+                    v-else
+                    class="rounded-lg border border-dashed border-[var(--esc-panel-border)] px-4 py-6 text-center"
+                >
+                    <p class="text-sm text-[var(--esc-panel-text-muted)]">
+                        No fields defined yet. Click "Add Field" to start.
+                    </p>
                 </div>
             </div>
 
@@ -181,7 +192,7 @@ function submit() {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-5 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                 >
                     {{ form.processing ? 'Saving...' : isEdit ? 'Update Object' : 'Create Object' }}
                 </button>

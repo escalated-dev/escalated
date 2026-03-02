@@ -154,7 +154,7 @@ describe('EscalatedPlugin', () => {
 
         app.use(EscalatedPlugin, {});
 
-        const layoutCalls = provideSpy.mock.calls.filter(c => c[0] === 'escalated-layout');
+        const layoutCalls = provideSpy.mock.calls.filter((c) => c[0] === 'escalated-layout');
         expect(layoutCalls).toHaveLength(0);
     });
 });
@@ -229,5 +229,95 @@ describe('scaleBorderRadius() utility (tested indirectly via theme)', () => {
 
         const lg = document.documentElement.style.getPropertyValue('--esc-radius-lg');
         expect(lg).toBe('3.00rem');
+    });
+});
+
+describe('Panel theming', () => {
+    const panelProps = [
+        '--esc-panel-bg',
+        '--esc-panel-sidebar-bg',
+        '--esc-panel-topbar-bg',
+        '--esc-panel-surface',
+        '--esc-panel-surface-alt',
+        '--esc-panel-border',
+        '--esc-panel-border-input',
+        '--esc-panel-text',
+        '--esc-panel-text-secondary',
+        '--esc-panel-text-tertiary',
+        '--esc-panel-text-muted',
+        '--esc-panel-accent',
+        '--esc-panel-accent-secondary',
+        '--esc-panel-accent-hover',
+        '--esc-panel-accent-secondary-hover',
+        '--esc-panel-hover',
+        '--esc-panel-active',
+    ];
+
+    beforeEach(() => {
+        const style = document.documentElement.style;
+        panelProps.forEach((p) => style.removeProperty(p));
+    });
+
+    it('does not set panel CSS variables when no panel option is provided', () => {
+        installPlugin({ theme: {} });
+        const style = document.documentElement.style;
+        expect(style.getPropertyValue('--esc-panel-bg')).toBe('');
+    });
+
+    it('sets all dark-mode panel defaults when panel is empty object', () => {
+        installPlugin({ theme: { panel: {} } });
+        const style = document.documentElement.style;
+        expect(style.getPropertyValue('--esc-panel-bg')).toBe('#000000');
+        expect(style.getPropertyValue('--esc-panel-sidebar-bg')).toBe('#0a0a0a');
+        expect(style.getPropertyValue('--esc-panel-text')).toBe('#ffffff');
+        expect(style.getPropertyValue('--esc-panel-accent')).toBe('#06b6d4');
+        expect(style.getPropertyValue('--esc-panel-accent-secondary')).toBe('#8b5cf6');
+    });
+
+    it('sets light-mode defaults when mode is light', () => {
+        installPlugin({ theme: { panel: { mode: 'light' } } });
+        const style = document.documentElement.style;
+        expect(style.getPropertyValue('--esc-panel-bg')).toBe('#f9fafb');
+        expect(style.getPropertyValue('--esc-panel-sidebar-bg')).toBe('#ffffff');
+        expect(style.getPropertyValue('--esc-panel-text')).toBe('#111827');
+        expect(style.getPropertyValue('--esc-panel-accent')).toBe('#3b82f6');
+        expect(style.getPropertyValue('--esc-panel-accent-secondary')).toBe('#6366f1');
+    });
+
+    it('allows individual token overrides on top of dark defaults', () => {
+        installPlugin({ theme: { panel: { accent: '#e94560', bg: '#0f0f23' } } });
+        const style = document.documentElement.style;
+        expect(style.getPropertyValue('--esc-panel-accent')).toBe('#e94560');
+        expect(style.getPropertyValue('--esc-panel-bg')).toBe('#0f0f23');
+        expect(style.getPropertyValue('--esc-panel-text')).toBe('#ffffff');
+    });
+
+    it('allows individual token overrides on top of light defaults', () => {
+        installPlugin({ theme: { panel: { mode: 'light', accent: '#e94560' } } });
+        const style = document.documentElement.style;
+        expect(style.getPropertyValue('--esc-panel-accent')).toBe('#e94560');
+        expect(style.getPropertyValue('--esc-panel-bg')).toBe('#f9fafb');
+    });
+
+    it('provides panel config including appName and logo via Vue provide', () => {
+        const app = createApp({ template: '<div />' });
+        const provideSpy = vi.spyOn(app, 'provide');
+        app.use(EscalatedPlugin, {
+            theme: { panel: { appName: 'HelpDesk Pro', logo: '/img/logo.svg' } },
+        });
+        expect(provideSpy).toHaveBeenCalledWith(
+            'escalated-panel',
+            expect.objectContaining({ appName: 'HelpDesk Pro', logo: '/img/logo.svg', mode: 'dark' }),
+        );
+    });
+
+    it('defaults appName to Escalated and logo to null', () => {
+        const app = createApp({ template: '<div />' });
+        const provideSpy = vi.spyOn(app, 'provide');
+        app.use(EscalatedPlugin, { theme: { panel: {} } });
+        expect(provideSpy).toHaveBeenCalledWith(
+            'escalated-panel',
+            expect.objectContaining({ appName: 'Escalated', logo: null, mode: 'dark' }),
+        );
     });
 });

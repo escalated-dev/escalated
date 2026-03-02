@@ -89,7 +89,7 @@ function statusLabel(plugin) {
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <p class="text-sm text-neutral-400">
+                <p class="text-sm text-[var(--esc-panel-text-tertiary)]">
                     {{ activePlugins.length }} active, {{ inactivePlugins.length }} inactive
                 </p>
             </div>
@@ -97,7 +97,7 @@ function statusLabel(plugin) {
                 <input ref="fileInput" type="file" accept=".zip" class="hidden" @change="handleUpload" />
                 <button
                     :disabled="uploading"
-                    class="rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-black/20 transition-all hover:from-cyan-400 hover:to-violet-400 disabled:opacity-50"
+                    class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-4 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)] disabled:opacity-50"
                     @click="triggerUpload"
                 >
                     <span v-if="uploading" class="flex items-center gap-2">
@@ -128,10 +128,10 @@ function statusLabel(plugin) {
         <!-- Empty state -->
         <div
             v-if="!plugins?.length"
-            class="rounded-xl border border-white/[0.06] bg-neutral-900/60 px-6 py-16 text-center"
+            class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] px-6 py-16 text-center"
         >
             <svg
-                class="mx-auto mb-4 h-12 w-12 text-neutral-700"
+                class="mx-auto mb-4 h-12 w-12 text-[var(--esc-panel-text-muted)]"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.5"
@@ -143,8 +143,8 @@ function statusLabel(plugin) {
                     d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z"
                 />
             </svg>
-            <h3 class="text-sm font-medium text-neutral-300">No plugins installed</h3>
-            <p class="mt-1 text-xs text-neutral-500">
+            <h3 class="text-sm font-medium text-[var(--esc-panel-text-secondary)]">No plugins installed</h3>
+            <p class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
                 Upload a plugin ZIP to extend Escalated with custom functionality.
             </p>
         </div>
@@ -154,30 +154,32 @@ function statusLabel(plugin) {
             <div
                 v-for="plugin in plugins"
                 :key="plugin.slug"
-                class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5 transition-colors hover:bg-neutral-900/80"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-5 transition-colors hover:bg-[var(--esc-panel-surface)]"
             >
                 <div class="flex items-start justify-between gap-4">
                     <!-- Plugin info -->
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-3">
-                            <h3 class="text-sm font-semibold text-white">{{ plugin.name }}</h3>
+                            <h3 class="text-sm font-semibold text-[var(--esc-panel-text)]">{{ plugin.name }}</h3>
                             <span
                                 :class="[
                                     'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold',
                                     plugin.is_active
                                         ? 'bg-emerald-500/10 text-emerald-400'
-                                        : 'bg-neutral-500/10 text-neutral-500',
+                                        : 'bg-neutral-500/10 text-[var(--esc-panel-text-muted)]',
                                 ]"
                             >
                                 <span :class="['h-1.5 w-1.5 rounded-full', statusColor(plugin)]"></span>
                                 {{ statusLabel(plugin) }}
                             </span>
-                            <span v-if="plugin.version" class="text-[11px] text-neutral-600"
+                            <span v-if="plugin.version" class="text-[11px] text-[var(--esc-panel-text-muted)]"
                                 >v{{ plugin.version }}</span
                             >
                         </div>
-                        <p v-if="plugin.description" class="mt-1 text-sm text-neutral-400">{{ plugin.description }}</p>
-                        <div class="mt-2 flex flex-wrap items-center gap-4 text-xs text-neutral-600">
+                        <p v-if="plugin.description" class="mt-1 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            {{ plugin.description }}
+                        </p>
+                        <div class="mt-2 flex flex-wrap items-center gap-4 text-xs text-[var(--esc-panel-text-muted)]">
                             <span v-if="plugin.author" class="flex items-center gap-1">
                                 <svg
                                     class="h-3.5 w-3.5"
@@ -212,7 +214,7 @@ function statusLabel(plugin) {
                                     :href="plugin.homepage"
                                     target="_blank"
                                     rel="noopener"
-                                    class="hover:text-neutral-400"
+                                    class="hover:text-[var(--esc-panel-text-tertiary)]"
                                     >{{ plugin.homepage }}</a
                                 >
                             </span>
@@ -238,7 +240,7 @@ function statusLabel(plugin) {
                         <div v-if="plugin.provides" class="mt-3 flex flex-wrap gap-2">
                             <span
                                 v-if="plugin.provides.menu_items"
-                                class="rounded bg-white/[0.04] px-2 py-0.5 text-[10px] text-neutral-500"
+                                class="rounded bg-[var(--esc-panel-hover)] px-2 py-0.5 text-[10px] text-[var(--esc-panel-text-muted)]"
                             >
                                 {{ plugin.provides.menu_items }} menu item{{
                                     plugin.provides.menu_items !== 1 ? 's' : ''
@@ -246,13 +248,13 @@ function statusLabel(plugin) {
                             </span>
                             <span
                                 v-if="plugin.provides.widgets"
-                                class="rounded bg-white/[0.04] px-2 py-0.5 text-[10px] text-neutral-500"
+                                class="rounded bg-[var(--esc-panel-hover)] px-2 py-0.5 text-[10px] text-[var(--esc-panel-text-muted)]"
                             >
                                 {{ plugin.provides.widgets }} widget{{ plugin.provides.widgets !== 1 ? 's' : '' }}
                             </span>
                             <span
                                 v-if="plugin.provides.page_components"
-                                class="rounded bg-white/[0.04] px-2 py-0.5 text-[10px] text-neutral-500"
+                                class="rounded bg-[var(--esc-panel-hover)] px-2 py-0.5 text-[10px] text-[var(--esc-panel-text-muted)]"
                             >
                                 {{ plugin.provides.page_components }} page component{{
                                     plugin.provides.page_components !== 1 ? 's' : ''
@@ -290,7 +292,7 @@ function statusLabel(plugin) {
                                     Confirm
                                 </button>
                                 <button
-                                    class="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-neutral-400 transition-colors hover:bg-white/[0.04]"
+                                    class="rounded-lg border border-[var(--esc-panel-border-input)] px-3 py-1.5 text-xs font-medium text-[var(--esc-panel-text-tertiary)] transition-colors hover:bg-[var(--esc-panel-hover)]"
                                     @click="cancelDelete"
                                 >
                                     Cancel
@@ -298,7 +300,7 @@ function statusLabel(plugin) {
                             </template>
                             <button
                                 v-else
-                                class="rounded-lg border border-white/[0.06] p-1.5 text-neutral-600 transition-colors hover:border-rose-500/20 hover:bg-rose-500/5 hover:text-rose-400"
+                                class="rounded-lg border border-[var(--esc-panel-border)] p-1.5 text-[var(--esc-panel-text-muted)] transition-colors hover:border-rose-500/20 hover:bg-rose-500/5 hover:text-rose-400"
                                 title="Delete plugin"
                                 @click="confirmDelete(plugin)"
                             >
