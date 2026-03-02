@@ -63,19 +63,44 @@ for (const story of stories) {
 
 // ----------------------------------------------------------------
 // README hero screenshots → docs/assets/ (referenced by README.md)
+// Full-page viewport captures with centered content for the README.
 // ----------------------------------------------------------------
 
+/**
+ * Prepare the page for a hero screenshot: fill the viewport background
+ * and center the story content both horizontally and vertically.
+ */
+async function prepareHeroShot(page, storyId) {
+    await openStory(page, storyId);
+    await page.addStyleTag({
+        content: `
+            body { background: #171717 !important; margin: 0; }
+            #storybook-root {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-height: 100vh !important;
+            }
+            #storybook-root > * {
+                width: 100%;
+                max-width: 900px;
+            }
+        `,
+    });
+    await page.waitForTimeout(300);
+}
+
 test('README hero: Dashboard components (escalated_admin_1)', async ({ page }) => {
-    const root = await openStory(page, 'components-statscard--dashboard-grid');
-    await root.screenshot({
+    await prepareHeroShot(page, 'components-statscard--dashboard-grid');
+    await page.screenshot({
         path: 'docs/assets/escalated_admin_1.png',
         animations: 'disabled',
     });
 });
 
 test('README hero: KPI metrics (escalated_admin_2)', async ({ page }) => {
-    const root = await openStory(page, 'components-kpicard--dashboard-row');
-    await root.screenshot({
+    await prepareHeroShot(page, 'components-kpicard--dashboard-row');
+    await page.screenshot({
         path: 'docs/assets/escalated_admin_2.png',
         animations: 'disabled',
     });
