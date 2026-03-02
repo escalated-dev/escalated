@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -47,6 +47,17 @@ jobs:
           name: component-screenshots
           path: screenshot-results/*.png
           retention-days: 30
+
+      - name: Commit updated README screenshots
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/assets/escalated_admin_1.png docs/assets/escalated_admin_2.png
+          git diff --cached --quiet && echo "No screenshot changes" || {
+            git commit -m "chore: update README screenshots from Storybook"
+            git push
+          }
 
       - name: Comment on PR with screenshot summary
         if: github.event_name == 'pull_request' && always()

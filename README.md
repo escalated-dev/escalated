@@ -127,12 +127,14 @@ All the Vue 3 + Inertia.js components that power the Escalated UI. These are ide
 
 ## 📸 Screenshots
 
+> Screenshots are auto-generated from Storybook via the [component-screenshots](.github/workflows/screenshots.yml) workflow.
+
 <p align="center">
-  <img src="docs/assets/escalated_admin_1.png" alt="Escalated Admin Screenshot 1" width="800" />
+  <img src="docs/assets/escalated_admin_1.png" alt="Escalated dashboard — StatsCard grid with metrics and trends" width="800" />
 </p>
 
 <p align="center">
-  <img src="docs/assets/escalated_admin_2.png" alt="Escalated Admin Screenshot 2" width="800" />
+  <img src="docs/assets/escalated_admin_2.png" alt="Escalated analytics — KPI cards with icons and trend indicators" width="800" />
 </p>
 
 ### Pages
