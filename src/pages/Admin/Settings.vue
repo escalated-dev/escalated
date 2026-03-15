@@ -28,6 +28,7 @@ const form = useForm({
     imap_username: props.settings.imap_username ?? '',
     imap_password: props.settings.imap_password ?? '',
     imap_mailbox: props.settings.imap_mailbox ?? 'INBOX',
+    show_powered_by: props.settings.show_powered_by ?? true,
 });
 
 const webhookBaseUrl = computed(() => {
@@ -414,6 +415,38 @@ function submit() {
                             </div>
                         </template>
                     </template>
+                </div>
+            </div>
+
+            <!-- Branding -->
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Branding</h3>
+                <div class="space-y-5">
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Show "Powered by Escalated"</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Display attribution badge in the support portal footer
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.show_powered_by ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.show_powered_by = !form.show_powered_by"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.show_powered_by ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
                 </div>
             </div>
 

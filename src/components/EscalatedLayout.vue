@@ -23,6 +23,7 @@ const isAdminSection = computed(() => currentUrl.value?.includes('/admin'));
 const isAgentSection = computed(() => currentUrl.value?.includes('/agent'));
 const isPanel = computed(() => isAdminSection.value || isAgentSection.value);
 const isDark = computed(() => isPanel.value && panelConfig.mode !== 'light');
+const showPoweredBy = computed(() => page.props.escalated?.show_powered_by !== false);
 
 provide('esc-dark', isDark);
 
@@ -328,6 +329,27 @@ function isActive(href) {
                     <span class="text-sm text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
                 </div>
             </div>
+
+            <!-- Powered by -->
+            <div v-if="showPoweredBy" class="px-4 pb-3">
+                <a
+                    href="https://escalated.dev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] text-[var(--esc-panel-text-muted)] opacity-60 transition-opacity hover:opacity-100"
+                >
+                    <img
+                        :src="
+                            isDark
+                                ? 'https://escalated.dev/brand/logo-icon-dark.svg'
+                                : 'https://escalated.dev/brand/logo-icon-white.svg'
+                        "
+                        alt=""
+                        class="h-3.5 w-3.5"
+                    />
+                    Powered by Escalated
+                </a>
+            </div>
         </aside>
 
         <!-- Main content -->
@@ -448,6 +470,27 @@ function isActive(href) {
         <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <slot />
         </main>
+
+        <!-- Powered by -->
+        <footer v-if="showPoweredBy" class="border-t border-[var(--esc-panel-border)] py-3 text-center">
+            <a
+                href="https://escalated.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-[11px] text-[var(--esc-panel-text-muted)] opacity-60 transition-opacity hover:opacity-100"
+            >
+                <img
+                    :src="
+                        isDark
+                            ? 'https://escalated.dev/brand/logo-icon-dark.svg'
+                            : 'https://escalated.dev/brand/logo-icon-white.svg'
+                    "
+                    alt=""
+                    class="h-3.5 w-3.5"
+                />
+                Powered by Escalated
+            </a>
+        </footer>
     </div>
 
     <!-- MODE 3: Customer pages — use host app layout if provided -->
@@ -501,5 +544,18 @@ function isActive(href) {
                 <slot />
             </div>
         </main>
+
+        <!-- Powered by -->
+        <footer v-if="showPoweredBy" class="border-t border-gray-200 py-3 text-center">
+            <a
+                href="https://escalated.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-[11px] text-gray-400 transition-colors hover:text-gray-600"
+            >
+                <img src="https://escalated.dev/brand/logo-icon-white.svg" alt="" class="h-3.5 w-3.5" />
+                Powered by Escalated
+            </a>
+        </footer>
     </div>
 </template>
