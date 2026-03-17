@@ -58,3 +58,10 @@ export { usePluginHooks } from './composables/usePluginHooks';
 
 // Plugin authoring helper
 export { defineEscalatedPlugin } from './defineEscalatedPlugin';
+
+// Import pages
+export { default as AdminImportIndex } from './pages/Admin/Import/Index.vue';
+export { default as AdminImportConnect } from './pages/Admin/Import/Connect.vue';
+export { default as AdminImportMapping } from './pages/Admin/Import/Mapping.vue';
+export { default as AdminImportReview } from './pages/Admin/Import/Review.vue';
+export { default as AdminImportProgress } from './pages/Admin/Import/Progress.vue';
