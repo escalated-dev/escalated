@@ -402,6 +402,31 @@
       "confirm_delete": "Are you sure you want to delete this plugin? This cannot be undone."
     }
   },
+  "import": {
+    "title": "Import Data",
+    "description": "Migrate tickets, contacts, and history from another helpdesk platform.",
+    "no_adapters": "No import adapters installed.",
+    "connect": "Connect to {platform}",
+    "test_connection": "Test Connection",
+    "testing": "Testing...",
+    "connected": "Connected successfully",
+    "field_mapping": "Field Mapping",
+    "skip_entity": "Skip importing {type}",
+    "review": "Review Import",
+    "start": "Start Import",
+    "starting": "Starting...",
+    "progress": "Import Progress",
+    "pause": "Pause",
+    "resume": "Resume",
+    "cancel": "Cancel",
+    "paused": "Import paused.",
+    "resumed": "Import resumed.",
+    "cancelled": "Import cancelled.",
+    "completed": "Import completed successfully.",
+    "history": "Import History",
+    "suppression_notice": "Notifications and automations are suppressed during import.",
+    "recent_errors": "Recent Errors"
+  },
   "agent": {
     "dashboard": "Agent Dashboard",
     "open_tickets": "Open Tickets",
