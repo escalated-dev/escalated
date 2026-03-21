@@ -60,6 +60,8 @@ const config = computed(() => {
 
 <template>
     <span
+        role="status"
+        :aria-label="'Status: ' + config.label"
         :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', config.color]"
         :style="
             config.customColor

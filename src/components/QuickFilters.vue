@@ -36,7 +36,7 @@ function toggle(chip) {
 </script>
 
 <template>
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Quick filters">
         <button
             v-for="chip in chips"
             :key="chip.key"
@@ -50,6 +50,7 @@ function toggle(chip) {
                       ? 'bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] ring-1 ring-[var(--esc-panel-border)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]'
                       : 'bg-gray-50 text-gray-600 ring-1 ring-gray-200 hover:bg-gray-100',
             ]"
+            :aria-pressed="activeChip === chip.key"
             @click="toggle(chip)"
         >
             {{ chip.label }}

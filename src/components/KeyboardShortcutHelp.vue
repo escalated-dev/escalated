@@ -68,6 +68,9 @@ function closeModal() {
 
                 <!-- Modal -->
                 <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Keyboard shortcuts"
                     :class="[
                         'relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border shadow-2xl',
                         escDark
@@ -109,6 +112,7 @@ function closeModal() {
                             </h2>
                         </div>
                         <button
+                            aria-label="Close"
                             :class="[
                                 'rounded-lg p-1.5 transition-colors',
                                 escDark

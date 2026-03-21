@@ -129,6 +129,7 @@ const buttonLabel = computed(() => {
                         ? 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/20'
                         : 'text-gray-400 hover:bg-white/[0.04]',
                 ]"
+                aria-label="Internal note"
                 @click="isNote = true"
             >
                 Internal Note
@@ -146,6 +147,7 @@ const buttonLabel = computed(() => {
             v-model="body"
             rows="4"
             :placeholder="placeholder"
+            aria-label="Reply message"
             class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
             @keydown="onTyping"
             @blur="onBlur"
@@ -156,7 +158,9 @@ const buttonLabel = computed(() => {
         <div v-if="files.length" class="mt-2 space-y-1">
             <div v-for="(file, i) in files" :key="i" class="flex items-center gap-2 text-sm text-gray-400">
                 <span>{{ file.name }}</span>
-                <button class="text-rose-400 hover:text-rose-300" @click="removeFile(i)">&times;</button>
+                <button aria-label="Remove attachment" class="text-rose-400 hover:text-rose-300" @click="removeFile(i)">
+                    &times;
+                </button>
             </div>
         </div>
 
@@ -207,6 +211,7 @@ const buttonLabel = computed(() => {
                     'rounded-md px-3 py-1 text-sm font-medium',
                     isNote ? 'bg-yellow-100 text-yellow-700' : 'text-gray-500 hover:bg-gray-100',
                 ]"
+                aria-label="Internal note"
                 @click="isNote = true"
             >
                 Internal Note
@@ -221,6 +226,7 @@ const buttonLabel = computed(() => {
             v-model="body"
             rows="4"
             :placeholder="placeholder"
+            aria-label="Reply message"
             class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             @keydown="onTyping"
             @blur="onBlur"
@@ -231,7 +237,9 @@ const buttonLabel = computed(() => {
         <div v-if="files.length" class="mt-2 space-y-1">
             <div v-for="(file, i) in files" :key="i" class="flex items-center gap-2 text-sm text-gray-600">
                 <span>{{ file.name }}</span>
-                <button class="text-red-500 hover:text-red-700" @click="removeFile(i)">&times;</button>
+                <button aria-label="Remove attachment" class="text-red-500 hover:text-red-700" @click="removeFile(i)">
+                    &times;
+                </button>
             </div>
         </div>
 

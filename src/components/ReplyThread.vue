@@ -34,7 +34,7 @@ function togglePin(reply) {
 </script>
 
 <template>
-    <div class="space-y-4">
+    <div class="space-y-4" role="feed" aria-label="Reply thread">
         <div
             v-for="reply in replies"
             :key="reply.id"

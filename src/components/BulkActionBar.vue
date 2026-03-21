@@ -77,13 +77,17 @@ const selectClass = computed(() =>
             ]"
         >
             <div class="mx-auto flex max-w-7xl items-center gap-4">
-                <span :class="['text-sm font-semibold', escDark ? 'text-[var(--esc-panel-text)]' : 'text-gray-900']">
+                <span
+                    :class="['text-sm font-semibold', escDark ? 'text-[var(--esc-panel-text)]' : 'text-gray-900']"
+                    aria-live="polite"
+                >
                     {{ selectedIds.length }} ticket{{ selectedIds.length !== 1 ? 's' : '' }} selected
                 </span>
 
                 <select
                     :class="selectClass"
                     :disabled="processing"
+                    aria-label="Change status"
                     @change="
                         performAction('status', $event.target.value);
                         $event.target.value = '';
@@ -96,6 +100,7 @@ const selectClass = computed(() =>
                 <select
                     :class="selectClass"
                     :disabled="processing"
+                    aria-label="Change priority"
                     @change="
                         performAction('priority', $event.target.value);
                         $event.target.value = '';

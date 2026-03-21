@@ -41,7 +41,13 @@ function removeSkill(skillId) {
                 class="inline-flex items-center gap-1 rounded-md bg-cyan-500/15 px-2 py-1 text-xs font-medium text-cyan-300 ring-1 ring-cyan-500/20"
             >
                 {{ skill.name }}
-                <button class="ml-0.5 text-cyan-400 hover:text-cyan-200" @click="removeSkill(skill.id)">&times;</button>
+                <button
+                    aria-label="Remove skill"
+                    class="ml-0.5 text-cyan-400 hover:text-cyan-200"
+                    @click="removeSkill(skill.id)"
+                >
+                    &times;
+                </button>
             </span>
             <span v-if="!selectedSkills.length" class="text-xs text-neutral-500">No skills assigned</span>
         </div>

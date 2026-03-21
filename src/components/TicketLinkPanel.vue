@@ -144,7 +144,11 @@ function groupedLinks() {
                             <span class="font-mono text-xs text-neutral-400">{{ link.ticket.reference }}</span>
                             <span class="ml-1 text-neutral-300">{{ link.ticket.subject }}</span>
                         </div>
-                        <button class="text-rose-400 hover:text-rose-300 text-xs" @click="removeLink(link.id)">
+                        <button
+                            aria-label="Remove link"
+                            class="text-rose-400 hover:text-rose-300 text-xs"
+                            @click="removeLink(link.id)"
+                        >
                             Unlink
                         </button>
                     </div>

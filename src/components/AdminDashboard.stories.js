@@ -1,3 +1,4 @@
+import { computed } from 'vue';
 import StatsCard from './StatsCard.vue';
 import KpiCard from './KpiCard.vue';
 import StatusBadge from './StatusBadge.vue';
@@ -227,6 +228,93 @@ export const FullDashboard = {
                                             <div style="font-size:13px; color:#a3a3a3;">{{ t.ago }}</div>
                                             <div style="font-size:11px; color:#525252;">{{ t.author }}</div>
                                         </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        `,
+    }),
+};
+
+/**
+ * Light mode admin dashboard — same layout, light theme.
+ * Used for README hero screenshot.
+ */
+export const FullDashboardLight = {
+    render: () => ({
+        components: { StatsCard, KpiCard, StatusBadge, PriorityBadge, AgentLoadIndicator },
+        data: () => ({ sidebarLinks, tickets }),
+        provide: { 'esc-dark': computed(() => false) },
+        template: `
+            <div style="display:flex; min-height:720px; background:#f9fafb; color:#111827; font-family: ui-sans-serif, system-ui, sans-serif; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
+                <aside style="width:240px; background:#ffffff; border-right:1px solid #e5e7eb; display:flex; flex-direction:column; flex-shrink:0;">
+                    <div style="height:56px; display:flex; align-items:center; gap:10px; padding:0 16px;">
+                        <div style="width:32px; height:32px; border-radius:8px; background:#f3f4f6; display:flex; align-items:center; justify-content:center;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <defs><linearGradient id="esc-rb-l" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="30%" stop-color="#eab308"/><stop offset="50%" stop-color="#22c55e"/><stop offset="70%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+                                <g transform="translate(12,12) scale(1.35) translate(-12,-12)"><polyline points="17 11 12 6 7 11" stroke="url(#esc-rb-l)"/><polyline points="17 18 12 13 7 18" stroke="url(#esc-rb-l)"/></g>
+                            </svg>
+                        </div>
+                        <div>
+                            <span style="font-size:13px; font-weight:700; letter-spacing:0.02em; color:#111827;">Escalated</span>
+                            <span style="margin-left:6px; background:#eff6ff; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; color:#3b82f6;">ADMIN</span>
+                        </div>
+                    </div>
+                    <nav style="flex:1; padding:4px 10px; display:flex; flex-direction:column; gap:1px; overflow-y:auto;">
+                        <a v-for="link in sidebarLinks" :key="link.label" :style="{ display:'flex', alignItems:'center', gap:'10px', padding:'7px 10px', borderRadius:'8px', fontSize:'13px', fontWeight:'500', textDecoration:'none', color: link.active ? '#111827' : '#6b7280', background: link.active ? '#eff6ff' : 'transparent' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" :stroke="link.active ? '#3b82f6' : '#9ca3af'" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" :d="link.icon"/></svg>
+                            {{ link.label }}
+                            <span v-if="link.badge" style="margin-left:auto; background:#dbeafe; color:#2563eb; font-size:10px; font-weight:600; padding:1px 6px; border-radius:10px;">{{ link.badge }}</span>
+                        </a>
+                    </nav>
+                    <div style="border-top:1px solid #e5e7eb; padding:10px;">
+                        <div style="display:flex; align-items:center; gap:10px; background:#f9fafb; border-radius:8px; padding:8px 10px;">
+                            <div style="width:28px; height:28px; border-radius:6px; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#374151;">J</div>
+                            <span style="font-size:13px; color:#374151;">Jane Admin</span>
+                        </div>
+                    </div>
+                </aside>
+                <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+                    <header style="height:48px; display:flex; align-items:center; border-bottom:1px solid #e5e7eb; background:rgba(255,255,255,0.95); padding:0 20px; backdrop-filter:blur(12px); flex-shrink:0;">
+                        <span style="font-size:13px; font-weight:600; color:#111827;">Reports</span>
+                    </header>
+                    <main style="flex:1; padding:20px; overflow-y:auto;">
+                        <div class="grid grid-cols-3 gap-4" style="margin-bottom:20px;">
+                            <KpiCard label="Total Tickets" :value="1284" :trend="5" icon="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859" />
+                            <KpiCard label="Avg Response Time" value="1h 42m" :trend="-18" icon="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <KpiCard label="CSAT Score" value="94%" :trend="3" icon="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                        </div>
+                        <div class="grid grid-cols-4 gap-4" style="margin-bottom:20px;">
+                            <StatsCard label="Open Tickets" :value="142" trend="+8% this week" color="blue" />
+                            <StatsCard label="Resolved Today" :value="38" trend="+12% vs yesterday" color="green" />
+                            <StatsCard label="Avg Response" value="2h 14m" trend="-18% improvement" color="cyan" />
+                            <StatsCard label="SLA Breaches" :value="3" trend="-25% vs last week" color="red" />
+                        </div>
+                        <div style="border-radius:12px; border:1px solid #e5e7eb; background:#ffffff; overflow:hidden;">
+                            <div style="padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between;">
+                                <span style="font-size:13px; font-weight:600; color:#111827;">Recent Tickets</span>
+                                <span style="font-size:12px; color:#9ca3af;">Last 24 hours</span>
+                            </div>
+                            <table style="width:100%; border-collapse:collapse;">
+                                <thead><tr style="background:#f9fafb;">
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Reference</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Subject</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Requester</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Status</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Priority</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Last Reply</th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr v-for="t in tickets" :key="t.ref" style="border-top:1px solid #f3f4f6;">
+                                        <td style="padding:10px 14px; font-size:13px; font-weight:500; white-space:nowrap;"><div style="display:flex; align-items:center; gap:6px;"><span v-if="t.sla" :style="{ width:'7px', height:'7px', borderRadius:'50%', background: t.sla === 'red' ? '#ef4444' : t.sla === 'amber' ? '#f59e0b' : '#22c55e' }"></span><span style="color:#2563eb;">{{ t.ref }}</span></div></td>
+                                        <td style="padding:10px 14px; font-size:13px; color:#111827; max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ t.subject }}</td>
+                                        <td style="padding:10px 14px;"><div style="font-size:13px; color:#374151;">{{ t.requester }}</div><div style="font-size:11px; color:#9ca3af;">{{ t.email }}</div></td>
+                                        <td style="padding:10px 14px;"><StatusBadge :status="t.status" /></td>
+                                        <td style="padding:10px 14px;"><PriorityBadge :priority="t.priority" /></td>
+                                        <td style="padding:10px 14px; white-space:nowrap;"><div style="font-size:13px; color:#374151;">{{ t.ago }}</div><div style="font-size:11px; color:#9ca3af;">{{ t.author }}</div></td>
                                     </tr>
                                 </tbody>
                             </table>

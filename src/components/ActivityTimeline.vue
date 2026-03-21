@@ -56,8 +56,8 @@ function describeActivity(activity) {
 </script>
 
 <template>
-    <div class="space-y-3">
-        <div v-for="activity in activities" :key="activity.id" class="flex gap-3 text-sm">
+    <div class="space-y-3" role="feed">
+        <div v-for="activity in activities" :key="activity.id" role="article" class="flex gap-3 text-sm">
             <div
                 :class="[
                     'mt-1 h-2 w-2 flex-shrink-0 rounded-full',

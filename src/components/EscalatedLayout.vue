@@ -221,7 +221,12 @@ function isActive(href) {
             <!-- Logo -->
             <div class="flex h-16 items-center gap-3 px-5">
                 <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--esc-panel-border-input)]">
-                    <img v-if="typeof panelConfig.logo === 'string'" :src="panelConfig.logo" class="h-5 w-5" alt="" />
+                    <img
+                        v-if="typeof panelConfig.logo === 'string'"
+                        :src="panelConfig.logo"
+                        class="h-5 w-5"
+                        alt="Escalated logo"
+                    />
                     <component :is="panelConfig.logo" v-else-if="panelConfig.logo" class="h-5 w-5" />
                     <svg
                         v-else
@@ -259,11 +264,12 @@ function isActive(href) {
             </div>
 
             <!-- Nav -->
-            <nav class="mt-1 flex-1 space-y-0.5 overflow-y-auto px-3">
+            <nav role="navigation" aria-label="Admin navigation" class="mt-1 flex-1 space-y-0.5 overflow-y-auto px-3">
                 <Link
                     v-for="link in adminLinks"
                     :key="link.href"
                     :href="link.href"
+                    :aria-current="isActive(link.href) ? 'page' : undefined"
                     :class="[
                         'group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all',
                         isActive(link.href)
@@ -350,7 +356,7 @@ function isActive(href) {
                                 ? 'https://escalated.dev/brand/logo-icon-dark.svg'
                                 : 'https://escalated.dev/brand/logo-icon-white.svg'
                         "
-                        alt=""
+                        alt="Escalated logo"
                         class="h-3.5 w-3.5"
                     />
                     Powered by Escalated
@@ -362,13 +368,14 @@ function isActive(href) {
         <div class="flex flex-1 flex-col pl-64">
             <!-- Top bar -->
             <header
+                role="banner"
                 class="sticky top-0 z-20 flex h-14 items-center border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-topbar-bg)] px-6 backdrop-blur-xl"
             >
                 <h1 class="text-sm font-semibold text-[var(--esc-panel-text)]">{{ title }}</h1>
             </header>
 
             <!-- Page content -->
-            <main class="flex-1 p-6">
+            <main role="main" class="flex-1 p-6">
                 <slot />
             </main>
         </div>
@@ -392,7 +399,7 @@ function isActive(href) {
                             v-if="typeof panelConfig.logo === 'string'"
                             :src="panelConfig.logo"
                             class="h-4 w-4"
-                            alt=""
+                            alt="Escalated logo"
                         />
                         <component :is="panelConfig.logo" v-else-if="panelConfig.logo" class="h-4 w-4" />
                         <svg
@@ -430,6 +437,7 @@ function isActive(href) {
                         v-for="link in agentLinks"
                         :key="link.href"
                         :href="link.href"
+                        :aria-current="isActive(link.href) ? 'page' : undefined"
                         :class="[
                             'flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all',
                             isActive(link.href)
@@ -559,7 +567,7 @@ function isActive(href) {
                 rel="noopener noreferrer"
                 class="inline-flex items-center gap-1.5 text-[11px] text-gray-400 transition-colors hover:text-gray-600"
             >
-                <img src="https://escalated.dev/brand/logo-icon-white.svg" alt="" class="h-3.5 w-3.5" />
+                <img src="https://escalated.dev/brand/logo-icon-white.svg" alt="Escalated logo" class="h-3.5 w-3.5" />
                 Powered by Escalated
             </a>
         </footer>

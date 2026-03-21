@@ -50,6 +50,8 @@ function toggle() {
                   : 'border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-800',
             processing && 'opacity-50 cursor-not-allowed',
         ]"
+        :aria-pressed="following"
+        :aria-label="following ? 'Unfollow ticket' : 'Follow ticket'"
         @click="toggle"
     >
         <!-- Eye icon -->

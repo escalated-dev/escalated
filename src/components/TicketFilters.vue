@@ -65,20 +65,31 @@ const checkboxClass = computed(() =>
 
 <template>
     <div class="flex flex-wrap items-center gap-3">
-        <input v-model="filters.search" type="text" placeholder="Search tickets..." :class="inputClass" />
-        <select v-model="filters.status" :class="selectClass">
+        <input
+            v-model="filters.search"
+            type="text"
+            placeholder="Search tickets..."
+            aria-label="Search tickets"
+            :class="inputClass"
+        />
+        <select v-model="filters.status" aria-label="Filter by status" :class="selectClass">
             <option value="">All Statuses</option>
             <option v-for="s in statuses" :key="s" :value="s">{{ s.replace(/_/g, ' ') }}</option>
         </select>
-        <select v-model="filters.priority" :class="selectClass">
+        <select v-model="filters.priority" aria-label="Filter by priority" :class="selectClass">
             <option value="">All Priorities</option>
             <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
         </select>
-        <select v-if="agents.length" v-model="filters.assigned_to" :class="selectClass">
+        <select v-if="agents.length" v-model="filters.assigned_to" aria-label="Filter by agent" :class="selectClass">
             <option value="">All Agents</option>
             <option v-for="a in agents" :key="a.id" :value="a.id">{{ a.name }}</option>
         </select>
-        <select v-if="departments.length" v-model="filters.department_id" :class="selectClass">
+        <select
+            v-if="departments.length"
+            v-model="filters.department_id"
+            aria-label="Filter by department"
+            :class="selectClass"
+        >
             <option value="">All Departments</option>
             <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
         </select>

@@ -5,7 +5,10 @@ const props = defineProps({
     priority: { type: String, required: true },
 });
 
-const escDark = inject('esc-dark', computed(() => false));
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 
 const darkConfig = {
     low: { label: 'Low', color: 'bg-gray-500/10 text-gray-400 ring-1 ring-gray-500/20' },
@@ -33,7 +36,11 @@ const config = computed(() => {
 </script>
 
 <template>
-    <span :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', config.color]">
+    <span
+        role="status"
+        :aria-label="'Priority: ' + config.label"
+        :class="['inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium', config.color]"
+    >
         {{ config.label }}
     </span>
 </template>

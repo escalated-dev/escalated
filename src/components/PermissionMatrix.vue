@@ -85,6 +85,7 @@ function isGroupAllChecked(group) {
                             <input
                                 type="checkbox"
                                 :checked="isChecked(getPermission(group, action).id)"
+                                :aria-label="group + ' ' + action + ' permission'"
                                 class="rounded border-white/20 bg-neutral-900 text-cyan-500 focus:ring-white/10"
                                 @change="toggle(getPermission(group, action).id)"
                             />

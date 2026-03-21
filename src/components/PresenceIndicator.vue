@@ -101,6 +101,7 @@ onUnmounted(() => {
             <div
                 v-for="(viewer, index) in visibleViewers"
                 :key="viewer.id || viewer.name"
+                :aria-label="viewer.name"
                 :class="[
                     'relative flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold text-white ring-2',
                     getColor(index),
@@ -131,7 +132,11 @@ onUnmounted(() => {
         </TransitionGroup>
 
         <!-- Viewer count label -->
-        <span v-if="showLabel" :class="['ml-2 text-xs font-medium', escDark ? 'text-neutral-400' : 'text-gray-500']">
+        <span
+            v-if="showLabel"
+            aria-live="polite"
+            :class="['ml-2 text-xs font-medium', escDark ? 'text-neutral-400' : 'text-gray-500']"
+        >
             {{ viewers.length }} viewing
         </span>
 

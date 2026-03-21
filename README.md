@@ -134,8 +134,13 @@ All the Vue 3 + Inertia.js components that power the Escalated UI. These are ide
 > Screenshots are auto-generated from Storybook via the [component-screenshots](.github/workflows/screenshots.yml) workflow.
 
 <p align="center">
-  <strong>Admin Panel</strong><br/>
-  <img src="docs/assets/escalated_admin_1.png" alt="Escalated Admin Panel — sidebar navigation, KPI cards, stats, and ticket list" width="800" />
+  <strong>Admin Panel (Dark)</strong><br/>
+  <img src="docs/assets/escalated_admin_1.png" alt="Escalated Admin Panel — dark mode with sidebar navigation, KPI cards, stats, and ticket list" width="800" />
+</p>
+
+<p align="center">
+  <strong>Admin Panel (Light)</strong><br/>
+  <img src="docs/assets/escalated_admin_3.png" alt="Escalated Admin Panel — light mode with sidebar navigation, KPI cards, stats, and ticket list" width="800" />
 </p>
 
 <p align="center">

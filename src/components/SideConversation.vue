@@ -1,6 +1,11 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, inject, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
+
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 
 const props = defineProps({
     conversation: { type: Object, required: true },
@@ -45,24 +50,45 @@ function closeConversation() {
 </script>
 
 <template>
-    <div class="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3">
-        <button class="flex w-full items-center justify-between" @click="expanded = !expanded">
+    <div
+        :class="[
+            'rounded-lg border p-3',
+            escDark ? 'border-white/[0.06] bg-white/[0.02]' : 'border-gray-200 bg-gray-50',
+        ]"
+    >
+        <button
+            class="flex w-full items-center justify-between"
+            :aria-expanded="expanded"
+            @click="expanded = !expanded"
+        >
             <div class="flex items-center gap-2">
                 <span
                     :class="[
                         'inline-flex h-5 items-center rounded px-1.5 text-[10px] font-semibold uppercase',
                         conversation.status === 'open'
-                            ? 'bg-emerald-500/15 text-emerald-400'
-                            : 'bg-neutral-500/15 text-neutral-400',
+                            ? escDark
+                                ? 'bg-emerald-500/15 text-emerald-400'
+                                : 'bg-emerald-100 text-emerald-700'
+                            : escDark
+                              ? 'bg-neutral-500/15 text-neutral-400'
+                              : 'bg-gray-100 text-gray-500',
                     ]"
                 >
                     {{ conversation.status }}
                 </span>
-                <span class="text-sm font-medium text-neutral-200">{{ conversation.subject }}</span>
-                <span class="text-xs text-neutral-500">{{ conversation.channel }}</span>
+                <span :class="['text-sm font-medium', escDark ? 'text-neutral-200' : 'text-gray-900']">
+                    {{ conversation.subject }}
+                </span>
+                <span :class="['text-xs', escDark ? 'text-neutral-500' : 'text-gray-400']">
+                    {{ conversation.channel }}
+                </span>
             </div>
             <svg
-                :class="['h-4 w-4 text-neutral-500 transition-transform', expanded && 'rotate-180']"
+                :class="[
+                    'h-4 w-4 transition-transform',
+                    escDark ? 'text-neutral-500' : 'text-gray-400',
+                    expanded && 'rotate-180',
+                ]"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.5"
@@ -74,15 +100,30 @@ function closeConversation() {
 
         <div v-if="expanded" class="mt-3 space-y-3">
             <!-- Replies -->
-            <div v-for="reply in conversation.replies" :key="reply.id" class="border-l-2 border-white/[0.06] pl-3">
+            <div
+                v-for="reply in conversation.replies"
+                :key="reply.id"
+                :class="['border-l-2 pl-3', escDark ? 'border-white/[0.06]' : 'border-gray-200']"
+            >
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-neutral-300">{{ reply.author?.name || 'System' }}</span>
-                    <span class="text-xs text-neutral-500">{{ reply.created_at }}</span>
+                    <span :class="['text-xs font-medium', escDark ? 'text-neutral-300' : 'text-gray-700']">
+                        {{ reply.author?.name || 'System' }}
+                    </span>
+                    <span :class="['text-xs', escDark ? 'text-neutral-500' : 'text-gray-400']">
+                        {{ reply.created_at }}
+                    </span>
                 </div>
-                <p class="mt-1 whitespace-pre-wrap text-sm text-neutral-400">{{ reply.body }}</p>
+                <p :class="['mt-1 whitespace-pre-wrap text-sm', escDark ? 'text-neutral-400' : 'text-gray-600']">
+                    {{ reply.body }}
+                </p>
             </div>
 
-            <div v-if="!conversation.replies?.length" class="text-xs text-neutral-500">No replies yet.</div>
+            <div
+                v-if="!conversation.replies?.length"
+                :class="['text-xs', escDark ? 'text-neutral-500' : 'text-gray-400']"
+            >
+                No replies yet.
+            </div>
 
             <!-- Reply form -->
             <div v-if="conversation.status === 'open'" class="pt-2">
@@ -90,7 +131,12 @@ function closeConversation() {
                     v-model="replyBody"
                     rows="2"
                     placeholder="Write a reply..."
-                    class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                    :class="[
+                        'w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1',
+                        escDark
+                            ? 'border-white/10 bg-neutral-950 text-neutral-200 placeholder-neutral-500 focus:border-white/20 focus:ring-white/10'
+                            : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-400 focus:ring-blue-200',
+                    ]"
                 ></textarea>
                 <div class="mt-2 flex items-center gap-2">
                     <button
@@ -104,7 +150,10 @@ function closeConversation() {
                         Reply
                     </button>
                     <button
-                        class="rounded-lg px-3 py-1.5 text-xs text-neutral-400 hover:text-neutral-300"
+                        :class="[
+                            'rounded-lg px-3 py-1.5 text-xs',
+                            escDark ? 'text-neutral-400 hover:text-neutral-300' : 'text-gray-500 hover:text-gray-700',
+                        ]"
                         @click="closeConversation"
                     >
                         Close

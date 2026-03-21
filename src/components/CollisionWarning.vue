@@ -1,7 +1,14 @@
 <script setup>
+import { inject, computed } from 'vue';
+
 defineProps({
     typers: { type: Array, default: () => [] },
 });
+
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
 
 function typersText(typers) {
     const names = typers.map((t) => t.name);
@@ -22,7 +29,12 @@ function typersText(typers) {
     >
         <div
             v-if="typers.length > 0"
-            class="flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 ring-1 ring-amber-500/20"
+            role="alert"
+            aria-live="assertive"
+            :class="[
+                'flex items-center gap-2 rounded-lg px-3 py-2 ring-1',
+                escDark ? 'bg-amber-500/10 ring-amber-500/20' : 'bg-amber-50 ring-amber-200',
+            ]"
         >
             <!-- Pulsing indicator -->
             <span class="relative flex h-2.5 w-2.5">
@@ -37,13 +49,20 @@ function typersText(typers) {
                 <div
                     v-for="typer in typers.slice(0, 3)"
                     :key="typer.name"
-                    class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/30 text-[10px] font-semibold text-amber-300 ring-1 ring-amber-500/40"
+                    :class="[
+                        'flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold ring-1',
+                        escDark
+                            ? 'bg-amber-500/30 text-amber-300 ring-amber-500/40'
+                            : 'bg-amber-100 text-amber-700 ring-amber-300',
+                    ]"
                 >
                     {{ (typer.name || '?').charAt(0).toUpperCase() }}
                 </div>
             </div>
 
-            <span class="text-xs font-medium text-amber-400">{{ typersText(typers) }}</span>
+            <span :class="['text-xs font-medium', escDark ? 'text-amber-400' : 'text-amber-700']">
+                {{ typersText(typers) }}
+            </span>
         </div>
     </Transition>
 </template>

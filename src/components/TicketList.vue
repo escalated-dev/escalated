@@ -106,36 +106,56 @@ const colCount = computed(() => {
         <table class="min-w-full divide-y divide-white/[0.06]">
             <thead>
                 <tr class="bg-white/[0.02]">
-                    <th v-if="selectable" class="w-10 px-3 py-3">
+                    <th v-if="selectable" scope="col" class="w-10 px-3 py-3">
                         <input
                             type="checkbox"
                             :checked="allSelected"
+                            aria-label="Select all tickets"
                             class="h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20"
                             @change="toggleAll"
                         />
                     </th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th
+                        scope="col"
+                        class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                    >
                         Reference
                     </th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th
+                        scope="col"
+                        class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                    >
                         Subject
                     </th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th
+                        scope="col"
+                        class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                    >
                         Requester
                     </th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th
+                        scope="col"
+                        class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                    >
                         Status
                     </th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th
+                        scope="col"
+                        class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                    >
                         Priority
                     </th>
                     <th
                         v-if="showAssignee"
+                        scope="col"
                         class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
                     >
                         Assignee
                     </th>
-                    <th class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th
+                        scope="col"
+                        class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500"
+                    >
                         Last Reply
                     </th>
                 </tr>
@@ -153,6 +173,7 @@ const colCount = computed(() => {
                         <input
                             type="checkbox"
                             :checked="selectedIds.includes(ticket.id)"
+                            aria-label="Select ticket"
                             class="h-4 w-4 rounded border-white/20 bg-neutral-950 text-cyan-500 focus:ring-cyan-500/20"
                             @change="toggleOne(ticket.id)"
                         />
@@ -209,23 +230,36 @@ const colCount = computed(() => {
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th v-if="selectable" class="w-10 px-3 py-3">
+                    <th v-if="selectable" scope="col" class="w-10 px-3 py-3">
                         <input
                             type="checkbox"
                             :checked="allSelected"
+                            aria-label="Select all tickets"
                             class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             @change="toggleAll"
                         />
                     </th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Reference</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Subject</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Requester</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Priority</th>
-                    <th v-if="showAssignee" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                        Reference
+                    </th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Subject</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                        Requester
+                    </th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                        Priority
+                    </th>
+                    <th
+                        v-if="showAssignee"
+                        scope="col"
+                        class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500"
+                    >
                         Assignee
                     </th>
-                    <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Last Reply</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                        Last Reply
+                    </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -238,6 +272,7 @@ const colCount = computed(() => {
                         <input
                             type="checkbox"
                             :checked="selectedIds.includes(ticket.id)"
+                            aria-label="Select ticket"
                             class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             @change="toggleOne(ticket.id)"
                         />

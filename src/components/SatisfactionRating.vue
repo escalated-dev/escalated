@@ -80,6 +80,7 @@ function submit() {
                 v-for="star in 5"
                 :key="star"
                 :disabled="isReadOnly"
+                :aria-label="'Rate ' + star + ' star' + (star !== 1 ? 's' : '')"
                 :class="['transition-transform', !isReadOnly && 'hover:scale-110', isReadOnly && 'cursor-default']"
                 @click="selectStar(star)"
                 @mouseenter="hoverStar(star)"

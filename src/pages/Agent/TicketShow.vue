@@ -18,7 +18,7 @@ import ContextPanelSection from '../../components/ContextPanelSection.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
 
 const props = defineProps({
     ticket: Object,
@@ -63,6 +63,11 @@ function toggleFollow() {
     router.post(route('escalated.agent.tickets.follow', props.ticket.reference), {}, { preserveScroll: true });
 }
 
+const escDark = inject(
+    'esc-dark',
+    computed(() => false),
+);
+
 const { getPageComponents } = usePluginExtensions();
 
 // Keyboard shortcuts
@@ -95,7 +100,9 @@ useKeyboardShortcuts({
         <PluginSlot slot="ticket.show.header" :components="getPageComponents('ticket.show', 'header')" />
 
         <div class="mb-5 flex flex-wrap items-center gap-3">
-            <span class="text-sm font-mono font-medium text-white">{{ ticket.reference }}</span>
+            <span :class="['text-sm font-mono font-medium', escDark ? 'text-white' : 'text-gray-900']">{{
+                ticket.reference
+            }}</span>
             <StatusBadge :status="ticket.status" />
             <PriorityBadge :priority="ticket.priority" />
             <span class="text-sm text-neutral-500">by {{ ticket.requester?.name }}</span>
@@ -121,7 +128,12 @@ useKeyboardShortcuts({
                 <template v-if="!isLightAgent">
                     <select
                         ref="statusSelectRef"
-                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                        :class="[
+                            'rounded-lg border px-3 py-1.5 text-sm focus:outline-none focus:ring-1',
+                            escDark
+                                ? 'border-white/10 bg-neutral-950 text-neutral-200 focus:border-white/20 focus:ring-white/10'
+                                : 'border-gray-300 bg-white text-gray-700 focus:border-gray-400 focus:ring-gray-200',
+                        ]"
                         @change="
                             changeStatus($event.target.value);
                             $event.target.value = '';
@@ -135,7 +147,12 @@ useKeyboardShortcuts({
                     </select>
                     <select
                         ref="prioritySelectRef"
-                        class="rounded-lg border border-white/10 bg-neutral-950 px-3 py-1.5 text-sm text-neutral-200 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                        :class="[
+                            'rounded-lg border px-3 py-1.5 text-sm focus:outline-none focus:ring-1',
+                            escDark
+                                ? 'border-white/10 bg-neutral-950 text-neutral-200 focus:border-white/20 focus:ring-white/10'
+                                : 'border-gray-300 bg-white text-gray-700 focus:border-gray-400 focus:ring-gray-200',
+                        ]"
                         @change="
                             changePriority($event.target.value);
                             $event.target.value = '';
@@ -155,8 +172,12 @@ useKeyboardShortcuts({
                     :class="[
                         'rounded-lg border px-3 py-1.5 text-sm transition-colors',
                         showContextPanel
-                            ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
-                            : 'border-white/10 text-neutral-400 hover:border-white/20 hover:text-neutral-200',
+                            ? escDark
+                                ? 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
+                                : 'border-blue-300 bg-blue-50 text-blue-600'
+                            : escDark
+                              ? 'border-white/10 text-neutral-400 hover:border-white/20 hover:text-neutral-200'
+                              : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600',
                     ]"
                     @click="showContextPanel = !showContextPanel"
                 >
@@ -180,19 +201,30 @@ useKeyboardShortcuts({
                     :ticket-reference="ticket.reference"
                     route-prefix="escalated.agent"
                 />
-                <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-5">
-                    <p class="whitespace-pre-wrap text-sm text-neutral-300">{{ ticket.description }}</p>
+                <div
+                    :class="[
+                        'rounded-xl border p-5',
+                        escDark ? 'border-white/[0.06] bg-neutral-900/60' : 'border-gray-200 bg-white',
+                    ]"
+                >
+                    <p :class="['whitespace-pre-wrap text-sm', escDark ? 'text-neutral-300' : 'text-gray-700']">
+                        {{ ticket.description }}
+                    </p>
                     <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />
                 </div>
                 <div>
-                    <div class="mb-4 flex gap-4 border-b border-white/[0.06]">
+                    <div :class="['mb-4 flex gap-4 border-b', escDark ? 'border-white/[0.06]' : 'border-gray-200']">
                         <button
                             v-if="!isLightAgent"
                             :class="[
                                 'pb-2 text-sm font-medium transition-colors',
                                 activeTab === 'reply'
-                                    ? 'border-b-2 border-cyan-500 text-white'
-                                    : 'text-neutral-500 hover:text-neutral-300',
+                                    ? escDark
+                                        ? 'border-b-2 border-cyan-500 text-white'
+                                        : 'border-b-2 border-blue-500 text-gray-900'
+                                    : escDark
+                                      ? 'text-neutral-500 hover:text-neutral-300'
+                                      : 'text-gray-400 hover:text-gray-600',
                             ]"
                             @click="activeTab = 'reply'"
                         >
@@ -202,8 +234,12 @@ useKeyboardShortcuts({
                             :class="[
                                 'pb-2 text-sm font-medium transition-colors',
                                 activeTab === 'note'
-                                    ? 'border-b-2 border-amber-500 text-amber-400'
-                                    : 'text-neutral-500 hover:text-neutral-300',
+                                    ? escDark
+                                        ? 'border-b-2 border-amber-500 text-amber-400'
+                                        : 'border-b-2 border-amber-500 text-amber-700'
+                                    : escDark
+                                      ? 'text-neutral-500 hover:text-neutral-300'
+                                      : 'text-gray-400 hover:text-gray-600',
                             ]"
                             @click="activeTab = 'note'"
                         >
@@ -224,7 +260,9 @@ useKeyboardShortcuts({
                     />
                 </div>
                 <div>
-                    <h2 class="mb-4 text-lg font-semibold text-neutral-200">Conversation</h2>
+                    <h2 :class="['mb-4 text-lg font-semibold', escDark ? 'text-neutral-200' : 'text-gray-900']">
+                        Conversation
+                    </h2>
                     <ReplyThread
                         :replies="ticket.replies || []"
                         :current-user-id="page.props.auth?.user?.id"
@@ -249,16 +287,22 @@ useKeyboardShortcuts({
             >
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
-                        <span class="text-neutral-500">Name</span>
-                        <span class="text-neutral-200">{{ ticket.requester?.name || 'Unknown' }}</span>
+                        <span :class="escDark ? 'text-neutral-500' : 'text-gray-500'">Name</span>
+                        <span :class="escDark ? 'text-neutral-200' : 'text-gray-900'">{{
+                            ticket.requester?.name || 'Unknown'
+                        }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-neutral-500">Email</span>
-                        <span class="truncate text-neutral-200">{{ ticket.requester?.email || '---' }}</span>
+                        <span :class="escDark ? 'text-neutral-500' : 'text-gray-500'">Email</span>
+                        <span :class="['truncate', escDark ? 'text-neutral-200' : 'text-gray-900']">{{
+                            ticket.requester?.email || '---'
+                        }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-neutral-500">Tickets</span>
-                        <span class="text-neutral-200">{{ ticket.requester_ticket_count ?? '---' }}</span>
+                        <span :class="escDark ? 'text-neutral-500' : 'text-gray-500'">Tickets</span>
+                        <span :class="escDark ? 'text-neutral-200' : 'text-gray-900'">{{
+                            ticket.requester_ticket_count ?? '---'
+                        }}</span>
                     </div>
                 </div>
             </ContextPanelSection>
@@ -272,13 +316,22 @@ useKeyboardShortcuts({
                     <div
                         v-for="rt in ticket.related_tickets"
                         :key="rt.reference"
-                        class="rounded-lg border border-white/[0.06] bg-neutral-950 px-3 py-2"
+                        :class="[
+                            'rounded-lg border px-3 py-2',
+                            escDark ? 'border-white/[0.06] bg-neutral-950' : 'border-gray-200 bg-gray-50',
+                        ]"
                     >
-                        <span class="font-mono text-xs text-cyan-400">{{ rt.reference }}</span>
-                        <p class="mt-0.5 truncate text-xs text-neutral-400">{{ rt.subject }}</p>
+                        <span :class="['font-mono text-xs', escDark ? 'text-cyan-400' : 'text-blue-600']">{{
+                            rt.reference
+                        }}</span>
+                        <p :class="['mt-0.5 truncate text-xs', escDark ? 'text-neutral-400' : 'text-gray-500']">
+                            {{ rt.subject }}
+                        </p>
                     </div>
                 </div>
-                <p v-else class="text-xs text-neutral-600">No related tickets found.</p>
+                <p v-else :class="['text-xs', escDark ? 'text-neutral-600' : 'text-gray-400']">
+                    No related tickets found.
+                </p>
             </ContextPanelSection>
 
             <ContextPanelSection
@@ -288,11 +341,13 @@ useKeyboardShortcuts({
             >
                 <div v-if="ticket.activities?.length" class="space-y-2">
                     <div v-for="activity in ticket.activities.slice(0, 5)" :key="activity.id" class="text-xs">
-                        <span class="text-neutral-500">{{ activity.description }}</span>
-                        <span class="ml-1 text-neutral-600">{{ activity.created_at_human }}</span>
+                        <span :class="escDark ? 'text-neutral-500' : 'text-gray-600'">{{ activity.description }}</span>
+                        <span :class="['ml-1', escDark ? 'text-neutral-600' : 'text-gray-400']">{{
+                            activity.created_at_human
+                        }}</span>
                     </div>
                 </div>
-                <p v-else class="text-xs text-neutral-600">No recent activity.</p>
+                <p v-else :class="['text-xs', escDark ? 'text-neutral-600' : 'text-gray-400']">No recent activity.</p>
             </ContextPanelSection>
 
             <!-- Plugin: context panel slot -->

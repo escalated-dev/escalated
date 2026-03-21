@@ -21,6 +21,7 @@ const dark = inject(
         >
         <select
             :value="modelValue"
+            aria-label="Assign to agent"
             :class="[
                 'w-full rounded-md border px-2 py-1.5 text-sm focus:outline-none',
                 dark

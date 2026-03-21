@@ -31,6 +31,8 @@ function browse() {
 
 <template>
     <div
+        role="button"
+        aria-label="Drop files here or click to upload"
         :class="[
             'cursor-pointer rounded-lg border-2 border-dashed px-4 py-3 text-center text-xs transition-colors',
             dark
@@ -50,6 +52,6 @@ function browse() {
             Drop files here or
             <span :class="['font-medium', dark ? 'text-[var(--esc-panel-text)]' : 'text-blue-600']">browse</span>
         </p>
-        <input ref="fileInput" type="file" multiple class="hidden" @change="onFileSelect" />
+        <input ref="fileInput" type="file" multiple aria-label="Upload files" class="hidden" @change="onFileSelect" />
     </div>
 </template>

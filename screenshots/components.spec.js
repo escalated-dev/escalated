@@ -36,6 +36,7 @@ const stories = [
 
     // Full-page composites
     { id: 'pages-admindashboard--full-dashboard', name: 'AdminDashboard-Full', fullPage: true },
+    { id: 'pages-admindashboard--full-dashboard-light', name: 'AdminDashboard-Light', fullPage: true },
     { id: 'pages-admindashboard--agent-panel', name: 'AgentPanel-Full', fullPage: true },
 ];
 
@@ -87,6 +88,21 @@ test('README hero: Admin Dashboard (escalated_admin_1)', async ({ page }) => {
     });
     await page.screenshot({
         path: 'docs/assets/escalated_admin_1.png',
+        animations: 'disabled',
+        omitBackground: true,
+    });
+});
+
+test('README hero: Admin Dashboard Light (escalated_admin_3)', async ({ page }) => {
+    await openStory(page, 'pages-admindashboard--full-dashboard-light');
+    await page.evaluate(() => {
+        document.body.style.background = 'transparent';
+        document.documentElement.style.background = 'transparent';
+        const root = document.querySelector('#storybook-root');
+        if (root?.firstElementChild) root.firstElementChild.style.background = 'transparent';
+    });
+    await page.screenshot({
+        path: 'docs/assets/escalated_admin_3.png',
         animations: 'disabled',
         omitBackground: true,
     });

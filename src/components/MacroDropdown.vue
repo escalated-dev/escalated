@@ -50,6 +50,8 @@ function close() {
                     : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
             ]"
             :disabled="processing"
+            aria-label="Apply macro"
+            :aria-expanded="open"
             @click="toggle"
         >
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -100,7 +102,7 @@ function close() {
                 >
                     Macros
                 </div>
-                <div class="max-h-64 overflow-y-auto">
+                <div class="max-h-64 overflow-y-auto" role="menu">
                     <div
                         v-if="!macros.length"
                         :class="[
@@ -113,6 +115,7 @@ function close() {
                     <button
                         v-for="macro in macros"
                         :key="macro.id"
+                        role="menuitem"
                         :disabled="processing"
                         :class="[
                             'flex w-full flex-col px-3 py-2.5 text-left transition-colors',
