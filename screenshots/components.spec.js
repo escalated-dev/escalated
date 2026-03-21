@@ -38,6 +38,7 @@ const stories = [
     { id: 'pages-admindashboard--full-dashboard', name: 'AdminDashboard-Full', fullPage: true },
     { id: 'pages-admindashboard--full-dashboard-light', name: 'AdminDashboard-Light', fullPage: true },
     { id: 'pages-admindashboard--agent-panel', name: 'AgentPanel-Full', fullPage: true },
+    { id: 'pages-admindashboard--agent-panel-light', name: 'AgentPanel-Light', fullPage: true },
 ];
 
 /**

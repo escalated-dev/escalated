@@ -458,3 +458,133 @@ export const AgentPanel = {
         `,
     }),
 };
+
+export const AgentPanelLight = {
+    render: () => ({
+        components: { StatsCard, StatusBadge, PriorityBadge, AgentLoadIndicator },
+        provide: { 'esc-dark': computed(() => false) },
+        data: () => ({
+            tickets: [
+                {
+                    ref: 'ESC-1042',
+                    subject: 'Unable to export CSV reports from dashboard',
+                    requester: 'Sarah Chen',
+                    status: 'open',
+                    priority: 'high',
+                    ago: '12m ago',
+                    sla: 'green',
+                },
+                {
+                    ref: 'ESC-1041',
+                    subject: 'SSO login redirect loop on Firefox',
+                    requester: 'James Wilson',
+                    status: 'pending',
+                    priority: 'urgent',
+                    ago: '34m ago',
+                    sla: 'amber',
+                },
+                {
+                    ref: 'ESC-1040',
+                    subject: 'Custom field values not persisting after save',
+                    requester: 'Maria Garcia',
+                    status: 'open',
+                    priority: 'medium',
+                    ago: '1h ago',
+                    sla: 'green',
+                },
+                {
+                    ref: 'ESC-1039',
+                    subject: 'Webhook notifications delayed by 15+ minutes',
+                    requester: 'Tom Baker',
+                    status: 'open',
+                    priority: 'high',
+                    ago: '2h ago',
+                    sla: 'red',
+                },
+                {
+                    ref: 'ESC-1038',
+                    subject: 'Knowledge base search returning no results',
+                    requester: 'Priya Patel',
+                    status: 'solved',
+                    priority: 'medium',
+                    ago: '3h ago',
+                    sla: '',
+                },
+            ],
+        }),
+        template: `
+            <div style="min-height:720px; background:#f9fafb; color:#111827; font-family: ui-sans-serif, system-ui, sans-serif; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb;">
+                <!-- Top nav -->
+                <nav style="height:48px; border-bottom:1px solid #e5e7eb; background:#ffffff; display:flex; align-items:center; justify-content:space-between; padding:0 24px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:30px; height:30px; border-radius:8px; background:#f3f4f6; display:flex; align-items:center; justify-content:center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <defs><linearGradient id="esc-rb2l" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="30%" stop-color="#eab308"/><stop offset="50%" stop-color="#22c55e"/><stop offset="70%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+                                <g transform="translate(12,12) scale(1.35) translate(-12,-12)"><polyline points="17 11 12 6 7 11" stroke="url(#esc-rb2l)"/><polyline points="17 18 12 13 7 18" stroke="url(#esc-rb2l)"/></g>
+                            </svg>
+                        </div>
+                        <span style="font-size:13px; font-weight:700; letter-spacing:0.02em;">Escalated</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="background:#eff6ff; padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500;">Dashboard</span>
+                        <span style="padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500; color:#6b7280;">Tickets</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:13px; color:#6b7280;">Admin</span>
+                        <div style="width:1px; height:16px; background:#eff6ff;"></div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:26px; height:26px; border-radius:6px; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:#374151;">M</div>
+                            <span style="font-size:13px; color:#374151;">Mike Agent</span>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Content -->
+                <main style="max-width:1100px; margin:0 auto; padding:20px 24px;">
+                    <!-- Stats -->
+                    <div class="grid grid-cols-4 gap-4" style="margin-bottom:20px;">
+                        <StatsCard label="My Open" :value="18" trend="+2 today" color="blue" />
+                        <StatsCard label="Unassigned" :value="7" trend="3 urgent" color="red" />
+                        <StatsCard label="Avg Response" value="1h 08m" trend="-22% this week" color="cyan" />
+                        <StatsCard label="Resolved Today" :value="12" trend="+4 vs yesterday" color="green" />
+                    </div>
+
+                    <!-- My tickets table -->
+                    <div style="border-radius:12px; border:1px solid #e5e7eb; background:#ffffff; overflow:hidden;">
+                        <div style="padding:12px 16px; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between;">
+                            <span style="font-size:13px; font-weight:600;">My Tickets</span>
+                            <span style="font-size:12px; color:#6b7280;">Assigned to me</span>
+                        </div>
+                        <table style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f3f4f6;">
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Reference</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Subject</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Requester</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Status</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Priority</th>
+                                    <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#6b7280;">Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="t in tickets" :key="t.ref" style="border-top:1px solid #f3f4f6;">
+                                    <td style="padding:10px 14px; font-size:13px; font-weight:500; white-space:nowrap;">
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span v-if="t.sla" :style="{ width:'7px', height:'7px', borderRadius:'50%', background: t.sla === 'red' ? '#ef4444' : t.sla === 'amber' ? '#f59e0b' : '#22c55e' }"></span>
+                                            <span style="color:#2563eb;">{{ t.ref }}</span>
+                                        </div>
+                                    </td>
+                                    <td style="padding:10px 14px; font-size:13px; color:#111827; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ t.subject }}</td>
+                                    <td style="padding:10px 14px; font-size:13px; color:#374151;">{{ t.requester }}</td>
+                                    <td style="padding:10px 14px;"><StatusBadge :status="t.status" /></td>
+                                    <td style="padding:10px 14px;"><PriorityBadge :priority="t.priority" /></td>
+                                    <td style="padding:10px 14px; font-size:13px; color:#374151; white-space:nowrap;">{{ t.ago }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </main>
+            </div>
+        `,
+    }),
+};
