@@ -798,3 +798,298 @@ export const AgentPanelLight = {
         `,
     }),
 };
+
+/**
+ * Ticket list view — agent ticket queue with filters, search, table, and pagination.
+ * Used for README hero screenshot.
+ */
+export const TicketListView = {
+    render: () => ({
+        components: { StatusBadge, PriorityBadge },
+        data: () => ({
+            chips: [
+                { label: 'My Tickets', active: true },
+                { label: 'Unassigned', active: false },
+                { label: 'Urgent+', active: false },
+                { label: 'SLA Breaching', active: false },
+                { label: 'Following', active: false },
+            ],
+            tickets: [
+                {
+                    ref: 'ESC-1042',
+                    subject: 'Unable to export CSV reports from dashboard',
+                    requester: 'Sarah Chen',
+                    email: 'sarah@acme.co',
+                    status: 'open',
+                    priority: 'high',
+                    assignee: 'Mike Agent',
+                    ago: '12m ago',
+                    author: 'Agent Mike',
+                    sla: 'green',
+                    checked: true,
+                },
+                {
+                    ref: 'ESC-1041',
+                    subject: 'SSO login redirect loop on Firefox',
+                    requester: 'James Wilson',
+                    email: 'james@corp.io',
+                    status: 'pending',
+                    priority: 'urgent',
+                    assignee: 'Lisa Torres',
+                    ago: '34m ago',
+                    author: 'James Wilson',
+                    sla: 'amber',
+                    checked: true,
+                },
+                {
+                    ref: 'ESC-1040',
+                    subject: 'Custom field values not persisting after save',
+                    requester: 'Maria Garcia',
+                    email: 'maria@startup.dev',
+                    status: 'in_progress',
+                    priority: 'medium',
+                    assignee: 'Mike Agent',
+                    ago: '1h ago',
+                    author: 'Agent Lisa',
+                    sla: 'green',
+                    checked: false,
+                },
+                {
+                    ref: 'ESC-1039',
+                    subject: 'Webhook notifications delayed by 15+ minutes',
+                    requester: 'Tom Baker',
+                    email: 'tom@enterprise.com',
+                    status: 'escalated',
+                    priority: 'high',
+                    assignee: 'Mike Agent',
+                    ago: '2h ago',
+                    author: 'Tom Baker',
+                    sla: 'red',
+                    checked: false,
+                },
+                {
+                    ref: 'ESC-1038',
+                    subject: 'Knowledge base search returning no results',
+                    requester: 'Priya Patel',
+                    email: 'priya@example.com',
+                    status: 'solved',
+                    priority: 'medium',
+                    assignee: 'Lisa Torres',
+                    ago: '3h ago',
+                    author: 'Agent Mike',
+                    sla: '',
+                    checked: false,
+                },
+                {
+                    ref: 'ESC-1037',
+                    subject: 'Feature request: Dark mode for customer portal',
+                    requester: 'Alex Kim',
+                    email: 'alex@design.co',
+                    status: 'open',
+                    priority: 'low',
+                    assignee: 'Unassigned',
+                    ago: '5h ago',
+                    author: 'Alex Kim',
+                    sla: '',
+                    checked: false,
+                },
+                {
+                    ref: 'ESC-1036',
+                    subject: 'Mobile app crashes when uploading attachments',
+                    requester: 'David Liu',
+                    email: 'david@bigcorp.com',
+                    status: 'in_progress',
+                    priority: 'urgent',
+                    assignee: 'Mike Agent',
+                    ago: '6h ago',
+                    author: 'Agent Mike',
+                    sla: 'amber',
+                    checked: false,
+                },
+                {
+                    ref: 'ESC-1035',
+                    subject: 'Automation rule not triggering on status change',
+                    requester: 'Nina Petrova',
+                    email: 'nina@saas.io',
+                    status: 'pending',
+                    priority: 'medium',
+                    assignee: 'Lisa Torres',
+                    ago: '8h ago',
+                    author: 'Nina Petrova',
+                    sla: 'green',
+                    checked: false,
+                },
+            ],
+        }),
+        template: `
+            <div style="min-height:720px; background:#000; color:#fff; font-family: ui-sans-serif, system-ui, sans-serif; border-radius: 12px; overflow: hidden; display:flex; flex-direction:column;">
+                <!-- Top nav (same as AgentPanel with Tickets active) -->
+                <nav style="height:48px; border-bottom:1px solid rgba(255,255,255,0.06); background:#0a0a0a; display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <defs><linearGradient id="esc-rb4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="30%" stop-color="#eab308"/><stop offset="50%" stop-color="#22c55e"/><stop offset="70%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+                                <g transform="translate(12,12) scale(1.35) translate(-12,-12)"><polyline points="17 11 12 6 7 11" stroke="url(#esc-rb4)"/><polyline points="17 18 12 13 7 18" stroke="url(#esc-rb4)"/></g>
+                            </svg>
+                        </div>
+                        <span style="font-size:13px; font-weight:700; letter-spacing:0.02em;">Escalated</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500; color:#737373;">Dashboard</span>
+                        <span style="background:rgba(255,255,255,0.08); padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500;">Tickets</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:13px; color:#737373;">Admin</span>
+                        <div style="width:1px; height:16px; background:rgba(255,255,255,0.08);"></div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:26px; height:26px; border-radius:6px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:#a3a3a3;">M</div>
+                            <span style="font-size:13px; color:#a3a3a3;">Mike Agent</span>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Content area -->
+                <div style="flex:1; display:flex; justify-content:center; padding:20px 24px; overflow-y:auto;">
+                    <div style="max-width:1100px; width:100%; display:flex; flex-direction:column; gap:16px;">
+
+                        <!-- Quick filter chips -->
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <span v-for="chip in chips" :key="chip.label"
+                                :style="{
+                                    padding: '4px 14px',
+                                    borderRadius: '20px',
+                                    fontSize: '12px',
+                                    fontWeight: '500',
+                                    cursor: 'pointer',
+                                    border: chip.active ? '1px solid rgba(6,182,212,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                    background: chip.active ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.04)',
+                                    color: chip.active ? '#22d3ee' : '#a3a3a3',
+                                }">
+                                {{ chip.label }}
+                            </span>
+                        </div>
+
+                        <!-- Search / filter bar -->
+                        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <div style="flex:1; min-width:200px; position:relative;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:10px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                                <input type="text" placeholder="Search tickets..." style="width:100%; padding:7px 12px 7px 32px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; outline:none;" />
+                            </div>
+                            <select style="padding:7px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3; font-size:12px; outline:none; appearance:auto;">
+                                <option>Status</option>
+                                <option>Open</option>
+                                <option>Pending</option>
+                                <option>In Progress</option>
+                                <option>Solved</option>
+                                <option>Escalated</option>
+                            </select>
+                            <select style="padding:7px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3; font-size:12px; outline:none; appearance:auto;">
+                                <option>Priority</option>
+                                <option>Low</option>
+                                <option>Medium</option>
+                                <option>High</option>
+                                <option>Urgent</option>
+                            </select>
+                            <span style="font-size:12px; color:#06b6d4; cursor:pointer; font-weight:500; padding:4px 8px;">Advanced</span>
+                        </div>
+
+                        <!-- Ticket table -->
+                        <div style="border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(23,23,23,0.6); overflow:hidden; flex:1;">
+                            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                                <thead>
+                                    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                                        <th style="padding:10px 14px; text-align:left; width:28px;">
+                                            <div style="width:14px; height:14px; border:1px solid rgba(255,255,255,0.2); border-radius:3px;"></div>
+                                        </th>
+                                        <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Reference</th>
+                                        <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Subject</th>
+                                        <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Requester</th>
+                                        <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Status</th>
+                                        <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Priority</th>
+                                        <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Assignee</th>
+                                        <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Last Reply</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="t in tickets" :key="t.ref"
+                                        :style="{
+                                            borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                            background: t.checked ? 'rgba(6,182,212,0.06)' : 'transparent',
+                                        }">
+                                        <td style="padding:10px 14px;">
+                                            <div :style="{
+                                                width: '14px', height: '14px', borderRadius: '3px',
+                                                border: t.checked ? '1px solid #06b6d4' : '1px solid rgba(255,255,255,0.15)',
+                                                background: t.checked ? '#06b6d4' : 'transparent',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            }">
+                                                <svg v-if="t.checked" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                            </div>
+                                        </td>
+                                        <td style="padding:10px 8px; white-space:nowrap;">
+                                            <div style="display:flex; align-items:center; gap:6px;">
+                                                <span :style="{
+                                                    width: '7px', height: '7px', borderRadius: '50%',
+                                                    background: t.sla === 'red' ? '#ef4444' : t.sla === 'amber' ? '#f59e0b' : t.sla === 'green' ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                                                    flexShrink: 0,
+                                                }"></span>
+                                                <span style="color:#22d3ee; font-weight:500;">{{ t.ref }}</span>
+                                            </div>
+                                        </td>
+                                        <td style="padding:10px 8px; max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#e5e5e5;">{{ t.subject }}</td>
+                                        <td style="padding:10px 8px; white-space:nowrap;">
+                                            <div style="display:flex; flex-direction:column;">
+                                                <span style="color:#d4d4d4; font-size:13px;">{{ t.requester }}</span>
+                                                <span style="color:#525252; font-size:11px;">{{ t.email }}</span>
+                                            </div>
+                                        </td>
+                                        <td style="padding:10px 8px;"><StatusBadge :status="t.status" /></td>
+                                        <td style="padding:10px 8px;"><PriorityBadge :priority="t.priority" /></td>
+                                        <td style="padding:10px 8px; white-space:nowrap;">
+                                            <span :style="{ color: t.assignee === 'Unassigned' ? '#525252' : '#a3a3a3', fontStyle: t.assignee === 'Unassigned' ? 'italic' : 'normal' }">{{ t.assignee }}</span>
+                                        </td>
+                                        <td style="padding:10px 8px; white-space:nowrap;">
+                                            <div style="display:flex; flex-direction:column;">
+                                                <span style="color:#a3a3a3; font-size:12px;">{{ t.ago }}</span>
+                                                <span style="color:#525252; font-size:11px;">{{ t.author }}</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="font-size:12px; color:#737373;">Showing 1\u20138 of 142 tickets</span>
+                            <div style="display:flex; gap:6px;">
+                                <button style="padding:5px 14px; border-radius:6px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#525252; font-size:12px; cursor:default;">Previous</button>
+                                <button style="padding:5px 14px; border-radius:6px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#e5e5e5; font-size:12px; cursor:pointer;">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Bulk action bar -->
+                        <div style="display:flex; align-items:center; gap:12px; padding:8px 14px; border-radius:10px; background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.15);">
+                            <span style="font-size:12px; color:#22d3ee; font-weight:500;">2 tickets selected</span>
+                            <div style="width:1px; height:14px; background:rgba(255,255,255,0.08);"></div>
+                            <select style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3; font-size:11px; outline:none; appearance:auto;">
+                                <option>Set Status...</option>
+                                <option>Open</option>
+                                <option>Pending</option>
+                                <option>Solved</option>
+                            </select>
+                            <select style="padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3; font-size:11px; outline:none; appearance:auto;">
+                                <option>Set Priority...</option>
+                                <option>Low</option>
+                                <option>Medium</option>
+                                <option>High</option>
+                                <option>Urgent</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        `,
+    }),
+};
