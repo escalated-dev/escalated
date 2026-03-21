@@ -10,50 +10,56 @@ const escDark = inject(
     'esc-dark',
     computed(() => false),
 );
-const activeChip = ref(null);
+const activeTab = ref(null);
 
-const chips = computed(() => {
+const tabs = computed(() => {
     const list = [
-        { key: 'my_tickets', label: 'My Tickets', filter: { assigned_to: props.currentUserId } },
+        { key: null, label: 'All Tickets', filter: {} },
+        { key: 'assigned_to_me', label: 'Assigned to Me', filter: { assigned_to: props.currentUserId } },
         { key: 'unassigned', label: 'Unassigned', filter: { unassigned: true } },
-        { key: 'urgent', label: 'Urgent+', filter: { priority: 'urgent' } },
+        { key: 'urgent', label: 'Urgent', filter: { priority: 'urgent' } },
         { key: 'sla_breaching', label: 'SLA Breaching', filter: { sla_breached: true } },
         { key: 'following', label: 'Following', filter: { following: true } },
     ];
     if (props.currentUserId) return list;
-    return list.filter((c) => c.key !== 'my_tickets');
+    return list.filter((t) => t.key !== 'assigned_to_me');
 });
 
-function toggle(chip) {
-    if (activeChip.value === chip.key) {
-        activeChip.value = null;
-        emit('filter', {});
-    } else {
-        activeChip.value = chip.key;
-        emit('filter', chip.filter);
-    }
+function selectTab(tab) {
+    activeTab.value = tab.key;
+    emit('filter', tab.filter);
 }
 </script>
 
 <template>
-    <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Quick filters">
+    <div
+        :class="['flex items-center gap-0 border-b', escDark ? 'border-white/[0.08]' : 'border-gray-200']"
+        role="tablist"
+        aria-label="Ticket view tabs"
+    >
         <button
-            v-for="chip in chips"
-            :key="chip.key"
+            v-for="tab in tabs"
+            :key="tab.key"
+            role="tab"
+            :aria-selected="activeTab === tab.key"
             :class="[
-                'rounded-full px-3 py-1.5 text-xs font-medium transition-all',
-                activeChip === chip.key
+                'relative px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-0',
+                activeTab === tab.key
                     ? escDark
-                        ? 'bg-gradient-to-r from-[var(--esc-panel-accent)]/20 to-[var(--esc-panel-accent-secondary)]/20 text-[var(--esc-panel-text)] ring-1 ring-[var(--esc-panel-accent)]/30'
-                        : 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 ring-1 ring-blue-200'
+                        ? 'text-cyan-400 focus-visible:ring-cyan-500/40'
+                        : 'text-blue-600 focus-visible:ring-blue-500/40'
                     : escDark
-                      ? 'bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] ring-1 ring-[var(--esc-panel-border)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]'
-                      : 'bg-gray-50 text-gray-600 ring-1 ring-gray-200 hover:bg-gray-100',
+                      ? 'text-neutral-500 hover:text-neutral-300 focus-visible:ring-cyan-500/40'
+                      : 'text-gray-500 hover:text-gray-700 focus-visible:ring-blue-500/40',
             ]"
-            :aria-pressed="activeChip === chip.key"
-            @click="toggle(chip)"
+            @click="selectTab(tab)"
         >
-            {{ chip.label }}
+            {{ tab.label }}
+            <span
+                v-if="activeTab === tab.key"
+                :class="['absolute bottom-0 left-0 right-0 h-0.5 rounded-t', escDark ? 'bg-cyan-400' : 'bg-blue-600']"
+            ></span>
         </button>
     </div>
 </template>

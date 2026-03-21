@@ -72,7 +72,7 @@ function applyQuickFilter(filter) {
             v-model:selected-ids="selectedIds"
             :tickets="tickets"
             route-prefix="escalated.agent.tickets"
-            show-assignee
+            :columns="['reference', 'subject', 'requester', 'status', 'priority', 'assignee', 'updated']"
             selectable
             navigable
         />
