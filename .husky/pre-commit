@@ -1,1 +1,1 @@
-npx lint-staged
+npx.cmd lint-staged 2>/dev/null || npx lint-staged
