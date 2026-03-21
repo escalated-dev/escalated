@@ -125,7 +125,7 @@ export const FullDashboard = {
         components: { StatsCard, KpiCard, StatusBadge, PriorityBadge, AgentLoadIndicator },
         data: () => ({ sidebarLinks, tickets }),
         template: `
-            <div style="display:flex; min-height:100vh; background:#000; color:#fff; font-family: ui-sans-serif, system-ui, sans-serif; margin: -24px; border-radius: 0;">
+            <div style="display:flex; min-height:720px; background:#000; color:#fff; font-family: ui-sans-serif, system-ui, sans-serif; border-radius: 12px; overflow: hidden;">
                 <!-- Sidebar -->
                 <aside style="width:240px; background:#0a0a0a; border-right:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; flex-shrink:0;">
                     <!-- Logo -->
@@ -295,7 +295,7 @@ export const AgentPanel = {
             ],
         }),
         template: `
-            <div style="min-height:100vh; background:#000; color:#fff; font-family: ui-sans-serif, system-ui, sans-serif; margin: -24px; border-radius: 0;">
+            <div style="min-height:720px; background:#000; color:#fff; font-family: ui-sans-serif, system-ui, sans-serif; border-radius: 12px; overflow: hidden;">
                 <!-- Top nav -->
                 <nav style="height:48px; border-bottom:1px solid rgba(255,255,255,0.06); background:#0a0a0a; display:flex; align-items:center; justify-content:space-between; padding:0 24px;">
                     <div style="display:flex; align-items:center; gap:10px;">

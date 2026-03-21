@@ -79,16 +79,30 @@ for (const story of stories) {
 
 test('README hero: Admin Dashboard (escalated_admin_1)', async ({ page }) => {
     await openStory(page, 'pages-admindashboard--full-dashboard');
+    await page.evaluate(() => {
+        document.body.style.background = 'transparent';
+        document.documentElement.style.background = 'transparent';
+        const root = document.querySelector('#storybook-root');
+        if (root?.firstElementChild) root.firstElementChild.style.background = 'transparent';
+    });
     await page.screenshot({
         path: 'docs/assets/escalated_admin_1.png',
         animations: 'disabled',
+        omitBackground: true,
     });
 });
 
 test('README hero: Agent Panel (escalated_admin_2)', async ({ page }) => {
     await openStory(page, 'pages-admindashboard--agent-panel');
+    await page.evaluate(() => {
+        document.body.style.background = 'transparent';
+        document.documentElement.style.background = 'transparent';
+        const root = document.querySelector('#storybook-root');
+        if (root?.firstElementChild) root.firstElementChild.style.background = 'transparent';
+    });
     await page.screenshot({
         path: 'docs/assets/escalated_admin_2.png',
         animations: 'disabled',
+        omitBackground: true,
     });
 });
