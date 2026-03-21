@@ -1,16 +1,13 @@
 <script setup>
+import { TICKET_TYPES } from '../utils/constants';
+
 defineProps({
     modelValue: { type: String, default: 'question' },
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-const types = [
-    { value: 'question', label: 'Question', color: 'text-cyan-400' },
-    { value: 'problem', label: 'Problem', color: 'text-rose-400' },
-    { value: 'incident', label: 'Incident', color: 'text-amber-400' },
-    { value: 'task', label: 'Task', color: 'text-violet-400' },
-];
+const types = TICKET_TYPES;
 </script>
 
 <template>

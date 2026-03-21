@@ -1,21 +1,14 @@
 <script setup>
 import { inject, computed, reactive, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { TICKET_STATUSES, TICKET_PRIORITIES } from '../utils/constants';
 
 const props = defineProps({
     statuses: {
         type: Array,
-        default: () => [
-            'open',
-            'in_progress',
-            'waiting_on_customer',
-            'waiting_on_agent',
-            'escalated',
-            'resolved',
-            'closed',
-        ],
+        default: () => TICKET_STATUSES,
     },
-    priorities: { type: Array, default: () => ['low', 'medium', 'high', 'urgent', 'critical'] },
+    priorities: { type: Array, default: () => TICKET_PRIORITIES },
     agents: { type: Array, default: () => [] },
     departments: { type: Array, default: () => [] },
     tags: { type: Array, default: () => [] },

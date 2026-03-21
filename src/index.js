@@ -52,9 +52,14 @@ export { default as TotpInput } from './components/TotpInput.vue';
 export { default as TwoFactorSetup } from './components/TwoFactorSetup.vue';
 
 // Composables
+export { useDebouncedSearch } from './composables/useDebouncedSearch';
 export { useKeyboardShortcuts } from './composables/useKeyboardShortcuts';
 export { usePluginExtensions } from './composables/usePluginExtensions';
 export { usePluginHooks } from './composables/usePluginHooks';
+
+// Utilities
+export { TICKET_STATUSES, TICKET_PRIORITIES, TICKET_TYPES, TICKET_TYPE_COLORS } from './utils/constants';
+export { timeAgo, slaClass } from './utils/formatting';
 
 // Plugin authoring helper
 export { defineEscalatedPlugin } from './defineEscalatedPlugin';
