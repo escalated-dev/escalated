@@ -459,6 +459,216 @@ export const AgentPanel = {
     }),
 };
 
+/**
+ * Ticket detail view — agent viewing a single ticket with conversation thread and sidebar.
+ * Dark mode. Used for README hero screenshot.
+ */
+export const TicketDetailView = {
+    render: () => ({
+        components: { StatusBadge, PriorityBadge },
+        data: () => ({
+            messages: [
+                {
+                    id: 1,
+                    author: 'Sarah Chen',
+                    initial: 'S',
+                    role: 'customer',
+                    time: 'Mar 20, 2026 at 2:14 PM',
+                    text: "Hi, I'm trying to export our monthly CSV report from the dashboard but the download never starts. I've tried Chrome and Firefox, both on macOS. The button spinner appears but then nothing happens after about 30 seconds. This is blocking our end-of-quarter review.",
+                },
+                {
+                    id: 2,
+                    author: 'Mike Agent',
+                    initial: 'M',
+                    role: 'agent',
+                    time: 'Mar 20, 2026 at 2:32 PM',
+                    text: "Hi Sarah, thanks for reporting this. I can reproduce the issue on our end. It looks like exports with more than 10,000 rows are timing out. I've escalated this to our engineering team and we're working on a fix. In the meantime, could you try filtering to a smaller date range as a workaround?",
+                },
+                {
+                    id: 3,
+                    author: 'Sarah Chen',
+                    initial: 'S',
+                    role: 'customer',
+                    time: 'Mar 20, 2026 at 3:05 PM',
+                    text: 'Thanks Mike! Filtering to a single month did work as a workaround. That said, we really need the full quarter export for our finance team. Is there an ETA on the fix?',
+                },
+                {
+                    id: 4,
+                    author: 'Mike Agent',
+                    initial: 'M',
+                    role: 'agent',
+                    time: 'Mar 20, 2026 at 3:18 PM',
+                    text: "Great to hear the workaround helped! Engineering has identified the root cause — it's a memory limit on the export worker. The fix is in review and should ship by tomorrow morning. I'll update this ticket as soon as it's deployed.",
+                },
+            ],
+            activeTab: 'reply',
+        }),
+        template: `
+            <div style="min-height:720px; background:#000; color:#fff; font-family: ui-sans-serif, system-ui, sans-serif; border-radius: 12px; overflow: hidden;">
+                <!-- Top nav (same as AgentPanel) -->
+                <nav style="height:48px; border-bottom:1px solid rgba(255,255,255,0.06); background:#0a0a0a; display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <defs><linearGradient id="esc-rb3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="30%" stop-color="#eab308"/><stop offset="50%" stop-color="#22c55e"/><stop offset="70%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+                                <g transform="translate(12,12) scale(1.35) translate(-12,-12)"><polyline points="17 11 12 6 7 11" stroke="url(#esc-rb3)"/><polyline points="17 18 12 13 7 18" stroke="url(#esc-rb3)"/></g>
+                            </svg>
+                        </div>
+                        <span style="font-size:13px; font-weight:700; letter-spacing:0.02em;">Escalated</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500; color:#737373;">Dashboard</span>
+                        <span style="background:rgba(255,255,255,0.08); padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500;">Tickets</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:13px; color:#737373;">Admin</span>
+                        <div style="width:1px; height:16px; background:rgba(255,255,255,0.08);"></div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:26px; height:26px; border-radius:6px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:#a3a3a3;">M</div>
+                            <span style="font-size:13px; color:#a3a3a3;">Mike Agent</span>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Main content area: left (thread) + right (sidebar) -->
+                <div style="display:flex; flex:1; min-height:672px;">
+                    <!-- Left: ticket thread -->
+                    <div style="flex:7; display:flex; flex-direction:column; border-right:1px solid rgba(255,255,255,0.06);">
+                        <!-- Ticket header -->
+                        <div style="padding:16px 24px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                                <span style="font-size:13px; color:#22d3ee; font-weight:500;">ESC-1042</span>
+                                <StatusBadge status="in_progress" />
+                                <PriorityBadge priority="high" />
+                            </div>
+                            <h1 style="font-size:16px; font-weight:600; margin:0; color:#f5f5f5;">Unable to export CSV reports from dashboard</h1>
+                        </div>
+
+                        <!-- Conversation thread -->
+                        <div style="flex:1; overflow-y:auto; padding:16px 24px; display:flex; flex-direction:column; gap:16px;">
+                            <div v-for="msg in messages" :key="msg.id" style="display:flex; gap:12px;">
+                                <!-- Avatar -->
+                                <div :style="{
+                                    width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '12px', fontWeight: '600',
+                                    background: msg.role === 'agent' ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.08)',
+                                    color: msg.role === 'agent' ? '#60a5fa' : '#a3a3a3',
+                                }">{{ msg.initial }}</div>
+                                <!-- Message body -->
+                                <div style="flex:1; min-width:0;">
+                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                        <span style="font-size:13px; font-weight:600;" :style="{ color: msg.role === 'agent' ? '#60a5fa' : '#e5e5e5' }">{{ msg.author }}</span>
+                                        <span v-if="msg.role === 'agent'" style="font-size:10px; background:rgba(59,130,246,0.12); color:#60a5fa; padding:1px 6px; border-radius:4px; font-weight:500;">Agent</span>
+                                        <span style="font-size:11px; color:#525252;">{{ msg.time }}</span>
+                                    </div>
+                                    <div style="font-size:13px; line-height:1.6; color:#d4d4d4; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); border-radius:10px; padding:10px 14px;">
+                                        {{ msg.text }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reply composer -->
+                        <div style="border-top:1px solid rgba(255,255,255,0.06); padding:12px 24px;">
+                            <div style="display:flex; gap:0; margin-bottom:8px;">
+                                <button :style="{
+                                    padding: '5px 14px', fontSize: '12px', fontWeight: '600', border: 'none', cursor: 'pointer', borderRadius: '6px 0 0 6px',
+                                    background: activeTab === 'reply' ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
+                                    color: activeTab === 'reply' ? '#60a5fa' : '#737373',
+                                }" @click="activeTab = 'reply'">Reply</button>
+                                <button :style="{
+                                    padding: '5px 14px', fontSize: '12px', fontWeight: '600', border: 'none', cursor: 'pointer', borderRadius: '0 6px 6px 0',
+                                    background: activeTab === 'note' ? 'rgba(234,179,8,0.12)' : 'rgba(255,255,255,0.05)',
+                                    color: activeTab === 'note' ? '#facc15' : '#737373',
+                                }" @click="activeTab = 'note'">Internal Note</button>
+                            </div>
+                            <div style="position:relative;">
+                                <textarea :placeholder="activeTab === 'reply' ? 'Type your reply...' : 'Add an internal note...'" style="width:100%; min-height:68px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 14px; font-size:13px; color:#e5e5e5; resize:none; font-family:inherit; box-sizing:border-box;" />
+                                <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                                    <span :style="{
+                                        padding: '6px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                                        background: activeTab === 'reply' ? '#3b82f6' : '#ca8a04',
+                                        color: '#fff',
+                                    }">{{ activeTab === 'reply' ? 'Send Reply' : 'Add Note' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: ticket sidebar -->
+                    <div style="flex:3; padding:16px; overflow-y:auto; background:rgba(10,10,10,0.5);">
+                        <!-- Assignee -->
+                        <div style="margin-bottom:20px;">
+                            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Assignee</div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="width:28px; height:28px; border-radius:6px; background:rgba(59,130,246,0.15); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#60a5fa;">M</div>
+                                <div>
+                                    <div style="font-size:13px; font-weight:500; color:#e5e5e5;">Mike Agent</div>
+                                    <div style="font-size:11px; color:#525252;">Support Team</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Department -->
+                        <div style="margin-bottom:20px;">
+                            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Department</div>
+                            <div style="font-size:13px; color:#a3a3a3;">Technical Support</div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div style="margin-bottom:20px;">
+                            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Tags</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                <span style="background:rgba(255,255,255,0.06); color:#a3a3a3; font-size:11px; padding:2px 8px; border-radius:6px;">csv-export</span>
+                                <span style="background:rgba(255,255,255,0.06); color:#a3a3a3; font-size:11px; padding:2px 8px; border-radius:6px;">dashboard</span>
+                                <span style="background:rgba(255,255,255,0.06); color:#a3a3a3; font-size:11px; padding:2px 8px; border-radius:6px;">bug</span>
+                            </div>
+                        </div>
+
+                        <!-- SLA Timer -->
+                        <div style="margin-bottom:20px;">
+                            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">SLA</div>
+                            <div style="border:1px solid rgba(16,185,129,0.2); background:rgba(16,185,129,0.08); border-radius:8px; padding:8px 12px;">
+                                <div style="font-size:12px; font-weight:500; color:#34d399;">Next Response Due</div>
+                                <div style="font-size:11px; color:#34d399;">3h 42m remaining</div>
+                            </div>
+                        </div>
+
+                        <!-- Requester Info -->
+                        <div style="margin-bottom:20px;">
+                            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Requester</div>
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:10px 12px;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                    <div style="width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#a3a3a3;">S</div>
+                                    <div>
+                                        <div style="font-size:13px; font-weight:500; color:#e5e5e5;">Sarah Chen</div>
+                                        <div style="font-size:11px; color:#525252;">sarah@acme.co</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size:11px; color:#525252; border-top:1px solid rgba(255,255,255,0.04); padding-top:8px;">
+                                    <span>Org: Acme Corp</span>
+                                    <span>12 tickets</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Created / Updated -->
+                        <div>
+                            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Details</div>
+                            <div style="font-size:12px; color:#525252; display:flex; flex-direction:column; gap:4px;">
+                                <div style="display:flex; justify-content:space-between;"><span>Created</span><span style="color:#737373;">Mar 20, 2026</span></div>
+                                <div style="display:flex; justify-content:space-between;"><span>Updated</span><span style="color:#737373;">2 min ago</span></div>
+                                <div style="display:flex; justify-content:space-between;"><span>Channel</span><span style="color:#737373;">Email</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
+    }),
+};
+
 export const AgentPanelLight = {
     render: () => ({
         components: { StatsCard, StatusBadge, PriorityBadge, AgentLoadIndicator },

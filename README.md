@@ -148,6 +148,11 @@ All the Vue 3 + Inertia.js components that power the Escalated UI. These are ide
   <img src="docs/assets/escalated_admin_2.png" alt="Escalated Agent Panel — top navigation, stats, and assigned ticket queue" width="800" />
 </p>
 
+<p align="center">
+  <strong>Ticket Detail View</strong><br/>
+  <img src="docs/assets/escalated_ticket_view.png" alt="Escalated Ticket Detail View — conversation thread, reply composer, and ticket sidebar with SLA timer" width="800" />
+</p>
+
 ### Pages
 
 **Customer Portal** — Self-service ticket management
