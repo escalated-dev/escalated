@@ -1,1 +1,5 @@
-npx.cmd lint-staged 2>/dev/null || npx lint-staged
+if command -v npx >/dev/null 2>&1; then
+  npx lint-staged
+else
+  npx.cmd lint-staged
+fi
