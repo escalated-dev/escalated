@@ -19,6 +19,7 @@ const ALL_COLUMNS = [
     { key: 'created', label: 'Created' },
     { key: 'sla', label: 'SLA' },
     { key: 'tags', label: 'Tags' },
+    { key: 'category', label: 'Category' },
 ];
 
 const props = defineProps({
@@ -193,6 +194,27 @@ function slaLabel(ticket) {
         return `${Math.floor(hrs / 24)}d left`;
     }
     return '—';
+}
+
+const TICKET_TYPE_MAP = {
+    question: { label: 'Question', darkColor: 'bg-cyan-500/20 text-cyan-400', lightColor: 'bg-cyan-100 text-cyan-700' },
+    problem: { label: 'Problem', darkColor: 'bg-rose-500/20 text-rose-400', lightColor: 'bg-rose-100 text-rose-700' },
+    incident: {
+        label: 'Incident',
+        darkColor: 'bg-amber-500/20 text-amber-400',
+        lightColor: 'bg-amber-100 text-amber-700',
+    },
+    task: { label: 'Task', darkColor: 'bg-violet-500/20 text-violet-400', lightColor: 'bg-violet-100 text-violet-700' },
+};
+
+function ticketTypeLabel(type) {
+    return TICKET_TYPE_MAP[type]?.label || type || '—';
+}
+
+function ticketTypeBadgeClass(type, dark) {
+    const entry = TICKET_TYPE_MAP[type];
+    if (!entry) return '';
+    return dark ? entry.darkColor : entry.lightColor;
 }
 
 function truncate(str, len = 60) {
@@ -379,6 +401,19 @@ const colCount = computed(() => {
                             <span v-if="!ticket.tags?.length" class="text-neutral-700">—</span>
                         </div>
                     </td>
+                    <!-- category (ticket type) -->
+                    <td v-if="isColumnActive('category')" class="px-4 py-3 text-sm">
+                        <span
+                            v-if="ticket.ticket_type"
+                            :class="[
+                                'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                                ticketTypeBadgeClass(ticket.ticket_type, true),
+                            ]"
+                        >
+                            {{ ticketTypeLabel(ticket.ticket_type) }}
+                        </span>
+                        <span v-else class="text-neutral-700">—</span>
+                    </td>
                     <!-- spacer for gear column -->
                     <td class="w-10 px-2 py-3"></td>
                 </tr>
@@ -559,6 +594,19 @@ const colCount = computed(() => {
                             </span>
                             <span v-if="!ticket.tags?.length" class="text-gray-400">—</span>
                         </div>
+                    </td>
+                    <!-- category (ticket type) -->
+                    <td v-if="isColumnActive('category')" class="px-4 py-3 text-sm">
+                        <span
+                            v-if="ticket.ticket_type"
+                            :class="[
+                                'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                                ticketTypeBadgeClass(ticket.ticket_type, false),
+                            ]"
+                        >
+                            {{ ticketTypeLabel(ticket.ticket_type) }}
+                        </span>
+                        <span v-else class="text-gray-400">—</span>
                     </td>
                     <!-- spacer for gear column -->
                     <td class="w-10 px-2 py-3"></td>

@@ -5,6 +5,7 @@ import PriorityBadge from './PriorityBadge.vue';
 import SlaTimer from './SlaTimer.vue';
 import AssigneeSelect from './AssigneeSelect.vue';
 import TagSelect from './TagSelect.vue';
+import TicketTypeSelector from './TicketTypeSelector.vue';
 import ActivityTimeline from './ActivityTimeline.vue';
 
 defineProps({
@@ -15,7 +16,7 @@ defineProps({
     editable: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['assign', 'tags', 'priority', 'department', 'status']);
+const emit = defineEmits(['assign', 'tags', 'priority', 'department', 'status', 'ticket-type']);
 const escDark = inject(
     'esc-dark',
     computed(() => false),
@@ -57,6 +58,22 @@ function renderStars(rating) {
                     <dt :class="escDark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'">Department</dt>
                     <dd :class="escDark ? 'text-[var(--esc-panel-text-secondary)]' : ''">
                         {{ ticket.department.name }}
+                    </dd>
+                </div>
+                <div class="flex items-center justify-between">
+                    <dt :class="escDark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'">Type</dt>
+                    <dd v-if="editable">
+                        <TicketTypeSelector
+                            :model-value="ticket.ticket_type || 'question'"
+                            @update:model-value="emit('ticket-type', $event)"
+                        />
+                    </dd>
+                    <dd v-else :class="escDark ? 'text-[var(--esc-panel-text-secondary)]' : ''">
+                        {{
+                            ticket.ticket_type
+                                ? ticket.ticket_type.charAt(0).toUpperCase() + ticket.ticket_type.slice(1)
+                                : '—'
+                        }}
                     </dd>
                 </div>
                 <div class="flex justify-between">

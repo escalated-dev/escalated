@@ -46,6 +46,7 @@ const filterData = reactive({
     tag: initial.tag || '',
     has_attachments: initial.has_attachments || '',
     requester: initial.requester || '',
+    ticket_type: initial.ticket_type || '',
 });
 
 const showAdvanced = ref(
@@ -126,6 +127,13 @@ const labelClass = computed(() =>
             <select v-model="filterData.priority" aria-label="Filter by priority" :class="selectClass">
                 <option value="">All Priorities</option>
                 <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
+            </select>
+            <select v-model="filterData.ticket_type" aria-label="Filter by type" :class="selectClass">
+                <option value="">All Types</option>
+                <option value="question">Question</option>
+                <option value="problem">Problem</option>
+                <option value="incident">Incident</option>
+                <option value="task">Task</option>
             </select>
             <select
                 v-if="agents.length"

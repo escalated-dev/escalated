@@ -1,6 +1,7 @@
 <script setup>
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import FileDropzone from '../../components/FileDropzone.vue';
+import TicketTypeSelector from '../../components/TicketTypeSelector.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
 import { useForm } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
@@ -15,6 +16,7 @@ const form = useForm({
     description: '',
     priority: 'medium',
     department_id: '',
+    ticket_type: 'question',
     attachments: [],
 });
 
@@ -53,7 +55,7 @@ function submit() {
                     {{ form.errors.description }}
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Priority</label>
                     <select v-model="form.priority" class="mt-1 w-full rounded-lg border-gray-300 shadow-sm">
@@ -66,6 +68,10 @@ function submit() {
                         <option value="">None</option>
                         <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
                     </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Type</label>
+                    <TicketTypeSelector v-model="form.ticket_type" class="mt-1 w-full" />
                 </div>
             </div>
             <div>
