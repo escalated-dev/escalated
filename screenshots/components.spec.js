@@ -33,6 +33,10 @@ const stories = [
     // Follow Button
     { id: 'components-followbutton--not-following', name: 'FollowButton-NotFollowing' },
     { id: 'components-followbutton--following', name: 'FollowButton-Following' },
+
+    // Full-page composites
+    { id: 'pages-admindashboard--full-dashboard', name: 'AdminDashboard-Full', fullPage: true },
+    { id: 'pages-admindashboard--agent-panel', name: 'AgentPanel-Full', fullPage: true },
 ];
 
 /**
@@ -54,28 +58,36 @@ async function openStory(page, storyId) {
 for (const story of stories) {
     test(`screenshot: ${story.name}`, async ({ page }) => {
         const root = await openStory(page, story.id);
-        await root.screenshot({
-            path: `screenshot-results/${story.name}.png`,
-            animations: 'disabled',
-        });
+        if (story.fullPage) {
+            await page.screenshot({
+                path: `screenshot-results/${story.name}.png`,
+                animations: 'disabled',
+            });
+        } else {
+            await root.screenshot({
+                path: `screenshot-results/${story.name}.png`,
+                animations: 'disabled',
+            });
+        }
     });
 }
 
 // ----------------------------------------------------------------
 // README hero screenshots → docs/assets/ (referenced by README.md)
+// Full-page captures of the admin dashboard and agent panel stories.
 // ----------------------------------------------------------------
 
-test('README hero: Dashboard components (escalated_admin_1)', async ({ page }) => {
-    const root = await openStory(page, 'components-statscard--dashboard-grid');
-    await root.screenshot({
+test('README hero: Admin Dashboard (escalated_admin_1)', async ({ page }) => {
+    await openStory(page, 'pages-admindashboard--full-dashboard');
+    await page.screenshot({
         path: 'docs/assets/escalated_admin_1.png',
         animations: 'disabled',
     });
 });
 
-test('README hero: KPI metrics (escalated_admin_2)', async ({ page }) => {
-    const root = await openStory(page, 'components-kpicard--dashboard-row');
-    await root.screenshot({
+test('README hero: Agent Panel (escalated_admin_2)', async ({ page }) => {
+    await openStory(page, 'pages-admindashboard--agent-panel');
+    await page.screenshot({
         path: 'docs/assets/escalated_admin_2.png',
         animations: 'disabled',
     });
