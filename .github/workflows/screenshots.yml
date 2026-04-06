@@ -2,9 +2,9 @@ name: component-screenshots
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -49,7 +49,7 @@ jobs:
           retention-days: 30
 
       - name: Commit updated README screenshots
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -59,69 +59,3 @@ jobs:
             git push
           }
 
-      - name: Comment on PR with screenshot summary
-        if: github.event_name == 'pull_request' && always()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const dir = 'screenshot-results';
-
-            if (!fs.existsSync(dir)) {
-              console.log('No screenshot-results directory found');
-              return;
-            }
-
-            const files = fs.readdirSync(dir).filter(f => f.endsWith('.png'));
-            if (files.length === 0) {
-              console.log('No screenshots captured');
-              return;
-            }
-
-            const { data: { artifacts } } = await github.rest.actions.listArtifactsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-
-            const body = [
-              '## Component Screenshots',
-              '',
-              `Captured **${files.length}** component screenshots from Storybook.`,
-              '',
-              'Download the full set from the **component-screenshots** artifact in the workflow run.',
-              '',
-              '<details>',
-              '<summary>Screenshot list</summary>',
-              '',
-              ...files.map(f => `- \`${f.replace('.png', '')}\``),
-              '',
-              '</details>',
-            ].join('\n');
-
-            // Find existing comment to update
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const existing = comments.find(c =>
-              c.user.type === 'Bot' && c.body.includes('## Component Screenshots')
-            );
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
