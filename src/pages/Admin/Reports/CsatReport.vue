@@ -4,7 +4,7 @@ import KpiCard from '../../../components/KpiCard.vue';
 import ChartWidget from '../../../components/ChartWidget.vue';
 import { router, Link } from '@inertiajs/vue3';
 
-const props = defineProps({
+defineProps({
     period_days: Number,
     csat_average: Number,
     response_rate: Number,

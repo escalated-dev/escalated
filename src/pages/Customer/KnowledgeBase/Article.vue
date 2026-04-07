@@ -42,8 +42,9 @@ function sendFeedback(helpful) {
                 <Link
                     :href="route('escalated.customer.kb.index', { category: article.category.id })"
                     class="hover:text-gray-700"
-                    >{{ article.category.name }}</Link
                 >
+                    {{ article.category.name }}
+                </Link>
             </div>
 
             <!-- Article -->

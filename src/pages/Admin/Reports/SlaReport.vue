@@ -20,10 +20,6 @@ const totalTickets = computed(() => {
     return props.compliance_by_policy?.reduce((sum, p) => sum + p.total, 0) || 0;
 });
 
-const totalBreaches = computed(() => {
-    return props.compliance_by_policy?.reduce((sum, p) => sum + p.breached, 0) || 0;
-});
-
 const firstResponseBreaches = computed(() => {
     return props.breaches?.filter((b) => b.sla_first_response_breached).length || 0;
 });

@@ -22,7 +22,7 @@ async function pollStatus() {
             clearInterval(polling.value);
             polling.value = null;
         }
-    } catch (e) {
+    } catch {
         // Silently retry on next interval
     }
 }

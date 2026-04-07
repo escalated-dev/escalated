@@ -3,7 +3,7 @@ import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import AgentPerformanceCard from '../../../components/AgentPerformanceCard.vue';
 import { router, Link } from '@inertiajs/vue3';
 
-const props = defineProps({
+defineProps({
     period_days: Number,
     agents: Array,
 });

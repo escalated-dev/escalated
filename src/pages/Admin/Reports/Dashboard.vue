@@ -5,7 +5,7 @@ import ChartWidget from '../../../components/ChartWidget.vue';
 import { router, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-const props = defineProps({
+defineProps({
     period_days: Number,
     volume: Array,
     by_status: Array,
