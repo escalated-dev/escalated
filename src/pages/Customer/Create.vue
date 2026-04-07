@@ -6,7 +6,7 @@ import PluginSlot from '../../components/PluginSlot.vue';
 import { useForm } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
-const props = defineProps({
+defineProps({
     departments: Array,
     priorities: Array,
 });

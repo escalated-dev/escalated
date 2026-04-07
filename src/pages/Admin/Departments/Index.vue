@@ -74,8 +74,9 @@ function destroy(id) {
                             <Link
                                 :href="route('escalated.admin.departments.edit', dept.id)"
                                 class="text-[var(--esc-panel-text-secondary)] hover:text-[var(--esc-panel-text)]"
-                                >Edit</Link
                             >
+                                Edit
+                            </Link>
                             <button class="ml-3 text-rose-400 hover:text-rose-300" @click="destroy(dept.id)">
                                 Delete
                             </button>

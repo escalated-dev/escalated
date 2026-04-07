@@ -1,7 +1,7 @@
 <script setup>
 import { router } from '@inertiajs/vue3';
 
-const props = defineProps({
+defineProps({
     adapters: { type: Array, default: () => [] },
     jobs: { type: Array, default: () => [] },
 });

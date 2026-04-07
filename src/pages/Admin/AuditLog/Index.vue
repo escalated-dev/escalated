@@ -2,7 +2,7 @@
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import AuditLogEntry from '../../../components/AuditLogEntry.vue';
 import { router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps({
     logs: Object,

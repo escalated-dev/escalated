@@ -5,7 +5,7 @@ import PluginSlot from '../../components/PluginSlot.vue';
 import { router, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
-const props = defineProps({
+defineProps({
     period_days: Number,
     total_tickets: Number,
     resolved_tickets: Number,
@@ -24,7 +24,7 @@ function renderStars(rating) {
     return Array.from({ length: 5 }, (_, i) => (i < Math.round(rating) ? 'filled' : 'empty'));
 }
 
-const { getPageComponents, reportWidgets } = usePluginExtensions();
+const { getPageComponents } = usePluginExtensions();
 </script>
 
 <template>

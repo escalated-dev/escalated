@@ -1,13 +1,6 @@
 <script setup>
-import { computed } from 'vue';
-
-const props = defineProps({
+defineProps({
     data: { type: Array, default: () => [] },
-});
-
-const maxTotal = computed(() => {
-    if (!props.data.length) return 1;
-    return Math.max(...props.data.map((d) => d.total), 1);
 });
 </script>
 

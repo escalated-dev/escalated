@@ -4,7 +4,7 @@ import TwoFactorSetup from '../../../components/TwoFactorSetup.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
-const props = defineProps({
+defineProps({
     enabled: { type: Boolean, default: false },
     pending: { type: Boolean, default: false },
 });

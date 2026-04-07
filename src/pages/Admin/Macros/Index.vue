@@ -1,7 +1,7 @@
 <script setup>
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { useForm, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 
 defineProps({ macros: Array });
 

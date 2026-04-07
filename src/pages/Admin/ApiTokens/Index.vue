@@ -3,7 +3,7 @@ import { ref, computed, inject } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 
-const props = defineProps({
+defineProps({
     tokens: Array,
     users: Array,
     api_enabled: Boolean,

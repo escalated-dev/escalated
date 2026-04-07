@@ -3,7 +3,7 @@ import { computed, inject, provide } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
 
-const props = defineProps({
+defineProps({
     title: { type: String, default: 'Support' },
 });
 
