@@ -168,6 +168,77 @@ function getWidgetStyles() {
     border-radius: 8px; font-size: 12px; color: #dc2626; margin-bottom: 12px;
 }
 .esc-w-empty { text-align: center; padding: 24px 0; color: #9ca3af; font-size: 13px; }
+.esc-w-chat-avail {
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    background: #f0fdf4; border-radius: 8px; font-size: 13px; color: #166534; margin-bottom: 16px;
+}
+.esc-w-chat-dot-green {
+    width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0;
+}
+.esc-w-chat-header-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #e5e7eb;
+}
+.esc-w-chat-agent-info { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #1f2937; }
+.esc-w-chat-agent-avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--esc-widget-color, #4F46E5);
+    color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
+}
+.esc-w-chat-header-actions { display: flex; align-items: center; gap: 8px; }
+.esc-w-chat-conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+.esc-w-chat-conn-connected { background: #22c55e; }
+.esc-w-chat-conn-reconnecting { background: #eab308; }
+.esc-w-chat-conn-disconnected { background: #ef4444; }
+.esc-w-chat-end-link { background: none; border: none; color: #6b7280; font-size: 12px; cursor: pointer; }
+.esc-w-chat-end-link:hover { color: #ef4444; }
+.esc-w-chat-messages {
+    flex: 1; overflow-y: auto; max-height: 280px; min-height: 120px;
+    padding: 8px 0; display: flex; flex-direction: column; gap: 6px;
+}
+.esc-w-chat-bubble-row { display: flex; align-items: flex-end; gap: 6px; }
+.esc-w-chat-bubble-row.esc-w-chat-agent { flex-direction: row-reverse; }
+.esc-w-chat-bubble-row.esc-w-chat-customer { flex-direction: row; }
+.esc-w-chat-avatar-sm {
+    width: 24px; height: 24px; border-radius: 50%; background: #e5e7eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #6b7280; flex-shrink: 0;
+}
+.esc-w-chat-avatar-agent { background: var(--esc-widget-color, #4F46E5); color: #fff; }
+.esc-w-chat-bubble {
+    max-width: 75%; padding: 8px 12px; border-radius: 16px; font-size: 13px; line-height: 1.5; word-break: break-word;
+}
+.esc-w-chat-bubble-customer { background: #f3f4f6; color: #1f2937; border-bottom-left-radius: 4px; }
+.esc-w-chat-bubble-agent { color: #fff; border-bottom-right-radius: 4px; }
+.esc-w-chat-typing { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; padding: 4px 0; }
+.esc-w-chat-typing-dots { display: inline-flex; gap: 3px; }
+.esc-w-chat-typing-dots span {
+    width: 5px; height: 5px; border-radius: 50%; background: #9ca3af;
+    animation: esc-chat-bounce 1.4s infinite both;
+}
+.esc-w-chat-typing-dots span:nth-child(2) { animation-delay: 0.16s; }
+.esc-w-chat-typing-dots span:nth-child(3) { animation-delay: 0.32s; }
+@keyframes esc-chat-bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+.esc-w-chat-input-bar {
+    display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px;
+}
+.esc-w-chat-input {
+    flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 20px;
+    font-size: 13px; outline: none; background: #fff; color: #1f2937;
+}
+.esc-w-chat-input:focus { border-color: var(--esc-widget-color, #4F46E5); }
+.esc-w-chat-send {
+    width: 36px; height: 36px; border-radius: 50%; border: none; color: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: opacity 0.15s; flex-shrink: 0;
+}
+.esc-w-chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.esc-w-chat-rating { display: flex; justify-content: center; gap: 4px; margin: 12px 0; }
+.esc-w-chat-star { background: none; border: none; cursor: pointer; color: #d1d5db; padding: 2px; transition: color 0.15s; }
+.esc-w-chat-star:hover, .esc-w-chat-star-active { color: #f59e0b; }
+.esc-w-chat-star svg { width: 28px; height: 28px; }
 .esc-w-spinner {
     width: 20px; height: 20px; border: 2px solid #e5e7eb;
     border-top-color: var(--esc-widget-color, #4F46E5);

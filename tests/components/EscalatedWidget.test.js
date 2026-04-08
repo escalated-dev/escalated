@@ -177,7 +177,9 @@ describe('EscalatedWidget', () => {
     describe('KB search', () => {
         it('does not trigger fetch for queries shorter than 2 characters', async () => {
             const wrapper = mountWidget();
-            // Clear the config fetch call
+            // Wait for both config and chat availability fetches to complete
+            await new Promise((resolve) => setTimeout(resolve, 50));
+            // Clear the config + availability fetch calls
             mockFetch.mockClear();
 
             const searchInput = wrapper.find('input[placeholder="Search for help..."]');
@@ -186,7 +188,7 @@ describe('EscalatedWidget', () => {
             // Wait for debounce
             await new Promise((resolve) => setTimeout(resolve, 350));
 
-            // Should not have called fetch for search (only config call happened earlier)
+            // Should not have called fetch for search
             expect(mockFetch).not.toHaveBeenCalled();
         });
 

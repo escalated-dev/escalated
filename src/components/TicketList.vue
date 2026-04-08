@@ -37,6 +37,7 @@ const props = defineProps({
     selectedIds: { type: Array, default: () => [] },
     assignRoute: { type: String, default: '' },
     navigable: { type: Boolean, default: false },
+    showLiveBadge: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:selectedIds']);
@@ -322,6 +323,13 @@ const colCount = computed(() => {
                         <div class="flex items-center gap-1.5">
                             <StatusBadge :status="ticket.status" />
                             <span
+                                v-if="showLiveBadge && ticket.channel === 'chat' && ticket.status === 'live'"
+                                class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/20"
+                            >
+                                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
+                                Live
+                            </span>
+                            <span
                                 v-if="ticket.snoozed_until && new Date(ticket.snoozed_until) > Date.now()"
                                 class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-amber-500/20"
                                 :title="'Snoozed until ' + new Date(ticket.snoozed_until).toLocaleString()"
@@ -540,6 +548,13 @@ const colCount = computed(() => {
                     <td v-if="isColumnActive('status')" class="px-4 py-3">
                         <div class="flex items-center gap-1.5">
                             <StatusBadge :status="ticket.status" />
+                            <span
+                                v-if="showLiveBadge && ticket.channel === 'chat' && ticket.status === 'live'"
+                                class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/20"
+                            >
+                                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
+                                Live
+                            </span>
                             <span
                                 v-if="ticket.snoozed_until && new Date(ticket.snoozed_until) > Date.now()"
                                 class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-amber-500/20"

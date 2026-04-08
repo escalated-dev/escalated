@@ -4,6 +4,9 @@ import StatusBadge from '../../components/StatusBadge.vue';
 import PriorityBadge from '../../components/PriorityBadge.vue';
 import ReplyThread from '../../components/ReplyThread.vue';
 import ReplyComposer from '../../components/ReplyComposer.vue';
+import ChatThread from '../../components/ChatThread.vue';
+import ChatComposer from '../../components/ChatComposer.vue';
+import ChatActionBar from '../../components/ChatActionBar.vue';
 import TicketSidebar from '../../components/TicketSidebar.vue';
 import AttachmentList from '../../components/AttachmentList.vue';
 import MacroDropdown from '../../components/MacroDropdown.vue';
@@ -18,6 +21,7 @@ import ContextPanelSection from '../../components/ContextPanelSection.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { useRealtime } from '../../composables/useRealtime';
+import { useChat } from '../../composables/useChat';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { ref, computed, inject, onMounted } from 'vue';
 
@@ -68,6 +72,53 @@ const escDark = inject(
     'esc-dark',
     computed(() => false),
 );
+
+// Live chat mode detection
+const isChatMode = computed(() => props.ticket.channel === 'chat' && props.ticket.status === 'live');
+const chatMessages = ref(props.ticket.chat_messages || []);
+const chatTypingUser = ref(null);
+
+// Subscribe to chat channel for real-time messages
+const { subscribeToChat } = useChat();
+let chatTypingTimer = null;
+
+onMounted(() => {
+    if (!isChatMode.value || !props.ticket.chat_session_id) return;
+    subscribeToChat(props.ticket.chat_session_id, {
+        onMessage(data) {
+            chatMessages.value.push(data.message);
+        },
+        onTyping(data) {
+            chatTypingUser.value = data.name;
+            clearTimeout(chatTypingTimer);
+            chatTypingTimer = setTimeout(() => {
+                chatTypingUser.value = null;
+            }, 4000);
+        },
+        onEnded() {
+            router.reload({ preserveScroll: true });
+        },
+        onAssigned() {
+            router.reload({ preserveScroll: true });
+        },
+    });
+});
+
+function onChatSend(payload) {
+    // Optimistically add message to thread
+    chatMessages.value.push({
+        id: Date.now(),
+        body: payload.body,
+        is_internal_note: payload.is_internal_note,
+        is_agent: true,
+        author: { id: page.props.auth?.user?.id, name: page.props.auth?.user?.name },
+        created_at: new Date().toISOString(),
+    });
+}
+
+function onEndChat() {
+    router.reload({ preserveScroll: true });
+}
 
 const { getPageComponents } = usePluginExtensions();
 
@@ -225,6 +276,21 @@ onMounted(() => {
         </div>
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 space-y-6">
+                <!-- Chat Action Bar (live chat mode) -->
+                <ChatActionBar
+                    v-if="isChatMode"
+                    :session-id="ticket.chat_session_id"
+                    :started-at="ticket.chat_started_at || ticket.created_at"
+                    :customer="{
+                        name: ticket.requester?.name,
+                        email: ticket.requester?.email,
+                        page_url: ticket.chat_metadata?.page_url,
+                    }"
+                    :agents="[]"
+                    :departments="departments"
+                    @end-chat="onEndChat"
+                />
+
                 <PinnedNotes
                     v-if="ticket.pinned_notes?.length"
                     :notes="ticket.pinned_notes"
@@ -242,65 +308,95 @@ onMounted(() => {
                     </p>
                     <AttachmentList v-if="ticket.attachments?.length" :attachments="ticket.attachments" class="mt-3" />
                 </div>
-                <div>
-                    <div :class="['mb-4 flex gap-4 border-b', escDark ? 'border-white/[0.06]' : 'border-gray-200']">
-                        <button
-                            v-if="!isLightAgent"
-                            :class="[
-                                'pb-2 text-sm font-medium transition-colors',
-                                activeTab === 'reply'
-                                    ? escDark
-                                        ? 'border-b-2 border-cyan-500 text-white'
-                                        : 'border-b-2 border-blue-500 text-gray-900'
-                                    : escDark
-                                      ? 'text-neutral-500 hover:text-neutral-300'
-                                      : 'text-gray-400 hover:text-gray-600',
-                            ]"
-                            @click="activeTab = 'reply'"
-                        >
-                            Reply
-                        </button>
-                        <button
-                            :class="[
-                                'pb-2 text-sm font-medium transition-colors',
-                                activeTab === 'note'
-                                    ? escDark
-                                        ? 'border-b-2 border-amber-500 text-amber-400'
-                                        : 'border-b-2 border-amber-500 text-amber-700'
-                                    : escDark
-                                      ? 'text-neutral-500 hover:text-neutral-300'
-                                      : 'text-gray-400 hover:text-gray-600',
-                            ]"
-                            @click="activeTab = 'note'"
-                        >
-                            Internal Note
-                        </button>
+                <!-- Live Chat Mode -->
+                <template v-if="isChatMode">
+                    <div
+                        :class="[
+                            'overflow-hidden rounded-xl border',
+                            escDark ? 'border-white/[0.06] bg-neutral-900/60' : 'border-gray-200 bg-white',
+                        ]"
+                    >
+                        <ChatThread
+                            :messages="chatMessages"
+                            :typing-user="chatTypingUser"
+                            :current-user-id="page.props.auth?.user?.id"
+                        />
+                        <ChatComposer
+                            :session-id="ticket.chat_session_id"
+                            :send-endpoint="
+                                ticket.chat_session_id ? `/support/widget/chat/${ticket.chat_session_id}/messages` : ''
+                            "
+                            :typing-endpoint="
+                                ticket.chat_session_id ? `/support/widget/chat/${ticket.chat_session_id}/typing` : ''
+                            "
+                            allow-notes
+                            @send="onChatSend"
+                        />
                     </div>
-                    <ReplyComposer
-                        v-if="activeTab === 'reply' && !isLightAgent"
-                        ref="replyComposerRef"
-                        :action="route('escalated.agent.tickets.reply', ticket.reference)"
-                        :canned-responses="cannedResponses"
-                    />
-                    <ReplyComposer
-                        v-if="activeTab === 'note'"
-                        :action="route('escalated.agent.tickets.note', ticket.reference)"
-                        placeholder="Write an internal note..."
-                        submit-label="Add Note"
-                    />
-                </div>
-                <div>
-                    <h2 :class="['mb-4 text-lg font-semibold', escDark ? 'text-neutral-200' : 'text-gray-900']">
-                        Conversation
-                    </h2>
-                    <ReplyThread
-                        :replies="ticket.replies || []"
-                        :current-user-id="page.props.auth?.user?.id"
-                        :ticket-reference="ticket.reference"
-                        route-prefix="escalated.agent"
-                        pinnable
-                    />
-                </div>
+                </template>
+
+                <!-- Standard Reply Mode -->
+                <template v-else>
+                    <div>
+                        <div :class="['mb-4 flex gap-4 border-b', escDark ? 'border-white/[0.06]' : 'border-gray-200']">
+                            <button
+                                v-if="!isLightAgent"
+                                :class="[
+                                    'pb-2 text-sm font-medium transition-colors',
+                                    activeTab === 'reply'
+                                        ? escDark
+                                            ? 'border-b-2 border-cyan-500 text-white'
+                                            : 'border-b-2 border-blue-500 text-gray-900'
+                                        : escDark
+                                          ? 'text-neutral-500 hover:text-neutral-300'
+                                          : 'text-gray-400 hover:text-gray-600',
+                                ]"
+                                @click="activeTab = 'reply'"
+                            >
+                                Reply
+                            </button>
+                            <button
+                                :class="[
+                                    'pb-2 text-sm font-medium transition-colors',
+                                    activeTab === 'note'
+                                        ? escDark
+                                            ? 'border-b-2 border-amber-500 text-amber-400'
+                                            : 'border-b-2 border-amber-500 text-amber-700'
+                                        : escDark
+                                          ? 'text-neutral-500 hover:text-neutral-300'
+                                          : 'text-gray-400 hover:text-gray-600',
+                                ]"
+                                @click="activeTab = 'note'"
+                            >
+                                Internal Note
+                            </button>
+                        </div>
+                        <ReplyComposer
+                            v-if="activeTab === 'reply' && !isLightAgent"
+                            ref="replyComposerRef"
+                            :action="route('escalated.agent.tickets.reply', ticket.reference)"
+                            :canned-responses="cannedResponses"
+                        />
+                        <ReplyComposer
+                            v-if="activeTab === 'note'"
+                            :action="route('escalated.agent.tickets.note', ticket.reference)"
+                            placeholder="Write an internal note..."
+                            submit-label="Add Note"
+                        />
+                    </div>
+                    <div>
+                        <h2 :class="['mb-4 text-lg font-semibold', escDark ? 'text-neutral-200' : 'text-gray-900']">
+                            Conversation
+                        </h2>
+                        <ReplyThread
+                            :replies="ticket.replies || []"
+                            :current-user-id="page.props.auth?.user?.id"
+                            :ticket-reference="ticket.reference"
+                            route-prefix="escalated.agent"
+                            pinnable
+                        />
+                    </div>
+                </template>
             </div>
             <div class="space-y-6">
                 <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" />

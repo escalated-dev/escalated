@@ -2,6 +2,7 @@
 export { EscalatedPlugin } from './plugin';
 
 // Components
+export { default as ActiveChatsPanel } from './components/ActiveChatsPanel.vue';
 export { default as ActivityTimeline } from './components/ActivityTimeline.vue';
 export { default as AgentLoadIndicator } from './components/AgentLoadIndicator.vue';
 export { default as AgentPerformanceCard } from './components/AgentPerformanceCard.vue';
@@ -11,6 +12,11 @@ export { default as AttachmentList } from './components/AttachmentList.vue';
 export { default as AuditLogEntry } from './components/AuditLogEntry.vue';
 export { default as BulkActionBar } from './components/BulkActionBar.vue';
 export { default as CategoryTree } from './components/CategoryTree.vue';
+export { default as ChatActionBar } from './components/ChatActionBar.vue';
+export { default as ChatBubble } from './components/ChatBubble.vue';
+export { default as ChatComposer } from './components/ChatComposer.vue';
+export { default as ChatQueue } from './components/ChatQueue.vue';
+export { default as ChatThread } from './components/ChatThread.vue';
 export { default as ChartWidget } from './components/ChartWidget.vue';
 export { default as CollisionWarning } from './components/CollisionWarning.vue';
 export { default as ConditionalFieldRules } from './components/ConditionalFieldRules.vue';
@@ -58,6 +64,7 @@ export { useDebouncedSearch } from './composables/useDebouncedSearch';
 export { useKeyboardShortcuts } from './composables/useKeyboardShortcuts';
 export { usePluginExtensions } from './composables/usePluginExtensions';
 export { usePluginHooks } from './composables/usePluginHooks';
+export { useChat } from './composables/useChat';
 export { useRealtime } from './composables/useRealtime';
 
 // Utilities
