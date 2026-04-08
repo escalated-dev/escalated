@@ -12,6 +12,7 @@ import PresenceIndicator from '../../../components/PresenceIndicator.vue';
 import PinnedNotes from '../../../components/PinnedNotes.vue';
 import KeyboardShortcutHelp from '../../../components/KeyboardShortcutHelp.vue';
 import PluginSlot from '../../../components/PluginSlot.vue';
+import SnoozeButton from '../../../components/SnoozeButton.vue';
 import { useKeyboardShortcuts } from '../../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../../composables/usePluginExtensions';
 import { router, useForm, usePage } from '@inertiajs/vue3';
@@ -26,6 +27,7 @@ const props = defineProps({
     macros: { type: Array, default: () => [] },
     is_following: { type: Boolean, default: false },
     followers_count: { type: Number, default: 0 },
+    is_snoozed: { type: Boolean, default: false },
 });
 
 const page = usePage();
@@ -89,6 +91,32 @@ useKeyboardShortcuts({
         <!-- Plugin: ticket show header slot -->
         <PluginSlot slot="ticket.show.header" :components="getPageComponents('ticket.show', 'header')" />
 
+        <!-- Snoozed banner (visible only when ticket is snoozed) -->
+        <div
+            v-if="ticket.is_snoozed || (ticket.snoozed_until && new Date(ticket.snoozed_until) > new Date())"
+            class="mb-4 flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium border border-amber-500/20 bg-amber-500/10 text-amber-300"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.828a1 1 0 101.415-1.414L11 9.586V6z"
+                    clip-rule="evenodd"
+                />
+            </svg>
+            <span
+                >Snoozed until
+                {{
+                    new Date(ticket.snoozed_until).toLocaleString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                    })
+                }}</span
+            >
+        </div>
+
         <div class="mb-5 flex flex-wrap items-center gap-3">
             <span class="text-sm font-mono font-medium text-[var(--esc-panel-text)]">{{ ticket.reference }}</span>
             <StatusBadge :status="ticket.status" />
@@ -113,6 +141,7 @@ useKeyboardShortcuts({
                 >
                     Assign to Me
                 </button>
+                <SnoozeButton :ticket="ticket" route-prefix="escalated.admin" />
                 <select
                     ref="statusSelectRef"
                     class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"

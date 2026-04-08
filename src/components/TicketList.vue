@@ -318,7 +318,30 @@ const colCount = computed(() => {
                         </div>
                     </td>
                     <!-- status -->
-                    <td v-if="isColumnActive('status')" class="px-4 py-3"><StatusBadge :status="ticket.status" /></td>
+                    <td v-if="isColumnActive('status')" class="px-4 py-3">
+                        <div class="flex items-center gap-1.5">
+                            <StatusBadge :status="ticket.status" />
+                            <span
+                                v-if="ticket.snoozed_until && new Date(ticket.snoozed_until) > Date.now()"
+                                class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-amber-500/20"
+                                :title="'Snoozed until ' + new Date(ticket.snoozed_until).toLocaleString()"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.828a1 1 0 101.415-1.414L11 9.586V6z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                                Snoozed
+                            </span>
+                        </div>
+                    </td>
                     <!-- priority -->
                     <td v-if="isColumnActive('priority')" class="px-4 py-3">
                         <PriorityBadge :priority="ticket.priority" />
@@ -514,7 +537,30 @@ const colCount = computed(() => {
                         </div>
                     </td>
                     <!-- status -->
-                    <td v-if="isColumnActive('status')" class="px-4 py-3"><StatusBadge :status="ticket.status" /></td>
+                    <td v-if="isColumnActive('status')" class="px-4 py-3">
+                        <div class="flex items-center gap-1.5">
+                            <StatusBadge :status="ticket.status" />
+                            <span
+                                v-if="ticket.snoozed_until && new Date(ticket.snoozed_until) > Date.now()"
+                                class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400 ring-1 ring-amber-500/20"
+                                :title="'Snoozed until ' + new Date(ticket.snoozed_until).toLocaleString()"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.828a1 1 0 101.415-1.414L11 9.586V6z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                                Snoozed
+                            </span>
+                        </div>
+                    </td>
                     <!-- priority -->
                     <td v-if="isColumnActive('priority')" class="px-4 py-3">
                         <PriorityBadge :priority="ticket.priority" />
