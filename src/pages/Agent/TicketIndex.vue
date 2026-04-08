@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import TicketList from '../../components/TicketList.vue';
@@ -10,6 +10,7 @@ import KeyboardShortcutHelp from '../../components/KeyboardShortcutHelp.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
+import { useRealtime } from '../../composables/useRealtime';
 
 defineProps({
     tickets: Object,
@@ -46,6 +47,28 @@ const { getPageComponents } = usePluginExtensions();
 function applyQuickFilter(filter) {
     router.get(route('escalated.agent.tickets.index'), filter, { preserveState: true });
 }
+
+// Real-time updates - refresh the ticket list when new tickets arrive or statuses change
+const { echoAvailable, subscribeToTickets, subscribeToAgent } = useRealtime();
+
+onMounted(() => {
+    if (!echoAvailable.value) return;
+
+    subscribeToTickets({
+        onTicketCreated() {
+            router.reload({ only: ['tickets'], preserveScroll: true });
+        },
+    });
+
+    const userId = page.props.auth?.user?.id;
+    if (userId) {
+        subscribeToAgent(userId, {
+            onTicketAssigned() {
+                router.reload({ only: ['tickets'], preserveScroll: true });
+            },
+        });
+    }
+});
 </script>
 
 <template>
