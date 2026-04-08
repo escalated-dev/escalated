@@ -3,12 +3,14 @@ import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
     ticketReference: { type: String, required: true },
+    ticketId: { type: [Number, String], default: null },
     routePrefix: { type: String, required: true },
     pollInterval: { type: Number, default: 30000 },
     showLabel: { type: Boolean, default: false },
 });
 
 const effectiveInterval = computed(() => Math.max(props.pollInterval, 5000));
+const echoAvailable = typeof window !== 'undefined' && !!window.Echo;
 
 const escDark = inject(
     'esc-dark',
@@ -17,6 +19,7 @@ const escDark = inject(
 const viewers = ref([]);
 const hovering = ref(false);
 let intervalId = null;
+let presenceChannel = null;
 
 async function fetchPresence() {
     try {
@@ -35,6 +38,35 @@ async function fetchPresence() {
         }
     } catch {
         // silently ignore network errors
+    }
+}
+
+/**
+ * Use Echo presence channel for real-time viewer tracking when available.
+ * Falls back to polling when Echo is not configured.
+ */
+function initPresenceChannel() {
+    if (!echoAvailable || !props.ticketId) return false;
+
+    try {
+        presenceChannel = window.Echo.join(`escalated.tickets.${props.ticketId}`);
+
+        presenceChannel
+            .here((users) => {
+                viewers.value = users;
+            })
+            .joining((user) => {
+                if (!viewers.value.find((v) => v.id === user.id)) {
+                    viewers.value = [...viewers.value, user];
+                }
+            })
+            .leaving((user) => {
+                viewers.value = viewers.value.filter((v) => v.id !== user.id);
+            });
+
+        return true;
+    } catch {
+        return false;
     }
 }
 
@@ -68,14 +100,26 @@ function getColor(index) {
 }
 
 onMounted(() => {
-    fetchPresence();
-    intervalId = setInterval(fetchPresence, effectiveInterval.value);
+    // Prefer presence channels via Echo; fall back to polling
+    const usingEcho = initPresenceChannel();
+    if (!usingEcho) {
+        fetchPresence();
+        intervalId = setInterval(fetchPresence, effectiveInterval.value);
+    }
 });
 
 onUnmounted(() => {
     if (intervalId) {
         clearInterval(intervalId);
         intervalId = null;
+    }
+    if (presenceChannel && props.ticketId) {
+        try {
+            window.Echo.leave(`escalated.tickets.${props.ticketId}`);
+        } catch {
+            // ignore
+        }
+        presenceChannel = null;
     }
 });
 </script>
