@@ -29,6 +29,9 @@ const form = useForm({
     imap_password: props.settings.imap_password ?? '',
     imap_mailbox: props.settings.imap_mailbox ?? 'INBOX',
     show_powered_by: props.settings.show_powered_by ?? true,
+    knowledge_base_enabled: props.settings.knowledge_base_enabled ?? true,
+    knowledge_base_public: props.settings.knowledge_base_public ?? true,
+    knowledge_base_feedback_enabled: props.settings.knowledge_base_feedback_enabled ?? true,
 });
 
 const webhookBaseUrl = computed(() => {
@@ -415,6 +418,88 @@ function submit() {
                             </div>
                         </template>
                     </template>
+                </div>
+            </div>
+
+            <!-- Knowledge Base -->
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Knowledge Base</h3>
+                <div class="space-y-5">
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Enable Knowledge Base</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Show the knowledge base to customers and visitors
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.knowledge_base_enabled ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.knowledge_base_enabled = !form.knowledge_base_enabled"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.knowledge_base_enabled ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Public Access</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Allow unauthenticated visitors to browse the knowledge base
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.knowledge_base_public ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.knowledge_base_public = !form.knowledge_base_public"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.knowledge_base_public ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Article Feedback</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Show helpful / not helpful buttons on articles
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.knowledge_base_feedback_enabled ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.knowledge_base_feedback_enabled = !form.knowledge_base_feedback_enabled"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.knowledge_base_feedback_enabled ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
                 </div>
             </div>
 

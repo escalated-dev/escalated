@@ -6,6 +6,7 @@ import { ref } from 'vue';
 const props = defineProps({
     article: Object,
     related: Array,
+    feedbackEnabled: { type: Boolean, default: true },
 });
 
 const feedbackSent = ref(false);
@@ -62,7 +63,7 @@ function sendFeedback(helpful) {
             </article>
 
             <!-- Feedback -->
-            <div class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center">
+            <div v-if="feedbackEnabled" class="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center">
                 <template v-if="!feedbackSent">
                     <p class="mb-3 text-sm font-medium text-gray-700">Was this article helpful?</p>
                     <div class="flex items-center justify-center gap-3">
