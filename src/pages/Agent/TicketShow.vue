@@ -17,8 +17,9 @@ import ContextPanel from '../../components/ContextPanel.vue';
 import ContextPanelSection from '../../components/ContextPanelSection.vue';
 import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
+import { useRealtime } from '../../composables/useRealtime';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, onMounted } from 'vue';
 
 const props = defineProps({
     ticket: Object,
@@ -92,6 +93,31 @@ useKeyboardShortcuts({
         showShortcutHelp.value = true;
     },
 });
+
+// Real-time updates via WebSocket (gracefully degrades to no-op when Echo is absent)
+const { echoAvailable, subscribeToTicket } = useRealtime();
+
+onMounted(() => {
+    if (!echoAvailable.value || !props.ticket?.id) return;
+
+    subscribeToTicket(props.ticket.id, {
+        onReplyCreated() {
+            router.reload({ only: ['ticket'], preserveScroll: true });
+        },
+        onStatusChanged() {
+            router.reload({ only: ['ticket'], preserveScroll: true });
+        },
+        onTicketUpdated() {
+            router.reload({ only: ['ticket'], preserveScroll: true });
+        },
+        onTicketAssigned() {
+            router.reload({ only: ['ticket'], preserveScroll: true });
+        },
+        onTicketEscalated() {
+            router.reload({ only: ['ticket'], preserveScroll: true });
+        },
+    });
+});
 </script>
 
 <template>
@@ -106,7 +132,11 @@ useKeyboardShortcuts({
             <StatusBadge :status="ticket.status" />
             <PriorityBadge :priority="ticket.priority" />
             <span class="text-sm text-neutral-500">by {{ ticket.requester?.name }}</span>
-            <PresenceIndicator :ticket-reference="ticket.reference" route-prefix="escalated.agent" />
+            <PresenceIndicator
+                :ticket-reference="ticket.reference"
+                :ticket-id="ticket.id"
+                route-prefix="escalated.agent"
+            />
             <div class="ml-auto flex items-center gap-2">
                 <FollowButton
                     :is-following="is_following"
