@@ -56,6 +56,7 @@ export { useDebouncedSearch } from './composables/useDebouncedSearch';
 export { useKeyboardShortcuts } from './composables/useKeyboardShortcuts';
 export { usePluginExtensions } from './composables/usePluginExtensions';
 export { usePluginHooks } from './composables/usePluginHooks';
+export { useRealtime } from './composables/useRealtime';
 
 // Utilities
 export { TICKET_STATUSES, TICKET_PRIORITIES, TICKET_TYPES, TICKET_TYPE_COLORS } from './utils/constants';
