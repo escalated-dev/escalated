@@ -40,6 +40,7 @@ const filterData = reactive({
     has_attachments: initial.has_attachments || '',
     requester: initial.requester || '',
     ticket_type: initial.ticket_type || '',
+    snoozed: initial.snoozed || '',
 });
 
 const showAdvanced = ref(
@@ -237,6 +238,18 @@ defineExpose({ filterData });
                 />
                 <span :class="['text-sm', escDark ? 'text-[var(--esc-panel-text-tertiary)]' : 'text-gray-600']"
                     >Has attachments</span
+                >
+            </label>
+            <label class="flex items-center gap-2 self-center pt-4">
+                <input
+                    v-model="filterData.snoozed"
+                    type="checkbox"
+                    true-value="1"
+                    false-value=""
+                    :class="checkboxClass"
+                />
+                <span :class="['text-sm', escDark ? 'text-[var(--esc-panel-text-tertiary)]' : 'text-gray-600']"
+                    >Snoozed</span
                 >
             </label>
         </div>

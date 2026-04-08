@@ -24,6 +24,8 @@ const isAgentSection = computed(() => currentUrl.value?.includes('/agent'));
 const isPanel = computed(() => isAdminSection.value || isAgentSection.value);
 const isDark = computed(() => isPanel.value && panelConfig.mode !== 'light');
 const showPoweredBy = computed(() => page.props.escalated?.show_powered_by !== false);
+const kbEnabled = computed(() => page.props.escalated?.knowledge_base_enabled !== false);
+const kbPublic = computed(() => page.props.escalated?.knowledge_base_public !== false);
 
 provide('esc-dark', isDark);
 
@@ -57,7 +59,7 @@ const adminLinks = computed(() => {
             position: 40,
         },
         {
-            href: `${p}/admin/knowledge-base/articles`,
+            href: `${p}/admin/kb-articles`,
             label: 'Knowledge Base',
             icon: 'M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25',
             position: 45,
@@ -514,6 +516,13 @@ function isActive(href) {
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ title }}</h2>
                 <nav class="flex items-center gap-4 text-sm">
                     <Link :href="prefix" class="text-gray-600 hover:text-gray-900">My Tickets</Link>
+                    <Link
+                        v-if="kbEnabled && (kbPublic || page.props.auth?.user)"
+                        :href="`${prefix}/kb`"
+                        class="text-gray-600 hover:text-gray-900"
+                    >
+                        Knowledge Base
+                    </Link>
                     <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">
                         Agent Panel
                     </Link>
@@ -538,6 +547,13 @@ function isActive(href) {
                         <span class="text-lg font-bold text-gray-900">{{ title }}</span>
                         <div class="flex items-center gap-4 text-sm">
                             <Link :href="prefix" class="text-gray-600 hover:text-gray-900">My Tickets</Link>
+                            <Link
+                                v-if="kbEnabled && (kbPublic || page.props.auth?.user)"
+                                :href="`${prefix}/kb`"
+                                class="text-gray-600 hover:text-gray-900"
+                            >
+                                Knowledge Base
+                            </Link>
                             <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">
                                 Agent Panel
                             </Link>
