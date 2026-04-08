@@ -520,8 +520,9 @@ function isActive(href) {
                         v-if="kbEnabled && (kbPublic || page.props.auth?.user)"
                         :href="`${prefix}/kb`"
                         class="text-gray-600 hover:text-gray-900"
-                        >Knowledge Base</Link
                     >
+                        Knowledge Base
+                    </Link>
                     <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">
                         Agent Panel
                     </Link>
@@ -550,8 +551,9 @@ function isActive(href) {
                                 v-if="kbEnabled && (kbPublic || page.props.auth?.user)"
                                 :href="`${prefix}/kb`"
                                 class="text-gray-600 hover:text-gray-900"
-                                >Knowledge Base</Link
                             >
+                                Knowledge Base
+                            </Link>
                             <Link v-if="isAgent" :href="`${prefix}/agent`" class="text-gray-600 hover:text-gray-900">
                                 Agent Panel
                             </Link>
