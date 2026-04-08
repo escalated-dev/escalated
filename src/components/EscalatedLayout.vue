@@ -2,6 +2,7 @@
 import { computed, inject, provide } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
+import ActiveChatsPanel from './ActiveChatsPanel.vue';
 
 defineProps({
     title: { type: String, default: 'Support' },
@@ -26,6 +27,9 @@ const isDark = computed(() => isPanel.value && panelConfig.mode !== 'light');
 const showPoweredBy = computed(() => page.props.escalated?.show_powered_by !== false);
 const kbEnabled = computed(() => page.props.escalated?.knowledge_base_enabled !== false);
 const kbPublic = computed(() => page.props.escalated?.knowledge_base_public !== false);
+const chatEnabled = computed(() => page.props.escalated?.chat_enabled === true);
+const activeChats = computed(() => page.props.escalated?.active_chats || []);
+const agentId = computed(() => page.props.auth?.user?.id);
 
 provide('esc-dark', isDark);
 
@@ -507,6 +511,9 @@ function isActive(href) {
                 Powered by Escalated
             </a>
         </footer>
+
+        <!-- Active Chats Panel (agent layout only, when chat enabled) -->
+        <ActiveChatsPanel v-if="chatEnabled && agentId" :chats="activeChats" :agent-id="agentId" />
     </div>
 
     <!-- MODE 3: Customer pages — use host app layout if provided -->

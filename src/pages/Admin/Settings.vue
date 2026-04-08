@@ -37,6 +37,33 @@ const form = useForm({
     knowledge_base_enabled: props.settings.knowledge_base_enabled ?? true,
     knowledge_base_public: props.settings.knowledge_base_public ?? true,
     knowledge_base_feedback_enabled: props.settings.knowledge_base_feedback_enabled ?? true,
+    // Chat settings
+    chat_enabled: props.settings.chat_enabled ?? false,
+    chat_sound_notifications: props.settings.chat_sound_notifications ?? true,
+    chat_pre_chat_name: props.settings.chat_pre_chat_name ?? true,
+    chat_pre_chat_email: props.settings.chat_pre_chat_email ?? true,
+    chat_pre_chat_department: props.settings.chat_pre_chat_department ?? false,
+    chat_routing_strategy: props.settings.chat_routing_strategy ?? 'round_robin',
+    chat_offline_behavior: props.settings.chat_offline_behavior ?? 'ticket_form',
+    chat_max_queue: props.settings.chat_max_queue ?? 10,
+    chat_concurrent_limit: props.settings.chat_concurrent_limit ?? 5,
+    chat_auto_close_minutes: props.settings.chat_auto_close_minutes ?? 30,
+    chat_queue_message: props.settings.chat_queue_message ?? '',
+    chat_offline_message: props.settings.chat_offline_message ?? '',
+    // Widget theme
+    widget_primary_color: props.settings.widget_primary_color ?? '#4F46E5',
+    widget_background_color: props.settings.widget_background_color ?? '#ffffff',
+    widget_text_color: props.settings.widget_text_color ?? '#1f2937',
+    widget_agent_bubble_color: props.settings.widget_agent_bubble_color ?? '#4F46E5',
+    widget_customer_bubble_color: props.settings.widget_customer_bubble_color ?? '#f3f4f6',
+    widget_header_background: props.settings.widget_header_background ?? '#4F46E5',
+    widget_font_family: props.settings.widget_font_family ?? 'system',
+    widget_border_radius: props.settings.widget_border_radius ?? 12,
+    widget_launcher_size: props.settings.widget_launcher_size ?? 'medium',
+    widget_show_branding: props.settings.widget_show_branding ?? true,
+    widget_custom_css: props.settings.widget_custom_css ?? '',
+    widget_pre_chat_message: props.settings.widget_pre_chat_message ?? '',
+    widget_chat_header_text: props.settings.widget_chat_header_text ?? 'Support',
 });
 
 const webhookBaseUrl = computed(() => {
@@ -665,6 +692,301 @@ function submit() {
                             >
                         </div>
                     </template>
+                </div>
+            </div>
+
+            <!-- Live Chat -->
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Live Chat</h3>
+                <div class="space-y-5">
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Enable Live Chat</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Allow customers to start real-time chat sessions
+                            </p>
+                        </div>
+                        <input
+                            v-model="form.chat_enabled"
+                            type="checkbox"
+                            :true-value="true"
+                            :false-value="false"
+                            class="h-4 w-4 rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]/20"
+                        />
+                    </label>
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Sound Notifications</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Play sound on new chat messages
+                            </p>
+                        </div>
+                        <input
+                            v-model="form.chat_sound_notifications"
+                            type="checkbox"
+                            :true-value="true"
+                            :false-value="false"
+                            class="h-4 w-4 rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]/20"
+                        />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Chat Routing -->
+            <div
+                v-if="form.chat_enabled"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Chat Routing</h3>
+                <div class="space-y-5">
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Routing Strategy</label
+                        >
+                        <select
+                            v-model="form.chat_routing_strategy"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
+                        >
+                            <option value="round_robin">Round Robin</option>
+                            <option value="least_active">Least Active</option>
+                            <option value="manual">Manual (Queue)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Offline Behavior</label
+                        >
+                        <select
+                            v-model="form.chat_offline_behavior"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
+                        >
+                            <option value="ticket_form">Show Ticket Form</option>
+                            <option value="offline_message">Show Offline Message</option>
+                            <option value="hide">Hide Chat</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Max Queue Size</label
+                            >
+                            <input
+                                v-model.number="form.chat_max_queue"
+                                type="number"
+                                min="1"
+                                class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Concurrent Limit</label
+                            >
+                            <input
+                                v-model.number="form.chat_concurrent_limit"
+                                type="number"
+                                min="1"
+                                class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Auto-close after (minutes)</label
+                        >
+                        <input
+                            v-model.number="form.chat_auto_close_minutes"
+                            type="number"
+                            min="1"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Queue Message</label
+                        >
+                        <input
+                            v-model="form.chat_queue_message"
+                            type="text"
+                            placeholder="You're in the queue..."
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Offline Message</label
+                        >
+                        <input
+                            v-model="form.chat_offline_message"
+                            type="text"
+                            placeholder="Sorry, we're not available right now..."
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Widget Theme -->
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Widget Theme</h3>
+                <div class="space-y-5">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Primary Color</label
+                            >
+                            <input
+                                v-model="form.widget_primary_color"
+                                type="color"
+                                class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Header Background</label
+                            >
+                            <input
+                                v-model="form.widget_header_background"
+                                type="color"
+                                class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Agent Bubble Color</label
+                            >
+                            <input
+                                v-model="form.widget_agent_bubble_color"
+                                type="color"
+                                class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Customer Bubble Color</label
+                            >
+                            <input
+                                v-model="form.widget_customer_bubble_color"
+                                type="color"
+                                class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Background Color</label
+                            >
+                            <input
+                                v-model="form.widget_background_color"
+                                type="color"
+                                class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
+                            />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Text Color</label
+                            >
+                            <input
+                                v-model="form.widget_text_color"
+                                type="color"
+                                class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Font Family</label
+                        >
+                        <select
+                            v-model="form.widget_font_family"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
+                        >
+                            <option value="system">System Default</option>
+                            <option value="Inter">Inter</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Open Sans">Open Sans</option>
+                            <option value="Lato">Lato</option>
+                            <option value="Poppins">Poppins</option>
+                            <option value="Nunito">Nunito</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Border Radius ({{ form.widget_border_radius }}px)</label
+                        >
+                        <input
+                            v-model.number="form.widget_border_radius"
+                            type="range"
+                            min="0"
+                            max="20"
+                            class="w-full"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Launcher Size</label
+                        >
+                        <div class="flex gap-3">
+                            <label
+                                v-for="size in ['small', 'medium', 'large']"
+                                :key="size"
+                                class="flex items-center gap-2"
+                            >
+                                <input
+                                    v-model="form.widget_launcher_size"
+                                    type="radio"
+                                    :value="size"
+                                    class="text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]/20"
+                                />
+                                <span class="text-sm capitalize text-[var(--esc-panel-text-secondary)]">{{
+                                    size
+                                }}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <label class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]">Show Branding</span>
+                        <input
+                            v-model="form.widget_show_branding"
+                            type="checkbox"
+                            :true-value="true"
+                            :false-value="false"
+                            class="h-4 w-4 rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]/20"
+                        />
+                    </label>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Pre-chat Message</label
+                        >
+                        <input
+                            v-model="form.widget_pre_chat_message"
+                            type="text"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Chat Header Text</label
+                        >
+                        <input
+                            v-model="form.widget_chat_header_text"
+                            type="text"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
+                        />
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >Custom CSS</label
+                        >
+                        <textarea
+                            v-model="form.widget_custom_css"
+                            rows="4"
+                            placeholder=".esc-w-panel { /* custom styles */ }"
+                            class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 font-mono text-xs text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
+                        ></textarea>
+                    </div>
                 </div>
             </div>
 

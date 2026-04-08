@@ -98,6 +98,7 @@ onMounted(() => {
             :columns="['reference', 'subject', 'requester', 'status', 'priority', 'assignee', 'updated']"
             selectable
             navigable
+            show-live-badge
         />
         <BulkActionBar
             :selected-ids="selectedIds"

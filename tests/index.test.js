@@ -53,6 +53,7 @@ describe('index.js exports', () => {
     // Components — every component listed in index.js must be exported
     // ----------------------------------------------------------------
     const expectedComponents = [
+        'ActiveChatsPanel',
         'ActivityTimeline',
         'AgentLoadIndicator',
         'AgentPerformanceCard',
@@ -62,6 +63,11 @@ describe('index.js exports', () => {
         'AuditLogEntry',
         'BulkActionBar',
         'CategoryTree',
+        'ChatActionBar',
+        'ChatBubble',
+        'ChatComposer',
+        'ChatQueue',
+        'ChatThread',
         'ChartWidget',
         'CollisionWarning',
         'ConditionalFieldRules',
@@ -114,8 +120,8 @@ describe('index.js exports', () => {
             expect(typeof component).toBe('object');
         });
 
-        it('exports exactly 48 components', () => {
-            expect(expectedComponents).toHaveLength(48);
+        it('exports exactly 54 components', () => {
+            expect(expectedComponents).toHaveLength(54);
             for (const name of expectedComponents) {
                 expect(escalated[name]).toBeDefined();
             }
@@ -135,8 +141,8 @@ describe('index.js exports', () => {
 
         it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 48 components + 2 saved-view components + 1 plugin + 5 composables + 1 helper + 5 pages + 6 utils = 68
-            expect(keys).toHaveLength(68);
+            // 54 components + 2 saved-view components + 1 plugin + 6 composables + 1 helper + 5 pages + 6 utils = 75
+            expect(keys).toHaveLength(75);
         });
 
         it('every export key is a non-empty string', () => {

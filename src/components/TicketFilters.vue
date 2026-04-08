@@ -41,6 +41,7 @@ const filterData = reactive({
     requester: initial.requester || '',
     ticket_type: initial.ticket_type || '',
     snoozed: initial.snoozed || '',
+    live_chat: initial.live_chat || '',
 });
 
 const showAdvanced = ref(
@@ -250,6 +251,18 @@ defineExpose({ filterData });
                 />
                 <span :class="['text-sm', escDark ? 'text-[var(--esc-panel-text-tertiary)]' : 'text-gray-600']"
                     >Snoozed</span
+                >
+            </label>
+            <label class="flex items-center gap-2 self-center pt-4">
+                <input
+                    v-model="filterData.live_chat"
+                    type="checkbox"
+                    true-value="1"
+                    false-value=""
+                    :class="checkboxClass"
+                />
+                <span :class="['text-sm', escDark ? 'text-[var(--esc-panel-text-tertiary)]' : 'text-gray-600']"
+                    >Live Chats</span
                 >
             </label>
         </div>
