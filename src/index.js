@@ -32,6 +32,8 @@ export { default as PriorityBadge } from './components/PriorityBadge.vue';
 export { default as QuickFilters } from './components/QuickFilters.vue';
 export { default as ReplyComposer } from './components/ReplyComposer.vue';
 export { default as ReplyThread } from './components/ReplyThread.vue';
+export { default as SavedViewSidebar } from './components/SavedViewSidebar.vue';
+export { default as SaveViewDialog } from './components/SaveViewDialog.vue';
 export { default as SatisfactionRating } from './components/SatisfactionRating.vue';
 export { default as ScheduleEditor } from './components/ScheduleEditor.vue';
 export { default as SideConversation } from './components/SideConversation.vue';
