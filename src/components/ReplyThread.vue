@@ -1,7 +1,8 @@
 <script setup>
-import { inject, computed } from 'vue';
+import { ref, inject, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AttachmentList from './AttachmentList.vue';
+import TicketSplitDialog from './TicketSplitDialog.vue';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
 import { useI18n } from '../composables/useI18n';
 
@@ -11,7 +12,24 @@ const props = defineProps({
     ticketReference: { type: String, default: '' },
     routePrefix: { type: String, default: '' },
     pinnable: { type: Boolean, default: false },
+    splittable: { type: Boolean, default: false },
 });
+
+const splitReply = ref(null);
+
+function openSplitDialog(reply) {
+    splitReply.value = reply;
+}
+
+function closeSplitDialog() {
+    splitReply.value = null;
+}
+
+function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+}
 
 const escDark = inject(
     'esc-dark',
@@ -76,6 +94,18 @@ function togglePin(reply) {
                 </div>
                 <div class="flex items-center gap-2">
                     <button
+                        v-if="splittable && !reply.is_internal_note"
+                        :class="[
+                            'rounded px-2 py-0.5 text-xs font-medium transition-colors',
+                            escDark
+                                ? 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]'
+                                : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600',
+                        ]"
+                        @click="openSplitDialog(reply)"
+                    >
+                        {{ t('reply.split') }}
+                    </button>
+                    <button
                         v-if="pinnable && reply.is_internal_note"
                         :class="[
                             'rounded px-2 py-0.5 text-xs font-medium transition-colors',
@@ -111,5 +141,13 @@ function togglePin(reply) {
         >
             {{ t('ticket.no_replies') }}
         </div>
+        <TicketSplitDialog
+            v-if="splitReply"
+            :ticket-reference="ticketReference"
+            :reply-id="splitReply.id"
+            :reply-author="splitReply.author?.name || ''"
+            :reply-excerpt="stripHtml(splitReply.body)"
+            @close="closeSplitDialog"
+        />
     </div>
 </template>
