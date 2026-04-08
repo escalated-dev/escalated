@@ -19,7 +19,7 @@ const props = defineProps({
     showAssignee: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'save-view']);
 const escDark = inject(
     'esc-dark',
     computed(() => false),
@@ -98,6 +98,12 @@ const toggleBtnClass = computed(() =>
 const labelClass = computed(() =>
     escDark.value ? 'text-xs font-medium text-[var(--esc-panel-text-tertiary)]' : 'text-xs font-medium text-gray-500',
 );
+
+const hasActiveFilters = computed(() => {
+    return Object.values(filterData).some((v) => v !== '' && v !== null && v !== undefined);
+});
+
+defineExpose({ filterData });
 </script>
 
 <template>
@@ -112,6 +118,19 @@ const labelClass = computed(() =>
             />
             <button type="button" :class="toggleBtnClass" @click="showAdvanced = !showAdvanced">
                 {{ showAdvanced ? 'Simple' : 'Advanced' }}
+            </button>
+            <button
+                v-if="hasActiveFilters"
+                type="button"
+                :class="[
+                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                    escDark
+                        ? 'bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30'
+                        : 'bg-blue-50 text-blue-700 hover:bg-blue-100',
+                ]"
+                @click="emit('save-view')"
+            >
+                Save as View
             </button>
             <select v-model="filterData.status" aria-label="Filter by status" :class="selectClass">
                 <option value="">All Statuses</option>
