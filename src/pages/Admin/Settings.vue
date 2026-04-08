@@ -5,7 +5,7 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
-const props = defineProps({ settings: Object });
+const props = defineProps({ settings: Object, departments: Array });
 const page = usePage();
 
 const form = useForm({
@@ -29,6 +29,14 @@ const form = useForm({
     imap_password: props.settings.imap_password ?? '',
     imap_mailbox: props.settings.imap_mailbox ?? 'INBOX',
     show_powered_by: props.settings.show_powered_by ?? true,
+    widget_enabled: props.settings.widget_enabled ?? false,
+    widget_color: props.settings.widget_color ?? '#4F46E5',
+    widget_position: props.settings.widget_position ?? 'bottom-right',
+    widget_greeting: props.settings.widget_greeting ?? 'Hi there! How can we help?',
+    widget_departments: props.settings.widget_departments ?? '',
+    knowledge_base_enabled: props.settings.knowledge_base_enabled ?? true,
+    knowledge_base_public: props.settings.knowledge_base_public ?? true,
+    knowledge_base_feedback_enabled: props.settings.knowledge_base_feedback_enabled ?? true,
 });
 
 const webhookBaseUrl = computed(() => {
@@ -418,6 +426,88 @@ function submit() {
                 </div>
             </div>
 
+            <!-- Knowledge Base -->
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Knowledge Base</h3>
+                <div class="space-y-5">
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Enable Knowledge Base</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Show the knowledge base to customers and visitors
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.knowledge_base_enabled ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.knowledge_base_enabled = !form.knowledge_base_enabled"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.knowledge_base_enabled ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Public Access</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Allow unauthenticated visitors to browse the knowledge base
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.knowledge_base_public ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.knowledge_base_public = !form.knowledge_base_public"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.knowledge_base_public ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Article Feedback</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Show helpful / not helpful buttons on articles
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.knowledge_base_feedback_enabled ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.knowledge_base_feedback_enabled = !form.knowledge_base_feedback_enabled"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.knowledge_base_feedback_enabled ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
+                </div>
+            </div>
+
             <!-- Branding -->
             <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Branding</h3>
@@ -447,6 +537,134 @@ function submit() {
                             />
                         </button>
                     </label>
+                </div>
+            </div>
+
+            <!-- Support Widget -->
+            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+                <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Support Widget</h3>
+                <div class="space-y-5">
+                    <label class="flex items-center justify-between">
+                        <div>
+                            <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Enable Widget</span
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Show an embeddable support widget on your site
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            :class="[
+                                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                                form.widget_enabled ? 'bg-emerald-500' : 'bg-neutral-700',
+                            ]"
+                            @click="form.widget_enabled = !form.widget_enabled"
+                        >
+                            <span
+                                :class="[
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                                    form.widget_enabled ? 'translate-x-5' : 'translate-x-0',
+                                ]"
+                            />
+                        </button>
+                    </label>
+                    <template v-if="form.widget_enabled">
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Widget Color</label
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Primary color for the widget button and header
+                            </p>
+                            <div class="mt-2 flex items-center gap-3">
+                                <input
+                                    v-model="form.widget_color"
+                                    type="color"
+                                    class="h-9 w-12 cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] p-0.5"
+                                />
+                                <input
+                                    v-model="form.widget_color"
+                                    type="text"
+                                    maxlength="7"
+                                    class="w-28 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] uppercase focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Position</label
+                            >
+                            <select
+                                v-model="form.widget_position"
+                                class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                            >
+                                <option value="bottom-right">Bottom Right</option>
+                                <option value="bottom-left">Bottom Left</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Greeting Message</label
+                            >
+                            <input
+                                v-model="form.widget_greeting"
+                                type="text"
+                                maxlength="255"
+                                class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                            />
+                        </div>
+                        <div v-if="departments?.length">
+                            <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Departments</label
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Select which departments appear in the widget (leave empty for all)
+                            </p>
+                            <div class="mt-2 space-y-2">
+                                <label v-for="dept in departments" :key="dept.id" class="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        :value="dept.id"
+                                        :checked="
+                                            form.widget_departments.split(',').filter(Boolean).includes(String(dept.id))
+                                        "
+                                        class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-emerald-500 focus:ring-emerald-500"
+                                        @change="
+                                            (e) => {
+                                                const ids = form.widget_departments.split(',').filter(Boolean);
+                                                if (e.target.checked) {
+                                                    ids.push(String(dept.id));
+                                                } else {
+                                                    const idx = ids.indexOf(String(dept.id));
+                                                    if (idx > -1) ids.splice(idx, 1);
+                                                }
+                                                form.widget_departments = ids.join(',');
+                                            }
+                                        "
+                                    />
+                                    <span class="text-sm text-[var(--esc-panel-text-secondary)]">{{ dept.name }}</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div
+                            class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface-alt)] p-4"
+                        >
+                            <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Embed Code</label
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                Add this snippet to your website to show the support widget
+                            </p>
+                            <code
+                                class="mt-2 block whitespace-pre-wrap break-all rounded-lg bg-[var(--esc-panel-bg)] p-3 text-xs text-[var(--esc-panel-text-tertiary)] select-all"
+                                >&lt;script src="/{{ page.props.escalated?.prefix || 'support' }}/widget/embed.js"
+                                data-color="{{ form.widget_color }}" data-position="{{
+                                    form.widget_position
+                                }}"&gt;&lt;/script&gt;</code
+                            >
+                        </div>
+                    </template>
                 </div>
             </div>
 
