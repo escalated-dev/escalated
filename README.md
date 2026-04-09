@@ -1,3 +1,20 @@
+<p align="center">
+  <a href="docs/translations/README.ar.md">العربية</a> •
+  <a href="docs/translations/README.de.md">Deutsch</a> •
+  <b>English</b> •
+  <a href="docs/translations/README.es.md">Español</a> •
+  <a href="docs/translations/README.fr.md">Français</a> •
+  <a href="docs/translations/README.it.md">Italiano</a> •
+  <a href="docs/translations/README.ja.md">日本語</a> •
+  <a href="docs/translations/README.ko.md">한국어</a> •
+  <a href="docs/translations/README.nl.md">Nederlands</a> •
+  <a href="docs/translations/README.pl.md">Polski</a> •
+  <a href="docs/translations/README.pt-BR.md">Português (BR)</a> •
+  <a href="docs/translations/README.ru.md">Русский</a> •
+  <a href="docs/translations/README.tr.md">Türkçe</a> •
+  <a href="docs/translations/README.zh-CN.md">简体中文</a>
+</p>
+
 <h1>
   <img src="https://escalated.dev/apple-touch-icon.png" width="28" style="vertical-align:middle;" />
   Escalated
