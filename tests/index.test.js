@@ -141,8 +141,8 @@ describe('index.js exports', () => {
 
         it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 54 components + 2 saved-view components + 1 plugin + 6 composables + 1 helper + 5 pages + 6 utils = 75
-            expect(keys).toHaveLength(75);
+            // 55 components + 2 saved-view components + 1 plugin + 7 composables + 1 helper + 5 pages + 6 utils = 77
+            expect(keys).toHaveLength(77);
         });
 
         it('every export key is a non-empty string', () => {

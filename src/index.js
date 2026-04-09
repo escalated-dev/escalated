@@ -30,6 +30,7 @@ export { default as KeyboardShortcutHelp } from './components/KeyboardShortcutHe
 export { default as KnowledgePanel } from './components/KnowledgePanel.vue';
 export { default as KpiCard } from './components/KpiCard.vue';
 export { default as MacroDropdown } from './components/MacroDropdown.vue';
+export { default as MentionDropdown } from './components/MentionDropdown.vue';
 export { default as PermissionMatrix } from './components/PermissionMatrix.vue';
 export { default as PinnedNotes } from './components/PinnedNotes.vue';
 export { default as PluginSlot } from './components/PluginSlot.vue';
@@ -62,6 +63,7 @@ export { default as TwoFactorSetup } from './components/TwoFactorSetup.vue';
 // Composables
 export { useDebouncedSearch } from './composables/useDebouncedSearch';
 export { useKeyboardShortcuts } from './composables/useKeyboardShortcuts';
+export { useMentions } from './composables/useMentions';
 export { usePluginExtensions } from './composables/usePluginExtensions';
 export { usePluginHooks } from './composables/usePluginHooks';
 export { useChat } from './composables/useChat';

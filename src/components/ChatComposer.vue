@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import MentionDropdown from './MentionDropdown.vue';
+import { useMentions } from '../composables/useMentions';
 
 const props = defineProps({
     sessionId: { type: [String, Number], default: null },
@@ -24,6 +26,27 @@ const isNote = ref(false);
 const files = ref([]);
 const submitting = ref(false);
 const textareaRef = ref(null);
+const mentionDropdownRef = ref(null);
+
+const {
+    suggestions,
+    isActive: mentionActive,
+    loading: mentionLoading,
+    onTextChange,
+    insertMention,
+    close: closeMentions,
+} = useMentions();
+
+function onMentionInput() {
+    if (textareaRef.value) {
+        onTextChange(textareaRef.value, body.value);
+    }
+}
+
+function handleMentionSelect(agent) {
+    body.value = insertMention(body.value, agent);
+    textareaRef.value?.focus();
+}
 
 // Typing indicator: debounced POST every 3 seconds while typing
 let lastTypingSent = 0;
@@ -60,6 +83,12 @@ async function sendTypingIndicator() {
 }
 
 function handleKeydown(e) {
+    // Let mention dropdown handle keys first
+    if (mentionActive.value && mentionDropdownRef.value) {
+        const handled = mentionDropdownRef.value.onKeydown(e);
+        if (handled) return;
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         submit();
@@ -219,23 +248,37 @@ async function submit() {
             </button>
 
             <!-- Text input -->
-            <textarea
-                ref="textareaRef"
-                v-model="body"
-                :disabled="disabled"
-                rows="1"
-                :placeholder="isNote ? t('reply.write_internal_note') : t('chat.placeholder')"
-                :class="[
-                    'flex-1 resize-none rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-1',
-                    disabled && 'cursor-not-allowed opacity-50',
-                    escDark
-                        ? 'border-white/10 bg-neutral-950 text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:ring-white/10'
-                        : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500',
-                ]"
-                aria-label="Chat message"
-                @input="onInput"
-                @keydown="handleKeydown"
-            ></textarea>
+            <div class="relative flex-1">
+                <textarea
+                    ref="textareaRef"
+                    v-model="body"
+                    :disabled="disabled"
+                    rows="1"
+                    :placeholder="isNote ? t('reply.write_internal_note') : t('chat.placeholder')"
+                    :class="[
+                        'w-full resize-none rounded-xl border px-4 py-2 text-sm focus:outline-none focus:ring-1',
+                        disabled && 'cursor-not-allowed opacity-50',
+                        escDark
+                            ? 'border-white/10 bg-neutral-950 text-neutral-200 placeholder-neutral-600 focus:border-white/20 focus:ring-white/10'
+                            : 'border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500',
+                    ]"
+                    aria-label="Chat message"
+                    @input="
+                        onInput();
+                        onMentionInput();
+                    "
+                    @keydown="handleKeydown"
+                ></textarea>
+                <MentionDropdown
+                    ref="mentionDropdownRef"
+                    :suggestions="suggestions"
+                    :visible="mentionActive"
+                    :loading="mentionLoading"
+                    class="bottom-0 left-0 translate-y-full"
+                    @select="handleMentionSelect"
+                    @close="closeMentions"
+                />
+            </div>
 
             <!-- Send button -->
             <button
