@@ -2,6 +2,8 @@
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import KpiCard from '../../../components/KpiCard.vue';
 import ChartWidget from '../../../components/ChartWidget.vue';
+import PeriodSelector from '../../../components/PeriodSelector.vue';
+import ReportExportButton from '../../../components/ReportExportButton.vue';
 import { router, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -26,6 +28,15 @@ const tabs = [
     { key: 'csat', label: 'CSAT' },
 ];
 
+const advancedReports = [
+    { label: 'SLA Trends', route: 'escalated.admin.reports.sla-trends' },
+    { label: 'Response Times', route: 'escalated.admin.reports.response-times' },
+    { label: 'Resolution Times', route: 'escalated.admin.reports.resolution-times' },
+    { label: 'Agent Rankings', route: 'escalated.admin.reports.agent-ranking' },
+    { label: 'Cohorts', route: 'escalated.admin.reports.cohorts' },
+    { label: 'Comparison', route: 'escalated.admin.reports.comparison' },
+];
+
 function changePeriod(days) {
     router.get(route('escalated.admin.reports.dashboard'), { days }, { preserveState: true });
 }
@@ -33,29 +44,18 @@ function changePeriod(days) {
 
 <template>
     <EscalatedLayout title="Reports Dashboard">
-        <!-- Period selector -->
+        <!-- Period selector & export -->
         <div class="mb-6 flex items-center justify-between">
-            <div class="flex gap-2">
-                <button
-                    v-for="d in [7, 30, 90]"
-                    :key="d"
-                    :class="[
-                        'rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all',
-                        period_days === d
-                            ? 'bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] text-white shadow-lg shadow-[var(--esc-panel-bg)]/20'
-                            : 'border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
-                    ]"
-                    @click="changePeriod(d)"
+            <PeriodSelector :model-value="period_days" @update:model-value="changePeriod" />
+            <div class="flex items-center gap-3">
+                <ReportExportButton report-name="dashboard" :period-days="period_days" />
+                <Link
+                    :href="route('escalated.admin.reports')"
+                    class="text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
                 >
-                    Last {{ d }} days
-                </button>
+                    Classic View
+                </Link>
             </div>
-            <Link
-                :href="route('escalated.admin.reports')"
-                class="text-sm text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
-            >
-                Classic View
-            </Link>
         </div>
 
         <!-- Tabs -->
@@ -204,6 +204,21 @@ function changePeriod(days) {
                     class="text-sm text-[var(--esc-panel-accent)] hover:text-[var(--esc-panel-accent)]"
                 >
                     Full CSAT Report &rarr;
+                </Link>
+            </div>
+        </div>
+
+        <!-- Advanced Reports Navigation -->
+        <div class="mt-8 rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-5">
+            <h3 class="mb-4 text-sm font-semibold text-[var(--esc-panel-text-secondary)]">Advanced Reports</h3>
+            <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+                <Link
+                    v-for="report in advancedReports"
+                    :key="report.route"
+                    :href="route(report.route, { days: period_days })"
+                    class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-4 py-3 text-center text-sm font-medium text-[var(--esc-panel-text-tertiary)] transition-all hover:border-[var(--esc-panel-accent)]/30 hover:text-[var(--esc-panel-text-secondary)]"
+                >
+                    {{ report.label }}
                 </Link>
             </div>
         </div>
