@@ -2,6 +2,8 @@
 import { ref, computed, inject } from 'vue';
 import { router } from '@inertiajs/vue3';
 import FileDropzone from './FileDropzone.vue';
+import MentionDropdown from './MentionDropdown.vue';
+import { useMentions } from '../composables/useMentions';
 
 const props = defineProps({
     action: { type: String, required: true },
@@ -22,6 +24,35 @@ const body = ref('');
 const isNote = ref(false);
 const files = ref([]);
 const submitting = ref(false);
+const textareaRef = ref(null);
+const mentionDropdownRef = ref(null);
+
+const {
+    suggestions,
+    isActive: mentionActive,
+    loading: mentionLoading,
+    onTextChange,
+    insertMention,
+    close: closeMentions,
+} = useMentions();
+
+function onMentionInput() {
+    if (textareaRef.value) {
+        onTextChange(textareaRef.value, body.value);
+    }
+}
+
+function handleMentionSelect(agent) {
+    body.value = insertMention(body.value, agent);
+    textareaRef.value?.focus();
+}
+
+function handleMentionKeydown(e) {
+    if (mentionActive.value && mentionDropdownRef.value) {
+        const handled = mentionDropdownRef.value.onKeydown(e);
+        if (handled) return;
+    }
+}
 
 // Typing indicator: debounced POST every 5 seconds while typing
 let lastTypingSent = 0;
@@ -143,15 +174,31 @@ const buttonLabel = computed(() => {
             This note is only visible to agents.
         </div>
 
-        <textarea
-            v-model="body"
-            rows="4"
-            :placeholder="placeholder"
-            aria-label="Reply message"
-            class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
-            @keydown="onTyping"
-            @blur="onBlur"
-        ></textarea>
+        <div class="relative">
+            <textarea
+                ref="textareaRef"
+                v-model="body"
+                rows="4"
+                :placeholder="placeholder"
+                aria-label="Reply message"
+                class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
+                @keydown="
+                    handleMentionKeydown($event);
+                    onTyping();
+                "
+                @input="onMentionInput"
+                @blur="onBlur"
+            ></textarea>
+            <MentionDropdown
+                ref="mentionDropdownRef"
+                :suggestions="suggestions"
+                :visible="mentionActive"
+                :loading="mentionLoading"
+                class="bottom-0 left-0 translate-y-full"
+                @select="handleMentionSelect"
+                @close="closeMentions"
+            />
+        </div>
 
         <FileDropzone class="mt-2" @files="handleFiles" />
 
@@ -222,15 +269,31 @@ const buttonLabel = computed(() => {
             This note is only visible to agents.
         </div>
 
-        <textarea
-            v-model="body"
-            rows="4"
-            :placeholder="placeholder"
-            aria-label="Reply message"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            @keydown="onTyping"
-            @blur="onBlur"
-        ></textarea>
+        <div class="relative">
+            <textarea
+                ref="textareaRef"
+                v-model="body"
+                rows="4"
+                :placeholder="placeholder"
+                aria-label="Reply message"
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                @keydown="
+                    handleMentionKeydown($event);
+                    onTyping();
+                "
+                @input="onMentionInput"
+                @blur="onBlur"
+            ></textarea>
+            <MentionDropdown
+                ref="mentionDropdownRef"
+                :suggestions="suggestions"
+                :visible="mentionActive"
+                :loading="mentionLoading"
+                class="bottom-0 left-0 translate-y-full"
+                @select="handleMentionSelect"
+                @close="closeMentions"
+            />
+        </div>
 
         <FileDropzone class="mt-2" @files="handleFiles" />
 

@@ -4,6 +4,7 @@ import { router } from '@inertiajs/vue3';
 import AttachmentList from './AttachmentList.vue';
 import TicketSplitDialog from './TicketSplitDialog.vue';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
+import { highlightMentions } from '../utils/mentionHighlight';
 import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
@@ -131,7 +132,7 @@ function togglePin(reply) {
                     'prose prose-sm max-w-none',
                     escDark ? 'prose-invert text-[var(--esc-panel-text-secondary)]' : 'text-gray-700',
                 ]"
-                v-html="sanitizeHtml(reply.body)"
+                v-html="highlightMentions(sanitizeHtml(reply.body), escDark)"
             ></div>
             <AttachmentList v-if="reply.attachments?.length" :attachments="reply.attachments" class="mt-3" />
         </div>
