@@ -325,6 +325,7 @@
             "back_to_rankings": "Zurück zum Ranking",
             "response_percentiles": "Antwortzeit-Perzentile",
             "productivity": "Produktivität (Antworten & Lösungen pro Tag)",
+            "productivity": "Produktivität",
             "workload_over_time": "Arbeitsbelastung im Zeitverlauf",
             "csat_breakdown": "CSAT-Aufschlüsselung",
             "by_tag": "Nach Tag",

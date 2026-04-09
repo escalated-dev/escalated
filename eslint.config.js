@@ -23,6 +23,7 @@ export default [
                 alert: 'readonly',
                 DOMParser: 'readonly',
                 URL: 'readonly',
+                Blob: 'readonly',
                 console: 'readonly',
                 // Inertia/Ziggy route helper
                 route: 'readonly',
