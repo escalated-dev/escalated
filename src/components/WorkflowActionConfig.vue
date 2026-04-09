@@ -9,6 +9,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
+const headersPlaceholder = '{"Authorization": "Bearer ..."}';
 const config = computed(() => props.modelValue || {});
 
 function update(key, value) {
@@ -193,7 +194,7 @@ const labelClass = 'block text-xs font-medium text-[var(--esc-panel-text-muted)]
                 <input
                     :class="inputClass"
                     :value="config.headers || ''"
-                    placeholder='{"Authorization": "Bearer ..."}'
+                    :placeholder="headersPlaceholder"
                     @input="update('headers', $event.target.value)"
                 />
             </div>
