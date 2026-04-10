@@ -2,6 +2,7 @@
 import { computed, inject } from 'vue';
 import { timeAgo } from '../utils/formatting';
 import { highlightMentions } from '../utils/mentionHighlight';
+import { sanitizeHtml } from '../utils/sanitizeHtml';
 
 const props = defineProps({
     message: { type: Object, required: true },
@@ -97,7 +98,10 @@ const isInternalNote = computed(() => props.message.is_internal_note);
                 <span v-if="isInternalNote" class="mb-1 block text-[10px] font-semibold uppercase opacity-70">
                     Internal Note
                 </span>
-                <p class="whitespace-pre-wrap break-words" v-html="highlightMentions(message.body || '', escDark)"></p>
+                <p
+                    class="whitespace-pre-wrap break-words"
+                    v-html="highlightMentions(sanitizeHtml(message.body || ''), escDark)"
+                ></p>
 
                 <!-- Attachments -->
                 <div v-if="message.attachments?.length" class="mt-2 space-y-1">

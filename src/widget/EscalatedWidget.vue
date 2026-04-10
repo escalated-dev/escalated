@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
+import { sanitizeHtml } from '../utils/sanitizeHtml';
 
 const props = defineProps({
     baseUrl: { type: String, default: '' },
@@ -471,7 +472,7 @@ function formatDate(iso) {
                         <template v-else>
                             <h3>{{ selectedArticle.title }}</h3>
                             <!-- eslint-disable-next-line vue/no-v-html -->
-                            <div class="esc-w-article-body" v-html="selectedArticle.body"></div>
+                            <div class="esc-w-article-body" v-html="sanitizeHtml(selectedArticle.body)"></div>
                         </template>
                     </div>
                 </template>
@@ -785,7 +786,7 @@ function formatDate(iso) {
                                 <span class="esc-w-reply-time">{{ formatDate(reply.created_at) }}</span>
                             </div>
                             <!-- eslint-disable-next-line vue/no-v-html -->
-                            <div class="esc-w-reply-body" v-html="reply.body"></div>
+                            <div class="esc-w-reply-body" v-html="sanitizeHtml(reply.body)"></div>
                         </div>
                     </div>
                     <div v-else class="esc-w-empty">No replies yet.</div>
