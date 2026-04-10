@@ -1,4 +1,11 @@
 /**
+ * HTML-encode a string to prevent injection via mention names.
+ */
+function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
  * Replace @{Name} patterns in text with styled mention badges.
  *
  * @param {string} html - The HTML or text content
@@ -12,6 +19,6 @@ export function highlightMentions(html, dark = false) {
         ? 'inline-flex items-center rounded-full bg-cyan-500/15 px-1.5 py-0.5 text-xs font-medium text-cyan-400 ring-1 ring-cyan-500/20'
         : 'inline-flex items-center rounded-full bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200';
 
-    // Replace @{Name} with styled pill
-    return html.replace(/@\{([^}]+)\}/g, `<span class="${pillClass}">@$1</span>`);
+    // Replace @{Name} with styled pill, encoding the name to prevent injection
+    return html.replace(/@\{([^}]+)\}/g, (match, name) => `<span class="${pillClass}">@${escapeHtml(name)}</span>`);
 }
