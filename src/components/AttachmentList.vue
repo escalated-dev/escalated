@@ -22,6 +22,18 @@ function iconForMime(mime) {
     if (mime === 'application/pdf') return '📄';
     return '📎';
 }
+
+function attachmentUrl(attachment) {
+    if (attachment.url) return attachment.url;
+    if (typeof window.route === 'function') {
+        try {
+            return window.route('escalated.attachments.download', attachment.id);
+        } catch {
+            // route not registered
+        }
+    }
+    return `/escalated/attachments/${attachment.id}/download`;
+}
 </script>
 
 <template>
@@ -36,7 +48,7 @@ function iconForMime(mime) {
         >
             <span>{{ iconForMime(attachment.mime_type) }}</span>
             <a
-                :href="attachment.url"
+                :href="attachmentUrl(attachment)"
                 target="_blank"
                 :class="[
                     'flex-1 truncate font-medium hover:underline',

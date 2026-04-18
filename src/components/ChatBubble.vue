@@ -16,6 +16,18 @@ const escDark = inject(
     computed(() => false),
 );
 
+function attachmentUrl(att) {
+    if (att.url) return att.url;
+    if (typeof window.route === 'function') {
+        try {
+            return window.route('escalated.attachments.download', att.id);
+        } catch {
+            // route not registered
+        }
+    }
+    return `/escalated/attachments/${att.id}/download`;
+}
+
 const initials = computed(() => {
     const name = props.message.author?.name || 'U';
     return name
@@ -108,7 +120,7 @@ const isInternalNote = computed(() => props.message.is_internal_note);
                     <a
                         v-for="att in message.attachments"
                         :key="att.id || att.url"
-                        :href="att.url"
+                        :href="attachmentUrl(att)"
                         target="_blank"
                         rel="noopener"
                         :class="[
