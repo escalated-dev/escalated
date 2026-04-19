@@ -5,19 +5,19 @@ on:
     branches: [main]
     paths:
       - 'scripts/generate-demo.js'
+      - 'src/components/AdminDashboard.stories.js'
       - '.github/workflows/demo.yml'
   pull_request:
     branches: [main]
     paths:
       - 'scripts/generate-demo.js'
+      - 'src/components/AdminDashboard.stories.js'
       - '.github/workflows/demo.yml'
   workflow_dispatch:
 
 permissions:
   contents: write
 
-# Cancel in-flight runs of this workflow on the same ref so a fast-following
-# push doesn't queue a stale GIF.
 concurrency:
   group: demo-gif-${{ github.ref }}
   cancel-in-progress: true
@@ -25,20 +25,13 @@ concurrency:
 jobs:
   generate-demo:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
 
     steps:
-      - name: Checkout escalated (this repo)
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout escalated-laravel
-        uses: actions/checkout@v4
-        with:
-          repository: escalated-dev/escalated-laravel
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: escalated-laravel
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -57,29 +50,34 @@ jobs:
       - name: Install Playwright Chromium
         run: node_modules/.bin/playwright install chromium --with-deps
 
-      - name: Build and start demo app
+      - name: Build Storybook
+        run: node_modules/.bin/storybook build --output-dir storybook-static
+
+      - name: Start Storybook server
         run: |
-          docker compose -f escalated-laravel/docker/compose.yml up -d --build
-          echo "[boot] Waiting for app to be ready (max 120s)..."
-          for i in $(seq 1 60); do
-            if curl -sf http://localhost:8000/demo -o /dev/null 2>/dev/null; then
-              echo "[ready] App up after $((i * 2))s"
+          npx http-server storybook-static -p 6006 -s &
+          echo "STORYBOOK_PID=$!" >> "$GITHUB_ENV"
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:6006 -o /dev/null; then
+              echo "[ready] Storybook up after ${i}s"
               exit 0
             fi
-            sleep 2
+            sleep 1
           done
-          echo "::error::App did not become ready within 120s"
-          docker compose -f escalated-laravel/docker/compose.yml logs
+          echo "::error::Storybook did not become ready within 30s"
           exit 1
 
       - name: Generate demo GIF
         run: node scripts/generate-demo.js
         env:
-          DEMO_BASE_URL: http://localhost:8000
+          DEMO_BASE_URL: http://localhost:6006
 
-      - name: Stop demo app
+      - name: Stop Storybook server
         if: always()
-        run: docker compose -f escalated-laravel/docker/compose.yml down -v
+        run: |
+          if [ -n "${STORYBOOK_PID:-}" ]; then
+            kill "$STORYBOOK_PID" 2>/dev/null || true
+          fi
 
       - name: Verify GIF was generated
         run: |
@@ -98,8 +96,6 @@ jobs:
             echo "::warning::Generated GIF exceeds 5MB target ($SIZE bytes); consider lowering fps or scale in scripts/generate-demo.js"
           fi
 
-      # Always upload the GIF as a workflow artifact so PR runs (which never
-      # commit back) still have a downloadable preview.
       - name: Upload GIF artifact
         uses: actions/upload-artifact@v4
         with:
@@ -107,7 +103,6 @@ jobs:
           path: .github/profile/demo.gif
           retention-days: 14
 
-      # Only commit on push-to-main runs so PR runs don't try to push.
       - name: Commit updated GIF
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: stefanzweifel/git-auto-commit-action@v5

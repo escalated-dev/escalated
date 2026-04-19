@@ -6,10 +6,17 @@ import { join, resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const BASE_URL = process.env.DEMO_BASE_URL || 'http://localhost:8000';
+const BASE_URL = process.env.DEMO_BASE_URL || 'http://localhost:6006';
 const RECORDINGS_DIR = resolve(ROOT, 'recordings');
 const OUTPUT_GIF = resolve(ROOT, '.github/profile/demo.gif');
 const VIEWPORT = { width: 1280, height: 800 };
+
+// Storybook iframe story URLs — rendered without Storybook chrome
+const STORIES = {
+    dashboard: `${BASE_URL}/iframe.html?id=pages-admindashboard--full-dashboard&viewMode=story`,
+    ticketList: `${BASE_URL}/iframe.html?id=pages-admindashboard--ticket-list-view&viewMode=story`,
+    ticketDetail: `${BASE_URL}/iframe.html?id=pages-admindashboard--ticket-detail-view&viewMode=story`,
+};
 
 function checkDependencies() {
     try {
@@ -45,52 +52,77 @@ async function pause(ms) {
     return new Promise((r) => setTimeout(r, ms));
 }
 
-async function typeSlowly(locator, text, delay = 60) {
+async function typeSlowly(locator, text, delay = 55) {
     for (const char of text) {
         await locator.pressSequentially(char);
         await pause(delay);
     }
 }
 
+async function loadStory(page, url) {
+    await page.goto(url, { waitUntil: 'networkidle' });
+    // Wait for Storybook to mount the story root
+    await page.waitForSelector('#storybook-root', { state: 'attached', timeout: 15000 });
+    await pause(400);
+}
+
 async function runDemoFlow(page) {
-    console.log(`[demo] Loading demo picker at ${BASE_URL}/demo ...`);
-    await page.goto(`${BASE_URL}/demo`, { waitUntil: 'networkidle' });
-    await pause(1000);
+    // 1. Admin dashboard overview
+    console.log('[demo] Showing admin dashboard...');
+    await loadStory(page, STORIES.dashboard);
+    await pause(2000);
 
-    console.log('[demo] Logging in as Alice Admin...');
-    const aliceBtn = page.locator('button.user').filter({ hasText: 'Alice Admin' });
-    await aliceBtn.waitFor({ state: 'visible', timeout: 15000 });
-    await aliceBtn.click();
-
-    console.log('[demo] Waiting for ticket list...');
-    await page.waitForURL('**/admin/tickets**', { timeout: 20000 });
-    await page.waitForLoadState('networkidle');
+    // 2. Ticket list
+    console.log('[demo] Showing ticket list...');
+    await loadStory(page, STORIES.ticketList);
     await pause(1500);
 
-    console.log('[demo] Clicking into first ticket...');
-    // Wait for Inertia to hydrate and render at least one ticket reference link
-    const firstTicketLink = page.locator('a[href*="/tickets/ESC"]').first();
-    await firstTicketLink.waitFor({ state: 'visible', timeout: 20000 });
-    await firstTicketLink.click();
-    await page.waitForLoadState('networkidle');
-    await pause(1200);
+    // Click "Urgent+" filter chip to show filtering in action
+    const urgentChip = page
+        .locator('button, span, div')
+        .filter({ hasText: /^Urgent\+$/ })
+        .first();
+    if (await urgentChip.isVisible()) {
+        await urgentChip.click();
+        await pause(800);
+    }
 
+    // 3. Ticket detail view
+    console.log('[demo] Showing ticket detail...');
+    await loadStory(page, STORIES.ticketDetail);
+    await pause(1500);
+
+    // Click "Internal Note" tab to show it, then switch back to Reply
+    const noteTab = page.locator('button').filter({ hasText: 'Internal Note' }).first();
+    if (await noteTab.isVisible()) {
+        await noteTab.click();
+        await pause(700);
+        const replyTab = page
+            .locator('button')
+            .filter({ hasText: /^Reply$/ })
+            .first();
+        await replyTab.click();
+        await pause(400);
+    }
+
+    // Type a reply in the composer textarea
     console.log('[demo] Typing reply...');
-    const replyTextarea = page.locator('textarea[aria-label="Reply message"]').first();
-    await replyTextarea.waitFor({ state: 'visible', timeout: 10000 });
-    await replyTextarea.click();
+    const textarea = page.locator('textarea').first();
+    await textarea.waitFor({ state: 'visible', timeout: 8000 });
+    await textarea.click();
     await typeSlowly(
-        replyTextarea,
-        "Thanks for reaching out! We've identified the issue and a fix is being deployed. I'll follow up once it's live.",
-        45,
+        textarea,
+        'Great news — the fix has been deployed. Full quarter exports should work again. Let me know if you run into anything else!',
+        48,
     );
     await pause(800);
 
+    // Click the Send Reply span/button
     console.log('[demo] Sending reply...');
-    const sendBtn = page.getByRole('button', { name: /send reply/i }).first();
+    const sendBtn = page.locator('span, button').filter({ hasText: 'Send Reply' }).first();
     await sendBtn.waitFor({ state: 'visible', timeout: 5000 });
     await sendBtn.click();
-    await pause(2000);
+    await pause(1500);
 }
 
 async function teardown(browser, context, page) {
