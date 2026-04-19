@@ -68,9 +68,9 @@ async function runDemoFlow(page) {
     await pause(1500);
 
     console.log('[demo] Clicking into first ticket...');
-    // Reference column links are the first <a> in each table row
-    const firstTicketLink = page.locator('table tbody tr').first().locator('a').first();
-    await firstTicketLink.waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for Inertia to hydrate and render at least one ticket reference link
+    const firstTicketLink = page.locator('a[href*="/tickets/ESC"]').first();
+    await firstTicketLink.waitFor({ state: 'visible', timeout: 20000 });
     await firstTicketLink.click();
     await page.waitForLoadState('networkidle');
     await pause(1200);
