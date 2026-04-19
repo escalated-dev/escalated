@@ -6,7 +6,7 @@ import { join, resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const BASE_URL = process.env.DEMO_BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.DEMO_BASE_URL || 'http://localhost:8000';
 const RECORDINGS_DIR = resolve(ROOT, 'recordings');
 const OUTPUT_GIF = resolve(ROOT, '.github/profile/demo.gif');
 const VIEWPORT = { width: 1280, height: 800 };
@@ -53,79 +53,44 @@ async function typeSlowly(locator, text, delay = 60) {
 }
 
 async function runDemoFlow(page) {
-    console.log(`[demo] Navigating to ${BASE_URL}...`);
-    await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+    console.log(`[demo] Loading demo picker at ${BASE_URL}/demo ...`);
+    await page.goto(`${BASE_URL}/demo`, { waitUntil: 'networkidle' });
     await pause(1000);
 
-    console.log('[demo] Viewing dashboard...');
+    console.log('[demo] Logging in as Alice Admin...');
+    const aliceBtn = page.locator('button.user').filter({ hasText: 'Alice Admin' });
+    await aliceBtn.waitFor({ state: 'visible', timeout: 15000 });
+    await aliceBtn.click();
+
+    console.log('[demo] Waiting for ticket list...');
+    await page.waitForURL('**/admin/tickets**', { timeout: 20000 });
+    await page.waitForLoadState('networkidle');
+    await pause(1500);
+
+    console.log('[demo] Clicking into first ticket...');
+    // Reference column links are the first <a> in each table row
+    const firstTicketLink = page.locator('table tbody tr').first().locator('a').first();
+    await firstTicketLink.waitFor({ state: 'visible', timeout: 10000 });
+    await firstTicketLink.click();
+    await page.waitForLoadState('networkidle');
     await pause(1200);
 
-    console.log('[demo] Opening new ticket form...');
-    const newTicketBtn = page
-        .getByRole('button', { name: /new ticket/i })
-        .or(page.getByRole('link', { name: /new ticket/i }))
-        .or(page.locator('[data-testid="new-ticket"]'))
-        .first();
-
-    await newTicketBtn.waitFor({ timeout: 10000 });
-    await newTicketBtn.click();
-    await pause(700);
-
-    const subjectField = page
-        .getByLabel(/subject/i)
-        .or(page.getByPlaceholder(/subject/i))
-        .or(page.locator('input[name="subject"]'))
-        .first();
-
-    await subjectField.waitFor({ timeout: 8000 });
-    await subjectField.click();
-    await typeSlowly(subjectField, 'Login page returns 500 error');
-    await pause(500);
-
-    const bodyField = page
-        .getByLabel(/message|description|body/i)
-        .or(page.getByPlaceholder(/describe|message/i))
-        .or(page.locator('textarea[name="body"]'))
-        .first();
-
-    await bodyField.waitFor({ state: 'visible', timeout: 5000 });
-    await bodyField.click();
+    console.log('[demo] Typing reply...');
+    const replyTextarea = page.locator('textarea[aria-label="Reply message"]').first();
+    await replyTextarea.waitFor({ state: 'visible', timeout: 10000 });
+    await replyTextarea.click();
     await typeSlowly(
-        bodyField,
-        'Users are unable to log in since the last deployment. The login page returns a 500 error intermittently.',
-        40,
-    );
-    await pause(600);
-
-    console.log('[demo] Submitting ticket...');
-    const submitBtn = page.getByRole('button', { name: /submit|create|save/i }).first();
-    await submitBtn.click();
-    // demo-server auto-opens the thread 600ms after submit — wait for it
-    await pause(1400);
-
-    console.log('[demo] Ticket thread opened, typing reply...');
-    const replyBox = page
-        .getByPlaceholder(/type a reply/i)
-        .or(page.locator('#reply-box'))
-        .or(page.locator('[data-testid="reply-composer"] textarea'))
-        .first();
-
-    await replyBox.waitFor({ state: 'visible', timeout: 5000 });
-    await replyBox.click();
-    await typeSlowly(
-        replyBox,
-        "Thanks for reporting this. We've identified the issue and a fix is being deployed now.",
+        replyTextarea,
+        "Thanks for reaching out! We've identified the issue and a fix is being deployed. I'll follow up once it's live.",
         45,
     );
-    await pause(700);
+    await pause(800);
 
-    const sendBtn = page.getByRole('button', { name: /send|reply/i }).first();
+    console.log('[demo] Sending reply...');
+    const sendBtn = page.getByRole('button', { name: /send reply/i }).first();
     await sendBtn.waitFor({ state: 'visible', timeout: 5000 });
     await sendBtn.click();
-    await pause(1000);
-
-    console.log('[demo] Showing notification...');
-    await pause(1500);
+    await pause(2000);
 }
 
 async function teardown(browser, context, page) {

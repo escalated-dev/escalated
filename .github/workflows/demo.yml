@@ -4,13 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'scripts/demo-server.js'
       - 'scripts/generate-demo.js'
       - '.github/workflows/demo.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'scripts/demo-server.js'
       - 'scripts/generate-demo.js'
       - '.github/workflows/demo.yml'
   workflow_dispatch:
@@ -27,13 +25,20 @@ concurrency:
 jobs:
   generate-demo:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
-      - name: Checkout code
+      - name: Checkout escalated (this repo)
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout escalated-laravel
+        uses: actions/checkout@v4
+        with:
+          repository: escalated-dev/escalated-laravel
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: escalated-laravel
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,34 +57,29 @@ jobs:
       - name: Install Playwright Chromium
         run: node_modules/.bin/playwright install chromium --with-deps
 
-      - name: Start demo server
+      - name: Build and start demo app
         run: |
-          node scripts/demo-server.js &
-          echo "APP_PID=$!" >> "$GITHUB_ENV"
-          # Poll for readiness (max 30s); fail loudly if the server never binds.
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:3000 -o /dev/null; then
-              echo "[ready] Demo server up after ${i}s"
+          docker compose -f escalated-laravel/docker/compose.yml up -d --build
+          echo "[boot] Waiting for app to be ready (max 120s)..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8000/demo -o /dev/null 2>/dev/null; then
+              echo "[ready] App up after $((i * 2))s"
               exit 0
             fi
-            sleep 1
+            sleep 2
           done
-          echo "::error::Demo server did not become ready within 30s"
+          echo "::error::App did not become ready within 120s"
+          docker compose -f escalated-laravel/docker/compose.yml logs
           exit 1
-        env:
-          PORT: 3000
 
       - name: Generate demo GIF
         run: node scripts/generate-demo.js
         env:
-          DEMO_BASE_URL: http://localhost:3000
+          DEMO_BASE_URL: http://localhost:8000
 
-      - name: Stop demo server
+      - name: Stop demo app
         if: always()
-        run: |
-          if [ -n "${APP_PID:-}" ]; then
-            kill "$APP_PID" 2>/dev/null || true
-          fi
+        run: docker compose -f escalated-laravel/docker/compose.yml down -v
 
       - name: Verify GIF was generated
         run: |
