@@ -8,6 +8,7 @@ on:
       - 'scripts/generate-demo.js'
       - '.github/workflows/demo.yml'
   pull_request:
+    branches: [main]
     paths:
       - 'scripts/demo-server.js'
       - 'scripts/generate-demo.js'
@@ -108,7 +109,7 @@ jobs:
 
       # Only commit on push-to-main runs so PR runs don't try to push.
       - name: Commit updated GIF
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'chore: update demo GIF [skip ci]'
