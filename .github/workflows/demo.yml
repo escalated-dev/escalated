@@ -8,6 +8,7 @@ on:
       - 'scripts/generate-demo.js'
       - '.github/workflows/demo.yml'
   pull_request:
+    branches: [main]
     paths:
       - 'scripts/demo-server.js'
       - 'scripts/generate-demo.js'
