@@ -4,3 +4,5 @@ dist/
 *.log
 storybook-static/
 screenshot-results/
+# Demo-recording intermediates (the produced GIF is committed to .github/profile/)
+recordings/

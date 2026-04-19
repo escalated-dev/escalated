@@ -1,0 +1,117 @@
+name: Generate Demo GIF
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/demo-server.js'
+      - 'scripts/generate-demo.js'
+      - '.github/workflows/demo.yml'
+  pull_request:
+    paths:
+      - 'scripts/demo-server.js'
+      - 'scripts/generate-demo.js'
+      - '.github/workflows/demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Cancel in-flight runs of this workflow on the same ref so a fast-following
+# push doesn't queue a stale GIF.
+concurrency:
+  group: demo-gif-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: node_modules/.bin/playwright install chromium --with-deps
+
+      - name: Start demo server
+        run: |
+          node scripts/demo-server.js &
+          echo "APP_PID=$!" >> "$GITHUB_ENV"
+          # Poll for readiness (max 30s); fail loudly if the server never binds.
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000 -o /dev/null; then
+              echo "[ready] Demo server up after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Demo server did not become ready within 30s"
+          exit 1
+        env:
+          PORT: 3000
+
+      - name: Generate demo GIF
+        run: node scripts/generate-demo.js
+        env:
+          DEMO_BASE_URL: http://localhost:3000
+
+      - name: Stop demo server
+        if: always()
+        run: |
+          if [ -n "${APP_PID:-}" ]; then
+            kill "$APP_PID" 2>/dev/null || true
+          fi
+
+      - name: Verify GIF was generated
+        run: |
+          GIF=".github/profile/demo.gif"
+          if [ ! -f "$GIF" ]; then
+            echo "::error::Expected $GIF was not produced"
+            exit 1
+          fi
+          SIZE=$(stat -c%s "$GIF")
+          echo "[verify] $GIF size: $SIZE bytes"
+          if [ "$SIZE" -lt 50000 ]; then
+            echo "::error::Generated GIF is implausibly small ($SIZE bytes); recording flow likely failed"
+            exit 1
+          fi
+          if [ "$SIZE" -gt 5242880 ]; then
+            echo "::warning::Generated GIF exceeds 5MB target ($SIZE bytes); consider lowering fps or scale in scripts/generate-demo.js"
+          fi
+
+      # Always upload the GIF as a workflow artifact so PR runs (which never
+      # commit back) still have a downloadable preview.
+      - name: Upload GIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-gif
+          path: .github/profile/demo.gif
+          retention-days: 14
+
+      # Only commit on push-to-main runs so PR runs don't try to push.
+      - name: Commit updated GIF
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: update demo GIF [skip ci]'
+          file_pattern: '.github/profile/demo.gif'
+          commit_user_name: 'github-actions[bot]'
+          commit_user_email: 'github-actions[bot]@users.noreply.github.com'
