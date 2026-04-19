@@ -47,6 +47,21 @@ export default [
         },
     },
     {
+        // Node-side scripts (demo recording pipeline, build helpers).
+        files: ['scripts/**/*.js'],
+        languageOptions: {
+            globals: {
+                process: 'readonly',
+                console: 'readonly',
+                setTimeout: 'readonly',
+                clearTimeout: 'readonly',
+                Buffer: 'readonly',
+                __dirname: 'readonly',
+                __filename: 'readonly',
+            },
+        },
+    },
+    {
         ignores: ['node_modules/', 'dist/', 'storybook-static/', 'screenshots/', 'playwright-screenshots.config.js'],
     },
 ];

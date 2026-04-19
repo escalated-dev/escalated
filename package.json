@@ -1,7 +1,7 @@
 {
   "name": "@escalated-dev/escalated",
   "version": "0.7.0",
-  "description": "Vue 3 + Inertia.js UI components for Escalated — the embeddable support ticket system",
+  "description": "Vue 3 + Inertia.js UI components for Escalated \u00e2\u20ac\u201d the embeddable support ticket system",
   "author": "Escalated Dev <hello@escalated.dev>",
   "license": "MIT",
   "homepage": "https://github.com/escalated-dev/escalated",
@@ -41,7 +41,10 @@
     "prepare": "husky",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "screenshot": "npx playwright test --config=playwright-screenshots.config.js"
+    "screenshot": "npx playwright test --config=playwright-screenshots.config.js",
+    "demo:serve": "node scripts/demo-server.js",
+    "demo:record": "node scripts/generate-demo.js",
+    "demo": "concurrently -k -s second \"npm run demo:serve\" \"wait-on http://localhost:3000 && npm run demo:record\""
   },
   "lint-staged": {
     "*.{js,vue}": [
@@ -59,17 +62,20 @@
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/test-utils": "^2.4.0",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^9.0.0",
     "eslint": "^10.0.1",
     "eslint-plugin-storybook": "^10.2.12",
     "eslint-plugin-vue": "^10.8.0",
     "happy-dom": "^15.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "playwright": "^1.50.0",
     "postcss": "^8.5.0",
     "prettier": "^3.8.1",
     "storybook": "^10.2.12",
     "tailwindcss": "^3.4.0",
     "vitest": "^2.0.0",
-    "vue": "^3.5.0"
+    "vue": "^3.5.0",
+    "wait-on": "^8.0.0"
   }
 }
