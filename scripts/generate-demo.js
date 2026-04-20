@@ -40,16 +40,23 @@ async function setup() {
         colorScheme: 'dark',
     });
     const page = await context.newPage();
+    // Wall-clock timestamp of (approx) recording start so we can trim the
+    // Storybook bootstrap / iframe mount time off the final GIF.
+    const recordingStartMs = Date.now();
 
-    // Force a black background before the story mounts so there's no
-    // initial white flash when the iframe first loads.
+    // Force a black background before the story mounts and hide Storybook's
+    // own loader so the iframe doesn't show a white flash or spinner.
     await page.addInitScript(() => {
         const style = document.createElement('style');
-        style.textContent = 'html, body, #storybook-root { background: #000 !important; margin: 0; }';
+        style.textContent = `
+            html, body, #storybook-root { background: #000 !important; margin: 0; }
+            .sb-nopreview, .sb-show-main.sb-main-centered, .sb-preparing-story,
+            .sb-preparing-docs, .sb-errordisplay, [class*="sb-loader"] { display: none !important; }
+        `;
         (document.head || document.documentElement).appendChild(style);
     });
 
-    return { browser, context, page };
+    return { browser, context, page, recordingStartMs };
 }
 
 async function pause(ms) {
@@ -63,14 +70,23 @@ async function typeSlowly(locator, text, delay = 55) {
     }
 }
 
-async function runDemoFlow(page) {
+async function runDemoFlow(page, recordingStartMs) {
     console.log(`[demo] Loading DemoFlow story...`);
     await page.goto(STORY_URL, { waitUntil: 'networkidle' });
     await page.waitForSelector('.demo-root', { state: 'visible', timeout: 15000 });
-    await pause(1600);
+    // Also wait for the ticket table to render so we don't trim into the
+    // first visual frame of real content.
+    await page.waitForSelector('[data-testid="demo-ticket-row"]', { state: 'visible', timeout: 8000 });
+    const storyReadyMs = Date.now();
+    const trimSeconds = Math.max(0, (storyReadyMs - recordingStartMs) / 1000 - 0.1);
+    console.log(
+        `[demo] Story ready after ${((storyReadyMs - recordingStartMs) / 1000).toFixed(2)}s; will trim ${trimSeconds.toFixed(2)}s of bootstrap`,
+    );
+
+    await pause(1800);
 
     console.log('[demo] Viewing ticket list...');
-    await pause(800);
+    await pause(900);
 
     console.log('[demo] Opening ticket ESC-1042...');
     const firstRow = page.locator('[data-testid="demo-ticket-row"]').first();
@@ -102,6 +118,8 @@ async function runDemoFlow(page) {
     await sendBtn.click();
     // Toast + new message animation
     await pause(2200);
+
+    return trimSeconds;
 }
 
 async function teardown(browser, context, page) {
@@ -112,20 +130,23 @@ async function teardown(browser, context, page) {
     return video ? await video.path() : undefined;
 }
 
-function convertToGif(inputPath, outputPath) {
-    console.log(`[convert] Converting ${inputPath} → ${outputPath}`);
+function convertToGif(inputPath, outputPath, trimSeconds = 0) {
+    console.log(`[convert] Converting ${inputPath} → ${outputPath} (trim ${trimSeconds.toFixed(2)}s)`);
     const palette = resolve(dirname(inputPath), `${basename(inputPath, '.webm')}_palette.png`);
+    // -ss BEFORE -i seeks to offset via fast keyframe jump, skipping the
+    // Storybook iframe bootstrap frames from the final GIF.
+    const seek = trimSeconds > 0 ? `-ss ${trimSeconds.toFixed(2)}` : '';
 
     try {
         // stats_mode=full samples every pixel (not just diffs between frames),
         // so low-contrast static UI chrome keeps palette slots instead of
         // being flattened into the background by quantization.
         execSync(
-            `ffmpeg -y -i "${inputPath}" -vf "fps=10,scale=800:-1:flags=lanczos,palettegen=stats_mode=full" "${palette}"`,
+            `ffmpeg -y ${seek} -i "${inputPath}" -vf "fps=10,scale=800:-1:flags=lanczos,palettegen=stats_mode=full" "${palette}"`,
             { stdio: 'inherit' },
         );
         execSync(
-            `ffmpeg -y -i "${inputPath}" -i "${palette}" -lavfi "fps=10,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5" "${outputPath}"`,
+            `ffmpeg -y ${seek} -i "${inputPath}" -i "${palette}" -lavfi "fps=10,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5" "${outputPath}"`,
             { stdio: 'inherit' },
         );
     } finally {
@@ -155,10 +176,11 @@ function findLatestWebm(dir) {
 async function main() {
     console.log('[start] Demo recording pipeline starting...');
     checkDependencies();
-    const { browser, context, page } = await setup();
+    const { browser, context, page, recordingStartMs } = await setup();
 
+    let trimSeconds = 0;
     try {
-        await runDemoFlow(page);
+        trimSeconds = (await runDemoFlow(page, recordingStartMs)) || 0;
     } catch (err) {
         console.error('[error] Demo flow failed:', err.message);
         console.log('[info] Continuing to export whatever was recorded...');
@@ -168,7 +190,7 @@ async function main() {
     const webmPath = videoPath || findLatestWebm(RECORDINGS_DIR);
 
     console.log(`[record] Video saved: ${webmPath}`);
-    convertToGif(webmPath, OUTPUT_GIF);
+    convertToGif(webmPath, OUTPUT_GIF, trimSeconds);
 
     if (!process.env.KEEP_WEBM) {
         rmSync(webmPath, { force: true });
