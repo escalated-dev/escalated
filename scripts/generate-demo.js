@@ -117,12 +117,15 @@ function convertToGif(inputPath, outputPath) {
     const palette = resolve(dirname(inputPath), `${basename(inputPath, '.webm')}_palette.png`);
 
     try {
+        // stats_mode=full samples every pixel (not just diffs between frames),
+        // so low-contrast static UI chrome keeps palette slots instead of
+        // being flattened into the background by quantization.
         execSync(
-            `ffmpeg -y -i "${inputPath}" -vf "fps=10,scale=800:-1:flags=lanczos,palettegen=stats_mode=diff" "${palette}"`,
+            `ffmpeg -y -i "${inputPath}" -vf "fps=10,scale=800:-1:flags=lanczos,palettegen=stats_mode=full" "${palette}"`,
             { stdio: 'inherit' },
         );
         execSync(
-            `ffmpeg -y -i "${inputPath}" -i "${palette}" -lavfi "fps=10,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" "${outputPath}"`,
+            `ffmpeg -y -i "${inputPath}" -i "${palette}" -lavfi "fps=10,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5" "${outputPath}"`,
             { stdio: 'inherit' },
         );
     } finally {

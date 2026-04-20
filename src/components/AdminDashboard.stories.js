@@ -1264,7 +1264,7 @@ export const DemoFlow = {
                     </div>
                     <div style="display:flex; align-items:center; gap:4px;">
                         <span style="padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500; color:#737373; cursor:pointer;">Dashboard</span>
-                        <span style="background:rgba(255,255,255,0.08); padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer;" @click="backToList">Tickets</span>
+                        <span style="background:#1f2937; padding:5px 12px; border-radius:8px; font-size:13px; font-weight:600; color:#fff; cursor:pointer;" @click="backToList">Tickets</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:12px;">
                         <span style="font-size:13px; color:#737373;">Admin</span>
