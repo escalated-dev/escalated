@@ -133,20 +133,20 @@ async function teardown(browser, context, page) {
 function convertToGif(inputPath, outputPath, trimSeconds = 0) {
     console.log(`[convert] Converting ${inputPath} → ${outputPath} (trim ${trimSeconds.toFixed(2)}s)`);
     const palette = resolve(dirname(inputPath), `${basename(inputPath, '.webm')}_palette.png`);
-    // -ss BEFORE -i seeks to offset via fast keyframe jump, skipping the
-    // Storybook iframe bootstrap frames from the final GIF.
-    const seek = trimSeconds > 0 ? `-ss ${trimSeconds.toFixed(2)}` : '';
+    // Use the `trim` filter inside the filtergraph (precise, decoded) rather
+    // than -ss — reliable for webm where keyframe placement is unpredictable.
+    const trimFilter = trimSeconds > 0 ? `trim=start=${trimSeconds.toFixed(2)},setpts=PTS-STARTPTS,` : '';
 
     try {
         // stats_mode=full samples every pixel (not just diffs between frames),
         // so low-contrast static UI chrome keeps palette slots instead of
         // being flattened into the background by quantization.
         execSync(
-            `ffmpeg -y ${seek} -i "${inputPath}" -vf "fps=10,scale=800:-1:flags=lanczos,palettegen=stats_mode=full" "${palette}"`,
+            `ffmpeg -y -i "${inputPath}" -vf "${trimFilter}fps=10,scale=800:-1:flags=lanczos,palettegen=stats_mode=full" "${palette}"`,
             { stdio: 'inherit' },
         );
         execSync(
-            `ffmpeg -y ${seek} -i "${inputPath}" -i "${palette}" -lavfi "fps=10,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5" "${outputPath}"`,
+            `ffmpeg -y -i "${inputPath}" -i "${palette}" -lavfi "[0:v]${trimFilter}fps=10,scale=800:-1:flags=lanczos [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" "${outputPath}"`,
             { stdio: 'inherit' },
         );
     } finally {

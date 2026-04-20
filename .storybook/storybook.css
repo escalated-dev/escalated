@@ -14,3 +14,14 @@ body:has(> #storybook-root > [data-fullbleed]) {
     margin: 0;
     padding: 0;
 }
+
+/* Hide Storybook's default loader / preparing-story overlay so it
+ * doesn't appear in the demo GIF recording. */
+.sb-preparing-story,
+.sb-preparing-docs,
+.sb-nopreview,
+.sb-loader,
+[class*='sb-loader'],
+[class*='sb-preparing'] {
+    display: none !important;
+}
