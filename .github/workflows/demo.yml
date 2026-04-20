@@ -16,6 +16,9 @@ on:
       - '.storybook/**'
       - '.github/workflows/demo.yml'
   workflow_dispatch:
+  schedule:
+    # Daily at 14:17 UTC (off-hour to dodge cron congestion on :00).
+    - cron: '17 14 * * *'
 
 permissions:
   contents: write
