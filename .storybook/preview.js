@@ -121,6 +121,17 @@ const preview = {
             // Apply panel theme CSS variables to document root
             applyPanelPreset(document.documentElement, panelTheme);
 
+            // Fullscreen stories render without the padded wrapper so they
+            // can fill the iframe edge-to-edge (used by the demo GIF flow).
+            if (context.parameters?.layout === 'fullscreen') {
+                const isDark = theme !== 'light';
+                return {
+                    components: { story },
+                    provide: { 'esc-dark': computed(() => isDark) },
+                    template: `<story />`,
+                };
+            }
+
             if (theme === 'side-by-side') {
                 return {
                     components: { story },

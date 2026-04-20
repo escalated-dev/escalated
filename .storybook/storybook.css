@@ -6,3 +6,11 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* Fullscreen stories: kill any white flash and fill the iframe. */
+body:has(> #storybook-root > .demo-root),
+body:has(> #storybook-root > [data-fullbleed]) {
+    background: #000 !important;
+    margin: 0;
+    padding: 0;
+}

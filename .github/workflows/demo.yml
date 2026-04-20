@@ -6,12 +6,14 @@ on:
     paths:
       - 'scripts/generate-demo.js'
       - 'src/components/AdminDashboard.stories.js'
+      - '.storybook/**'
       - '.github/workflows/demo.yml'
   pull_request:
     branches: [main]
     paths:
       - 'scripts/generate-demo.js'
       - 'src/components/AdminDashboard.stories.js'
+      - '.storybook/**'
       - '.github/workflows/demo.yml'
   workflow_dispatch:
 

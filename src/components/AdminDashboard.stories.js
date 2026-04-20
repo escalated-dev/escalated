@@ -1093,3 +1093,352 @@ export const TicketListView = {
         `,
     }),
 };
+
+const demoTickets = [
+    {
+        ref: 'ESC-1042',
+        subject: 'Unable to export CSV reports from dashboard',
+        requester: 'Sarah Chen',
+        email: 'sarah@acme.co',
+        status: 'open',
+        priority: 'high',
+        assignee: 'Mike Agent',
+        ago: '12m ago',
+        sla: 'green',
+    },
+    {
+        ref: 'ESC-1041',
+        subject: 'SSO login redirect loop on Firefox',
+        requester: 'James Wilson',
+        email: 'james@corp.io',
+        status: 'pending',
+        priority: 'urgent',
+        assignee: 'Lisa Torres',
+        ago: '34m ago',
+        sla: 'amber',
+    },
+    {
+        ref: 'ESC-1040',
+        subject: 'Custom field values not persisting after save',
+        requester: 'Maria Garcia',
+        email: 'maria@startup.dev',
+        status: 'in_progress',
+        priority: 'medium',
+        assignee: 'Mike Agent',
+        ago: '1h ago',
+        sla: 'green',
+    },
+    {
+        ref: 'ESC-1039',
+        subject: 'Webhook notifications delayed by 15+ minutes',
+        requester: 'Tom Baker',
+        email: 'tom@enterprise.com',
+        status: 'escalated',
+        priority: 'high',
+        assignee: 'Mike Agent',
+        ago: '2h ago',
+        sla: 'red',
+    },
+    {
+        ref: 'ESC-1038',
+        subject: 'Knowledge base search returning no results',
+        requester: 'Priya Patel',
+        email: 'priya@example.com',
+        status: 'solved',
+        priority: 'medium',
+        assignee: 'Lisa Torres',
+        ago: '3h ago',
+        sla: '',
+    },
+    {
+        ref: 'ESC-1037',
+        subject: 'Feature request: Dark mode for customer portal',
+        requester: 'Alex Kim',
+        email: 'alex@design.co',
+        status: 'open',
+        priority: 'low',
+        assignee: 'Unassigned',
+        ago: '5h ago',
+        sla: '',
+    },
+];
+
+/**
+ * Single-page interactive flow used by the README demo GIF.
+ * List ↔ detail transitions happen in one page load so there's no iframe flash.
+ */
+export const DemoFlow = {
+    parameters: { layout: 'fullscreen' },
+    render: () => ({
+        components: { StatusBadge, PriorityBadge },
+        data: () => ({
+            view: 'list',
+            tickets: demoTickets,
+            selectedTicket: null,
+            messages: [],
+            replyText: '',
+            toast: '',
+        }),
+        methods: {
+            openTicket(t) {
+                this.selectedTicket = t;
+                this.messages = [
+                    {
+                        id: 1,
+                        author: t.requester,
+                        initial: t.requester[0],
+                        role: 'customer',
+                        time: t.ago,
+                        text: `Hi team — ${t.subject.charAt(0).toLowerCase() + t.subject.slice(1)}. This is blocking our workflow, any update would be appreciated.`,
+                    },
+                    {
+                        id: 2,
+                        author: 'Mike Agent',
+                        initial: 'M',
+                        role: 'agent',
+                        time: '3m ago',
+                        text: 'Thanks for the report — I can reproduce this. Engineering has identified the root cause and a patch is already in review.',
+                    },
+                ];
+                this.view = 'detail';
+            },
+            backToList() {
+                this.view = 'list';
+                this.replyText = '';
+            },
+            sendReply() {
+                const text = this.replyText.trim();
+                if (!text) return;
+                this.messages.push({
+                    id: Date.now(),
+                    author: 'Mike Agent',
+                    initial: 'M',
+                    role: 'agent',
+                    time: 'just now',
+                    text,
+                });
+                this.replyText = '';
+                this.toast = 'Reply sent';
+                setTimeout(() => {
+                    this.toast = '';
+                }, 2800);
+            },
+            slaColor(s) {
+                return s === 'red'
+                    ? '#ef4444'
+                    : s === 'amber'
+                      ? '#f59e0b'
+                      : s === 'green'
+                        ? '#22c55e'
+                        : 'rgba(255,255,255,0.1)';
+            },
+        },
+        template: `
+            <div class="demo-root" data-fullbleed>
+                <style>
+                    html, body, #storybook-root { margin: 0; padding: 0; background: #000 !important; }
+                    .demo-root {
+                        position: fixed; inset: 0; background: #000; color: #fff;
+                        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+                        display: flex; flex-direction: column; overflow: hidden;
+                    }
+                    .demo-fade-enter-active, .demo-fade-leave-active { transition: opacity 220ms ease; }
+                    .demo-fade-enter-from, .demo-fade-leave-to { opacity: 0; }
+                    .demo-msg-enter-active { transition: opacity 280ms ease, transform 280ms ease; }
+                    .demo-msg-enter-from { opacity: 0; transform: translateY(8px); }
+                    .demo-toast-enter-active, .demo-toast-leave-active { transition: opacity 220ms ease, transform 220ms ease; }
+                    .demo-toast-enter-from, .demo-toast-leave-to { opacity: 0; transform: translateY(10px); }
+                    .demo-ticket-row { cursor: pointer; transition: background 120ms ease; }
+                    .demo-ticket-row:hover { background: rgba(255,255,255,0.05) !important; }
+                </style>
+
+                <nav style="height:48px; border-bottom:1px solid rgba(255,255,255,0.06); background:#0a0a0a; display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <defs><linearGradient id="esc-rb-demo" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="30%" stop-color="#eab308"/><stop offset="50%" stop-color="#22c55e"/><stop offset="70%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+                                <g transform="translate(12,12) scale(1.35) translate(-12,-12)"><polyline points="17 11 12 6 7 11" stroke="url(#esc-rb-demo)"/><polyline points="17 18 12 13 7 18" stroke="url(#esc-rb-demo)"/></g>
+                            </svg>
+                        </div>
+                        <span style="font-size:13px; font-weight:700; letter-spacing:0.02em;">Escalated</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500; color:#737373; cursor:pointer;">Dashboard</span>
+                        <span style="background:rgba(255,255,255,0.08); padding:5px 12px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer;" @click="backToList">Tickets</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:13px; color:#737373;">Admin</span>
+                        <div style="width:1px; height:16px; background:rgba(255,255,255,0.08);"></div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:26px; height:26px; border-radius:6px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:#a3a3a3;">M</div>
+                            <span style="font-size:13px; color:#a3a3a3;">Mike Agent</span>
+                        </div>
+                    </div>
+                </nav>
+
+                <transition name="demo-fade" mode="out-in">
+                    <div v-if="view === 'list'" key="list" style="flex:1; display:flex; justify-content:center; padding:20px 24px; overflow-y:auto;">
+                        <div style="max-width:1100px; width:100%; display:flex; flex-direction:column; gap:16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h1 style="font-size:20px; font-weight:600; margin:0; color:#f5f5f5;">All Tickets</h1>
+                                <span style="font-size:12px; color:#737373;">142 tickets · 18 unassigned</span>
+                            </div>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <span style="padding:4px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid rgba(6,182,212,0.4); background:rgba(6,182,212,0.15); color:#22d3ee;">My Tickets</span>
+                                <span style="padding:4px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3;">Unassigned</span>
+                                <span style="padding:4px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3;">Urgent+</span>
+                                <span style="padding:4px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3;">SLA Breaching</span>
+                                <span style="padding:4px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3;">Following</span>
+                            </div>
+                            <div style="flex:1; min-width:200px; position:relative;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:10px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                                <input type="text" placeholder="Search tickets..." style="width:100%; padding:7px 12px 7px 32px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; outline:none; box-sizing:border-box;" />
+                            </div>
+                            <div style="border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(23,23,23,0.6); overflow:hidden;">
+                                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                                    <thead>
+                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                                            <th style="padding:10px 14px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Reference</th>
+                                            <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Subject</th>
+                                            <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Requester</th>
+                                            <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Status</th>
+                                            <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Priority</th>
+                                            <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Assignee</th>
+                                            <th style="padding:10px 8px; text-align:left; font-size:11px; font-weight:600; color:#737373; text-transform:uppercase; letter-spacing:0.05em;">Last Reply</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="t in tickets" :key="t.ref"
+                                            class="demo-ticket-row"
+                                            data-testid="demo-ticket-row"
+                                            :data-ref="t.ref"
+                                            @click="openTicket(t)"
+                                            style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                                            <td style="padding:10px 14px; white-space:nowrap;">
+                                                <div style="display:flex; align-items:center; gap:6px;">
+                                                    <span :style="{ width: '7px', height: '7px', borderRadius: '50%', background: slaColor(t.sla), flexShrink: 0 }"></span>
+                                                    <span style="color:#22d3ee; font-weight:500;">{{ t.ref }}</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:10px 8px; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#e5e5e5;">{{ t.subject }}</td>
+                                            <td style="padding:10px 8px; white-space:nowrap;">
+                                                <div style="display:flex; flex-direction:column;">
+                                                    <span style="color:#d4d4d4; font-size:13px;">{{ t.requester }}</span>
+                                                    <span style="color:#525252; font-size:11px;">{{ t.email }}</span>
+                                                </div>
+                                            </td>
+                                            <td style="padding:10px 8px;"><StatusBadge :status="t.status" /></td>
+                                            <td style="padding:10px 8px;"><PriorityBadge :priority="t.priority" /></td>
+                                            <td style="padding:10px 8px; white-space:nowrap;">
+                                                <span :style="{ color: t.assignee === 'Unassigned' ? '#525252' : '#a3a3a3', fontStyle: t.assignee === 'Unassigned' ? 'italic' : 'normal' }">{{ t.assignee }}</span>
+                                            </td>
+                                            <td style="padding:10px 8px; white-space:nowrap; color:#a3a3a3; font-size:12px;">{{ t.ago }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else key="detail" style="flex:1; display:flex; min-height:0;">
+                        <div style="flex:7; display:flex; flex-direction:column; border-right:1px solid rgba(255,255,255,0.06); min-width:0;">
+                            <div style="padding:14px 24px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                                    <span @click="backToList" style="font-size:12px; color:#737373; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                                        Tickets
+                                    </span>
+                                    <span style="color:#404040;">·</span>
+                                    <span style="font-size:13px; color:#22d3ee; font-weight:500;">{{ selectedTicket?.ref }}</span>
+                                    <StatusBadge :status="selectedTicket?.status" />
+                                    <PriorityBadge :priority="selectedTicket?.priority" />
+                                </div>
+                                <h1 style="font-size:16px; font-weight:600; margin:0; color:#f5f5f5;">{{ selectedTicket?.subject }}</h1>
+                            </div>
+
+                            <div style="flex:1; overflow-y:auto; padding:16px 24px;">
+                                <transition-group name="demo-msg" tag="div" style="display:flex; flex-direction:column; gap:14px;">
+                                    <div v-for="msg in messages" :key="msg.id" style="display:flex; gap:12px;">
+                                        <div :style="{ width: '32px', height: '32px', borderRadius: '8px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '600', background: msg.role === 'agent' ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.08)', color: msg.role === 'agent' ? '#60a5fa' : '#a3a3a3' }">{{ msg.initial }}</div>
+                                        <div style="flex:1; min-width:0;">
+                                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                                <span :style="{ fontSize: '13px', fontWeight: '600', color: msg.role === 'agent' ? '#60a5fa' : '#e5e5e5' }">{{ msg.author }}</span>
+                                                <span v-if="msg.role === 'agent'" style="font-size:10px; background:rgba(59,130,246,0.12); color:#60a5fa; padding:1px 6px; border-radius:4px; font-weight:500;">Agent</span>
+                                                <span style="font-size:11px; color:#525252;">{{ msg.time }}</span>
+                                            </div>
+                                            <div style="font-size:13px; line-height:1.6; color:#d4d4d4; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); border-radius:10px; padding:10px 14px;">{{ msg.text }}</div>
+                                        </div>
+                                    </div>
+                                </transition-group>
+                            </div>
+
+                            <div style="border-top:1px solid rgba(255,255,255,0.06); padding:12px 24px; flex-shrink:0;">
+                                <div style="display:flex; gap:0; margin-bottom:8px;">
+                                    <button style="padding:5px 14px; font-size:12px; font-weight:600; border:none; cursor:pointer; border-radius:6px 0 0 6px; background:rgba(59,130,246,0.15); color:#60a5fa;">Reply</button>
+                                    <button style="padding:5px 14px; font-size:12px; font-weight:600; border:none; cursor:pointer; border-radius:0 6px 6px 0; background:rgba(255,255,255,0.05); color:#737373;">Internal Note</button>
+                                </div>
+                                <textarea
+                                    v-model="replyText"
+                                    data-testid="demo-reply-textarea"
+                                    placeholder="Type your reply..."
+                                    style="width:100%; min-height:68px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px 14px; font-size:13px; color:#e5e5e5; resize:none; font-family:inherit; box-sizing:border-box; outline:none;"
+                                ></textarea>
+                                <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+                                    <button
+                                        data-testid="demo-send-reply"
+                                        @click="sendReply"
+                                        :disabled="!replyText.trim()"
+                                        :style="{ padding: '6px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: '600', border: 'none', cursor: replyText.trim() ? 'pointer' : 'not-allowed', background: '#3b82f6', color: '#fff', opacity: replyText.trim() ? '1' : '0.5', transition: 'opacity 150ms ease' }"
+                                    >Send Reply</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="flex:3; padding:16px; overflow-y:auto; background:rgba(10,10,10,0.5); min-width:0;">
+                            <div style="margin-bottom:20px;">
+                                <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Assignee</div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="width:28px; height:28px; border-radius:6px; background:rgba(59,130,246,0.15); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#60a5fa;">M</div>
+                                    <div>
+                                        <div style="font-size:13px; font-weight:500; color:#e5e5e5;">{{ selectedTicket?.assignee }}</div>
+                                        <div style="font-size:11px; color:#525252;">Support Team</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:20px;">
+                                <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Department</div>
+                                <div style="font-size:13px; color:#a3a3a3;">Technical Support</div>
+                            </div>
+                            <div style="margin-bottom:20px;">
+                                <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">SLA</div>
+                                <div style="border:1px solid rgba(16,185,129,0.2); background:rgba(16,185,129,0.08); border-radius:8px; padding:8px 12px;">
+                                    <div style="font-size:12px; font-weight:500; color:#34d399;">Next Response Due</div>
+                                    <div style="font-size:11px; color:#34d399;">3h 42m remaining</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#525252; margin-bottom:6px;">Requester</div>
+                                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:10px 12px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div style="width:28px; height:28px; border-radius:6px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#a3a3a3;">{{ selectedTicket?.requester?.[0] }}</div>
+                                        <div>
+                                            <div style="font-size:13px; font-weight:500; color:#e5e5e5;">{{ selectedTicket?.requester }}</div>
+                                            <div style="font-size:11px; color:#525252;">{{ selectedTicket?.email }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+
+                <transition name="demo-toast">
+                    <div v-if="toast" style="position:fixed; bottom:20px; right:20px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#34d399; padding:10px 16px; border-radius:10px; font-size:13px; font-weight:500; display:flex; align-items:center; gap:8px; backdrop-filter: blur(8px);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        {{ toast }}
+                    </div>
+                </transition>
+            </div>
+        `,
+    }),
+};

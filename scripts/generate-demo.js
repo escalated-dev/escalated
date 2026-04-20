@@ -11,12 +11,9 @@ const RECORDINGS_DIR = resolve(ROOT, 'recordings');
 const OUTPUT_GIF = resolve(ROOT, '.github/profile/demo.gif');
 const VIEWPORT = { width: 1280, height: 800 };
 
-// Storybook iframe story URLs — rendered without Storybook chrome
-const STORIES = {
-    dashboard: `${BASE_URL}/iframe.html?id=pages-admindashboard--full-dashboard&viewMode=story`,
-    ticketList: `${BASE_URL}/iframe.html?id=pages-admindashboard--ticket-list-view&viewMode=story`,
-    ticketDetail: `${BASE_URL}/iframe.html?id=pages-admindashboard--ticket-detail-view&viewMode=story`,
-};
+// Single story — list ↔ detail transitions happen via reactive state,
+// so there are no iframe navigations (and therefore no flashes).
+const STORY_URL = `${BASE_URL}/iframe.html?id=pages-admindashboard--demo-flow&viewMode=story`;
 
 function checkDependencies() {
     try {
@@ -39,12 +36,19 @@ async function setup() {
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
         viewport: VIEWPORT,
-        recordVideo: {
-            dir: RECORDINGS_DIR,
-            size: VIEWPORT,
-        },
+        recordVideo: { dir: RECORDINGS_DIR, size: VIEWPORT },
+        colorScheme: 'dark',
     });
     const page = await context.newPage();
+
+    // Force a black background before the story mounts so there's no
+    // initial white flash when the iframe first loads.
+    await page.addInitScript(() => {
+        const style = document.createElement('style');
+        style.textContent = 'html, body, #storybook-root { background: #000 !important; margin: 0; }';
+        (document.head || document.documentElement).appendChild(style);
+    });
+
     return { browser, context, page };
 }
 
@@ -59,76 +63,51 @@ async function typeSlowly(locator, text, delay = 55) {
     }
 }
 
-async function loadStory(page, url) {
-    await page.goto(url, { waitUntil: 'networkidle' });
-    // Wait for Storybook to mount the story root
-    await page.waitForSelector('#storybook-root', { state: 'attached', timeout: 15000 });
-    await pause(400);
-}
-
 async function runDemoFlow(page) {
-    // 1. Admin dashboard overview
-    console.log('[demo] Showing admin dashboard...');
-    await loadStory(page, STORIES.dashboard);
-    await pause(2000);
+    console.log(`[demo] Loading DemoFlow story...`);
+    await page.goto(STORY_URL, { waitUntil: 'networkidle' });
+    await page.waitForSelector('.demo-root', { state: 'visible', timeout: 15000 });
+    await pause(1600);
 
-    // 2. Ticket list
-    console.log('[demo] Showing ticket list...');
-    await loadStory(page, STORIES.ticketList);
-    await pause(1500);
+    console.log('[demo] Viewing ticket list...');
+    await pause(800);
 
-    // Click "Urgent+" filter chip to show filtering in action
-    const urgentChip = page
-        .locator('button, span, div')
-        .filter({ hasText: /^Urgent\+$/ })
-        .first();
-    if (await urgentChip.isVisible()) {
-        await urgentChip.click();
-        await pause(800);
-    }
+    console.log('[demo] Opening ticket ESC-1042...');
+    const firstRow = page.locator('[data-testid="demo-ticket-row"]').first();
+    await firstRow.waitFor({ state: 'visible', timeout: 8000 });
+    // Hover briefly to show the pointer interaction
+    await firstRow.hover();
+    await pause(400);
+    await firstRow.click();
+    // Fade transition is 220ms — let it complete before interacting
+    await pause(900);
 
-    // 3. Ticket detail view
-    console.log('[demo] Showing ticket detail...');
-    await loadStory(page, STORIES.ticketDetail);
-    await pause(1500);
+    console.log('[demo] Reading conversation thread...');
+    await pause(1600);
 
-    // Click "Internal Note" tab to show it, then switch back to Reply
-    const noteTab = page.locator('button').filter({ hasText: 'Internal Note' }).first();
-    if (await noteTab.isVisible()) {
-        await noteTab.click();
-        await pause(700);
-        const replyTab = page
-            .locator('button')
-            .filter({ hasText: /^Reply$/ })
-            .first();
-        await replyTab.click();
-        await pause(400);
-    }
-
-    // Type a reply in the composer textarea
     console.log('[demo] Typing reply...');
-    const textarea = page.locator('textarea').first();
-    await textarea.waitFor({ state: 'visible', timeout: 8000 });
+    const textarea = page.locator('[data-testid="demo-reply-textarea"]');
+    await textarea.waitFor({ state: 'visible', timeout: 5000 });
     await textarea.click();
+    await pause(300);
     await typeSlowly(
         textarea,
-        'Great news — the fix has been deployed. Full quarter exports should work again. Let me know if you run into anything else!',
+        'The fix has shipped — full quarter exports should work again. Let me know if anything else comes up!',
         48,
     );
     await pause(800);
 
-    // Click the Send Reply span/button
     console.log('[demo] Sending reply...');
-    const sendBtn = page.locator('span, button').filter({ hasText: 'Send Reply' }).first();
-    await sendBtn.waitFor({ state: 'visible', timeout: 5000 });
+    const sendBtn = page.locator('[data-testid="demo-send-reply"]');
     await sendBtn.click();
-    await pause(1500);
+    // Toast + new message animation
+    await pause(2200);
 }
 
 async function teardown(browser, context, page) {
     console.log('[teardown] Closing browser...');
     const video = page.video();
-    await context.close(); // video is fully written only after context closes
+    await context.close();
     await browser.close();
     return video ? await video.path() : undefined;
 }
