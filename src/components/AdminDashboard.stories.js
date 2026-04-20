@@ -1274,8 +1274,8 @@ export const DemoFlow = {
                                 <span style="padding:4px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#a3a3a3;">Following</span>
                             </div>
                             <div style="flex:1; min-width:200px; position:relative;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:10px; top:50%; transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                                <input type="text" placeholder="Search tickets..." style="width:100%; padding:7px 12px 7px 32px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; outline:none; box-sizing:border-box;" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:12px; top:50%; transform:translateY(-50%);"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.85-4.85"/></svg>
+                                <input type="text" placeholder="Search tickets..." style="width:100%; padding:8px 12px 8px 38px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:#fff; font-size:13px; outline:none; box-sizing:border-box;" />
                             </div>
                             <div style="border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(23,23,23,0.6); overflow:hidden;">
                                 <table style="width:100%; border-collapse:collapse; font-size:13px;">
