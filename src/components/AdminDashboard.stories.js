@@ -1235,23 +1235,6 @@ export const DemoFlow = {
         },
         template: `
             <div class="demo-root" data-fullbleed>
-                <style>
-                    html, body, #storybook-root { margin: 0; padding: 0; background: #000 !important; }
-                    .demo-root {
-                        position: fixed; inset: 0; background: #000; color: #fff;
-                        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-                        display: flex; flex-direction: column; overflow: hidden;
-                    }
-                    .demo-fade-enter-active, .demo-fade-leave-active { transition: opacity 220ms ease; }
-                    .demo-fade-enter-from, .demo-fade-leave-to { opacity: 0; }
-                    .demo-msg-enter-active { transition: opacity 280ms ease, transform 280ms ease; }
-                    .demo-msg-enter-from { opacity: 0; transform: translateY(8px); }
-                    .demo-toast-enter-active, .demo-toast-leave-active { transition: opacity 220ms ease, transform 220ms ease; }
-                    .demo-toast-enter-from, .demo-toast-leave-to { opacity: 0; transform: translateY(10px); }
-                    .demo-ticket-row { cursor: pointer; transition: background 120ms ease; }
-                    .demo-ticket-row:hover { background: rgba(255,255,255,0.05) !important; }
-                </style>
-
                 <nav style="height:48px; border-bottom:1px solid rgba(255,255,255,0.06); background:#0a0a0a; display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0;">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <div style="width:30px; height:30px; border-radius:8px; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center;">

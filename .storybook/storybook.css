@@ -25,3 +25,52 @@ body:has(> #storybook-root > [data-fullbleed]) {
 [class*='sb-preparing'] {
     display: none !important;
 }
+
+/* DemoFlow story — single-page interactive app demo for the README GIF.
+ * Moved out of the Vue template so the rules apply reliably from the
+ * moment the iframe renders (not after Vue hydrates). */
+.demo-root {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    color: #fff;
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.demo-fade-enter-active,
+.demo-fade-leave-active {
+    transition: opacity 220ms ease;
+}
+.demo-fade-enter-from,
+.demo-fade-leave-to {
+    opacity: 0;
+}
+.demo-msg-enter-active {
+    transition:
+        opacity 280ms ease,
+        transform 280ms ease;
+}
+.demo-msg-enter-from {
+    opacity: 0;
+    transform: translateY(8px);
+}
+.demo-toast-enter-active,
+.demo-toast-leave-active {
+    transition:
+        opacity 220ms ease,
+        transform 220ms ease;
+}
+.demo-toast-enter-from,
+.demo-toast-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+.demo-ticket-row {
+    cursor: pointer;
+    transition: background 120ms ease;
+}
+.demo-ticket-row:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
