@@ -159,6 +159,28 @@ function convertToGif(inputPath, outputPath, trimSeconds = 0) {
     if (sizeBytes > 5 * 1024 * 1024) {
         console.warn(`[warn] GIF exceeds 5 MB target (${sizeMB} MB) — consider reducing fps or scale`);
     }
+
+    // Diagnostic: extract a handful of trimmed PNG frames so we can sanity-check
+    // what actually made it into the GIF (uploaded as CI artifact in debug mode).
+    if (process.env.DEMO_DEBUG_FRAMES) {
+        const trimOption = trimSeconds > 0 ? `-ss ${trimSeconds.toFixed(2)}` : '';
+        const debugDir = dirname(outputPath);
+        for (const [label, t] of [
+            ['early', 0.5],
+            ['mid', 5.0],
+            ['late', 9.0],
+        ]) {
+            const out = resolve(debugDir, `demo_frame_${label}.png`);
+            try {
+                execSync(`ffmpeg -y ${trimOption} -i "${inputPath}" -ss ${t} -vframes 1 -vf "scale=800:-1" "${out}"`, {
+                    stdio: 'pipe',
+                });
+                console.log(`[debug] frame ${label} (t=${t}s): ${out}`);
+            } catch (e) {
+                console.warn(`[debug] failed to extract ${label}: ${e.message}`);
+            }
+        }
+    }
 }
 
 function findLatestWebm(dir) {

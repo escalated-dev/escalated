@@ -73,6 +73,7 @@ jobs:
         run: node scripts/generate-demo.js
         env:
           DEMO_BASE_URL: http://localhost:6006
+          DEMO_DEBUG_FRAMES: '1'
 
       - name: Stop Storybook server
         if: always()
@@ -104,6 +105,15 @@ jobs:
           name: demo-gif
           path: .github/profile/demo.gif
           retention-days: 14
+
+      - name: Upload debug frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-debug-frames
+          path: .github/profile/demo_frame_*.png
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Commit updated GIF
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

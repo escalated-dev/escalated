@@ -6,3 +6,4 @@ storybook-static/
 screenshot-results/
 # Demo-recording intermediates (the produced GIF is committed to .github/profile/)
 recordings/
+.github/profile/demo_frame_*.png
