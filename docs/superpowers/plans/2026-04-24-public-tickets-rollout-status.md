@@ -259,6 +259,21 @@ Shared surface across all 5:
 - Provider-hosted attachments (Mailgun) pass through as `PendingAttachment` records; inline attachments don't (host app decides how to persist those).
 - Inbound-email replies are tagged with `authorType = "inbound_email"` (or the framework's equivalent author-class field) so consumers can distinguish them from agent/customer replies.
 
+### HTTP-level controller test matrix (iter 99-102) ✅
+
+Every greenfield framework now has CI-runnable tests that drive the real inbound-email controller across: new-ticket / matched-reply / skipped outcomes, missing + bad secret 401s, missing + unknown adapter 400s, and adapter-selection-via-header fallback. Closes the "service built but HTTP boundary untested" gap identified in iter 99 during the Go audit.
+
+| Framework | PR | Test cases | Style |
+|---|---|---|---|
+| escalated-nestjs | [#18](https://github.com/escalated-dev/escalated-nestjs/pull/18) | 3 (iter 91, extended iter 98) | `Test.createTestingModule` + repo mocks |
+| escalated-dotnet | [#28](https://github.com/escalated-dev/escalated-dotnet/pull/28) | 6 | direct controller instantiation + `DefaultHttpContext` + in-memory EF Core |
+| escalated-go | [#34](https://github.com/escalated-dev/escalated-go/pull/34) | 7 | `net/http/httptest` + fakeLookup / fakeWriter |
+| escalated-spring | [#31](https://github.com/escalated-dev/escalated-spring/pull/31) | 9 | `@WebMvcTest` + MockMvc + `@MockBean` |
+| escalated-phoenix | [#40](https://github.com/escalated-dev/escalated-phoenix/pull/40) | 6 | `Plug.Test.conn/3` + FailingParser stub via application env |
+| escalated-symfony | [#36](https://github.com/escalated-dev/escalated-symfony/pull/36) | 10 | direct controller instantiation + mocked `InboundEmailService` |
+
+Go PR #34 also fixed a genuine wiring gap: the handler was calling `router.ResolveTicket` directly instead of the orchestration service. Symfony PR #36 drops `final` from `InboundEmailService` + `InboundRouter` to allow test doubles (which also un-breaks the 9 existing `InboundEmailServiceTest` cases — full suite now 177/177 green).
+
 Remaining follow-ups: attachment persistence workers for provider-hosted downloads, and SES parser if demand warrants (third major provider).
 
 ### Public docs for greenfield frameworks (iter 89) ✅
