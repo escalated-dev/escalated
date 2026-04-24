@@ -265,9 +265,9 @@ Remaining follow-ups: attachment persistence workers for provider-hosted downloa
 
 `escalated-dev/escalated-docs#6` adds inbound-email setup pages for all 5 greenfield framework ports and rewrites `_intro.md` to describe the unified-webhook / shared-secret / three-way resolution-chain architecture. These were the first entries under `sections/inbound-email/` for .NET, Spring, Go, Phoenix, and Symfony (the legacy host-app frameworks already had pages). Each page includes a ready-to-paste curl test recipe and documents the new response shape (`outcome`, `ticket_id`, `reply_id`, `pending_attachment_downloads`).
 
-### Frontend + host-adapter guest-policy settings page (iter 92-94)
+### Frontend + host-adapter guest-policy settings page (iter 92-95)
 
-Plan Task 6.3 — a runtime admin settings page for the public-ticket guest policy — shipped across the shared frontend and four Inertia host adapters. The Vue page is discoverable from the main Admin/Settings page (toggle Guest Tickets on → "Configure guest policy →" link appears).
+Plan Task 6.3 — a runtime admin settings page for the public-ticket guest policy — shipped across the shared frontend and 6 host adapters. The Vue page is discoverable from the main Admin/Settings page (toggle Guest Tickets on → "Configure guest policy →" link appears).
 
 | Repo | PR | What |
 |---|---|---|
@@ -276,8 +276,10 @@ Plan Task 6.3 — a runtime admin settings page for the public-ticket guest poli
 | escalated-rails | [#46](https://github.com/escalated-dev/escalated-rails/pull/46) | `SettingsController#public_tickets` + routes |
 | escalated-django | [#43](https://github.com/escalated-dev/escalated-django/pull/43) | `settings_public_tickets` view + URL |
 | escalated-adonis | [#51](https://github.com/escalated-dev/escalated-adonis/pull/51) | `AdminSettingsController#publicTickets` + routes |
+| escalated-wordpress | [#34](https://github.com/escalated-dev/escalated-wordpress/pull/34) | Guest-policy fields inline on existing admin settings page (PHP template, no Vue) |
+| escalated-filament | [#24](https://github.com/escalated-dev/escalated-filament/pull/24) | `PublicTicketsSettings` Filament page + blade view + lang strings |
 
-Each host-adapter PR validates mode against the three supported values, persists via the existing `EscalatedSetting(s)` KV store, and clears stale fields when switching modes. Symfony/WordPress/Filament/greenfield host adapters remain as follow-ups (Symfony lacks a persisted-settings layer entirely; that's a bigger yak-shave).
+Each host-adapter PR validates mode against the three supported values, persists via the existing `EscalatedSetting(s)` KV store, and clears stale fields when switching modes. WordPress + Filament use their native admin UI patterns (PHP template / Filament Page) instead of the shared Inertia/Vue page. Symfony + greenfield host adapters remain as follow-ups (Symfony lacks a persisted-settings layer entirely; that's a bigger yak-shave).
 
 ### Per-repo READMEs (iter 90) ✅
 
