@@ -46,13 +46,32 @@ Stacked PRs: runners target `feat/workflow-executor`, listeners target `feat/wor
 
 Phoenix listener is helper-based (per-event functions host calls directly) because Phoenix doesn't auto-emit ApplicationEvents. .NET uses an `IEscalatedEventDispatcher` decorator. Spring uses `@EventListener` on existing `ApplicationEvent`s. WordPress uses `add_action` on existing `escalated_*` hooks.
 
+#### Email Message-ID util — **all 10 frameworks drafted (iter 51-55)** ✅
+
+Each framework now has a pure-function `MessageIdUtil` (or language-appropriate equivalent) with the same 4-method API: `buildMessageId`, `parseTicketIdFromMessageId`, `buildReplyTo`, `verifyReplyTo`. Signed Reply-To is `reply+{id}.{hmac8}@{domain}`; verification is timing-safe in every port.
+
+| Framework | PR | Tests | CI |
+|---|---|---|---|
+| escalated-spring | [#24](https://github.com/escalated-dev/escalated-spring/pull/24) | 13 | ✅ green |
+| escalated-wordpress | [#31](https://github.com/escalated-dev/escalated-wordpress/pull/31) | 13 | ✅ green |
+| escalated-dotnet | [#21](https://github.com/escalated-dev/escalated-dotnet/pull/21) | 16 | ✅ green |
+| escalated-phoenix | [#33](https://github.com/escalated-dev/escalated-phoenix/pull/33) | 19 | — (no repo CI) |
+| escalated-laravel | [#68](https://github.com/escalated-dev/escalated-laravel/pull/68) | 13 | ✅ green |
+| escalated-rails | [#43](https://github.com/escalated-dev/escalated-rails/pull/43) | 17 | ✅ after rubocop fix |
+| escalated-django | [#40](https://github.com/escalated-dev/escalated-django/pull/40) | 15 | ✅ green |
+| escalated-adonis | [#48](https://github.com/escalated-dev/escalated-adonis/pull/48) | 12 | ✅ green |
+| escalated-go | [#27](https://github.com/escalated-dev/escalated-go/pull/27) | 13 | ✅ green |
+| escalated-symfony | [#28](https://github.com/escalated-dev/escalated-symfony/pull/28) | 13 | ✅ green |
+
+Follow-up per-framework work: wire the util into each `EmailService` / `ThreadingService` / outbound mailer so ticket notifications carry the canonical Message-ID + signed Reply-To, and add inbound-webhook calls to `verifyReplyTo` for ticket-identity routing.
+
 #### Still open
 
-- **Outbound email Message-ID threading** across all frameworks except NestJS. NestJS `email/message-id.ts` + `email.service.ts` + `inbound-router.service.ts` are the reference.
 - **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
 - **escalated-spring: inbound email webhook** (greenfield — no prior guest support meant no inbound impl either).
+- **Per-framework EmailService wire-up** of `MessageIdUtil` (10 follow-up PRs)
 
-NestJS is the reference for these follow-ups. Per-framework port work estimated at 2-4 hours once scheduled.
+NestJS is the reference for these follow-ups.
 
 
 ## Summary table
