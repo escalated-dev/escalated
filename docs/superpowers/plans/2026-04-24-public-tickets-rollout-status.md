@@ -17,20 +17,17 @@
 | escalated-dotnet | [#17](https://github.com/escalated-dev/escalated-dotnet/pull/17) | ✅ | ✅ TicketService.CreateAsync |
 | escalated-wordpress | [#27](https://github.com/escalated-dev/escalated-wordpress/pull/27) | ✅ | ✅ TicketService::create_guest |
 | escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | ✅ | ✅ TicketService::create |
-| escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ partial (Contact dedupe; ticket back-link TODO) |
+| escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ TicketService.Create (+ contact_id threaded through Ticket SQL) |
 | escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create |
 | escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | ✅ | ✅ TicketService.create (greenfield) |
 | escalated-filament | — | ✅ via laravel | ✅ via laravel |
 
 ## Final state — rollout complete
 
-**11 open PRs.** Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail`. Repeat guest submissions dedupe to a single Contact across all frameworks; the foundation for `promote_to_user` is in place everywhere.
-
-One caveat: **escalated-go** ships Contact dedupe but doesn't back-link the Ticket to the Contact yet — the Ticket CRUD SQL doesn't project `contact_id` through every SELECT scan, and threading that through is deferred as a follow-up. Contact-level dedupe still works (repeat emails yield one Contact row).
+**11 open PRs.** Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail` + ticket back-linked via `contact_id`. Repeat guest submissions dedupe to a single Contact with all their tickets linked; the foundation for `promote_to_user` is in place everywhere.
 
 ### Follow-up backlog
 
-- **escalated-go**: finish the Ticket `contact_id` projection across all SELECT queries
 - All frameworks except NestJS: outbound email Message-ID threading, Workflow executor wiring
 - All frameworks: deprecate + drop inline guest_* columns after a dual-read cycle
 - escalated-spring: inbound email webhook (no prior guest support meant no inbound impl either)
