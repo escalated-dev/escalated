@@ -405,6 +405,7 @@ Task 6.3 was the last remaining gap from the original plan. The shared `Admin/Se
 | escalated-go | [#38](https://github.com/escalated-dev/escalated-go/pull/38) | No — built `Store.GetSetting/SetSetting` + new `escalated_settings` table |
 | escalated-spring | [#36](https://github.com/escalated-dev/escalated-spring/pull/36) | Yes — `SettingsService` + JPA entity pre-existed |
 | escalated-phoenix | [#45](https://github.com/escalated-dev/escalated-phoenix/pull/45) | No — built `SettingsService` + Ecto schema + migration |
+| escalated-nestjs reference | [#27](https://github.com/escalated-dev/escalated-nestjs/pull/27) | Yes — added dedicated endpoint so the reference tracks the ecosystem; internally writes single `guest_policy` JSON blob so WidgetController's existing `getTyped('guest_policy')` read-path keeps working with zero change |
 
 **Shared semantic surface across all four ports** (plus the legacy adapters + Symfony):
 - 3 keys: `guest_policy_mode` (unassigned | guest_user | prompt_signup) / `guest_policy_user_id` / `guest_policy_signup_url_template`
@@ -439,6 +440,7 @@ Remaining smaller follow-ups for future iterations:
 - Per-framework CHANGELOG entries for frameworks that don't yet have them (NestJS + WordPress done; Spring / Phoenix / Go / .NET have no CHANGELOG.md yet)
 - The 1-line Phoenix `WorkflowRunner` update to pass `workflow_id` to `execute/3` once `feat/workflow-runner` + `feat/workflow-delay` both merge on master
 - WordPress plugin-upgrade-path gap — existing installs need reactivation to pick up new tables; would benefit from a `plugins_loaded` version check that triggers `Activator::activate()` on version mismatch (pre-existing infrastructure gap, not plan-scoped)
+- **Laravel (and possibly other legacy plugins) admin settings page has no behavioral effect on the widget** — grep across `escalated-laravel/src/` shows `WidgetController::createTicket` writes `guest_name`/`guest_email`/`guest_token` unconditionally, ignoring the `guest_policy_mode` setting the admin page writes. Needs a per-framework patch to read the persisted setting in the widget controller and branch on mode (same fix the NestJS reference ships via [escalated-nestjs#27](https://github.com/escalated-dev/escalated-nestjs/pull/27), where the endpoint writes to a single `guest_policy` JSON key that the widget controller already reads via `settingsService.getTyped`). This was caught during docs self-review but is out of scope for the current rollout.
 
 ### Infrastructure fixes surfaced along the way
 
