@@ -37,6 +37,10 @@ const props = defineProps({
 
 const page = usePage();
 const isLightAgent = computed(() => page.props.escalated?.agent_type === 'light');
+// Route prefix the host framework mounts Escalated under. Defaults to
+// `support`, matching every host-adapter plugin. NestJS uses `escalated`.
+const routePrefix = computed(() => page.props.escalated?.prefix || 'support');
+const widgetPath = computed(() => `/${routePrefix.value}/widget`);
 const activeTab = ref(isLightAgent.value ? 'note' : 'reply');
 const showShortcutHelp = ref(false);
 const replyComposerRef = ref(null);
@@ -78,8 +82,10 @@ const isChatMode = computed(() => props.ticket.channel === 'chat' && props.ticke
 const chatMessages = ref(props.ticket.chat_messages || []);
 const chatTypingUser = ref(null);
 
-// Subscribe to chat channel for real-time messages
-const { subscribeToChat } = useChat();
+// Subscribe to chat channel for real-time messages. Pass widgetPath so
+// useChat's API calls resolve against whatever prefix the host framework
+// serves Escalated under (config on NestJS, default /support elsewhere).
+const { subscribeToChat } = useChat({ widgetPath: widgetPath.value });
 let chatTypingTimer = null;
 
 onMounted(() => {
@@ -324,10 +330,10 @@ onMounted(() => {
                         <ChatComposer
                             :session-id="ticket.chat_session_id"
                             :send-endpoint="
-                                ticket.chat_session_id ? `/support/widget/chat/${ticket.chat_session_id}/messages` : ''
+                                ticket.chat_session_id ? `${widgetPath}/chat/${ticket.chat_session_id}/messages` : ''
                             "
                             :typing-endpoint="
-                                ticket.chat_session_id ? `/support/widget/chat/${ticket.chat_session_id}/typing` : ''
+                                ticket.chat_session_id ? `${widgetPath}/chat/${ticket.chat_session_id}/typing` : ''
                             "
                             allow-notes
                             @send="onChatSend"
