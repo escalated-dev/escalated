@@ -63,13 +63,30 @@ Each framework now has a pure-function `MessageIdUtil` (or language-appropriate 
 | escalated-go | [#27](https://github.com/escalated-dev/escalated-go/pull/27) | 13 | ✅ green |
 | escalated-symfony | [#28](https://github.com/escalated-dev/escalated-symfony/pull/28) | 13 | ✅ green |
 
-Follow-up per-framework work: wire the util into each `EmailService` / `ThreadingService` / outbound mailer so ticket notifications carry the canonical Message-ID + signed Reply-To, and add inbound-webhook calls to `verifyReplyTo` for ticket-identity routing.
+#### EmailService wire-up — **all 10 frameworks drafted (iter 56-63)** ✅
+
+Stacked on each framework's MessageIdUtil PR. Every outbound ticket notification (ticket-created, reply, status-change, SLA breach, escalation, assignment, resolution) now emits canonical RFC 5322 Message-IDs + signed Reply-To in every framework.
+
+| Framework | Wire-up PR | Base |
+|---|---|---|
+| escalated-spring | [#25](https://github.com/escalated-dev/escalated-spring/pull/25) | → #24 |
+| escalated-wordpress | [#32](https://github.com/escalated-dev/escalated-wordpress/pull/32) | → #31 |
+| escalated-dotnet | [#22](https://github.com/escalated-dev/escalated-dotnet/pull/22) | → #21 |
+| escalated-phoenix | [#34](https://github.com/escalated-dev/escalated-phoenix/pull/34) | → #33 |
+| escalated-laravel | [#69](https://github.com/escalated-dev/escalated-laravel/pull/69) | → #68 |
+| escalated-rails | [#44](https://github.com/escalated-dev/escalated-rails/pull/44) | → #43 |
+| escalated-django | [#41](https://github.com/escalated-dev/escalated-django/pull/41) | → #40 |
+| escalated-adonis | [#49](https://github.com/escalated-dev/escalated-adonis/pull/49) | → #48 |
+| escalated-go | [#28](https://github.com/escalated-dev/escalated-go/pull/28) | → #27 |
+| escalated-symfony | [#29](https://github.com/escalated-dev/escalated-symfony/pull/29) | → #28 |
+
+20 email-related PRs total (10 util + 10 wire-up). Merge order per framework: util → wire-up. CI on stacked wire-up branches won't trigger until the base merges and they rebase onto `main`/`master`.
 
 #### Still open
 
+- **Inbound-webhook wire-up** of `verifyReplyTo` across frameworks that have inbound adapters (Laravel, Rails, Django, Adonis, WordPress) — so the signed Reply-To actually drives ticket-identity routing. ~30-50 LOC per framework.
 - **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
 - **escalated-spring: inbound email webhook** (greenfield — no prior guest support meant no inbound impl either).
-- **Per-framework EmailService wire-up** of `MessageIdUtil` (10 follow-up PRs)
 
 NestJS is the reference for these follow-ups.
 
