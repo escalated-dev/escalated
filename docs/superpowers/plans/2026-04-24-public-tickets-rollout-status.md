@@ -265,6 +265,20 @@ Remaining follow-ups: attachment persistence workers for provider-hosted downloa
 
 `escalated-dev/escalated-docs#6` adds inbound-email setup pages for all 5 greenfield framework ports and rewrites `_intro.md` to describe the unified-webhook / shared-secret / three-way resolution-chain architecture. These were the first entries under `sections/inbound-email/` for .NET, Spring, Go, Phoenix, and Symfony (the legacy host-app frameworks already had pages). Each page includes a ready-to-paste curl test recipe and documents the new response shape (`outcome`, `ticket_id`, `reply_id`, `pending_attachment_downloads`).
 
+### Frontend + host-adapter guest-policy settings page (iter 92-94)
+
+Plan Task 6.3 — a runtime admin settings page for the public-ticket guest policy — shipped across the shared frontend and four Inertia host adapters. The Vue page is discoverable from the main Admin/Settings page (toggle Guest Tickets on → "Configure guest policy →" link appears).
+
+| Repo | PR | What |
+|---|---|---|
+| escalated (frontend) | [#32](https://github.com/escalated-dev/escalated/pull/32) | `Admin/Settings/PublicTickets.vue` + discovery link |
+| escalated-laravel | [#71](https://github.com/escalated-dev/escalated-laravel/pull/71) | `PublicTicketsSettingsController` + routes |
+| escalated-rails | [#46](https://github.com/escalated-dev/escalated-rails/pull/46) | `SettingsController#public_tickets` + routes |
+| escalated-django | [#43](https://github.com/escalated-dev/escalated-django/pull/43) | `settings_public_tickets` view + URL |
+| escalated-adonis | [#51](https://github.com/escalated-dev/escalated-adonis/pull/51) | `AdminSettingsController#publicTickets` + routes |
+
+Each host-adapter PR validates mode against the three supported values, persists via the existing `EscalatedSetting(s)` KV store, and clears stale fields when switching modes. Symfony/WordPress/Filament/greenfield host adapters remain as follow-ups (Symfony lacks a persisted-settings layer entirely; that's a bigger yak-shave).
+
 ### Per-repo READMEs (iter 90) ✅
 
 Each of the 5 greenfield plugin repos now has a top-level `## Inbound email` section in its README with framework-native config snippet (`Mail.InboundSecret`, `escalated.mail.inbound-secret`, `email.Config{InboundSecret}`, `email_inbound_secret`, `escalated.inbound_secret`), the webhook URL, and a link out to docs.escalated.dev. Each READMEs PR is stacked on its framework's `feat/inbound-email-orchestration` so the README only claims features that exist on that branch.
