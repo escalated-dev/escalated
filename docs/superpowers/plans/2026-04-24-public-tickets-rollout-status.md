@@ -96,6 +96,22 @@ Each framework with an existing inbound adapter now has a 5-priority resolution 
 
 Forged signatures are rejected in every framework — verification uses a timing-safe comparison (`hash_equals` / `hmac.compare_digest` / `crypto.timingSafeEqual` / `CryptographicOperations.FixedTimeEquals` / manual secure_compare depending on language).
 
+#### Message-ID format migration note (for host upgrade guides)
+
+The wire-up PRs change the outbound Message-ID format in five frameworks to match the canonical NestJS reference. Existing outbound emails already sent stay in the old format (can't be rewritten), but **inbound replies to those pre-migration emails will fall through to the legacy `InboundEmail.message_id` lookup (strategy #5) instead of the canonical parse (#1/#2)**. This still works because the legacy InboundEmail table stores whatever Message-IDs we sent, but it's slower than the parse path.
+
+| Framework | Before | After | Breaks inbound routing? |
+|---|---|---|---|
+| escalated-wordpress | `reply-{id}-ticket-{ref}@{domain}` | `<ticket-{id}@{domain}>` | No (legacy lookup still matches) |
+| escalated-django | `<ticket-{pk}-{ref}@{domain}>` | `<ticket-{pk}@{domain}>` | No (legacy lookup still matches) |
+| escalated-symfony | `escalated.{ref}@{domain}` | `<ticket-{id}@{domain}>` | No (legacy lookup still matches) |
+| escalated-phoenix | `<escalated-{ref}@{domain}>` | `<ticket-{id}@{domain}>` | No (legacy lookup still matches) |
+| escalated-adonis | `<escalated-{unique}-{sha256:16}@{domain}>` | `<ticket-{id}@{domain}>` | **No longer identifiable**, falls through to legacy lookup |
+| escalated-dotnet | `<{ref}@escalated>` | `<ticket-{id}@{domain}>` | No (legacy lookup still matches) |
+
+Laravel's format was `<ticket-{id}@{domain}>` already — no migration needed.
+Rails, Go and Spring had no outbound-email-sending today; their format is canonical from day one.
+
 #### Still open
 
 - **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
