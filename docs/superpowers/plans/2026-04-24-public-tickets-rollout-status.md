@@ -329,6 +329,21 @@ Each greenfield framework now ships a parser-equivalence test that asserts Postm
 
 Same 2-case pattern per port: `NormalizesToSameMessage` (from/to/subject/inReplyTo/references) + `BodyExtractionMatches` (bodyText including SES's base64 MIME path).
 
+### NestJS reference catch-up (iter 118-121) ✅
+
+The NestJS reference started the rollout with only a Postmark parser — the ports had ended up with more features than the canonical. This wave closed the gap: Mailgun + SES parsers + AttachmentDownloader + parser-equivalence test, so every framework in the ecosystem now agrees on what an inbound email means.
+
+| PR | What |
+|---|---|
+| [escalated-nestjs#19](https://github.com/escalated-dev/escalated-nestjs/pull/19) | `MailgunInboundParser` + controller provider dispatch (`options.inbound.provider`) |
+| [escalated-nestjs#20](https://github.com/escalated-dev/escalated-nestjs/pull/20) | `SESInboundParser` + `SESSubscriptionConfirmationError` sentinel |
+| [escalated-nestjs#21](https://github.com/escalated-dev/escalated-nestjs/pull/21) | `AttachmentDownloader` + `LocalFileAttachmentStorage` reference |
+| [escalated-nestjs#22](https://github.com/escalated-dev/escalated-nestjs/pull/22) | Parser-equivalence test across all three providers |
+
+NestJS test suite grew from 232 → 269 passing tests across these four PRs. Zero-CI-failures throughout; all four PRs rely on the provider-dispatch pattern established in #19.
+
+**End state:** 1 reference + 5 greenfield framework ports + 6 legacy host-app frameworks now share the same inbound architecture — 3 providers (Postmark/Mailgun/SES), same message normalization, same attachment persistence contract, same equivalence proof. Adding a fourth provider is pure pattern application.
+
 ### Public docs for greenfield frameworks (iter 89) ✅
 
 `escalated-dev/escalated-docs#6` adds inbound-email setup pages for all 5 greenfield framework ports and rewrites `_intro.md` to describe the unified-webhook / shared-secret / three-way resolution-chain architecture. These were the first entries under `sections/inbound-email/` for .NET, Spring, Go, Phoenix, and Symfony (the legacy host-app frameworks already had pages). Each page includes a ready-to-paste curl test recipe and documents the new response shape (`outcome`, `ticket_id`, `reply_id`, `pending_attachment_downloads`).
