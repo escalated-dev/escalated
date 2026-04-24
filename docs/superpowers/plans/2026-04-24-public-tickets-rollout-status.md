@@ -131,12 +131,23 @@ Follow-up PRs per framework (greenfield only):
 - Framework-native webhook controller (`POST /escalated/webhook/email/inbound`)
 - Full orchestration service (parser → router → reply/ticket create + attachment handling)
 
+#### Provider parsers + webhook controllers — **all 5 greenfield frameworks drafted** ✅
+
+Each of the 5 greenfield frameworks (dotnet / spring / go / phoenix / symfony) now has the full inbound stack in stacked PRs: Postmark + Mailgun + SES parsers, `InboundEmailController`, orchestration service (`InboundEmailService` that runs the parse → router → reply/ticket-create pipeline), `AttachmentDownloader`, HTTP-level controller tests, and parser equivalence tests.
+
+| Framework | Postmark + controller | Mailgun | Orchestration | Controller tests | AttachmentDownloader | SES | Parser equivalence |
+|---|---|---|---|---|---|---|---|
+| escalated-dotnet | [#24](https://github.com/escalated-dev/escalated-dotnet/pull/24) | [#25](https://github.com/escalated-dev/escalated-dotnet/pull/25) | [#26](https://github.com/escalated-dev/escalated-dotnet/pull/26) | [#28](https://github.com/escalated-dev/escalated-dotnet/pull/28) | [#29](https://github.com/escalated-dev/escalated-dotnet/pull/29) | [#30](https://github.com/escalated-dev/escalated-dotnet/pull/30) | [#31](https://github.com/escalated-dev/escalated-dotnet/pull/31) |
+| escalated-spring | [#27](https://github.com/escalated-dev/escalated-spring/pull/27) | [#28](https://github.com/escalated-dev/escalated-spring/pull/28) | [#29](https://github.com/escalated-dev/escalated-spring/pull/29) | [#31](https://github.com/escalated-dev/escalated-spring/pull/31) | [#32](https://github.com/escalated-dev/escalated-spring/pull/32) | [#33](https://github.com/escalated-dev/escalated-spring/pull/33) | [#34](https://github.com/escalated-dev/escalated-spring/pull/34) |
+| escalated-go | [#30](https://github.com/escalated-dev/escalated-go/pull/30) | [#31](https://github.com/escalated-dev/escalated-go/pull/31) | [#32](https://github.com/escalated-dev/escalated-go/pull/32) | — (inline in handler PR) | [#35](https://github.com/escalated-dev/escalated-go/pull/35) | [#36](https://github.com/escalated-dev/escalated-go/pull/36) | [#37](https://github.com/escalated-dev/escalated-go/pull/37) |
+| escalated-phoenix | [#36](https://github.com/escalated-dev/escalated-phoenix/pull/36) | [#37](https://github.com/escalated-dev/escalated-phoenix/pull/37) | [#38](https://github.com/escalated-dev/escalated-phoenix/pull/38) | [#40](https://github.com/escalated-dev/escalated-phoenix/pull/40) | [#41](https://github.com/escalated-dev/escalated-phoenix/pull/41) | [#42](https://github.com/escalated-dev/escalated-phoenix/pull/42) | [#43](https://github.com/escalated-dev/escalated-phoenix/pull/43) |
+| escalated-symfony | [#31](https://github.com/escalated-dev/escalated-symfony/pull/31) | [#32](https://github.com/escalated-dev/escalated-symfony/pull/32) | [#33](https://github.com/escalated-dev/escalated-symfony/pull/33) | [#36](https://github.com/escalated-dev/escalated-symfony/pull/36) | [#37](https://github.com/escalated-dev/escalated-symfony/pull/37) | [#38](https://github.com/escalated-dev/escalated-symfony/pull/38) | [#39](https://github.com/escalated-dev/escalated-symfony/pull/39) |
+
+All 7 × 5 = **35 PRs** in stacked order; CI won't trigger on stacked branches until bases merge and they rebase. NestJS reference is the baseline for signature verification + parser semantics in every port.
+
 #### Still open
 
-- **Per-framework webhook controllers + provider parsers** — follow-ups for the 5 greenfield frameworks. Each ~100-200 LOC + provider-specific signature verification. Laravel/Rails/Django/Adonis/WordPress already have these.
-- **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
-
-NestJS is the reference for these follow-ups.
+- **Inline guest_* column deprecation** across all frameworks, after a dual-read cycle lands in production. Tracked as future work; not blocking the rollout.
 
 
 ## Summary table
