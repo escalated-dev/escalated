@@ -376,3 +376,64 @@ Each of the 5 greenfield plugin repos now has a top-level `## Inbound email` sec
 | escalated-go | [#33](https://github.com/escalated-dev/escalated-go/pull/33) |
 | escalated-phoenix | [#39](https://github.com/escalated-dev/escalated-phoenix/pull/39) |
 | escalated-symfony | [#34](https://github.com/escalated-dev/escalated-symfony/pull/34) |
+
+### Deferred workflow actions (iter 122-130) ✅
+
+The NestJS reference and the four drafted workflow-stack frameworks (Spring, WordPress, .NET, Phoenix) originally shipped only the 8-action catalog (`change_priority`, `change_status`, `add_tag`, `remove_tag`, `set_department`, `assign_agent`, `add_note`, `insert_canned_reply`). The plan's Phase 3 called for four more actions that depend on external infrastructure (a webhook table, a followers table, an agent-pool strategy, a deferred-job queue). These landed as four stacked PRs on the NestJS feature branch plus a delay-action port to Spring / Phoenix / WordPress.
+
+| Framework | send_webhook | add_follower | assign_round_robin | delay |
+|---|---|---|---|---|
+| escalated-nestjs | [#23](https://github.com/escalated-dev/escalated-nestjs/pull/23) | [#25](https://github.com/escalated-dev/escalated-nestjs/pull/25) | [#24](https://github.com/escalated-dev/escalated-nestjs/pull/24) | [#26](https://github.com/escalated-dev/escalated-nestjs/pull/26) |
+| escalated-spring | (pre-existing) | (pre-existing) | (pre-existing) | [#35](https://github.com/escalated-dev/escalated-spring/pull/35) |
+| escalated-phoenix | (pre-existing) | (pre-existing) | (pre-existing) | [#44](https://github.com/escalated-dev/escalated-phoenix/pull/44) |
+| escalated-wordpress | (pre-existing) | (pre-existing) | (pre-existing) | [#35](https://github.com/escalated-dev/escalated-wordpress/pull/35) |
+
+**Legacy framework stacks already had `delay`** (Laravel/Rails/Django/Adonis/.NET/Symfony/Go) — the 4 new ports only covered the frameworks where the workflow stack was freshly landed in iter 42-50.
+
+The delay action's queue implementation diverges intentionally across frameworks:
+- NestJS + Spring + WordPress — *one row with a JSON list of remaining actions*, seconds granularity
+- Phoenix + Laravel + Django — *one row per remaining action*, minutes granularity
+Each port picked the convention its ecosystem already used; unifying wasn't scoped.
+
+### Greenfield Task 6.3 — runtime guest-policy settings (iter 131+) ✅
+
+Task 6.3 was the last remaining gap from the original plan. The shared `Admin/Settings/PublicTickets.vue` page landed in iter 92-95 for the six legacy host adapters (Laravel / Rails / Django / Adonis / WordPress / Filament) and for Symfony (which needed the foundation built first at [#35](https://github.com/escalated-dev/escalated-symfony/pull/35)). The four greenfield adapters were deferred because each uses a JSON API surface rather than the Inertia/Vue renderer the shared page targets.
+
+| Framework | Settings PR | Prior settings infra? |
+|---|---|---|
+| escalated-dotnet | [#32](https://github.com/escalated-dev/escalated-dotnet/pull/32) | Yes — `SettingsService` + `EscalatedSettings` pre-existed |
+| escalated-go | [#38](https://github.com/escalated-dev/escalated-go/pull/38) | No — built `Store.GetSetting/SetSetting` + new `escalated_settings` table |
+| escalated-spring | [#36](https://github.com/escalated-dev/escalated-spring/pull/36) | Yes — `SettingsService` + JPA entity pre-existed |
+| escalated-phoenix | [#45](https://github.com/escalated-dev/escalated-phoenix/pull/45) | No — built `SettingsService` + Ecto schema + migration |
+
+**Shared semantic surface across all four ports** (plus the legacy adapters + Symfony):
+- 3 keys: `guest_policy_mode` (unassigned | guest_user | prompt_signup) / `guest_policy_user_id` / `guest_policy_signup_url_template`
+- Unknown `guest_policy_mode` coerces to `unassigned` (never 500s)
+- Mode switch clears the fields that don't apply to the new mode
+- Zero / negative / non-numeric user_id surfaces as JSON null on GET
+- Signup URL templates trimmed + truncated to 500 chars
+- snake_case wire format matches what the shared Vue page sends (via `@JsonPropertyName`, `@JsonProperty`, native Go struct tags, or Elixir map keys as appropriate)
+
+**Task 6.3 is now shipped across the entire ecosystem** — 10 host-framework plugins + the shared frontend.
+
+### Public-facing docs (iter 131+) ✅
+
+Two new docs pages landed in `escalated-dev/escalated-docs`:
+
+| Page | PR | Covers |
+|---|---|---|
+| `sections/workflows.md` | [#9](https://github.com/escalated-dev/escalated-docs/pull/9) | Full Workflow feature — 14 trigger events, 12 actions including `delay`, condition catalog, template interpolation, decision table vs. Automations |
+| `sections/public-tickets.md` | [#10](https://github.com/escalated-dev/escalated-docs/pull/10) | Guest-policy mode decision table, admin settings page behavior + runtime API, widget submission, 5-priority inbound routing chain, `promoteToUser` flow, Contact-pattern data model |
+
+### End state
+
+At this checkpoint, every task in the original plan has either shipped or been explicitly deferred as a pre-existing infrastructure concern:
+
+- **Task 3.9 `delay`** — shipped across all 11 frameworks (1 reference + 10 plugins)
+- **Task 6.3 runtime settings** — shipped across all 10 host-framework plugins
+- **Task 9.4 final acceptance test** — manual, requires a fully-wired staging environment (not automatable)
+
+Remaining smaller follow-ups for future iterations:
+- Per-framework CHANGELOG entries for frameworks that don't yet have them (NestJS + WordPress done; Spring / Phoenix / Go / .NET have no CHANGELOG.md yet)
+- The 1-line Phoenix `WorkflowRunner` update to pass `workflow_id` to `execute/3` once `feat/workflow-runner` + `feat/workflow-delay` both merge on master
+- WordPress plugin-upgrade-path gap — existing installs need reactivation to pick up new tables; would benefit from a `plugins_loaded` version check that triggers `Activator::activate()` on version mismatch (pre-existing infrastructure gap, not plan-scoped)
