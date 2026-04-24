@@ -2,9 +2,7 @@
 
 > **For agentic workers (Ralph Loop, etc.):** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax. **Never skip the TDD red step (write failing test → confirm failure → implement).**
 
-**Goal:** Ship an end-to-end public (anonymous) ticketing system: a guest can submit a ticket via a public form *or* inbound email, the ticket is routed automatically by admin-configured rules, the guest receives outbound confirmation/reply emails that thread correctly, and admin has a configurable policy for what identity the guest gets (guest user / unassigned / invited to create an account). Additionally, ship a Macros admin UI so the existing `Macro` backend has a first-class home in the admin surface.
-
-**Note on Workflows / Automations / Macros:** earlier drafts of this plan framed the work as "repurpose the dead Automations UI into Macros." That framing was wrong — see [`escalated-developer-context/decisions/2026-04-24-admin-agent-tool-split.md`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md). The locked taxonomy: **Workflows** (admin, event-driven), **Automations** (admin, time-based), **Macros** (agent, manual). All three co-exist permanently; the Automations folder + sidebar link stay. Macros gets its own admin UI at `Admin/Macros/`.
+**Goal:** Ship an end-to-end public (anonymous) ticketing system: a guest can submit a ticket via a public form *or* inbound email, the ticket is routed automatically by admin-configured rules, the guest receives outbound confirmation/reply emails that thread correctly, and admin has a configurable policy for what identity the guest gets (guest user / unassigned / invited to create an account). Additionally, resolve the Workflows-vs-Automations split: Workflows remain the admin automation engine; the Automations UI is repurposed into an agent-facing Macros system.
 
 **Architecture:**
 - **Backend:** NestJS v10 module in `C:\Users\work\escalated-nestjs` (TypeORM, EventEmitter2, Jest).
@@ -12,10 +10,7 @@
 - **Email:** `@nestjs-modules/mailer` + `nodemailer` for outbound; a single webhook endpoint with a pluggable parser interface for inbound (Postmark first, Mailgun/SendGrid stub adapters).
 - **Extension model:** Pure event listeners (`@OnEvent`) — no new plugin runtime. Mirrors the existing WebhookService / EscalatedGateway patterns.
 - **Data model additions:** `Contact` entity (new, first-class), `Macro` entity (new), Workflow action executor (new), Contact-aware ticket creation. `requesterId: number` is preserved on `Ticket` for host-app user mapping; a nullable `contactId: number | null` is added for guest/contact-based tickets.
-- **Three-surface split (locked by ADR 2026-04-24-admin-agent-tool-split):**
-  - **Workflows** — admin, event-driven (`ticket.created`, `reply.created`, …). Existing entity + service.
-  - **Automations** — admin, time-based (cron scans `hours_since_*` conditions). Backend exists in 7/11 hosts; NestJS port is a follow-up. Frontend folder + sidebar link stay.
-  - **Macros** — agent, manual one-click action bundles. Existing entity + service in NestJS. Phase 7 ships its admin UI at `Admin/Macros/` (separate from `Admin/Automations/`).
+- **Two-audience split (final):** **Workflows** = admin-managed, automatic, runs on events. **Macros** = agent-applied, manual one-click action bundles (replaces the dead Automations UI).
 
 **Tech stack:** TypeScript 5, NestJS 10, TypeORM 0.3, EventEmitter2, Jest 29 + ts-jest, Vue 3, Inertia, Vitest 2, nodemailer, @nestjs-modules/mailer.
 
@@ -25,16 +20,10 @@
 
 ---
 
-## Audit corrections (discovered during execution)
-
-- **2026-04-24:** Macro entity, service (CRUD + execute), admin & agent controllers already exist in `escalated-nestjs`. Action set: `set_status`, `set_priority`, `set_department`, `assign`, `add_reply`, `add_note`. Phase 7 is therefore reduced to: (a) add `insert_canned_reply` with Handlebars-style interpolation, (b) add a frontend Macros admin UI at `Admin/Macros/` that points at the existing backend, (c) add a MacroMenu component on the agent ticket detail. See Phase 7 notes below.
-
-- **2026-04-24 (later):** Earlier in this plan an audit recommended deleting the `Admin/Automations/` frontend folder as "dead UI." That audit was wrong — Automations has a working time-based backend in 7 of 11 host plugins (Laravel, Rails, Django, Adonis, WordPress, .NET, Spring) and is a permanent admin surface. See ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md) for the canonical taxonomy. The deletion commit (`0b3cc25`) has been reverted on this branch. Macros gets its own folder at `Admin/Macros/` independent of Automations.
-
 ## Product decisions locked before coding starts
 
-1. **Workflows, Automations, and Macros are three separate surfaces — all permanent.** Locked by ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md). Workflows = admin event-driven. Automations = admin time-based (cron). Macros = agent manual. None of them subsume each other; none are being removed or renamed.
-2. **Phase 7 of this plan ships only the Macros admin UI.** New folder `src/pages/Admin/Macros/`. The pre-existing `src/pages/Admin/Automations/` folder + sidebar link stay untouched. NestJS port of the Automation backend is tracked separately (next reference work after this plan completes).
+1. **Workflows stay as the admin automation engine.** The existing `Workflow` entity, service, Builder.vue, and Logs.vue are canonical.
+2. **Automations frontend folder is renamed/repurposed to Macros.** It currently has no backend, so there is no data migration. No user-facing breaking change (per user confirmation: "won't break existing builds").
 3. **Contact is a first-class entity.** A guest ticket always has a `Contact` record (`email`, optional `name`, `userId` nullable). Repeat guests are deduped by email. `Ticket.requesterId` remains for host-app user references; `Ticket.contactId` is added for contacts.
 4. **Admin-configurable guest identity policy** with three modes (default = `unassigned`):
    - `unassigned` — no host-app user is linked. `ticket.requesterId = 0`. Contact carries email/name.
@@ -117,8 +106,8 @@
 | `src/widget/EscalatedWidget.vue` | Modify: collect `email` and `name`, pass in payload. |
 | `src/pages/Guest/Create.vue` | Modify: drop `requesterId` dependency; send email/name. |
 | `src/pages/Admin/Macros/Index.vue` | New (copy structure from existing Workflows Index). |
-| `src/pages/Admin/Macros/Form.vue` | New (independent from Automations — Macros is a separate feature). |
-| `src/pages/Admin/Automations/` | **Untouched.** Stays as-is; serves the time-based admin engine that exists in 7/11 host plugins. |
+| `src/pages/Admin/Macros/Form.vue` | New (evolves from dead `Admin/Automations/Form.vue`). |
+| `src/pages/Admin/Automations/` | Delete (dead UI; confirmed by user). |
 | `src/pages/Admin/Settings/PublicTickets.vue` | New: Guest policy + inbound email config. |
 | `src/pages/Agent/Tickets/MacroMenu.vue` | New: dropdown on ticket detail. |
 
@@ -135,7 +124,7 @@ The plan is broken into nine phases. Each phase ships something useful on its ow
 - **Phase 4 — Outbound email (transactional).**
 - **Phase 5 — Inbound email ingress (new ticket + reply threading).**
 - **Phase 6 — Guest policy + admin settings UI.**
-- **Phase 7 — Macros admin UI** (independent of Automations).
+- **Phase 7 — Macros (repurposed from Automations).**
 - **Phase 8 — Frontend wiring (widget + Guest page).**
 - **Phase 9 — Cleanup + docs.**
 
@@ -151,23 +140,28 @@ Each phase has a **definition of done** at the top and a checklist of TDD tasks.
 - `EscalatedModuleOptions` is extended with typed `mail`, `inbound`, `guestPolicy`, `guestUserId` fields but no behavior yet.
 - `npm test` still passes with no regressions.
 
-### Task 0.1 — Install mail dependencies — COMPLETED d401a83
+### Task 0.1 — Install mail dependencies
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\package.json`
 - Modify: `C:\Users\work\escalated-nestjs\package-lock.json` (automatic)
 
-- [x] **Step 1:** From backend root, run:
+- [ ] **Step 1:** From backend root, run:
   ```bash
   npm install @nestjs-modules/mailer nodemailer handlebars
   npm install --save-dev @types/nodemailer
   ```
-- [x] **Step 2:** Verify `package.json` has the four dependencies pinned.
-- [x] **Step 3:** Run `npm test` — expect unchanged pass count.
-- [x] **Step 4:** Run `npm run lint`. Fix any issues.
-- [x] **Step 5:** Commit (done in commit d401a83 on branch feat/public-ticket-system)
+- [ ] **Step 2:** Verify `package.json` has the four dependencies pinned.
+- [ ] **Step 3:** Run `npm test` — expect unchanged pass count.
+- [ ] **Step 4:** Run `npm run lint`. Fix any issues.
+- [ ] **Step 5:** Commit:
+  ```bash
+  git add package.json package-lock.json
+  git commit -m "chore(email): install mailer + nodemailer dependencies"
+  git push
+  ```
 
-### Task 0.2 — Extend `EscalatedModuleOptions` with mail/inbound/guest-policy fields (types only) — COMPLETED 4ff1310
+### Task 0.2 — Extend `EscalatedModuleOptions` with mail/inbound/guest-policy fields (types only)
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\config\escalated.config.ts`
@@ -245,7 +239,7 @@ Each phase has a **definition of done** at the top and a checklist of TDD tasks.
   git push
   ```
 
-### Task 0.3 — Create test factories — COMPLETED (see commit on feat/public-ticket-system)
+### Task 0.3 — Create test factories
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\test\factories\index.ts`
@@ -344,7 +338,7 @@ Contact and Macro factories are added in their respective phases.
 - `Ticket` has nullable `contactId` with relation; existing `requesterId` untouched.
 - All new code passes lint + tests.
 
-### Task 1.1 — `Contact` entity — COMPLETED eab03f2
+### Task 1.1 — `Contact` entity
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\entities\contact.entity.ts`
@@ -420,7 +414,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.2 — Register `Contact` in EscalatedModule — COMPLETED 7258712
+### Task 1.2 — Register `Contact` in EscalatedModule
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\escalated.module.ts`
@@ -455,7 +449,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.3 — Add `contactId` to `Ticket` — COMPLETED 56e75fe
+### Task 1.3 — Add `contactId` to `Ticket`
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\entities\ticket.entity.ts`
@@ -494,7 +488,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.4 — `ContactService.findOrCreateByEmail` — COMPLETED 3574928
+### Task 1.4 — `ContactService.findOrCreateByEmail`
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\contact.service.ts`
@@ -668,7 +662,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.5 — `ContactService.promoteToUser` (account creation hook) — COMPLETED 3574928 (same commit as 1.4)
+### Task 1.5 — `ContactService.promoteToUser` (account creation hook)
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\services\contact.service.ts`
@@ -754,7 +748,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - Created ticket has `contactId` set and, according to guest policy, either `requesterId = 0`, `requesterId = guestUserId`, or `requesterId = 0` (for `prompt_signup`).
 - A per-email rate limit (10/hour) is enforced.
 
-### Task 2.1 — `CreatePublicTicketDto` with validation — COMPLETED 03c2bd8
+### Task 2.1 — `CreatePublicTicketDto` with validation
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\dto\create-public-ticket.dto.ts`
@@ -853,7 +847,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 2.2 — Widget controller accepts DTO + resolves Contact — COMPLETED df06c01
+### Task 2.2 — Widget controller accepts DTO + resolves Contact
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\controllers\widget\widget.controller.ts`
@@ -963,7 +957,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 4:** Update `widget.controller.spec.ts`'s `beforeEach` to supply the ContactService mock. Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 2.3 — `TicketService.create` writes `contactId` — COMPLETED 44b1330
+### Task 2.3 — `TicketService.create` writes `contactId`
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\services\ticket.service.ts`
@@ -993,7 +987,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 2.4 — Apply Guest Policy in widget controller — COMPLETED df06c01 (same as 2.2)
+### Task 2.4 — Apply Guest Policy in widget controller
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\controllers\widget\widget.controller.ts`
@@ -1042,7 +1036,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Task 2.5 — Per-email rate limit for public submission — COMPLETED (latest)
+### Task 2.5 — Per-email rate limit for public submission
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\controllers\widget\widget.controller.ts`
@@ -1067,7 +1061,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - Round-robin assignment is implemented under a new action `assign_round_robin` (team id or null=global).
 - Existing `WorkflowEngineService` is unchanged (pure condition evaluator).
 
-### Task 3.1 — `WorkflowExecutorService` skeleton with action dispatch — COMPLETED (see Phase 3 series)
+### Task 3.1 — `WorkflowExecutorService` skeleton with action dispatch
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\workflow-executor.service.ts`
@@ -1123,11 +1117,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Tasks 3.2 – 3.6 — Implement each action — COMPLETED (same commit as 3.1)
-
-Actions shipped: change_priority, add_tag, remove_tag, change_status, set_department, assign_agent, add_note.
-
-### Tasks 3.7 – 3.10 — DEFERRED to a follow-up phase
+### Tasks 3.2 – 3.10 — Implement each action (one per task)
 
 Each of these follows the same TDD pattern. **Do not batch.** Each gets its own red spec, minimal impl, commit.
 
@@ -1143,7 +1133,7 @@ Each of these follows the same TDD pattern. **Do not batch.** Each gets its own 
 
 Each task's spec covers: success path, no-op path (e.g. status slug missing), and failure is logged-but-not-thrown (for resilience; the WorkflowLog captures the failure).
 
-### Task 3.11 — `WorkflowListener` — COMPLETED (routing goes live)
+### Task 3.11 — `WorkflowListener`
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\listeners\workflow.listener.ts`
@@ -1199,7 +1189,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Task 3.12 — Integration smoke test (Workflow fires on real `TicketService.create`) — COMPLETED
+### Task 3.12 — Integration smoke test (Workflow fires on real `TicketService.create`)
 
 **Files:**
 - Test: `C:\Users\work\escalated-nestjs\test\integration\ticket-create-triggers-workflow.spec.ts`
@@ -1221,7 +1211,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - Signed `Reply-To` address is used so inbound can resolve the ticket even when threading headers are stripped.
 - Email dispatch failures are logged and do not throw out of the listener.
 
-### Task 4.1 — `MailerModule` registration — COMPLETED
+### Task 4.1 — `MailerModule` registration
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\escalated.module.ts`
@@ -1232,7 +1222,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.2 — `message-id.ts` utility — COMPLETED
+### Task 4.2 — `message-id.ts` utility
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\email\message-id.ts`
@@ -1244,7 +1234,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.3 — `EmailService.send` — COMPLETED
+### Task 4.3 — `EmailService.send`
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\email\email.service.ts`
@@ -1257,7 +1247,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.4 — Ticket created listener — COMPLETED
+### Task 4.4 — Ticket created listener
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\listeners\email.listener.ts`
@@ -1269,7 +1259,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.5 — Reply created listener (agent reply → guest) — COMPLETED
+### Task 4.5 — Reply created listener (agent reply → guest)
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\listeners\email.listener.ts`
@@ -1281,7 +1271,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.6 — Signup invite listener (prompt_signup mode) — COMPLETED
+### Task 4.6 — Signup invite listener (prompt_signup mode)
 
 **Files:**
 - Modify: `email.listener.ts` + spec.
@@ -1292,7 +1282,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.7 — Failures are swallowed with structured logs — COMPLETED
+### Task 4.7 — Failures are swallowed with structured logs
 
 **Files:**
 - Modify: `email.listener.ts` + spec.
@@ -1313,7 +1303,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - Routing priorities (per `Product decisions` §7) are implemented: In-Reply-To → X-Escalated-Ticket-Id → Reply-To token → subject reference → new ticket.
 - New-ticket-from-email uses `ContactService.findOrCreateByEmail` and `TicketService.create` exactly like the widget path, honoring guest policy.
 
-### Task 5.1 — `InboundEmail` audit entity — COMPLETED
+### Task 5.1 — `InboundEmail` audit entity
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\entities\inbound-email.entity.ts`
@@ -1325,7 +1315,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Register with TypeORM.
 - [ ] **Step 5:** Commit + push.
 
-### Task 5.2 — `InboundEmailParser` interface + Postmark parser — COMPLETED
+### Task 5.2 — `InboundEmailParser` interface + Postmark parser
 
 **Files:**
 - Create: `src/services/email/inbound-parser.interface.ts`
@@ -1339,7 +1329,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 5.3 — `InboundRouterService.route` — COMPLETED
+### Task 5.3 — `InboundRouterService.route`
 
 **Files:**
 - Create: `src/services/email/inbound-router.service.ts`
@@ -1357,7 +1347,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 5.4 — `InboundEmailController` + signature verification — COMPLETED
+### Task 5.4 — `InboundEmailController` + signature verification
 
 **Files:**
 - Create: `src/controllers/inbound-email.controller.ts`
@@ -1371,12 +1361,13 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Task 5.5 — Integration: end-to-end inbound email creates a ticket — COMPLETED (iter 91)
+### Task 5.5 — Integration: end-to-end inbound email creates a ticket
 
 **Files:**
 - Test: `test/integration/inbound-email-creates-ticket.spec.ts`
 
-- [x] **Spec** — POSTs a Postmark fixture to `InboundEmailController.receive`, wires `InboundRouterService` + `PostmarkInboundParser` + `ContactService` + `TicketService` with repo mocks at the edges, and asserts: (a) a Contact was created from `from`/`fromName`, (b) a Ticket was created with `channel: 'email'` and the Contact's id, (c) the `InboundEmail` audit row records `outcome: 'ticket_created'`, (d) `escalated.ticket.created` was emitted (the bus that WorkflowListener + EmailListener subscribe to). Plus a negative test that messages with no `from` are ignored but still audited.
+- [ ] **Step 1 (red):** Spec: POST fixture to the endpoint with a valid signature, assert a ticket exists, a contact exists, and `TicketCreatedEvent` was emitted (which will, in the real runtime, trigger workflows + outbound email).
+- [ ] **Step 2 - 5:** Red/green/commit as usual.
 
 ---
 
@@ -1388,13 +1379,13 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - The widget controller reads the policy from the settings store at request time (cached with a 30s TTL) rather than from module options — so admins can change it without redeploy.
 - The `guestPolicy` module option becomes the *default* only.
 
-### Task 6.1 — `EscalatedSetting` KV entity (if missing) — COMPLETED
+### Task 6.1 — `EscalatedSetting` KV entity (if missing)
 
-- [x] Pre-existing `EscalatedSetting` entity at `src/entities/escalated-settings.entity.ts` + `SettingsService` at `src/services/settings.service.ts` already cover `get<T>(key, default)` / `set(key, value)`. Reused directly — no new entity needed.
+- [ ] Check for an existing settings entity/service in `src/entities` and `src/services`. If one exists, use it. Otherwise create `escalated_settings` with `(key varchar pk, value simple-json, updatedAt timestamp)` and a `SettingsService` with `get<T>(key, default)` and `set(key, value)`.
 
-### Task 6.2 — Persist guest policy via settings — COMPLETED 2eee369
+### Task 6.2 — Persist guest policy via settings
 
-- [x] `src/controllers/widget/widget.controller.ts` reads `guest_policy` via `SettingsService.get('guest_policy', options.guestPolicy)` at request time (commit 2eee369). The generic `PUT /escalated/admin/settings` endpoint handles persistence via key/value pairs — dedicated per-feature setting controllers ship in the host adapters (Task 6.3 port PRs).
+- [ ] Admin controller `PUT /escalated/admin/settings/guest-policy` updates the stored policy. Widget controller reads the stored policy via `SettingsService.get('guestPolicy', options.guestPolicy)`.
 
 ### Task 6.3 — Frontend settings page
 
@@ -1405,29 +1396,27 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 
 ---
 
-# Phase 7 — Macros admin UI
-
-**Note:** earlier drafts framed this phase as "repurposing the dead Automations UI." That framing was wrong (see ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md)). Macros is its own admin feature with its own folder; the Automations folder + sidebar link stay untouched.
+# Phase 7 — Macros (repurposed Automations)
 
 **Definition of done:**
 - `Macro` entity exists (`name`, `description`, `scope: 'personal' | 'shared'`, `ownerId: number | null`, `actions: JSON`).
 - `MacroService.list(agentId)`, `apply(macroId, ticketId, agentId)`.
 - Admin CRUD + agent-apply endpoints.
-- Frontend `Admin/Macros/Index.vue` (+ optional `Form.vue`) — independent of Automations.
-- Agent ticket detail gets a `MacroDropdown.vue` component with an "Apply Macro" dropdown.
-- `Admin/Automations/` folder + sidebar link **stay** (untouched by this phase).
+- Frontend `Admin/Macros/Index.vue` + `Admin/Macros/Form.vue` replace the old `Admin/Automations/` folder.
+- Agent ticket detail gets a `MacroMenu.vue` component with a "Apply Macro" dropdown.
+- Old `Admin/Automations/` folder is deleted.
 
-### Tasks 7.1 – 7.9 — Mirror the Contact / Workflow phase pattern — COMPLETED
+### Tasks 7.1 – 7.9 — Mirror the Contact / Workflow phase pattern
 
-- [x] **7.1** — `src/entities/macro.entity.ts` ships via #17.
-- [x] **7.2** — Macro factory + TypeORM registration via #17.
-- [x] **7.3** — `src/services/macro.service.ts` with `create/update/delete/list` via #17.
-- [x] **7.4** — `MacroService.apply` reuses `WorkflowExecutorService.execute` (same action vocabulary + executor).
-- [x] **7.5** — Agent-safe action subset enforced; `assign_agent` admin-gated.
-- [x] **7.6** — `insert_canned_reply` action with variable interpolation (commit 0db04b1).
-- [x] **7.7** — `src/controllers/admin/macro.controller.ts` (admin CRUD, permission-guarded).
-- [x] **7.8** — `src/controllers/agent/macro.controller.ts` (agent apply endpoint).
-- [x] **7.9** — Frontend: `src/pages/Admin/Macros/Index.vue` ships inline form (modal pattern — no separate `Form.vue` needed). `src/components/MacroDropdown.vue` wired into both Admin and Agent ticket Show pages. The `Admin/Automations/` folder is **kept** (the prior plan called for deleting it, but that was reverted on 2026-04-24 — see ADR).
+- [ ] **7.1** — `Macro` entity + spec.
+- [ ] **7.2** — Macro factory + registered with TypeORM.
+- [ ] **7.3** — `MacroService.create/update/delete/list` + spec.
+- [ ] **7.4** — `MacroService.apply(macroId, ticketId, agentId)` reuses `WorkflowExecutorService.execute(ticket, macro.actions)` for DRY — macros and workflows share the same action vocabulary + executor.
+- [ ] **7.5** — Action set subset: macros support only agent-safe actions (`change_status`, `change_priority`, `add_tag`, `remove_tag`, `set_department`, `add_note`, `add_follower`, plus a new `insert_canned_reply`). `assign_agent` is allowed only for admins; the apply endpoint rejects for non-admins.
+- [ ] **7.6** — `insert_canned_reply` action: creates a draft Reply with the template body rendered against the ticket (using `WorkflowEngineService.interpolateVariables`).
+- [ ] **7.7** — Admin CRUD controller (`/escalated/admin/macros`), permission-guarded.
+- [ ] **7.8** — Agent controller (`/escalated/agent/macros`, `/escalated/agent/tickets/:id/macros/:macroId/apply`).
+- [ ] **7.9** — Frontend: copy `Admin/Workflows/Index.vue` to `Admin/Macros/Index.vue`, adapt. Create `Admin/Macros/Form.vue` modeled on the dead `Automations/Form.vue` (reuse its layout). Add `Agent/Tickets/MacroMenu.vue`. Delete `Admin/Automations/` folder.
 
 ---
 
@@ -1438,33 +1427,31 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] Update `src/widget/EscalatedWidget.vue` to render `email` (required) and `name` (optional) inputs above `subject`. Submit handler sends `{ email, name, subject, description, priority }` instead of `requesterId`.
 - [ ] Update Storybook story for the widget.
 
-### Task 8.2 — `Guest/Create.vue` matches new payload shape — COMPLETED
+### Task 8.2 — `Guest/Create.vue` matches new payload shape
 
-- [x] `src/pages/Guest/Create.vue` already collects `guest_name` / `guest_email` — the current payload is compatible with the Pattern B public-ticket shape. Host adapters keep the Inertia `route('escalated.guest.tickets.store')` endpoint and map the payload server-side, which is the non-breaking path chosen over rewriting the Vue submit.
+- [ ] Already collects `guest_name` / `guest_email`. Change the submit to POST to the new public endpoint structure (backend now accepts `email` field rather than the framework-routed Inertia endpoint). Alternatively: keep the Inertia endpoint on host frameworks but update the NestJS package so host adapters forward to our controller.
+- [ ] Verify interactively in Storybook.
 
-### Task 8.3 — Macro menu on ticket detail — COMPLETED
+### Task 8.3 — Macro menu on ticket detail
 
-- [x] `src/components/MacroDropdown.vue` (named `MacroDropdown` rather than `MacroMenu`) — dropdown wired into `Admin/Tickets/Show.vue` and `Agent/TicketShow.vue`. Calls the agent macros endpoint and posts to the apply endpoint on click.
+- [ ] `Agent/Tickets/MacroMenu.vue` — dropdown that calls `GET /escalated/agent/macros`, renders items, and on click POSTs `/escalated/agent/tickets/:id/macros/:macroId/apply`.
 
 ---
 
 # Phase 9 — Cleanup + docs
 
-### Task 9.1 — REVERTED — Automations UI was NOT actually dead
+### Task 9.1 — Delete dead Automations UI
 
-This task was originally "Delete dead Automations UI" and was marked complete by commit `0b3cc25` on this branch. **That deletion was reverted on 2026-04-24** by commit `d5fdb58`.
+- [ ] Delete `C:\Users\work\escalated\src\pages\Admin\Automations\` folder.
+- [ ] Search for stale imports/references. Remove.
 
-The original audit was wrong — it observed only the NestJS reference (which has never had an `AutomationRunner`) and missed that 7 of 11 host plugins (Laravel, Rails, Django, Adonis, WordPress, .NET, Spring) ship a working time-based Automation backend. Deleting the UI would strand that feature.
-
-The corrected taxonomy is locked in ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md). The NestJS Automation port is tracked as a follow-up to this plan.
-
-### Task 9.2 — README updates in both repos — COMPLETED (backend README + CHANGELOG)
+### Task 9.2 — README updates in both repos
 
 - [ ] `C:\Users\work\escalated-nestjs\README.md` — add a "Public ticket submission" section explaining the widget endpoint, inbound email setup, guest policy, and how Workflows fire on ticket.created.
 - [ ] `C:\Users\work\escalated\README.md` — add a link to the backend docs and note the widget's new payload shape.
 - [ ] `C:\Users\work\escalated-docs` repo (per user's memory): reflect the same.
 
-### Task 9.3 — Migration notes / changelog — COMPLETED (inside CHANGELOG Unreleased)
+### Task 9.3 — Migration notes / changelog
 
 - [ ] Update `CHANGELOG.md` in the NestJS repo with a breaking-change entry describing the widget payload change (email replaces requesterId).
 
@@ -1549,7 +1536,7 @@ git commit -m "docs: record public ticket acceptance test run" --allow-empty
 - `src/pages/Guest/Create.vue`
 
 **Frontend — deleted:**
-- _(none — the prior plan called for deleting `src/pages/Admin/Automations/` but that was reverted on 2026-04-24; see ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md))_
+- `src/pages/Admin/Automations/` (entire folder)
 
 ---
 
