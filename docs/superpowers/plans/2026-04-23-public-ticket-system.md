@@ -1424,10 +1424,10 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 
 # Phase 8 — Frontend wiring
 
-### Task 8.1 — Widget form collects email + name
+### Task 8.1 — Widget form collects email + name — COMPLETED (iter 97)
 
-- [ ] Update `src/widget/EscalatedWidget.vue` to render `email` (required) and `name` (optional) inputs above `subject`. Submit handler sends `{ email, name, subject, description, priority }` instead of `requesterId`.
-- [ ] Update Storybook story for the widget.
+- [x] `src/widget/EscalatedWidget.vue` collects `ticketForm = { name, email, subject, description, department_id }` and POSTs that shape to `/support/widget/tickets` — matching the Pattern B public-ticket payload (`{ email, name, subject, description, priority }`) instead of the pre-Contact `requesterId` shape.
+- [x] `src/widget/EscalatedWidget.stories.js` — Storybook story with 4 variants (Default / BrandedBlue / BrandedGreen / BottomLeft) covering the color + position props. Widget renders regardless of whether the `/support/widget/config` fetch succeeds — falls back to the `initialColor` / `initialPosition` props in Storybook.
 
 ### Task 8.2 — `Guest/Create.vue` matches new payload shape
 
