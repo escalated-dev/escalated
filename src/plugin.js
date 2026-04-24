@@ -42,9 +42,10 @@ export const EscalatedPlugin = {
 
 // 77 components in this package call the Ziggy `route()` helper (Laravel's
 // named-route URL generator). Laravel hosts ship Ziggy and get `window.route`
-// for free; other host frameworks (Rails, Django, NestJS, Rails, Phoenix, …)
-// don't, and the call sites would otherwise throw a bare ReferenceError deep
-// inside a component render with no hint at the cause.
+// for free; other host frameworks (Rails, Django, NestJS, Phoenix, Symfony,
+// Adonis, Go, .NET, Spring, WordPress) don't, and the call sites would
+// otherwise throw a bare ReferenceError deep inside a component render with
+// no hint at the cause.
 //
 // Install a stub that throws an informative error instead, so the host app's
 // first failing request points at the actual missing dependency. Laravel hosts
