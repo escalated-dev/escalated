@@ -66,13 +66,7 @@ Guest-policy admin UI for the Inertia host adapters (iter 92-95):
 
 - **escalated (shared Vue frontend):** [#32](https://github.com/escalated-dev/escalated/pull/32) `Admin/Settings/PublicTickets.vue` + discovery link. [#33](https://github.com/escalated-dev/escalated/pull/33) widget Storybook story.
 - **escalated-docs:** [#6](https://github.com/escalated-dev/escalated-docs/pull/6) greenfield framework pages + `_intro` rewrite. [#7](https://github.com/escalated-dev/escalated-docs/pull/7) AttachmentDownloader. [#8](https://github.com/escalated-dev/escalated-docs/pull/8) SES adapter. Merge in order: #6 → #7 → #8.
-- **escalated-nestjs (reference):** the reference has its own stack now that it's caught up to the ports on parsers + attachment downloader. Merge in order:
-  - [#17](https://github.com/escalated-dev/escalated-nestjs/pull/17) full public ticket system (9 phases) — base
-  - [#18](https://github.com/escalated-dev/escalated-nestjs/pull/18) E2E inbound integration test
-  - [#19](https://github.com/escalated-dev/escalated-nestjs/pull/19) MailgunInboundParser + provider dispatch
-  - [#20](https://github.com/escalated-dev/escalated-nestjs/pull/20) SESInboundParser
-  - [#21](https://github.com/escalated-dev/escalated-nestjs/pull/21) AttachmentDownloader + LocalFileAttachmentStorage
-  - [#22](https://github.com/escalated-dev/escalated-nestjs/pull/22) parser-equivalence test
+- **escalated-nestjs (reference):** [#17](https://github.com/escalated-dev/escalated-nestjs/pull/17) full public ticket system (9 phases). [#18](https://github.com/escalated-dev/escalated-nestjs/pull/18) E2E integration test.
 
 ## What to do when you pick this up
 
