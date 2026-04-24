@@ -3,6 +3,21 @@
 **Context:** the public ticket system is now shipped in `@escalated-dev/escalated-nestjs` (PR #17, all 9 phases complete). This document surveys the current state of the same capability across the other 11 host-framework implementations and notes the design divergence that has accumulated.
 
 **Survey date:** 2026-04-24
+**Last updated:** 2026-04-24 (after convergence PRs opened)
+
+## PRs in flight
+
+| Framework | PR | Scope |
+|---|---|---|
+| escalated-nestjs | [#17](https://github.com/escalated-dev/escalated-nestjs/pull/17) | Full feature (232 tests) — reference impl |
+| escalated-laravel | [#67](https://github.com/escalated-dev/escalated-laravel/pull/67) | Schema + model convergence |
+| escalated-rails | [#41](https://github.com/escalated-dev/escalated-rails/pull/41) | Schema + model convergence |
+| escalated-django | [#38](https://github.com/escalated-dev/escalated-django/pull/38) | Schema + model convergence |
+| escalated-adonis | [#47](https://github.com/escalated-dev/escalated-adonis/pull/47) | Schema + model convergence |
+| escalated-dotnet | [#17](https://github.com/escalated-dev/escalated-dotnet/pull/17) | Schema + model convergence |
+| escalated-wordpress | [#27](https://github.com/escalated-dev/escalated-wordpress/pull/27) | Schema + model convergence |
+| Symfony / Filament / Phoenix / Go / Spring | — | Greenfield, not yet started |
+
 
 ## Summary table
 
