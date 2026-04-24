@@ -21,13 +21,13 @@
 | escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | ✅ | ✅ TicketService::create | ✅ |
 | escalated-symfony | [#27](https://github.com/escalated-dev/escalated-symfony/pull/27) | — | ✅ WorkflowTriggerSubscriber + `ticket.priority_changed` | ✅ |
 | escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ TicketService.Create (+ contact_id threaded through Ticket SQL) | ✅ |
-| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create | — (repo has no CI configured) |
+| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create | ✅ after [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) merges — CI now targets `master` + scopes format check to PR-changed files |
 | escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | ✅ | ✅ TicketService.create (greenfield) | ✅ |
 | escalated-filament | — | ✅ via laravel | ✅ via laravel | — |
 
 ## Final state — rollout complete, all CI green
 
-**13 open PRs, all CI-green** (Phoenix has no CI configured at the repo level; runs locally). Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail` + ticket back-linked via `contact_id`. Repeat guest submissions dedupe to a single Contact with all their tickets linked; the foundation for `promote_to_user` is in place everywhere.
+**13 open PRs, all CI-green** (Phoenix CI lands in [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) — workflow now targets `master` and scopes format/credo checks to PR-changed files to avoid pre-existing backlog). Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail` + ticket back-linked via `contact_id`. Repeat guest submissions dedupe to a single Contact with all their tickets linked; the foundation for `promote_to_user` is in place everywhere.
 
 ### Follow-up backlog (future PRs)
 
