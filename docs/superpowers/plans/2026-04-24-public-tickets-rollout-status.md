@@ -259,4 +259,8 @@ Shared surface across all 5:
 - Provider-hosted attachments (Mailgun) pass through as `PendingAttachment` records; inline attachments don't (host app decides how to persist those).
 - Inbound-email replies are tagged with `authorType = "inbound_email"` (or the framework's equivalent author-class field) so consumers can distinguish them from agent/customer replies.
 
-Remaining follow-ups: attachment persistence workers for provider-hosted downloads, host-app deployment docs, and SES parser if demand warrants (third major provider).
+Remaining follow-ups: attachment persistence workers for provider-hosted downloads, and SES parser if demand warrants (third major provider).
+
+### Public docs for greenfield frameworks (iter 89) ✅
+
+`escalated-dev/escalated-docs#6` adds inbound-email setup pages for all 5 greenfield framework ports and rewrites `_intro.md` to describe the unified-webhook / shared-secret / three-way resolution-chain architecture. These were the first entries under `sections/inbound-email/` for .NET, Spring, Go, Phoenix, and Symfony (the legacy host-app frameworks already had pages). Each page includes a ready-to-paste curl test recipe and documents the new response shape (`outcome`, `ticket_id`, `reply_id`, `pending_attachment_downloads`).
