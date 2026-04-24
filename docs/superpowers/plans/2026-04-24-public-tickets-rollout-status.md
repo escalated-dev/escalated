@@ -443,6 +443,7 @@ Remaining smaller follow-ups for future iterations:
 - The 1-line Phoenix `WorkflowRunner` update to pass `workflow_id` to `execute/3` once `feat/workflow-runner` + `feat/workflow-delay` both merge on master
 - Phoenix `mix format` follow-up — running CI for the first time (via [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46)) surfaced pre-existing format drift across ~20 files; needs a local Elixir+Erlang toolchain to run `mix format` on the whole codebase
 - WordPress plugin-upgrade-path gap — existing installs need reactivation to pick up new tables; would benefit from a `plugins_loaded` version check that triggers `Activator::activate()` on version mismatch (pre-existing infrastructure gap, not plan-scoped)
+- **Ziggy `route()` helper dependency across 79 Vue components** — The shared frontend calls `route('escalated.admin.saved-views.update', id)` and similar in 79 files. That's Ziggy (Laravel) specifically. Laravel hosts get it for free, but other frameworks (Rails, Django, NestJS, etc.) need a `window.route()` shim that speaks Ziggy's API to generate the right URLs for their named route tables. Two files (`AttachmentList.vue`, `ChatBubble.vue`) have defensive `typeof window.route === 'function'` checks, but the other 77 callers don't. For each non-Laravel host framework, shipping a Ziggy-compatible shim is a prerequisite for the admin / agent UI to work at all — surfaced while sweeping the widget-path bug but much bigger scope to fix.
 
 ### Widget↔settings disconnection fix sweep — **all 6 affected frameworks shipped** ✅
 
