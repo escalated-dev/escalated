@@ -82,11 +82,24 @@ Stacked on each framework's MessageIdUtil PR. Every outbound ticket notification
 
 20 email-related PRs total (10 util + 10 wire-up). Merge order per framework: util → wire-up. CI on stacked wire-up branches won't trigger until the base merges and they rebase onto `main`/`master`.
 
+#### Inbound-webhook verification — **all 5 inbound-capable frameworks drafted (iter 64-67)** ✅
+
+Each framework with an existing inbound adapter now has a 5-priority resolution chain stacked on its email-service wire-up PR: In-Reply-To via `parseTicketIdFromMessageId` → References via `parseTicketIdFromMessageId` → signed Reply-To via `verifyReplyTo` → subject reference → legacy InboundEmail lookup.
+
+| Framework | Inbound verify PR | Base |
+|---|---|---|
+| escalated-laravel | [#70](https://github.com/escalated-dev/escalated-laravel/pull/70) | → #68 |
+| escalated-rails | [#45](https://github.com/escalated-dev/escalated-rails/pull/45) | → #44 |
+| escalated-django | [#42](https://github.com/escalated-dev/escalated-django/pull/42) | → #41 |
+| escalated-adonis | [#50](https://github.com/escalated-dev/escalated-adonis/pull/50) | → #49 |
+| escalated-wordpress | [#33](https://github.com/escalated-dev/escalated-wordpress/pull/33) | → #32 |
+
+Forged signatures are rejected in every framework — verification uses a timing-safe comparison (`hash_equals` / `hmac.compare_digest` / `crypto.timingSafeEqual` / `CryptographicOperations.FixedTimeEquals` / manual secure_compare depending on language).
+
 #### Still open
 
-- **Inbound-webhook wire-up** of `verifyReplyTo` across frameworks that have inbound adapters (Laravel, Rails, Django, Adonis, WordPress) — so the signed Reply-To actually drives ticket-identity routing. ~30-50 LOC per framework.
 - **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
-- **escalated-spring: inbound email webhook** (greenfield — no prior guest support meant no inbound impl either).
+- **Inbound email webhooks for frameworks without one yet** — Spring, .NET, Phoenix, Go, Symfony. Greenfield.
 
 NestJS is the reference for these follow-ups.
 
