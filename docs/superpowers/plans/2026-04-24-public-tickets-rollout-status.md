@@ -31,7 +31,23 @@
 
 ### Follow-up backlog (future PRs)
 
-- **WorkflowEngine executor port** for .NET, WordPress, Phoenix, Spring — each today has only the evaluator (conditions) but no action-dispatch. NestJS `workflow-executor.service.ts` + `workflow-runner.service.ts` + `workflow.listener.ts` are the reference. Estimate: 2-4 iterations per framework.
+#### Workflow stack — **all 4 frameworks drafted (iter 42-50)** ✅
+
+Each framework now has a 3-PR stack: executor → runner → listener. The chain is functionally complete end-to-end (event → listener → runner → engine+executor → WorkflowLog).
+
+| Framework | Executor | Runner | Listener |
+|---|---|---|---|
+| escalated-spring | [#21](https://github.com/escalated-dev/escalated-spring/pull/21) ✅ CI green | [#22](https://github.com/escalated-dev/escalated-spring/pull/22) | [#23](https://github.com/escalated-dev/escalated-spring/pull/23) |
+| escalated-wordpress | [#28](https://github.com/escalated-dev/escalated-wordpress/pull/28) ✅ CI green | [#29](https://github.com/escalated-dev/escalated-wordpress/pull/29) | [#30](https://github.com/escalated-dev/escalated-wordpress/pull/30) |
+| escalated-dotnet | [#18](https://github.com/escalated-dev/escalated-dotnet/pull/18) ✅ CI green | [#19](https://github.com/escalated-dev/escalated-dotnet/pull/19) | [#20](https://github.com/escalated-dev/escalated-dotnet/pull/20) |
+| escalated-phoenix | [#30](https://github.com/escalated-dev/escalated-phoenix/pull/30) | [#31](https://github.com/escalated-dev/escalated-phoenix/pull/31) | [#32](https://github.com/escalated-dev/escalated-phoenix/pull/32) |
+
+Stacked PRs: runners target `feat/workflow-executor`, listeners target `feat/workflow-runner`. CI on the stacked branches won't trigger until the base merges and they rebase onto `main`. Merge order per framework: executor → runner → listener.
+
+Phoenix listener is helper-based (per-event functions host calls directly) because Phoenix doesn't auto-emit ApplicationEvents. .NET uses an `IEscalatedEventDispatcher` decorator. Spring uses `@EventListener` on existing `ApplicationEvent`s. WordPress uses `add_action` on existing `escalated_*` hooks.
+
+#### Still open
+
 - **Outbound email Message-ID threading** across all frameworks except NestJS. NestJS `email/message-id.ts` + `email.service.ts` + `inbound-router.service.ts` are the reference.
 - **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
 - **escalated-spring: inbound email webhook** (greenfield — no prior guest support meant no inbound impl either).
