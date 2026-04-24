@@ -112,10 +112,29 @@ The wire-up PRs change the outbound Message-ID format in five frameworks to matc
 Laravel's format was `<ticket-{id}@{domain}>` already — no migration needed.
 Rails, Go and Spring had no outbound-email-sending today; their format is canonical from day one.
 
+#### Greenfield inbound routers — **all 5 frameworks without inbound adapters drafted (iter 71-75)** ✅
+
+Each of the 5 frameworks that previously had no inbound-email support now has the routing brain — `InboundMessage` DTO, `InboundEmailParser` interface, and `InboundRouter.resolveTicket` with the same 4-priority chain (In-Reply-To → References → signed Reply-To → subject).
+
+| Framework | Inbound router PR | Base |
+|---|---|---|
+| escalated-dotnet | [#23](https://github.com/escalated-dev/escalated-dotnet/pull/23) | → #21 |
+| escalated-spring | [#26](https://github.com/escalated-dev/escalated-spring/pull/26) | → #25 |
+| escalated-go | [#29](https://github.com/escalated-dev/escalated-go/pull/29) | → #28 |
+| escalated-phoenix | [#35](https://github.com/escalated-dev/escalated-phoenix/pull/35) | → #34 |
+| escalated-symfony | [#30](https://github.com/escalated-dev/escalated-symfony/pull/30) | → #29 |
+
+**Ticket-identity routing is now complete across all 10 host frameworks.** Every outbound email carries canonical `<ticket-{id}@{domain}>` Message-IDs + signed `reply+{id}.{hmac8}@{domain}` Reply-To, and every framework has the resolution chain to route inbound mail back to the right ticket.
+
+Follow-up PRs per framework (greenfield only):
+- Per-provider parser implementations (Postmark / Mailgun / SES)
+- Framework-native webhook controller (`POST /escalated/webhook/email/inbound`)
+- Full orchestration service (parser → router → reply/ticket create + attachment handling)
+
 #### Still open
 
+- **Per-framework webhook controllers + provider parsers** — follow-ups for the 5 greenfield frameworks. Each ~100-200 LOC + provider-specific signature verification. Laravel/Rails/Django/Adonis/WordPress already have these.
 - **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
-- **Inbound email webhooks for frameworks without one yet** — Spring, .NET, Phoenix, Go, Symfony. Greenfield.
 
 NestJS is the reference for these follow-ups.
 
