@@ -20,6 +20,10 @@
 
 ---
 
+## Audit corrections (discovered during execution)
+
+- **2026-04-24:** Macro entity, service (CRUD + execute), admin & agent controllers already exist in `escalated-nestjs`. Action set: `set_status`, `set_priority`, `set_department`, `assign`, `add_reply`, `add_note`. Phase 7 is therefore reduced to: (a) add `insert_canned_reply` with Handlebars-style interpolation, (b) delete the dead `Admin/Automations/` frontend, (c) add a frontend Macros admin UI that points at the existing backend, (d) add a MacroMenu component on the agent ticket detail. See Phase 7 notes below.
+
 ## Product decisions locked before coding starts
 
 1. **Workflows stay as the admin automation engine.** The existing `Workflow` entity, service, Builder.vue, and Logs.vue are canonical.
@@ -140,28 +144,23 @@ Each phase has a **definition of done** at the top and a checklist of TDD tasks.
 - `EscalatedModuleOptions` is extended with typed `mail`, `inbound`, `guestPolicy`, `guestUserId` fields but no behavior yet.
 - `npm test` still passes with no regressions.
 
-### Task 0.1 — Install mail dependencies
+### Task 0.1 — Install mail dependencies — COMPLETED d401a83
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\package.json`
 - Modify: `C:\Users\work\escalated-nestjs\package-lock.json` (automatic)
 
-- [ ] **Step 1:** From backend root, run:
+- [x] **Step 1:** From backend root, run:
   ```bash
   npm install @nestjs-modules/mailer nodemailer handlebars
   npm install --save-dev @types/nodemailer
   ```
-- [ ] **Step 2:** Verify `package.json` has the four dependencies pinned.
-- [ ] **Step 3:** Run `npm test` — expect unchanged pass count.
-- [ ] **Step 4:** Run `npm run lint`. Fix any issues.
-- [ ] **Step 5:** Commit:
-  ```bash
-  git add package.json package-lock.json
-  git commit -m "chore(email): install mailer + nodemailer dependencies"
-  git push
-  ```
+- [x] **Step 2:** Verify `package.json` has the four dependencies pinned.
+- [x] **Step 3:** Run `npm test` — expect unchanged pass count.
+- [x] **Step 4:** Run `npm run lint`. Fix any issues.
+- [x] **Step 5:** Commit (done in commit d401a83 on branch feat/public-ticket-system)
 
-### Task 0.2 — Extend `EscalatedModuleOptions` with mail/inbound/guest-policy fields (types only)
+### Task 0.2 — Extend `EscalatedModuleOptions` with mail/inbound/guest-policy fields (types only) — COMPLETED 4ff1310
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\config\escalated.config.ts`
@@ -239,7 +238,7 @@ Each phase has a **definition of done** at the top and a checklist of TDD tasks.
   git push
   ```
 
-### Task 0.3 — Create test factories
+### Task 0.3 — Create test factories — COMPLETED (see commit on feat/public-ticket-system)
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\test\factories\index.ts`
