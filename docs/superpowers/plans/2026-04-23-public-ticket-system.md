@@ -1389,12 +1389,12 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 
 - [ ] Admin controller `PUT /escalated/admin/settings/guest-policy` updates the stored policy. Widget controller reads the stored policy via `SettingsService.get('guestPolicy', options.guestPolicy)`.
 
-### Task 6.3 — Frontend settings page
+### Task 6.3 — Frontend settings page — COMPLETED (iter 92)
 
 **Files:**
 - Create: `C:\Users\work\escalated\src\pages\Admin\Settings\PublicTickets.vue`
 
-- [ ] Form with radio for mode, conditional `guestUserId` picker, save button that PUTs to the admin endpoint. Mirror the visual style of existing `Admin/Workflows/Builder.vue` for consistency.
+- [x] Radio picker for mode (unassigned / guest_user / prompt_signup), conditional `guest_policy_user_id` number input when mode is `guest_user`, conditional `guest_policy_signup_url_template` text input when mode is `prompt_signup`, Save button PUTs to `route('escalated.admin.settings.public-tickets.update')`. Visual style matches existing `Admin/Settings/CsatSettings.vue` (same border / accent / hover tokens).
 
 ---
 
