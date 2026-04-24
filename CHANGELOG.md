@@ -5,7 +5,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 ## [Unreleased]
 
 ### Fixed
-- Install a `window.route` safety stub in `EscalatedPlugin.install()` on hosts that haven't provided their own. Non-Laravel hosts previously saw bare `ReferenceError: route is not defined` errors when any of the 77 components that call Ziggy's `route(name, params)` helper rendered. The stub throws a descriptive error naming the missing dependency instead. Laravel hosts with Ziggy loaded are untouched.
+- Widget's API endpoint path is now configurable via `data-widget-path` (on the script tag) / `widgetPath` option (on `createEscalated`). Default stays `/support/widget` for backward compatibility. Unblocks NestJS hosts where the base path isn't `/support`.
+- `useChat()` threads the resolved `widgetPath` through all six chat API endpoints; Agent `TicketShow`, `ActiveChatsPanel`, `ChatQueue` read `page.props.escalated?.prefix` to build the right path on the agent side.
 
 ## [0.7.0] - 2026-04-05
 
