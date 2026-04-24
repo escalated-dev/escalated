@@ -295,7 +295,25 @@ Shared semantic surface across all 5:
 - Reference local-filesystem storage with timestamp-prefixed filenames so concurrent writes with the same original name don't collide.
 - Storage interface is pluggable — host apps with S3/GCS/Azure implement a thin adapter instead of using the local reference.
 
-Remaining follow-ups: SES parser if demand warrants (third major provider).
+### SES parser across greenfield frameworks (iter 108-111) ✅
+
+Third inbound provider alongside Postmark + Mailgun. AWS SES receipt rules publish to an SNS topic; host apps subscribe via HTTP and SNS POSTs the envelope to the unified `/...webhook/email/inbound?adapter=ses` endpoint.
+
+| Framework | PR | Tests | MIME lib |
+|---|---|---|---|
+| escalated-go | [#36](https://github.com/escalated-dev/escalated-go/pull/36) | 10 | stdlib (`net/mail`, `mime/multipart`, `mime/quotedprintable`) |
+| escalated-dotnet | [#30](https://github.com/escalated-dev/escalated-dotnet/pull/30) | 10 | hand-rolled `MimeMessageParser` (stdlib only) |
+| escalated-spring | [#33](https://github.com/escalated-dev/escalated-spring/pull/33) | 10 | `jakarta.mail` (already transitive via `spring-boot-starter-mail`) |
+| escalated-phoenix | [#42](https://github.com/escalated-dev/escalated-phoenix/pull/42) | 10 | hand-rolled splitter (no external dep) |
+| escalated-symfony | [#38](https://github.com/escalated-dev/escalated-symfony/pull/38) | 10 | hand-rolled splitter (no external dep) |
+
+Shared semantic surface:
+- `SubscriptionConfirmation` envelope → distinguishable sentinel (sentinel error in Go/Elixir, typed exception in .NET/Java/PHP) carrying `SubscribeURL` for out-of-band activation.
+- `Notification` envelope → extracts from/to/subject/messageId/inReplyTo/references from `commonHeaders`, falls back to raw `headers` array when a threading field is absent.
+- Best-effort MIME body decoding (plain, html, multipart/alternative, quoted-printable). Missing content leaves body empty; routing still works via threading metadata.
+- 10 unit tests per port covering every branch.
+
+**Rollout of the public ticket system ecosystem is now feature-complete across the greenfield portfolio** — inbound pipeline (orchestration + router + Postmark + Mailgun + SES + attachment downloader + controller tests) + outbound threading (Message-ID / signed Reply-To) + Contact-pattern B + Workflow stack. Remaining effort is maintenance, observability, and any new provider integrations as demand surfaces.
 
 ### Public docs for greenfield frameworks (iter 89) ✅
 
