@@ -439,7 +439,7 @@ At this checkpoint, every task in the original plan has either shipped or been e
 Then, two additional bug-sweeps (see sections below) were driven by self-review of the docs I wrote for the rollout — docs claiming "the admin settings page lets you switch modes at runtime" turned out to be aspirational on most plugins. Fixing that reality gap shipped as **11 more PRs across 6 frameworks × 2 code paths** (widget / guest form, then inbound email). Details and per-framework PR links follow.
 
 Remaining smaller follow-ups for future iterations:
-- Per-framework CHANGELOG entries for frameworks that don't yet have them (NestJS + WordPress done; Spring / Phoenix / Go / .NET have no CHANGELOG.md yet)
+- ~~Per-framework CHANGELOG entries for frameworks that don't yet have them~~ ✅ backfilled — see Spring [#37](https://github.com/escalated-dev/escalated-spring/pull/37), Phoenix [#47](https://github.com/escalated-dev/escalated-phoenix/pull/47), Go [#39](https://github.com/escalated-dev/escalated-go/pull/39), .NET [#33](https://github.com/escalated-dev/escalated-dotnet/pull/33)
 - The 1-line Phoenix `WorkflowRunner` update to pass `workflow_id` to `execute/3` once `feat/workflow-runner` + `feat/workflow-delay` both merge on master
 - Phoenix `mix format` follow-up — running CI for the first time (via [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46)) surfaced pre-existing format drift across ~20 files; needs a local Elixir+Erlang toolchain to run `mix format` on the whole codebase
 - WordPress plugin-upgrade-path gap — existing installs need reactivation to pick up new tables; would benefit from a `plugins_loaded` version check that triggers `Activator::activate()` on version mismatch (pre-existing infrastructure gap, not plan-scoped)
