@@ -16,7 +16,26 @@
 | escalated-adonis | [#47](https://github.com/escalated-dev/escalated-adonis/pull/47) | Schema + model convergence |
 | escalated-dotnet | [#17](https://github.com/escalated-dev/escalated-dotnet/pull/17) | Schema + model convergence |
 | escalated-wordpress | [#27](https://github.com/escalated-dev/escalated-wordpress/pull/27) | Schema + model convergence |
-| Symfony / Filament / Phoenix / Go / Spring | — | Greenfield, not yet started |
+| escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | Schema + model convergence (Pattern A was inline) |
+| escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | Schema + model convergence (Pattern A was inline) |
+| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | Schema + model convergence (Pattern A was inline) |
+| escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | **Greenfield** Pattern B (no prior guest support) |
+| escalated-filament | — | Inherits from escalated-laravel — no separate PR |
+
+## Final state — all frameworks covered
+
+**11 PRs are now open across the framework ecosystem.** Filament inherits via the Laravel package. Every framework in Escalated now has (or shortly will have, once the PRs merge) the Contact entity + the ability to dedupe guests by email + the foundation for `promote_to_user`.
+
+### Follow-up backlog (per framework)
+
+Most frameworks still need, separately:
+
+- Guest submission controller writing via Contact (currently writes inline guest_* fields)
+- Outbound email Message-ID threading (NestJS has it)
+- Workflow executor wiring (NestJS has it; several frameworks have Workflow tables but no runner)
+- Deprecate + drop inline guest_* columns once Contact writes are live everywhere
+
+The NestJS PR is the reference; per-framework port work is estimated at 2-4 hours each once needed.
 
 
 ## Summary table
