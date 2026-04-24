@@ -278,8 +278,9 @@ Plan Task 6.3 — a runtime admin settings page for the public-ticket guest poli
 | escalated-adonis | [#51](https://github.com/escalated-dev/escalated-adonis/pull/51) | `AdminSettingsController#publicTickets` + routes |
 | escalated-wordpress | [#34](https://github.com/escalated-dev/escalated-wordpress/pull/34) | Guest-policy fields inline on existing admin settings page (PHP template, no Vue) |
 | escalated-filament | [#24](https://github.com/escalated-dev/escalated-filament/pull/24) | `PublicTicketsSettings` Filament page + blade view + lang strings |
+| escalated-symfony | [#35](https://github.com/escalated-dev/escalated-symfony/pull/35) | `EscalatedSetting` entity + `SettingsService` + `PublicTicketsSettingsController` + 7 tests |
 
-Each host-adapter PR validates mode against the three supported values, persists via the existing `EscalatedSetting(s)` KV store, and clears stale fields when switching modes. WordPress + Filament use their native admin UI patterns (PHP template / Filament Page) instead of the shared Inertia/Vue page. Symfony + greenfield host adapters remain as follow-ups (Symfony lacks a persisted-settings layer entirely; that's a bigger yak-shave).
+Each host-adapter PR validates mode against the three supported values, persists via the existing `EscalatedSetting(s)` KV store, and clears stale fields when switching modes. WordPress + Filament use their native admin UI patterns (PHP template / Filament Page) instead of the shared Inertia/Vue page; Symfony had no persisted settings layer at all, so #35 also builds the foundation. Greenfield host adapters (dotnet/spring/go/phoenix) remain as follow-ups — they use JSON APIs rather than Inertia, so the shared Vue page would need a different wire-up.
 
 ### Per-repo READMEs (iter 90) ✅
 
