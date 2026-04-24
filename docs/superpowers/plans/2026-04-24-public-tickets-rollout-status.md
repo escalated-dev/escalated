@@ -440,7 +440,27 @@ Remaining smaller follow-ups for future iterations:
 - Per-framework CHANGELOG entries for frameworks that don't yet have them (NestJS + WordPress done; Spring / Phoenix / Go / .NET have no CHANGELOG.md yet)
 - The 1-line Phoenix `WorkflowRunner` update to pass `workflow_id` to `execute/3` once `feat/workflow-runner` + `feat/workflow-delay` both merge on master
 - WordPress plugin-upgrade-path gap — existing installs need reactivation to pick up new tables; would benefit from a `plugins_loaded` version check that triggers `Activator::activate()` on version mismatch (pre-existing infrastructure gap, not plan-scoped)
-- **Laravel (and possibly other legacy plugins) admin settings page has no behavioral effect on the widget** — grep across `escalated-laravel/src/` shows `WidgetController::createTicket` writes `guest_name`/`guest_email`/`guest_token` unconditionally, ignoring the `guest_policy_mode` setting the admin page writes. Needs a per-framework patch to read the persisted setting in the widget controller and branch on mode (same fix the NestJS reference ships via [escalated-nestjs#27](https://github.com/escalated-dev/escalated-nestjs/pull/27), where the endpoint writes to a single `guest_policy` JSON key that the widget controller already reads via `settingsService.getTyped`). This was caught during docs self-review but is out of scope for the current rollout.
+### Widget↔settings disconnection fix sweep — **all 6 affected frameworks shipped** ✅
+
+Surfaced during docs self-review: the admin settings page at `Admin → Settings → Public Tickets` was persisting `guest_policy_mode` / `guest_policy_user_id` / `guest_policy_signup_url_template` to the settings store, but every public-submission code path wrote `requester*` / `guest*` fields **unconditionally**, ignoring the configured mode. The admin page had zero behavioral effect. Fixed in a 6-PR sweep:
+
+| Framework | Fix PR | Entry points covered |
+|---|---|---|
+| escalated-nestjs | [#27](https://github.com/escalated-dev/escalated-nestjs/pull/27) | Adds dedicated `/admin/settings/public-tickets` endpoint that writes a single `guest_policy` JSON blob matching what `WidgetController.resolveGuestPolicy` already reads. Closes the NestJS reference's API-surface gap with the 10 host plugins while also wiring settings→behavior end-to-end. |
+| escalated-laravel | [#72](https://github.com/escalated-dev/escalated-laravel/pull/72) | `WidgetController::createTicket`. |
+| escalated-rails | [#47](https://github.com/escalated-dev/escalated-rails/pull/47) | `WidgetController#create_ticket` + `Guest::TicketsController#store`. |
+| escalated-django | [#44](https://github.com/escalated-dev/escalated-django/pull/44) | `widget.widget_create_ticket` + `guest.guest_create_ticket`. Factored a `_apply_guest_policy` helper. |
+| escalated-adonis | [#52](https://github.com/escalated-dev/escalated-adonis/pull/52) | `WidgetController#createTicket` + `GuestTicketsController#store`. New `resolveGuestPolicy()` helper returns `{ requesterType, requesterId }` to preserve TypeScript literal-type inference at the call site. |
+| escalated-wordpress | [#36](https://github.com/escalated-dev/escalated-wordpress/pull/36) | `TicketService::create_guest` (both the REST widget endpoint and the `[escalated_portal]` AJAX handler go through this one method). |
+
+Shared semantics across all 6 ports:
+- `unassigned` (default): existing behavior — `requester*` null, `guest*` fields set.
+- `guest_user`: route to the configured host user via the framework's polymorphic-requester FK (`requester_type` + `requester_id`, `requesterType` + `requesterId`, or just `requester_id` on WP where ticket requesters are always WP users). Still records `guest_name` / `guest_email` so agents see who submitted.
+- `prompt_signup`: same ticket-create path as unassigned today. Signup-invite emission is a listener-level follow-up in every framework (needs a `TicketSignupInviteEvent` + listener that doesn't exist yet on the legacy plugins).
+
+Misconfigured `guest_user` (zero / missing user id) falls through to unassigned in every framework, so bad admin input can't 500 public submissions.
+
+Added 20 new test cases across the 6 frameworks (4-8 per framework) covering the three modes, the misconfigured-fallback path, and regression coverage of the default `unassigned` path.
 
 ### Infrastructure fixes surfaced along the way
 
