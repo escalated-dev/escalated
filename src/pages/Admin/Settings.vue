@@ -1,7 +1,7 @@
 <script setup>
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
@@ -111,6 +111,18 @@ function submit() {
                             />
                         </button>
                     </label>
+
+                    <div v-if="form.guest_tickets_enabled" class="-mt-3 ml-0.5">
+                        <Link
+                            :href="route('escalated.admin.settings.public-tickets')"
+                            class="text-xs text-[var(--esc-panel-accent)] hover:underline"
+                        >
+                            Configure guest policy &rarr;
+                        </Link>
+                        <p class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
+                            Who owns a ticket submitted via the public widget or inbound email.
+                        </p>
+                    </div>
 
                     <label class="flex items-center justify-between">
                         <div>
