@@ -225,4 +225,20 @@ Each of the 5 greenfield frameworks now has the **full inbound webhook stack**: 
 | escalated-phoenix | [#35](https://github.com/escalated-dev/escalated-phoenix/pull/35) | [#36](https://github.com/escalated-dev/escalated-phoenix/pull/36) |
 | escalated-symfony | [#30](https://github.com/escalated-dev/escalated-symfony/pull/30) | [#31](https://github.com/escalated-dev/escalated-symfony/pull/31) |
 
-**Every framework in the ecosystem can now receive inbound webhook mail and route it to the right ticket.** Follow-up per-framework work (Mailgun/SES parsers, attachment persistence, full reply/ticket-create orchestration, host-app deployment docs) can now be tackled on top of this foundation.
+**Every framework in the ecosystem can now receive inbound webhook mail and route it to the right ticket.**
+
+### Mailgun parity (iter 81-83) ✅
+
+Mailgun is the second supported inbound provider alongside Postmark across all 5 greenfield frameworks. Host maintainers can point either Postmark or Mailgun at `/escalated/webhook/email/inbound` without writing any custom adapter code.
+
+| Framework | Postmark | Mailgun |
+|---|---|---|
+| escalated-dotnet | [#24](https://github.com/escalated-dev/escalated-dotnet/pull/24) | [#25](https://github.com/escalated-dev/escalated-dotnet/pull/25) |
+| escalated-spring | [#27](https://github.com/escalated-dev/escalated-spring/pull/27) | [#28](https://github.com/escalated-dev/escalated-spring/pull/28) |
+| escalated-go | [#30](https://github.com/escalated-dev/escalated-go/pull/30) | [#31](https://github.com/escalated-dev/escalated-go/pull/31) |
+| escalated-phoenix | [#36](https://github.com/escalated-dev/escalated-phoenix/pull/36) | [#37](https://github.com/escalated-dev/escalated-phoenix/pull/37) |
+| escalated-symfony | [#31](https://github.com/escalated-dev/escalated-symfony/pull/31) | [#32](https://github.com/escalated-dev/escalated-symfony/pull/32) |
+
+Mailgun-specific handling: extracts display name from `"Name <email>"`-style `from` header, falls back to `sender` field for the email, carries provider-hosted attachment URLs through in `downloadUrl` / `DownloadURL` so a follow-up worker can fetch + persist out-of-band. Malformed attachments JSON degrades gracefully to an empty list.
+
+Remaining follow-ups: attachment persistence, full reply/ticket-create orchestration (parser → router → create+reply with attachments), host-app deployment docs, and SES parser if demand warrants (third major provider).
