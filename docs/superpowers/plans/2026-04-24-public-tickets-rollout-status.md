@@ -264,3 +264,15 @@ Remaining follow-ups: attachment persistence workers for provider-hosted downloa
 ### Public docs for greenfield frameworks (iter 89) ✅
 
 `escalated-dev/escalated-docs#6` adds inbound-email setup pages for all 5 greenfield framework ports and rewrites `_intro.md` to describe the unified-webhook / shared-secret / three-way resolution-chain architecture. These were the first entries under `sections/inbound-email/` for .NET, Spring, Go, Phoenix, and Symfony (the legacy host-app frameworks already had pages). Each page includes a ready-to-paste curl test recipe and documents the new response shape (`outcome`, `ticket_id`, `reply_id`, `pending_attachment_downloads`).
+
+### Per-repo READMEs (iter 90) ✅
+
+Each of the 5 greenfield plugin repos now has a top-level `## Inbound email` section in its README with framework-native config snippet (`Mail.InboundSecret`, `escalated.mail.inbound-secret`, `email.Config{InboundSecret}`, `email_inbound_secret`, `escalated.inbound_secret`), the webhook URL, and a link out to docs.escalated.dev. Each READMEs PR is stacked on its framework's `feat/inbound-email-orchestration` so the README only claims features that exist on that branch.
+
+| Framework | README PR |
+|---|---|
+| escalated-dotnet | [#27](https://github.com/escalated-dev/escalated-dotnet/pull/27) |
+| escalated-spring | [#30](https://github.com/escalated-dev/escalated-spring/pull/30) |
+| escalated-go | [#33](https://github.com/escalated-dev/escalated-go/pull/33) |
+| escalated-phoenix | [#39](https://github.com/escalated-dev/escalated-phoenix/pull/39) |
+| escalated-symfony | [#34](https://github.com/escalated-dev/escalated-symfony/pull/34) |
