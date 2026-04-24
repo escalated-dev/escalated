@@ -21,7 +21,7 @@
 | escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | ✅ | ✅ TicketService::create | ✅ |
 | escalated-symfony | [#27](https://github.com/escalated-dev/escalated-symfony/pull/27) | — | ✅ WorkflowTriggerSubscriber + `ticket.priority_changed` | ✅ |
 | escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ TicketService.Create (+ contact_id threaded through Ticket SQL) | ✅ |
-| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create | ✅ after [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) merges — CI now targets `master` + scopes format check to PR-changed files |
+| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create | ✅ CI green via [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) — workflow now targets `master` and scopes format + credo checks to PR-changed `lib/`/`test/` files |
 | escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | ✅ | ✅ TicketService.create (greenfield) | ✅ |
 | escalated-filament | — | ✅ via laravel | ✅ via laravel | — |
 
