@@ -3,34 +3,38 @@
 **Context:** the public ticket system is now shipped in `@escalated-dev/escalated-nestjs` (PR #17, all 9 phases complete). This document surveys the current state of the same capability across the other 11 host-framework implementations and notes the design divergence that has accumulated.
 
 **Survey date:** 2026-04-24
-**Last updated:** 2026-04-24 (after convergence PRs opened)
+**Last updated:** 2026-04-24 (after iter 40 CI-green sweep)
 
-## PRs in flight
+## PRs in flight (all CI-green)
 
-| Framework | PR | Model | Wire-up |
-|---|---|---|---|
-| escalated-nestjs | [#17](https://github.com/escalated-dev/escalated-nestjs/pull/17) | ✅ | ✅ full feature (232 tests) — reference |
-| escalated-laravel | [#67](https://github.com/escalated-dev/escalated-laravel/pull/67) | ✅ | ✅ Guest + Widget controllers |
-| escalated-rails | [#41](https://github.com/escalated-dev/escalated-rails/pull/41) | ✅ | ✅ Guest controller + TicketService |
-| escalated-django | [#38](https://github.com/escalated-dev/escalated-django/pull/38) | ✅ | ✅ Guest + Widget views + inbound service |
-| escalated-adonis | [#47](https://github.com/escalated-dev/escalated-adonis/pull/47) | ✅ | ✅ Guest + Widget + inbound |
-| escalated-dotnet | [#17](https://github.com/escalated-dev/escalated-dotnet/pull/17) | ✅ | ✅ TicketService.CreateAsync |
-| escalated-wordpress | [#27](https://github.com/escalated-dev/escalated-wordpress/pull/27) | ✅ | ✅ TicketService::create_guest |
-| escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | ✅ | ✅ TicketService::create |
-| escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ TicketService.Create (+ contact_id threaded through Ticket SQL) |
-| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create |
-| escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | ✅ | ✅ TicketService.create (greenfield) |
-| escalated-filament | — | ✅ via laravel | ✅ via laravel |
+| Framework | PR | Model | Wire-up | CI |
+|---|---|---|---|---|
+| escalated-nestjs | [#17](https://github.com/escalated-dev/escalated-nestjs/pull/17) | ✅ | ✅ full feature (232 tests) — reference | ✅ |
+| escalated-laravel | [#67](https://github.com/escalated-dev/escalated-laravel/pull/67) | ✅ | ✅ Guest + Widget controllers | ✅ |
+| escalated-rails | [#41](https://github.com/escalated-dev/escalated-rails/pull/41) | ✅ | ✅ Guest controller + TicketService | ✅ |
+| escalated-rails | [#42](https://github.com/escalated-dev/escalated-rails/pull/42) | — | ✅ WorkflowSubscriber wire-up | ✅ |
+| escalated-django | [#38](https://github.com/escalated-dev/escalated-django/pull/38) | ✅ | ✅ Guest + Widget views + inbound service | ✅ |
+| escalated-django | [#39](https://github.com/escalated-dev/escalated-django/pull/39) | — | ✅ signal→workflow bridge | ✅ |
+| escalated-adonis | [#47](https://github.com/escalated-dev/escalated-adonis/pull/47) | ✅ | ✅ Guest + Widget + inbound | ✅ |
+| escalated-dotnet | [#17](https://github.com/escalated-dev/escalated-dotnet/pull/17) | ✅ | ✅ TicketService.CreateAsync | ✅ |
+| escalated-wordpress | [#27](https://github.com/escalated-dev/escalated-wordpress/pull/27) | ✅ | ✅ TicketService::create_guest | ✅ |
+| escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | ✅ | ✅ TicketService::create | ✅ |
+| escalated-symfony | [#27](https://github.com/escalated-dev/escalated-symfony/pull/27) | — | ✅ WorkflowTriggerSubscriber + `ticket.priority_changed` | ✅ |
+| escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ TicketService.Create (+ contact_id threaded through Ticket SQL) | ✅ |
+| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create | — (repo has no CI configured) |
+| escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | ✅ | ✅ TicketService.create (greenfield) | ✅ |
+| escalated-filament | — | ✅ via laravel | ✅ via laravel | — |
 
-## Final state — rollout complete
+## Final state — rollout complete, all CI green
 
-**11 open PRs.** Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail` + ticket back-linked via `contact_id`. Repeat guest submissions dedupe to a single Contact with all their tickets linked; the foundation for `promote_to_user` is in place everywhere.
+**13 open PRs, all CI-green** (Phoenix has no CI configured at the repo level; runs locally). Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail` + ticket back-linked via `contact_id`. Repeat guest submissions dedupe to a single Contact with all their tickets linked; the foundation for `promote_to_user` is in place everywhere.
 
-### Follow-up backlog
+### Follow-up backlog (future PRs)
 
-- All frameworks except NestJS: outbound email Message-ID threading, Workflow executor wiring
-- All frameworks: deprecate + drop inline guest_* columns after a dual-read cycle
-- escalated-spring: inbound email webhook (no prior guest support meant no inbound impl either)
+- **WorkflowEngine executor port** for .NET, WordPress, Phoenix, Spring — each today has only the evaluator (conditions) but no action-dispatch. NestJS `workflow-executor.service.ts` + `workflow-runner.service.ts` + `workflow.listener.ts` are the reference. Estimate: 2-4 iterations per framework.
+- **Outbound email Message-ID threading** across all frameworks except NestJS. NestJS `email/message-id.ts` + `email.service.ts` + `inbound-router.service.ts` are the reference.
+- **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
+- **escalated-spring: inbound email webhook** (greenfield — no prior guest support meant no inbound impl either).
 
 NestJS is the reference for these follow-ups. Per-framework port work estimated at 2-4 hours once scheduled.
 
