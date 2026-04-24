@@ -4,6 +4,13 @@ import { sanitizeHtml } from '../utils/sanitizeHtml';
 
 const props = defineProps({
     baseUrl: { type: String, default: '' },
+    // Path prefix the host framework mounts widget routes under. Defaults
+    // to /support/widget which matches every host-adapter plugin
+    // (Laravel / Rails / Django / Adonis / WordPress / Filament /
+    // Symfony / .NET / Go / Spring / Phoenix). The NestJS reference
+    // mounts at /escalated/widget, so embedders on a NestJS backend
+    // should override this with data-widget-path="/escalated/widget".
+    widgetPath: { type: String, default: '/support/widget' },
     initialColor: { type: String, default: '#4F46E5' },
     initialPosition: { type: String, default: 'bottom-right' },
 });
@@ -64,7 +71,7 @@ const statusResult = ref(null);
 let searchTimer = null;
 
 async function api(method, apiPath, body = null) {
-    const url = `${props.baseUrl}/support/widget${apiPath}`;
+    const url = `${props.baseUrl}${props.widgetPath}${apiPath}`;
     const opts = {
         method,
         headers: {
