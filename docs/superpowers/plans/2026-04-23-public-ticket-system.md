@@ -1214,7 +1214,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - Signed `Reply-To` address is used so inbound can resolve the ticket even when threading headers are stripped.
 - Email dispatch failures are logged and do not throw out of the listener.
 
-### Task 4.1 — `MailerModule` registration
+### Task 4.1 — `MailerModule` registration — COMPLETED
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\escalated.module.ts`
@@ -1225,7 +1225,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.2 — `message-id.ts` utility
+### Task 4.2 — `message-id.ts` utility — COMPLETED
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\email\message-id.ts`
@@ -1237,7 +1237,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.3 — `EmailService.send`
+### Task 4.3 — `EmailService.send` — COMPLETED
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\email\email.service.ts`
@@ -1250,7 +1250,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.4 — Ticket created listener
+### Task 4.4 — Ticket created listener — COMPLETED
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\listeners\email.listener.ts`
@@ -1262,7 +1262,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.5 — Reply created listener (agent reply → guest)
+### Task 4.5 — Reply created listener (agent reply → guest) — COMPLETED
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\listeners\email.listener.ts`
@@ -1274,7 +1274,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.6 — Signup invite listener (prompt_signup mode)
+### Task 4.6 — Signup invite listener (prompt_signup mode) — COMPLETED
 
 **Files:**
 - Modify: `email.listener.ts` + spec.
@@ -1285,7 +1285,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 4.7 — Failures are swallowed with structured logs
+### Task 4.7 — Failures are swallowed with structured logs — COMPLETED
 
 **Files:**
 - Modify: `email.listener.ts` + spec.
