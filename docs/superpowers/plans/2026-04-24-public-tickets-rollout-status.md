@@ -422,8 +422,10 @@ Two new docs pages landed in `escalated-dev/escalated-docs`:
 
 | Page | PR | Covers |
 |---|---|---|
-| `sections/workflows.md` | [#9](https://github.com/escalated-dev/escalated-docs/pull/9) | Full Workflow feature — 14 trigger events, 12 actions including `delay`, condition catalog, template interpolation, decision table vs. Automations |
-| `sections/public-tickets.md` | [#10](https://github.com/escalated-dev/escalated-docs/pull/10) | Guest-policy mode decision table, admin settings page behavior + runtime API, widget submission, 5-priority inbound routing chain, `promoteToUser` flow, Contact-pattern data model |
+| `sections/workflows.md` | [#9](https://github.com/escalated-dev/escalated-docs/pull/9) | Full Workflow feature — 5 trigger events the runner actually bridges (out of 12 that exist in the event bus), the 12 action types including `delay` (with seconds-vs-minutes unit divergence across frameworks called out), the `{field, operator, value}` condition model, webhook delivery + signature verification, template interpolation on scalar columns, decision table vs. Automations |
+| `sections/public-tickets.md` | [#10](https://github.com/escalated-dev/escalated-docs/pull/10) | Guest-policy mode decision table, admin settings page behavior + runtime API, widget submission + deployment caveat about in-memory rate limiter, 4-priority inbound routing chain, `promoteToUser` flow, Contact-pattern data model, provider coverage table (NestJS + 5 greenfield support SES; 5 legacy plugins are Postmark+Mailgun only) |
+
+Both docs went through aggressive self-review after drafting; 20+ factual corrections were caught and fixed before shipping (variable names, signatures, payload shapes, endpoint paths, unit conventions, condition-map accessibility).
 
 ### End state
 
@@ -437,3 +439,11 @@ Remaining smaller follow-ups for future iterations:
 - Per-framework CHANGELOG entries for frameworks that don't yet have them (NestJS + WordPress done; Spring / Phoenix / Go / .NET have no CHANGELOG.md yet)
 - The 1-line Phoenix `WorkflowRunner` update to pass `workflow_id` to `execute/3` once `feat/workflow-runner` + `feat/workflow-delay` both merge on master
 - WordPress plugin-upgrade-path gap — existing installs need reactivation to pick up new tables; would benefit from a `plugins_loaded` version check that triggers `Activator::activate()` on version mismatch (pre-existing infrastructure gap, not plan-scoped)
+
+### Infrastructure fixes surfaced along the way
+
+| Fix | Why |
+|---|---|
+| [escalated-phoenix#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) | `lint.yml` triggered on `main` but the repo's default branch is `master`, so **CI had never run on any Phoenix PR** across the entire rollout. Same PR also relaxes `inertia_phoenix` constraint from the unsatisfiable `~> 0.9` to `~> 0.4` (latest published). Running CI for the first time surfaced pre-existing `mix format` drift across the codebase; a follow-up format PR (needs a local Elixir toolchain) is the last step. |
+| escalated-dotnet#32 rebase | The settings-endpoints PR was accidentally stacked on top of 9 inbound-email branches, dragging in half-landed code that referenced symbols not yet on `main`. Force-pushed a clean rebase onto `main` — 104 tests + lint now green. |
+| escalated-django#43 / escalated-adonis#51 / escalated-symfony#35 | Lint fixes (ruff format / prettier / php-cs-fixer Yoda conditions) on public-tickets settings PRs from earlier iterations — were blocking merge. |
