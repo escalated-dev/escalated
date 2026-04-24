@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createApp } from 'vue';
 import { EscalatedPlugin } from '../src/plugin.js';
 
@@ -156,6 +156,49 @@ describe('EscalatedPlugin', () => {
 
         const layoutCalls = provideSpy.mock.calls.filter((c) => c[0] === 'escalated-layout');
         expect(layoutCalls).toHaveLength(0);
+    });
+});
+
+describe('route() helper shim', () => {
+    let originalRoute;
+
+    beforeEach(() => {
+        originalRoute = window.route;
+        delete window.route;
+    });
+
+    afterEach(() => {
+        if (originalRoute === undefined) {
+            delete window.route;
+        } else {
+            window.route = originalRoute;
+        }
+    });
+
+    it('installs a window.route stub on non-Laravel hosts', () => {
+        expect(typeof window.route).toBe('undefined');
+        installPlugin();
+        expect(typeof window.route).toBe('function');
+    });
+
+    it('the stub throws a descriptive error when called', () => {
+        installPlugin();
+
+        expect(() => window.route('escalated.admin.saved-views.update', 1)).toThrow(
+            /window\.route\('escalated\.admin\.saved-views\.update'\)/,
+        );
+        expect(() => window.route('x')).toThrow(/Install Ziggy/);
+    });
+
+    it('does not overwrite an existing window.route from a Laravel host', () => {
+        const existing = vi.fn(() => '/from-ziggy');
+        window.route = existing;
+
+        installPlugin();
+
+        expect(window.route).toBe(existing);
+        expect(window.route('some.name')).toBe('/from-ziggy');
+        expect(existing).toHaveBeenCalledWith('some.name');
     });
 });
 

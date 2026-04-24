@@ -17,6 +17,8 @@ import { markRaw } from 'vue';
  */
 export const EscalatedPlugin = {
     install(app, options = {}) {
+        installRouteShim();
+
         if (options.layout) {
             app.provide('escalated-layout', markRaw(options.layout));
         }
@@ -37,6 +39,28 @@ export const EscalatedPlugin = {
         }
     },
 };
+
+// 77 components in this package call the Ziggy `route()` helper (Laravel's
+// named-route URL generator). Laravel hosts ship Ziggy and get `window.route`
+// for free; other host frameworks (Rails, Django, NestJS, Rails, Phoenix, …)
+// don't, and the call sites would otherwise throw a bare ReferenceError deep
+// inside a component render with no hint at the cause.
+//
+// Install a stub that throws an informative error instead, so the host app's
+// first failing request points at the actual missing dependency. Laravel hosts
+// that already have Ziggy loaded are left alone.
+function installRouteShim() {
+    if (typeof window === 'undefined') return;
+    if (typeof window.route === 'function') return;
+
+    window.route = function escalatedRouteShimMissing(name) {
+        throw new Error(
+            `[escalated] window.route('${name}') called, but no \`route()\` helper is installed on this host. ` +
+                `The escalated agent/admin UI depends on Laravel's Ziggy-style \`route(name, params)\` helper. ` +
+                `Install Ziggy (on Laravel hosts) or register a compatible shim on window.route before mounting the app.`,
+        );
+    };
+}
 
 const themeDefaults = {
     primary: '#4f46e5',
