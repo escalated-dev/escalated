@@ -747,7 +747,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - Created ticket has `contactId` set and, according to guest policy, either `requesterId = 0`, `requesterId = guestUserId`, or `requesterId = 0` (for `prompt_signup`).
 - A per-email rate limit (10/hour) is enforced.
 
-### Task 2.1 — `CreatePublicTicketDto` with validation
+### Task 2.1 — `CreatePublicTicketDto` with validation — COMPLETED 03c2bd8
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\dto\create-public-ticket.dto.ts`
@@ -846,7 +846,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 2.2 — Widget controller accepts DTO + resolves Contact
+### Task 2.2 — Widget controller accepts DTO + resolves Contact — COMPLETED df06c01
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\controllers\widget\widget.controller.ts`
@@ -956,7 +956,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 4:** Update `widget.controller.spec.ts`'s `beforeEach` to supply the ContactService mock. Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 2.3 — `TicketService.create` writes `contactId`
+### Task 2.3 — `TicketService.create` writes `contactId` — COMPLETED 44b1330
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\services\ticket.service.ts`
@@ -986,7 +986,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 2.4 — Apply Guest Policy in widget controller
+### Task 2.4 — Apply Guest Policy in widget controller — COMPLETED df06c01 (same as 2.2)
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\controllers\widget\widget.controller.ts`
@@ -1035,7 +1035,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Task 2.5 — Per-email rate limit for public submission
+### Task 2.5 — Per-email rate limit for public submission — COMPLETED (latest)
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\controllers\widget\widget.controller.ts`
