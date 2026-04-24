@@ -337,7 +337,7 @@ Contact and Macro factories are added in their respective phases.
 - `Ticket` has nullable `contactId` with relation; existing `requesterId` untouched.
 - All new code passes lint + tests.
 
-### Task 1.1 — `Contact` entity
+### Task 1.1 — `Contact` entity — COMPLETED eab03f2
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\entities\contact.entity.ts`
@@ -413,7 +413,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.2 — Register `Contact` in EscalatedModule
+### Task 1.2 — Register `Contact` in EscalatedModule — COMPLETED 7258712
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\escalated.module.ts`
@@ -448,7 +448,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.3 — Add `contactId` to `Ticket`
+### Task 1.3 — Add `contactId` to `Ticket` — COMPLETED 56e75fe
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\entities\ticket.entity.ts`
@@ -487,7 +487,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.4 — `ContactService.findOrCreateByEmail`
+### Task 1.4 — `ContactService.findOrCreateByEmail` — COMPLETED 3574928
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\contact.service.ts`
@@ -661,7 +661,7 @@ Contact and Macro factories are added in their respective phases.
   git push
   ```
 
-### Task 1.5 — `ContactService.promoteToUser` (account creation hook)
+### Task 1.5 — `ContactService.promoteToUser` (account creation hook) — COMPLETED 3574928 (same commit as 1.4)
 
 **Files:**
 - Modify: `C:\Users\work\escalated-nestjs\src\services\contact.service.ts`
