@@ -1306,7 +1306,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - Routing priorities (per `Product decisions` §7) are implemented: In-Reply-To → X-Escalated-Ticket-Id → Reply-To token → subject reference → new ticket.
 - New-ticket-from-email uses `ContactService.findOrCreateByEmail` and `TicketService.create` exactly like the widget path, honoring guest policy.
 
-### Task 5.1 — `InboundEmail` audit entity
+### Task 5.1 — `InboundEmail` audit entity — COMPLETED
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\entities\inbound-email.entity.ts`
@@ -1318,7 +1318,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Register with TypeORM.
 - [ ] **Step 5:** Commit + push.
 
-### Task 5.2 — `InboundEmailParser` interface + Postmark parser
+### Task 5.2 — `InboundEmailParser` interface + Postmark parser — COMPLETED
 
 **Files:**
 - Create: `src/services/email/inbound-parser.interface.ts`
@@ -1332,7 +1332,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 5.3 — `InboundRouterService.route`
+### Task 5.3 — `InboundRouterService.route` — COMPLETED
 
 **Files:**
 - Create: `src/services/email/inbound-router.service.ts`
@@ -1350,7 +1350,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 4:** Re-run — expect pass.
 - [ ] **Step 5:** Commit + push.
 
-### Task 5.4 — `InboundEmailController` + signature verification
+### Task 5.4 — `InboundEmailController` + signature verification — COMPLETED
 
 **Files:**
 - Create: `src/controllers/inbound-email.controller.ts`
