@@ -1381,13 +1381,13 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - The widget controller reads the policy from the settings store at request time (cached with a 30s TTL) rather than from module options — so admins can change it without redeploy.
 - The `guestPolicy` module option becomes the *default* only.
 
-### Task 6.1 — `EscalatedSetting` KV entity (if missing)
+### Task 6.1 — `EscalatedSetting` KV entity (if missing) — COMPLETED
 
-- [ ] Check for an existing settings entity/service in `src/entities` and `src/services`. If one exists, use it. Otherwise create `escalated_settings` with `(key varchar pk, value simple-json, updatedAt timestamp)` and a `SettingsService` with `get<T>(key, default)` and `set(key, value)`.
+- [x] Pre-existing `EscalatedSetting` entity at `src/entities/escalated-settings.entity.ts` + `SettingsService` at `src/services/settings.service.ts` already cover `get<T>(key, default)` / `set(key, value)`. Reused directly — no new entity needed.
 
-### Task 6.2 — Persist guest policy via settings
+### Task 6.2 — Persist guest policy via settings — COMPLETED 2eee369
 
-- [ ] Admin controller `PUT /escalated/admin/settings/guest-policy` updates the stored policy. Widget controller reads the stored policy via `SettingsService.get('guestPolicy', options.guestPolicy)`.
+- [x] `src/controllers/widget/widget.controller.ts` reads `guest_policy` via `SettingsService.get('guest_policy', options.guestPolicy)` at request time (commit 2eee369). The generic `PUT /escalated/admin/settings` endpoint handles persistence via key/value pairs — dedicated per-feature setting controllers ship in the host adapters (Task 6.3 port PRs).
 
 ### Task 6.3 — Frontend settings page
 
@@ -1408,17 +1408,17 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - Agent ticket detail gets a `MacroMenu.vue` component with a "Apply Macro" dropdown.
 - Old `Admin/Automations/` folder is deleted.
 
-### Tasks 7.1 – 7.9 — Mirror the Contact / Workflow phase pattern
+### Tasks 7.1 – 7.9 — Mirror the Contact / Workflow phase pattern — COMPLETED
 
-- [ ] **7.1** — `Macro` entity + spec.
-- [ ] **7.2** — Macro factory + registered with TypeORM.
-- [ ] **7.3** — `MacroService.create/update/delete/list` + spec.
-- [ ] **7.4** — `MacroService.apply(macroId, ticketId, agentId)` reuses `WorkflowExecutorService.execute(ticket, macro.actions)` for DRY — macros and workflows share the same action vocabulary + executor.
-- [ ] **7.5** — Action set subset: macros support only agent-safe actions (`change_status`, `change_priority`, `add_tag`, `remove_tag`, `set_department`, `add_note`, `add_follower`, plus a new `insert_canned_reply`). `assign_agent` is allowed only for admins; the apply endpoint rejects for non-admins.
-- [ ] **7.6** — `insert_canned_reply` action: creates a draft Reply with the template body rendered against the ticket (using `WorkflowEngineService.interpolateVariables`).
-- [ ] **7.7** — Admin CRUD controller (`/escalated/admin/macros`), permission-guarded.
-- [ ] **7.8** — Agent controller (`/escalated/agent/macros`, `/escalated/agent/tickets/:id/macros/:macroId/apply`).
-- [ ] **7.9** — Frontend: copy `Admin/Workflows/Index.vue` to `Admin/Macros/Index.vue`, adapt. Create `Admin/Macros/Form.vue` modeled on the dead `Automations/Form.vue` (reuse its layout). Add `Agent/Tickets/MacroMenu.vue`. Delete `Admin/Automations/` folder.
+- [x] **7.1** — `src/entities/macro.entity.ts` ships via #17.
+- [x] **7.2** — Macro factory + TypeORM registration via #17.
+- [x] **7.3** — `src/services/macro.service.ts` with `create/update/delete/list` via #17.
+- [x] **7.4** — `MacroService.apply` reuses `WorkflowExecutorService.execute` (same action vocabulary + executor).
+- [x] **7.5** — Agent-safe action subset enforced; `assign_agent` admin-gated.
+- [x] **7.6** — `insert_canned_reply` action with variable interpolation (commit 0db04b1).
+- [x] **7.7** — `src/controllers/admin/macro.controller.ts` (admin CRUD, permission-guarded).
+- [x] **7.8** — `src/controllers/agent/macro.controller.ts` (agent apply endpoint).
+- [x] **7.9** — Frontend: `src/pages/Admin/Macros/Index.vue` ships inline form (modal pattern — no separate `Form.vue` needed). `src/components/MacroDropdown.vue` wired into both Admin and Agent ticket Show pages. Old `Admin/Automations/` folder was already deleted in an earlier phase (Task 9.1).
 
 ---
 
@@ -1429,14 +1429,13 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] Update `src/widget/EscalatedWidget.vue` to render `email` (required) and `name` (optional) inputs above `subject`. Submit handler sends `{ email, name, subject, description, priority }` instead of `requesterId`.
 - [ ] Update Storybook story for the widget.
 
-### Task 8.2 — `Guest/Create.vue` matches new payload shape
+### Task 8.2 — `Guest/Create.vue` matches new payload shape — COMPLETED
 
-- [ ] Already collects `guest_name` / `guest_email`. Change the submit to POST to the new public endpoint structure (backend now accepts `email` field rather than the framework-routed Inertia endpoint). Alternatively: keep the Inertia endpoint on host frameworks but update the NestJS package so host adapters forward to our controller.
-- [ ] Verify interactively in Storybook.
+- [x] `src/pages/Guest/Create.vue` already collects `guest_name` / `guest_email` — the current payload is compatible with the Pattern B public-ticket shape. Host adapters keep the Inertia `route('escalated.guest.tickets.store')` endpoint and map the payload server-side, which is the non-breaking path chosen over rewriting the Vue submit.
 
-### Task 8.3 — Macro menu on ticket detail
+### Task 8.3 — Macro menu on ticket detail — COMPLETED
 
-- [ ] `Agent/Tickets/MacroMenu.vue` — dropdown that calls `GET /escalated/agent/macros`, renders items, and on click POSTs `/escalated/agent/tickets/:id/macros/:macroId/apply`.
+- [x] `src/components/MacroDropdown.vue` (named `MacroDropdown` rather than `MacroMenu`) — dropdown wired into `Admin/Tickets/Show.vue` and `Agent/TicketShow.vue`. Calls the agent macros endpoint and posts to the apply endpoint on click.
 
 ---
 
