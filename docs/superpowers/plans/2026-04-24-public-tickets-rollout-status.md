@@ -462,6 +462,19 @@ Misconfigured `guest_user` (zero / missing user id) falls through to unassigned 
 
 Added 20 new test cases across the 6 frameworks (4-8 per framework) covering the three modes, the misconfigured-fallback path, and regression coverage of the default `unassigned` path.
 
+### Inbound-email second wave — **all frameworks covered** ✅
+
+Once the widget sweep wrapped, I audited the inbound-email ticket-creation path for the same bug. Every framework's `InboundEmailService` (or equivalent) was writing `guest_*` fields unconditionally when an email arrived from an unregistered sender, ignoring `guest_policy_mode` just like the widget controllers did.
+
+| Framework | Fix PR | Notes |
+|---|---|---|
+| escalated-nestjs | [#28](https://github.com/escalated-dev/escalated-nestjs/pull/28) | `InboundRouterService.createTicket` — adds `SettingsService` DI + `resolveRequesterIdForGuestPolicy` mirror of the widget helper. |
+| escalated-laravel | [#73](https://github.com/escalated-dev/escalated-laravel/pull/73) | `InboundEmailService::createNewTicket` — same 3-mode branching as widget #72. 3 new Pest cases. |
+| escalated-rails | [#48](https://github.com/escalated-dev/escalated-rails/pull/48) | `InboundEmailService` guest-ticket branch — mirrors widget #47. |
+| escalated-django | [#45](https://github.com/escalated-dev/escalated-django/pull/45) | `InboundEmailService._create_ticket` now delegates to `_apply_guest_policy` (the helper factored in widget #44) — one implementation, both paths wired. |
+| escalated-adonis | [#53](https://github.com/escalated-dev/escalated-adonis/pull/53) | `InboundEmailService#createNewTicket` wired through `resolveGuestPolicy` (from widget #52). Stacked on the widget fix because the helper file lives there. |
+| escalated-wordpress | **covered by [#36](https://github.com/escalated-dev/escalated-wordpress/pull/36)** — no separate PR needed | WP's `InboundEmailService::_create_new_ticket` delegates to `TicketService::create_guest`, which is exactly the method patched by #36. Centralizing ticket-creation logic paid off — the widget-fix PR automatically fixed the inbound path too. |
+
 ### Infrastructure fixes surfaced along the way
 
 | Fix | Why |
