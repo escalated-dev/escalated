@@ -274,7 +274,28 @@ Every greenfield framework now has CI-runnable tests that drive the real inbound
 
 Go PR #34 also fixed a genuine wiring gap: the handler was calling `router.ResolveTicket` directly instead of the orchestration service. Symfony PR #36 drops `final` from `InboundEmailService` + `InboundRouter` to allow test doubles (which also un-breaks the 9 existing `InboundEmailServiceTest` cases — full suite now 177/177 green).
 
-Remaining follow-ups: attachment persistence workers for provider-hosted downloads, and SES parser if demand warrants (third major provider).
+### AttachmentDownloader across greenfield frameworks (iter 103-106) ✅
+
+Every greenfield framework now ships a reference worker for the Mailgun-style provider-hosted attachments surfaced in `ProcessResult.PendingAttachmentDownloads`. Before this wave, those URLs were returned but never fetched — host apps had to roll their own download logic.
+
+| Framework | PR | Tests | Notes |
+|---|---|---|---|
+| escalated-go | [#35](https://github.com/escalated-dev/escalated-go/pull/35) | 12 | `AttachmentStorage` interface + `LocalFileStorage` reference |
+| escalated-dotnet | [#29](https://github.com/escalated-dev/escalated-dotnet/pull/29) | 12 | `IAttachmentStorage` + `LocalFileAttachmentStorage`; `AttachmentDownloadResult` record per input |
+| escalated-spring | [#32](https://github.com/escalated-dev/escalated-spring/pull/32) | 13 | JDK `HttpClient`; `Options.maxBytes`/`basicAuth` fluent builder |
+| escalated-phoenix | [#41](https://github.com/escalated-dev/escalated-phoenix/pull/41) | 13 | Function-map storage + writer contracts (Ecto-free); defaults to `:httpc` stdlib |
+| escalated-symfony | [#37](https://github.com/escalated-dev/escalated-symfony/pull/37) | 17 | Own `AttachmentHttpClientInterface` (no `symfony/http-client` dep); cURL reference |
+
+Shared semantic surface across all 5:
+- `download` / `downloadAll` methods with partial-failure handling.
+- `safeFilename` sanitization: `../../etc/passwd` → `passwd`.
+- `MaxBytes` size cap with a typed too-large error.
+- Optional HTTP basic auth for Mailgun API-key URLs.
+- Response Content-Type fallback when the pending record's contentType is blank.
+- Reference local-filesystem storage with timestamp-prefixed filenames so concurrent writes with the same original name don't collide.
+- Storage interface is pluggable — host apps with S3/GCS/Azure implement a thin adapter instead of using the local reference.
+
+Remaining follow-ups: SES parser if demand warrants (third major provider).
 
 ### Public docs for greenfield frameworks (iter 89) ✅
 
