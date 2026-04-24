@@ -1364,13 +1364,12 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Task 5.5 — Integration: end-to-end inbound email creates a ticket
+### Task 5.5 — Integration: end-to-end inbound email creates a ticket — COMPLETED (iter 91)
 
 **Files:**
 - Test: `test/integration/inbound-email-creates-ticket.spec.ts`
 
-- [ ] **Step 1 (red):** Spec: POST fixture to the endpoint with a valid signature, assert a ticket exists, a contact exists, and `TicketCreatedEvent` was emitted (which will, in the real runtime, trigger workflows + outbound email).
-- [ ] **Step 2 - 5:** Red/green/commit as usual.
+- [x] **Spec** — POSTs a Postmark fixture to `InboundEmailController.receive`, wires `InboundRouterService` + `PostmarkInboundParser` + `ContactService` + `TicketService` with repo mocks at the edges, and asserts: (a) a Contact was created from `from`/`fromName`, (b) a Ticket was created with `channel: 'email'` and the Contact's id, (c) the `InboundEmail` audit row records `outcome: 'ticket_created'`, (d) `escalated.ticket.created` was emitted (the bus that WorkflowListener + EmailListener subscribe to). Plus a negative test that messages with no `from` are ignored but still audited.
 
 ---
 
