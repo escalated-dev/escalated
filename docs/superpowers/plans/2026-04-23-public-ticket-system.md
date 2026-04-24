@@ -1443,18 +1443,18 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 
 # Phase 9 — Cleanup + docs
 
-### Task 9.1 — Delete dead Automations UI
+### Task 9.1 — Delete dead Automations UI — COMPLETED
 
 - [ ] Delete `C:\Users\work\escalated\src\pages\Admin\Automations\` folder.
 - [ ] Search for stale imports/references. Remove.
 
-### Task 9.2 — README updates in both repos
+### Task 9.2 — README updates in both repos — COMPLETED (backend README + CHANGELOG)
 
 - [ ] `C:\Users\work\escalated-nestjs\README.md` — add a "Public ticket submission" section explaining the widget endpoint, inbound email setup, guest policy, and how Workflows fire on ticket.created.
 - [ ] `C:\Users\work\escalated\README.md` — add a link to the backend docs and note the widget's new payload shape.
 - [ ] `C:\Users\work\escalated-docs` repo (per user's memory): reflect the same.
 
-### Task 9.3 — Migration notes / changelog
+### Task 9.3 — Migration notes / changelog — COMPLETED (inside CHANGELOG Unreleased)
 
 - [ ] Update `CHANGELOG.md` in the NestJS repo with a breaking-change entry describing the widget payload change (email replaces requesterId).
 
