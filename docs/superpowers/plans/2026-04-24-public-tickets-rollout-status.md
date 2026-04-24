@@ -241,4 +241,22 @@ Mailgun is the second supported inbound provider alongside Postmark across all 5
 
 Mailgun-specific handling: extracts display name from `"Name <email>"`-style `from` header, falls back to `sender` field for the email, carries provider-hosted attachment URLs through in `downloadUrl` / `DownloadURL` so a follow-up worker can fetch + persist out-of-band. Malformed attachments JSON degrades gracefully to an empty list.
 
-Remaining follow-ups: attachment persistence, full reply/ticket-create orchestration (parser → router → create+reply with attachments), host-app deployment docs, and SES parser if demand warrants (third major provider).
+### Orchestration parity (iter 84-88) ✅
+
+The `InboundEmailService` (parser output → router resolution → reply-on-existing OR create-new-ticket OR skip) is now in place on all 5 greenfield frameworks. Every service returns a richer response shape carrying `outcome`, `ticketId`, `replyId`, and `pendingAttachmentDownloads` (provider-hosted URLs surfaced for an out-of-band attachment worker).
+
+| Framework | Orchestration PR |
+|---|---|
+| escalated-dotnet | [#26](https://github.com/escalated-dev/escalated-dotnet/pull/26) |
+| escalated-spring | [#29](https://github.com/escalated-dev/escalated-spring/pull/29) |
+| escalated-go | [#32](https://github.com/escalated-dev/escalated-go/pull/32) |
+| escalated-phoenix | [#38](https://github.com/escalated-dev/escalated-phoenix/pull/38) |
+| escalated-symfony | [#33](https://github.com/escalated-dev/escalated-symfony/pull/33) |
+
+Shared surface across all 5:
+- Skip SNS confirmation mail (`no-reply@sns.amazonaws.com`) and empty-body+empty-subject noise rather than creating a new ticket from it.
+- `(no subject)` fallback when subject is blank but body has content.
+- Provider-hosted attachments (Mailgun) pass through as `PendingAttachment` records; inline attachments don't (host app decides how to persist those).
+- Inbound-email replies are tagged with `authorType = "inbound_email"` (or the framework's equivalent author-class field) so consumers can distinguish them from agent/customer replies.
+
+Remaining follow-ups: attachment persistence workers for provider-hosted downloads, host-app deployment docs, and SES parser if demand warrants (third major provider).
