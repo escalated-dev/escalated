@@ -212,3 +212,17 @@ Per-framework migration sketch for net-new implementations:
 - Workflow routing parity. The NestJS implementation fires Workflows on ticket events; several other frameworks have `Workflow` tables (Laravel in particular) but whether the runner is wired was not verified in this survey.
 
 These are worthwhile follow-up audits.
+
+## Inbound webhook completeness (iter 76-80)
+
+Each of the 5 greenfield frameworks now has the **full inbound webhook stack**: router foundation (priority-chain resolver), Postmark parser (canonical format), and framework-native controller with signature verification. The ingress endpoint `POST /escalated/webhook/email/inbound` is wired up in every framework.
+
+| Framework | Router | Parser + Controller |
+|---|---|---|
+| escalated-dotnet | [#23](https://github.com/escalated-dev/escalated-dotnet/pull/23) | [#24](https://github.com/escalated-dev/escalated-dotnet/pull/24) |
+| escalated-spring | [#26](https://github.com/escalated-dev/escalated-spring/pull/26) | [#27](https://github.com/escalated-dev/escalated-spring/pull/27) |
+| escalated-go | [#29](https://github.com/escalated-dev/escalated-go/pull/29) | [#30](https://github.com/escalated-dev/escalated-go/pull/30) |
+| escalated-phoenix | [#35](https://github.com/escalated-dev/escalated-phoenix/pull/35) | [#36](https://github.com/escalated-dev/escalated-phoenix/pull/36) |
+| escalated-symfony | [#30](https://github.com/escalated-dev/escalated-symfony/pull/30) | [#31](https://github.com/escalated-dev/escalated-symfony/pull/31) |
+
+**Every framework in the ecosystem can now receive inbound webhook mail and route it to the right ticket.** Follow-up per-framework work (Mailgun/SES parsers, attachment persistence, full reply/ticket-create orchestration, host-app deployment docs) can now be tackled on top of this foundation.
