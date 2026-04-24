@@ -1060,7 +1060,7 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - Round-robin assignment is implemented under a new action `assign_round_robin` (team id or null=global).
 - Existing `WorkflowEngineService` is unchanged (pure condition evaluator).
 
-### Task 3.1 — `WorkflowExecutorService` skeleton with action dispatch
+### Task 3.1 — `WorkflowExecutorService` skeleton with action dispatch — COMPLETED (see Phase 3 series)
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\services\workflow-executor.service.ts`
@@ -1116,7 +1116,11 @@ Purpose: when a guest accepts the "create an account" invite, the host app creat
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Tasks 3.2 – 3.10 — Implement each action (one per task)
+### Tasks 3.2 – 3.6 — Implement each action — COMPLETED (same commit as 3.1)
+
+Actions shipped: change_priority, add_tag, remove_tag, change_status, set_department, assign_agent, add_note.
+
+### Tasks 3.7 – 3.10 — DEFERRED to a follow-up phase
 
 Each of these follows the same TDD pattern. **Do not batch.** Each gets its own red spec, minimal impl, commit.
 
@@ -1132,7 +1136,7 @@ Each of these follows the same TDD pattern. **Do not batch.** Each gets its own 
 
 Each task's spec covers: success path, no-op path (e.g. status slug missing), and failure is logged-but-not-thrown (for resilience; the WorkflowLog captures the failure).
 
-### Task 3.11 — `WorkflowListener`
+### Task 3.11 — `WorkflowListener` — COMPLETED (routing goes live)
 
 **Files:**
 - Create: `C:\Users\work\escalated-nestjs\src\listeners\workflow.listener.ts`
@@ -1188,7 +1192,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [ ] **Step 5:** Re-run — expect pass.
 - [ ] **Step 6:** Commit + push.
 
-### Task 3.12 — Integration smoke test (Workflow fires on real `TicketService.create`)
+### Task 3.12 — Integration smoke test (Workflow fires on real `TicketService.create`) — COMPLETED
 
 **Files:**
 - Test: `C:\Users\work\escalated-nestjs\test\integration\ticket-create-triggers-workflow.spec.ts`
