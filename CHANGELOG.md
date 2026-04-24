@@ -2,6 +2,11 @@
 
 All notable changes to `@escalated-dev/escalated` will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- Install a `window.route` safety stub in `EscalatedPlugin.install()` on hosts that haven't provided their own. Non-Laravel hosts previously saw bare `ReferenceError: route is not defined` errors when any of the 77 components that call Ziggy's `route(name, params)` helper rendered. The stub throws a descriptive error naming the missing dependency instead. Laravel hosts with Ziggy loaded are untouched.
+
 ## [0.7.0] - 2026-04-05
 
 ### Added
