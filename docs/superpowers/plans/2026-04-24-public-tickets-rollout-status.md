@@ -313,7 +313,21 @@ Shared semantic surface:
 - Best-effort MIME body decoding (plain, html, multipart/alternative, quoted-printable). Missing content leaves body empty; routing still works via threading metadata.
 - 10 unit tests per port covering every branch.
 
-**Rollout of the public ticket system ecosystem is now feature-complete across the greenfield portfolio** — inbound pipeline (orchestration + router + Postmark + Mailgun + SES + attachment downloader + controller tests) + outbound threading (Message-ID / signed Reply-To) + Contact-pattern B + Workflow stack. Remaining effort is maintenance, observability, and any new provider integrations as demand surfaces.
+**Rollout of the public ticket system ecosystem is now feature-complete across the greenfield portfolio** — inbound pipeline (orchestration + router + Postmark + Mailgun + SES + attachment downloader + controller tests + parser-equivalence tests) + outbound threading (Message-ID / signed Reply-To) + Contact-pattern B + Workflow stack. Remaining effort is maintenance, observability, and any new provider integrations as demand surfaces.
+
+### Parser-equivalence test matrix (iter 114-116) ✅
+
+Each greenfield framework now ships a parser-equivalence test that asserts Postmark, Mailgun, and SES all normalize a single logical email to the same `InboundMessage` metadata + body text. Adding a fourth provider in the future gets contract validation against the existing three for free — just add a `build{Provider}Payload` builder.
+
+| Framework | PR |
+|---|---|
+| escalated-go | [#37](https://github.com/escalated-dev/escalated-go/pull/37) |
+| escalated-dotnet | [#31](https://github.com/escalated-dev/escalated-dotnet/pull/31) |
+| escalated-spring | [#34](https://github.com/escalated-dev/escalated-spring/pull/34) |
+| escalated-phoenix | [#43](https://github.com/escalated-dev/escalated-phoenix/pull/43) |
+| escalated-symfony | [#39](https://github.com/escalated-dev/escalated-symfony/pull/39) |
+
+Same 2-case pattern per port: `NormalizesToSameMessage` (from/to/subject/inReplyTo/references) + `BodyExtractionMatches` (bodyText including SES's base64 MIME path).
 
 ### Public docs for greenfield frameworks (iter 89) ✅
 
