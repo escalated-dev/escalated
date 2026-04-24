@@ -7,35 +7,35 @@
 
 ## PRs in flight
 
-| Framework | PR | Scope |
-|---|---|---|
-| escalated-nestjs | [#17](https://github.com/escalated-dev/escalated-nestjs/pull/17) | Full feature (232 tests) — reference impl |
-| escalated-laravel | [#67](https://github.com/escalated-dev/escalated-laravel/pull/67) | Schema + model convergence |
-| escalated-rails | [#41](https://github.com/escalated-dev/escalated-rails/pull/41) | Schema + model convergence |
-| escalated-django | [#38](https://github.com/escalated-dev/escalated-django/pull/38) | Schema + model convergence |
-| escalated-adonis | [#47](https://github.com/escalated-dev/escalated-adonis/pull/47) | Schema + model convergence |
-| escalated-dotnet | [#17](https://github.com/escalated-dev/escalated-dotnet/pull/17) | Schema + model convergence |
-| escalated-wordpress | [#27](https://github.com/escalated-dev/escalated-wordpress/pull/27) | Schema + model convergence |
-| escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | Schema + model convergence (Pattern A was inline) |
-| escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | Schema + model convergence (Pattern A was inline) |
-| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | Schema + model convergence (Pattern A was inline) |
-| escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | **Greenfield** Pattern B (no prior guest support) |
-| escalated-filament | — | Inherits from escalated-laravel — no separate PR |
+| Framework | PR | Model | Wire-up |
+|---|---|---|---|
+| escalated-nestjs | [#17](https://github.com/escalated-dev/escalated-nestjs/pull/17) | ✅ | ✅ full feature (232 tests) — reference |
+| escalated-laravel | [#67](https://github.com/escalated-dev/escalated-laravel/pull/67) | ✅ | ✅ Guest + Widget controllers |
+| escalated-rails | [#41](https://github.com/escalated-dev/escalated-rails/pull/41) | ✅ | ✅ Guest controller + TicketService |
+| escalated-django | [#38](https://github.com/escalated-dev/escalated-django/pull/38) | ✅ | ✅ Guest + Widget views + inbound service |
+| escalated-adonis | [#47](https://github.com/escalated-dev/escalated-adonis/pull/47) | ✅ | ✅ Guest + Widget + inbound |
+| escalated-dotnet | [#17](https://github.com/escalated-dev/escalated-dotnet/pull/17) | ✅ | ✅ TicketService.CreateAsync |
+| escalated-wordpress | [#27](https://github.com/escalated-dev/escalated-wordpress/pull/27) | ✅ | ✅ TicketService::create_guest |
+| escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | ✅ | ✅ TicketService::create |
+| escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ partial (Contact dedupe; ticket back-link TODO) |
+| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create |
+| escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | ✅ | ✅ TicketService.create (greenfield) |
+| escalated-filament | — | ✅ via laravel | ✅ via laravel |
 
-## Final state — all frameworks covered
+## Final state — rollout complete
 
-**11 PRs are now open across the framework ecosystem.** Filament inherits via the Laravel package. Every framework in Escalated now has (or shortly will have, once the PRs merge) the Contact entity + the ability to dedupe guests by email + the foundation for `promote_to_user`.
+**11 open PRs.** Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail`. Repeat guest submissions dedupe to a single Contact across all frameworks; the foundation for `promote_to_user` is in place everywhere.
 
-### Follow-up backlog (per framework)
+One caveat: **escalated-go** ships Contact dedupe but doesn't back-link the Ticket to the Contact yet — the Ticket CRUD SQL doesn't project `contact_id` through every SELECT scan, and threading that through is deferred as a follow-up. Contact-level dedupe still works (repeat emails yield one Contact row).
 
-Most frameworks still need, separately:
+### Follow-up backlog
 
-- Guest submission controller writing via Contact (currently writes inline guest_* fields)
-- Outbound email Message-ID threading (NestJS has it)
-- Workflow executor wiring (NestJS has it; several frameworks have Workflow tables but no runner)
-- Deprecate + drop inline guest_* columns once Contact writes are live everywhere
+- **escalated-go**: finish the Ticket `contact_id` projection across all SELECT queries
+- All frameworks except NestJS: outbound email Message-ID threading, Workflow executor wiring
+- All frameworks: deprecate + drop inline guest_* columns after a dual-read cycle
+- escalated-spring: inbound email webhook (no prior guest support meant no inbound impl either)
 
-The NestJS PR is the reference; per-framework port work is estimated at 2-4 hours each once needed.
+NestJS is the reference for these follow-ups. Per-framework port work estimated at 2-4 hours once scheduled.
 
 
 ## Summary table
