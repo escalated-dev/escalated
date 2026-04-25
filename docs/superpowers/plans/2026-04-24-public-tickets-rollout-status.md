@@ -169,7 +169,12 @@ All 7 × 5 = **35 PRs** in stacked order; CI won't trigger on stacked branches u
   | go | [#40](https://github.com/escalated-dev/escalated-go/pull/40) | Automation model + runner + migration + admin CRUD + run-now + tests |
   | go | [#41](https://github.com/escalated-dev/escalated-go/pull/41) | Macro model + service + migration + admin CRUD + agent apply + tests |
 
-  The shared frontend's `Admin/Automations/` and `Admin/Macros/` folders are wire-compatible with these endpoints. Routing registration (each framework registers the controller in its router/route table) is a per-host concern handled at install time.
+  The shared frontend's `Admin/Automations/` and `Admin/Macros/` folders are wire-compatible with these endpoints. **Routing is registered** in each framework's router so the new controllers/handlers respond at canonical paths — no host-side install step beyond running migrations:
+
+  - **NestJS** — controllers added to the module's controllers array (auto-route via `@Controller` decorators).
+  - **Symfony** — auto-discovered via `#[Route]` attributes; `config/routes.yaml`'s existing `Controller/Admin/` and `Controller/Agent/` resource loaders pick up the new files. `config/services.yaml` autowire glob picks up the runner + service. Bonus: `bin/console escalated:automations:run` console command added for the cron entry.
+  - **Phoenix** — `lib/escalated/router.ex` `escalated_routes/2` macro now mounts `resources "/admin/automations"`, `post "/admin/automations/run"`, `resources "/admin/macros"`, `get "/agent/macros"`, and `post "/agent/tickets/:ticket_id/macros/:macro_id/apply"`.
+  - **Go** — both `router/chi.go` and `router/stdlib.go` now mount the admin Automation routes (CRUD + `/run`) under `RequireAdmin`, and the admin/agent Macro routes under their respective middlewares. Hosts mounting via `MountChi` or `MountStdlib` get them automatically.
 
 
 ## Summary table
