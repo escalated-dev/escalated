@@ -148,6 +148,15 @@ All 7 × 5 = **35 PRs** in stacked order; CI won't trigger on stacked branches u
 #### Still open
 
 - **Inline guest_* column deprecation** across all frameworks, after a dual-read cycle lands in production. Tracked as future work; not blocking the rollout.
+- **Automation + Macro backend ports** (surfaced 2026-04-24, ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md)). The portfolio currently has gaps in the time-based admin engine (Automations) and the agent macro tool (Macros). Status:
+
+  | Framework | Workflow | Automation | Macro |
+  |---|:---:|:---:|:---:|
+  | laravel / rails / django / adonis / wordpress / dotnet / spring | ✅ | ✅ | ✅ |
+  | nestjs (reference) | ✅ | ❌ | ✅ |
+  | symfony / phoenix / go | ✅ | ❌ | ❌ |
+
+  NestJS Automation port is on the critical path (it's the reference). Symfony / Phoenix / Go need both Automation + Macro ports. Order: NestJS first (as reference), then a sweep across the three greenfield frameworks. Tracked separately from the public-ticket-system rollout — does not block any of the in-flight PRs.
 
 
 ## Summary table
