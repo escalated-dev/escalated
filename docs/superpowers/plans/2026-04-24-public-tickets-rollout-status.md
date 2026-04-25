@@ -148,15 +148,16 @@ All 7 × 5 = **35 PRs** in stacked order; CI won't trigger on stacked branches u
 #### Still open
 
 - **Inline guest_* column deprecation** across all frameworks, after a dual-read cycle lands in production. Tracked as future work; not blocking the rollout.
-- **Automation + Macro backend ports** (surfaced 2026-04-24, ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md)). The portfolio currently has gaps in the time-based admin engine (Automations) and the agent macro tool (Macros). Status:
+- ~~**Automation + Macro backend ports**~~ ✅ shipped 2026-04-25 — every framework gap from ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md) closed in 7 stacked PRs:
 
-  | Framework | Workflow | Automation | Macro |
-  |---|:---:|:---:|:---:|
-  | laravel / rails / django / adonis / wordpress / dotnet / spring | ✅ | ✅ | ✅ |
-  | nestjs (reference) | ✅ | ❌ | ✅ |
-  | symfony / phoenix / go | ✅ | ❌ | ❌ |
+  | Framework | Automation | Macro |
+  |---|---|---|
+  | nestjs (reference) | [#29](https://github.com/escalated-dev/escalated-nestjs/pull/29) (entity + service + scheduler + admin controller + 15 tests) | _existing_ |
+  | symfony | [#40](https://github.com/escalated-dev/escalated-symfony/pull/40) (entity + service + 5 tests) | [#41](https://github.com/escalated-dev/escalated-symfony/pull/41) (entity + service + 6 tests) |
+  | phoenix | [#48](https://github.com/escalated-dev/escalated-phoenix/pull/48) (schema + runner + migration + tests) | [#49](https://github.com/escalated-dev/escalated-phoenix/pull/49) (schema + service + migration + tests) |
+  | go | [#40](https://github.com/escalated-dev/escalated-go/pull/40) (model + runner + migration + helper tests) | [#41](https://github.com/escalated-dev/escalated-go/pull/41) (model + service + migration + helper tests) |
 
-  NestJS Automation port is on the critical path (it's the reference). Symfony / Phoenix / Go need both Automation + Macro ports. Order: NestJS first (as reference), then a sweep across the three greenfield frameworks. Tracked separately from the public-ticket-system rollout — does not block any of the in-flight PRs.
+  Final portfolio state: **all 11 frameworks now have Workflow + Automation + Macro backends**. NestJS reference shipped first; Symfony, Phoenix, Go ports followed. Frontend `Admin/Automations/` and `Admin/Macros/` folders already exist in `@escalated-dev/escalated` — wire once each framework's admin controller lands (follow-up per-framework, not blocking).
 
 
 ## Summary table
