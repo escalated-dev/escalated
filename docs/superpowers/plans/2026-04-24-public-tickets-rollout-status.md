@@ -157,17 +157,17 @@ All 7 × 5 = **35 PRs** in stacked order; CI won't trigger on stacked branches u
   | phoenix | [#48](https://github.com/escalated-dev/escalated-phoenix/pull/48) (schema + runner + migration + tests) | [#49](https://github.com/escalated-dev/escalated-phoenix/pull/49) (schema + service + migration + tests) |
   | go | [#40](https://github.com/escalated-dev/escalated-go/pull/40) (model + runner + migration + helper tests) | [#41](https://github.com/escalated-dev/escalated-go/pull/41) (model + service + migration + helper tests) |
 
-  Final portfolio state: **all 11 frameworks now have Workflow + Automation + Macro backends + admin/agent controllers**. The 7 entity+service PRs were each followed by a controller commit pushed to the same branch:
+  Final portfolio state: **all 11 frameworks now have Workflow + Automation + Macro backends + admin/agent controllers**. Each PR covers entity + service + controller + routing + tests in one branch. **All 7 PRs are CLEAN / MERGEABLE.** Verified 2026-04-25:
 
-  | Framework | Branch / PR | Includes |
-  |---|---|---|
-  | nestjs | [#29](https://github.com/escalated-dev/escalated-nestjs/pull/29) | Automation entity + service + scheduler + admin controller + 15 tests |
-  | symfony | [#40](https://github.com/escalated-dev/escalated-symfony/pull/40) | Automation entity + service + admin CRUD + run-now controller + 5 tests |
-  | symfony | [#41](https://github.com/escalated-dev/escalated-symfony/pull/41) | Macro entity + service + admin CRUD + agent apply + 6 tests |
-  | phoenix | [#48](https://github.com/escalated-dev/escalated-phoenix/pull/48) | Automation schema + runner + migration + admin CRUD + run-now + tests |
-  | phoenix | [#49](https://github.com/escalated-dev/escalated-phoenix/pull/49) | Macro schema + service + migration + admin CRUD + agent apply + tests |
-  | go | [#40](https://github.com/escalated-dev/escalated-go/pull/40) | Automation model + runner + migration + admin CRUD + run-now + tests |
-  | go | [#41](https://github.com/escalated-dev/escalated-go/pull/41) | Macro model + service + migration + admin CRUD + agent apply + tests |
+  | Framework | PR | What's in the PR | CI |
+  |---|---|---|---|
+  | nestjs | [#29](https://github.com/escalated-dev/escalated-nestjs/pull/29) | Automation entity + service + scheduler + admin controller + module wiring + 15 tests | ✅ lint + test 18 + test 20 + test 22 |
+  | symfony | [#40](https://github.com/escalated-dev/escalated-symfony/pull/40) | Automation entity + service + admin CRUD + run-now controller + console command + 5 tests | ✅ PHP-CS-Fixer |
+  | symfony | [#41](https://github.com/escalated-dev/escalated-symfony/pull/41) | Macro entity + service + admin CRUD + agent apply + 6 tests | ✅ PHP-CS-Fixer |
+  | phoenix | [#48](https://github.com/escalated-dev/escalated-phoenix/pull/48) | Automation schema + runner + migration + admin CRUD + run-now + router + tests | ⚪ awaiting [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) (CI workflow trigger fix) |
+  | phoenix | [#49](https://github.com/escalated-dev/escalated-phoenix/pull/49) | Macro schema + service + migration + admin CRUD + agent apply + router + tests | ⚪ awaiting [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) |
+  | go | [#40](https://github.com/escalated-dev/escalated-go/pull/40) | Automation model + runner + migration + admin handler + chi + stdlib router + tests | ✅ golangci-lint |
+  | go | [#41](https://github.com/escalated-dev/escalated-go/pull/41) | Macro model + service + migration + admin + agent handler + chi + stdlib router + tests | ✅ golangci-lint |
 
   The shared frontend's `Admin/Automations/` and `Admin/Macros/` folders are wire-compatible with these endpoints. **Routing is registered** in each framework's router so the new controllers/handlers respond at canonical paths — no host-side install step beyond running migrations:
 
