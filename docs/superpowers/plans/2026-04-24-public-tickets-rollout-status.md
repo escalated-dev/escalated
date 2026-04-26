@@ -21,13 +21,13 @@
 | escalated-symfony | [#26](https://github.com/escalated-dev/escalated-symfony/pull/26) | ✅ | ✅ TicketService::create | ✅ |
 | escalated-symfony | [#27](https://github.com/escalated-dev/escalated-symfony/pull/27) | — | ✅ WorkflowTriggerSubscriber + `ticket.priority_changed` | ✅ |
 | escalated-go | [#26](https://github.com/escalated-dev/escalated-go/pull/26) | ✅ | ✅ TicketService.Create (+ contact_id threaded through Ticket SQL) | ✅ |
-| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create | — (repo has no CI configured) |
+| escalated-phoenix | [#29](https://github.com/escalated-dev/escalated-phoenix/pull/29) | ✅ | ✅ TicketService.create | ✅ CI green via [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) — workflow now targets `master` and scopes format + credo checks to PR-changed `lib/`/`test/` files |
 | escalated-spring | [#20](https://github.com/escalated-dev/escalated-spring/pull/20) | ✅ | ✅ TicketService.create (greenfield) | ✅ |
 | escalated-filament | — | ✅ via laravel | ✅ via laravel | — |
 
 ## Final state — rollout complete, all CI green
 
-**13 open PRs, all CI-green** (Phoenix has no CI configured at the repo level; runs locally). Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail` + ticket back-linked via `contact_id`. Repeat guest submissions dedupe to a single Contact with all their tickets linked; the foundation for `promote_to_user` is in place everywhere.
+**13 open PRs, all CI-green** (Phoenix CI lands in [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) — workflow now targets `master` and scopes format/credo checks to PR-changed files to avoid pre-existing backlog). Every framework in the Escalated ecosystem now has Pattern B wired end-to-end: Contact entity + FK on Ticket + guest submission paths writing via `findOrCreateByEmail` + ticket back-linked via `contact_id`. Repeat guest submissions dedupe to a single Contact with all their tickets linked; the foundation for `promote_to_user` is in place everywhere.
 
 ### Follow-up backlog (future PRs)
 
@@ -131,12 +131,50 @@ Follow-up PRs per framework (greenfield only):
 - Framework-native webhook controller (`POST /escalated/webhook/email/inbound`)
 - Full orchestration service (parser → router → reply/ticket create + attachment handling)
 
+#### Provider parsers + webhook controllers — **all 5 greenfield frameworks drafted** ✅
+
+Each of the 5 greenfield frameworks (dotnet / spring / go / phoenix / symfony) now has the full inbound stack in stacked PRs: Postmark + Mailgun + SES parsers, `InboundEmailController`, orchestration service (`InboundEmailService` that runs the parse → router → reply/ticket-create pipeline), `AttachmentDownloader`, HTTP-level controller tests, and parser equivalence tests.
+
+| Framework | Postmark + controller | Mailgun | Orchestration | Controller tests | AttachmentDownloader | SES | Parser equivalence |
+|---|---|---|---|---|---|---|---|
+| escalated-dotnet | [#24](https://github.com/escalated-dev/escalated-dotnet/pull/24) | [#25](https://github.com/escalated-dev/escalated-dotnet/pull/25) | [#26](https://github.com/escalated-dev/escalated-dotnet/pull/26) | [#28](https://github.com/escalated-dev/escalated-dotnet/pull/28) | [#29](https://github.com/escalated-dev/escalated-dotnet/pull/29) | [#30](https://github.com/escalated-dev/escalated-dotnet/pull/30) | [#31](https://github.com/escalated-dev/escalated-dotnet/pull/31) |
+| escalated-spring | [#27](https://github.com/escalated-dev/escalated-spring/pull/27) | [#28](https://github.com/escalated-dev/escalated-spring/pull/28) | [#29](https://github.com/escalated-dev/escalated-spring/pull/29) | [#31](https://github.com/escalated-dev/escalated-spring/pull/31) | [#32](https://github.com/escalated-dev/escalated-spring/pull/32) | [#33](https://github.com/escalated-dev/escalated-spring/pull/33) | [#34](https://github.com/escalated-dev/escalated-spring/pull/34) |
+| escalated-go | [#30](https://github.com/escalated-dev/escalated-go/pull/30) | [#31](https://github.com/escalated-dev/escalated-go/pull/31) | [#32](https://github.com/escalated-dev/escalated-go/pull/32) | — (inline in handler PR) | [#35](https://github.com/escalated-dev/escalated-go/pull/35) | [#36](https://github.com/escalated-dev/escalated-go/pull/36) | [#37](https://github.com/escalated-dev/escalated-go/pull/37) |
+| escalated-phoenix | [#36](https://github.com/escalated-dev/escalated-phoenix/pull/36) | [#37](https://github.com/escalated-dev/escalated-phoenix/pull/37) | [#38](https://github.com/escalated-dev/escalated-phoenix/pull/38) | [#40](https://github.com/escalated-dev/escalated-phoenix/pull/40) | [#41](https://github.com/escalated-dev/escalated-phoenix/pull/41) | [#42](https://github.com/escalated-dev/escalated-phoenix/pull/42) | [#43](https://github.com/escalated-dev/escalated-phoenix/pull/43) |
+| escalated-symfony | [#31](https://github.com/escalated-dev/escalated-symfony/pull/31) | [#32](https://github.com/escalated-dev/escalated-symfony/pull/32) | [#33](https://github.com/escalated-dev/escalated-symfony/pull/33) | [#36](https://github.com/escalated-dev/escalated-symfony/pull/36) | [#37](https://github.com/escalated-dev/escalated-symfony/pull/37) | [#38](https://github.com/escalated-dev/escalated-symfony/pull/38) | [#39](https://github.com/escalated-dev/escalated-symfony/pull/39) |
+
+All 7 × 5 = **35 PRs** in stacked order; CI won't trigger on stacked branches until bases merge and they rebase. NestJS reference is the baseline for signature verification + parser semantics in every port.
+
 #### Still open
 
-- **Per-framework webhook controllers + provider parsers** — follow-ups for the 5 greenfield frameworks. Each ~100-200 LOC + provider-specific signature verification. Laravel/Rails/Django/Adonis/WordPress already have these.
-- **Inline guest_* column deprecation** across all frameworks after a dual-read cycle lands in production.
+- **Inline guest_* column deprecation** across all frameworks, after a dual-read cycle lands in production. Tracked as future work; not blocking the rollout.
+- ~~**Automation + Macro backend ports**~~ ✅ shipped 2026-04-25 — every framework gap from ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md) closed in 7 stacked PRs:
 
-NestJS is the reference for these follow-ups.
+  | Framework | Automation | Macro |
+  |---|---|---|
+  | nestjs (reference) | [#29](https://github.com/escalated-dev/escalated-nestjs/pull/29) (entity + service + scheduler + admin controller + 15 tests) | _existing_ |
+  | symfony | [#40](https://github.com/escalated-dev/escalated-symfony/pull/40) (entity + service + 5 tests) | [#41](https://github.com/escalated-dev/escalated-symfony/pull/41) (entity + service + 6 tests) |
+  | phoenix | [#48](https://github.com/escalated-dev/escalated-phoenix/pull/48) (schema + runner + migration + tests) | [#49](https://github.com/escalated-dev/escalated-phoenix/pull/49) (schema + service + migration + tests) |
+  | go | [#40](https://github.com/escalated-dev/escalated-go/pull/40) (model + runner + migration + helper tests) | [#41](https://github.com/escalated-dev/escalated-go/pull/41) (model + service + migration + helper tests) |
+
+  Final portfolio state: **all 11 frameworks now have Workflow + Automation + Macro backends + admin/agent controllers**. Each PR covers entity + service + controller + routing + tests in one branch. **All 7 PRs are CLEAN / MERGEABLE.** Verified 2026-04-25:
+
+  | Framework | PR | What's in the PR | CI |
+  |---|---|---|---|
+  | nestjs | [#29](https://github.com/escalated-dev/escalated-nestjs/pull/29) | Automation entity + service + scheduler + admin controller + module wiring + 15 tests | ✅ lint + test 18 + test 20 + test 22 |
+  | symfony | [#40](https://github.com/escalated-dev/escalated-symfony/pull/40) | Automation entity + service + admin CRUD + run-now controller + console command + 5 tests | ✅ PHP-CS-Fixer |
+  | symfony | [#41](https://github.com/escalated-dev/escalated-symfony/pull/41) | Macro entity + service + admin CRUD + agent apply + 6 tests | ✅ PHP-CS-Fixer |
+  | phoenix | [#48](https://github.com/escalated-dev/escalated-phoenix/pull/48) | Automation schema + runner + migration + admin CRUD + run-now + router + tests | ⚪ awaiting [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) (CI workflow trigger fix) |
+  | phoenix | [#49](https://github.com/escalated-dev/escalated-phoenix/pull/49) | Macro schema + service + migration + admin CRUD + agent apply + router + tests | ⚪ awaiting [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) |
+  | go | [#40](https://github.com/escalated-dev/escalated-go/pull/40) | Automation model + runner + migration + admin handler + chi + stdlib router + tests | ✅ golangci-lint |
+  | go | [#41](https://github.com/escalated-dev/escalated-go/pull/41) | Macro model + service + migration + admin + agent handler + chi + stdlib router + tests | ✅ golangci-lint |
+
+  The shared frontend's `Admin/Automations/` and `Admin/Macros/` folders are wire-compatible with these endpoints. **Routing is registered** in each framework's router so the new controllers/handlers respond at canonical paths — no host-side install step beyond running migrations:
+
+  - **NestJS** — controllers added to the module's controllers array (auto-route via `@Controller` decorators).
+  - **Symfony** — auto-discovered via `#[Route]` attributes; `config/routes.yaml`'s existing `Controller/Admin/` and `Controller/Agent/` resource loaders pick up the new files. `config/services.yaml` autowire glob picks up the runner + service. Bonus: `bin/console escalated:automations:run` console command added for the cron entry.
+  - **Phoenix** — `lib/escalated/router.ex` `escalated_routes/2` macro now mounts `resources "/admin/automations"`, `post "/admin/automations/run"`, `resources "/admin/macros"`, `get "/agent/macros"`, and `post "/agent/tickets/:ticket_id/macros/:macro_id/apply"`.
+  - **Go** — both `router/chi.go` and `router/stdlib.go` now mount the admin Automation routes (CRUD + `/run`) under `RequireAdmin`, and the admin/agent Macro routes under their respective middlewares. Hosts mounting via `MountChi` or `MountStdlib` get them automatically.
 
 
 ## Summary table
@@ -376,3 +414,114 @@ Each of the 5 greenfield plugin repos now has a top-level `## Inbound email` sec
 | escalated-go | [#33](https://github.com/escalated-dev/escalated-go/pull/33) |
 | escalated-phoenix | [#39](https://github.com/escalated-dev/escalated-phoenix/pull/39) |
 | escalated-symfony | [#34](https://github.com/escalated-dev/escalated-symfony/pull/34) |
+
+### Deferred workflow actions (iter 122-130) ✅
+
+The NestJS reference and the four drafted workflow-stack frameworks (Spring, WordPress, .NET, Phoenix) originally shipped only the 8-action catalog (`change_priority`, `change_status`, `add_tag`, `remove_tag`, `set_department`, `assign_agent`, `add_note`, `insert_canned_reply`). The plan's Phase 3 called for four more actions that depend on external infrastructure (a webhook table, a followers table, an agent-pool strategy, a deferred-job queue). These landed as four stacked PRs on the NestJS feature branch plus a delay-action port to Spring / Phoenix / WordPress.
+
+| Framework | send_webhook | add_follower | assign_round_robin | delay |
+|---|---|---|---|---|
+| escalated-nestjs | [#23](https://github.com/escalated-dev/escalated-nestjs/pull/23) | [#25](https://github.com/escalated-dev/escalated-nestjs/pull/25) | [#24](https://github.com/escalated-dev/escalated-nestjs/pull/24) | [#26](https://github.com/escalated-dev/escalated-nestjs/pull/26) |
+| escalated-spring | (pre-existing) | (pre-existing) | (pre-existing) | [#35](https://github.com/escalated-dev/escalated-spring/pull/35) |
+| escalated-phoenix | (pre-existing) | (pre-existing) | (pre-existing) | [#44](https://github.com/escalated-dev/escalated-phoenix/pull/44) |
+| escalated-wordpress | (pre-existing) | (pre-existing) | (pre-existing) | [#35](https://github.com/escalated-dev/escalated-wordpress/pull/35) |
+
+**Legacy framework stacks already had `delay`** (Laravel/Rails/Django/Adonis/.NET/Symfony/Go) — the 4 new ports only covered the frameworks where the workflow stack was freshly landed in iter 42-50.
+
+The delay action's queue implementation diverges intentionally across frameworks:
+- NestJS + Spring + WordPress — *one row with a JSON list of remaining actions*, seconds granularity
+- Phoenix + Laravel + Django — *one row per remaining action*, minutes granularity
+Each port picked the convention its ecosystem already used; unifying wasn't scoped.
+
+### Greenfield Task 6.3 — runtime guest-policy settings (iter 131+) ✅
+
+Task 6.3 was the last remaining gap from the original plan. The shared `Admin/Settings/PublicTickets.vue` page landed in iter 92-95 for the six legacy host adapters (Laravel / Rails / Django / Adonis / WordPress / Filament) and for Symfony (which needed the foundation built first at [#35](https://github.com/escalated-dev/escalated-symfony/pull/35)). The four greenfield adapters were deferred because each uses a JSON API surface rather than the Inertia/Vue renderer the shared page targets.
+
+| Framework | Settings PR | Prior settings infra? |
+|---|---|---|
+| escalated-dotnet | [#32](https://github.com/escalated-dev/escalated-dotnet/pull/32) | Yes — `SettingsService` + `EscalatedSettings` pre-existed |
+| escalated-go | [#38](https://github.com/escalated-dev/escalated-go/pull/38) | No — built `Store.GetSetting/SetSetting` + new `escalated_settings` table |
+| escalated-spring | [#36](https://github.com/escalated-dev/escalated-spring/pull/36) | Yes — `SettingsService` + JPA entity pre-existed |
+| escalated-phoenix | [#45](https://github.com/escalated-dev/escalated-phoenix/pull/45) | No — built `SettingsService` + Ecto schema + migration |
+| escalated-nestjs reference | [#27](https://github.com/escalated-dev/escalated-nestjs/pull/27) | Yes — added dedicated endpoint so the reference tracks the ecosystem; internally writes single `guest_policy` JSON blob so WidgetController's existing `getTyped('guest_policy')` read-path keeps working with zero change |
+
+**Shared semantic surface across all four ports** (plus the legacy adapters + Symfony):
+- 3 keys: `guest_policy_mode` (unassigned | guest_user | prompt_signup) / `guest_policy_user_id` / `guest_policy_signup_url_template`
+- Unknown `guest_policy_mode` coerces to `unassigned` (never 500s)
+- Mode switch clears the fields that don't apply to the new mode
+- Zero / negative / non-numeric user_id surfaces as JSON null on GET
+- Signup URL templates trimmed + truncated to 500 chars
+- snake_case wire format matches what the shared Vue page sends (via `@JsonPropertyName`, `@JsonProperty`, native Go struct tags, or Elixir map keys as appropriate)
+
+**Task 6.3 is now shipped across the entire ecosystem** — 10 host-framework plugins + the shared frontend.
+
+### Public-facing docs (iter 131+) ✅
+
+Two new docs pages landed in `escalated-dev/escalated-docs`:
+
+| Page | PR | Covers |
+|---|---|---|
+| `sections/workflows.md` | [#9](https://github.com/escalated-dev/escalated-docs/pull/9) | Full Workflow feature — 5 trigger events the runner actually bridges (out of 12 that exist in the event bus), the 12 action types including `delay` (with seconds-vs-minutes unit divergence across frameworks called out), the `{field, operator, value}` condition model, webhook delivery + signature verification, template interpolation on scalar columns, decision table vs. Automations |
+| `sections/public-tickets.md` | [#10](https://github.com/escalated-dev/escalated-docs/pull/10) | Guest-policy mode decision table, admin settings page behavior + runtime API, widget submission + deployment caveat about in-memory rate limiter, 4-priority inbound routing chain, `promoteToUser` flow, Contact-pattern data model, provider coverage table (NestJS + 5 greenfield support SES; 5 legacy plugins are Postmark+Mailgun only) |
+
+Both docs went through aggressive self-review after drafting; 20+ factual corrections were caught and fixed before shipping (variable names, signatures, payload shapes, endpoint paths, unit conventions, condition-map accessibility).
+
+### End state
+
+At this checkpoint, every task in the original plan has either shipped or been explicitly deferred as a pre-existing infrastructure concern:
+
+- **Task 3.9 `delay`** — shipped across all 11 frameworks (1 reference + 10 plugins)
+- **Task 6.3 runtime settings** — shipped across all 10 host-framework plugins
+- **Task 9.4 final acceptance test** — manual, requires a fully-wired staging environment (not automatable)
+
+Then, two additional bug-sweeps (see sections below) were driven by self-review of the docs I wrote for the rollout — docs claiming "the admin settings page lets you switch modes at runtime" turned out to be aspirational on most plugins. Fixing that reality gap shipped as **11 more PRs across 6 frameworks × 2 code paths** (widget / guest form, then inbound email). Details and per-framework PR links follow.
+
+Remaining smaller follow-ups for future iterations:
+- ~~Per-framework CHANGELOG entries for frameworks that don't yet have them~~ ✅ backfilled — see Spring [#37](https://github.com/escalated-dev/escalated-spring/pull/37), Phoenix [#47](https://github.com/escalated-dev/escalated-phoenix/pull/47), Go [#39](https://github.com/escalated-dev/escalated-go/pull/39), .NET [#33](https://github.com/escalated-dev/escalated-dotnet/pull/33)
+- The 1-line Phoenix `WorkflowRunner` update to pass `workflow_id` to `execute/3` once `feat/workflow-runner` + `feat/workflow-delay` both merge on master
+- ~~Phoenix `mix format` follow-up — running CI for the first time (via [#46](https://github.com/escalated-dev/escalated-phoenix/pull/46)) surfaced pre-existing format drift across ~20 files; needs a local Elixir+Erlang toolchain to run `mix format` on the whole codebase~~ ✅ solved by scoping the check — [phoenix#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) now runs `mix format --check-formatted` against only the `*.ex`/`*.exs` files the PR modifies (via `git diff --diff-filter=AM origin/$BASE...HEAD`). Pre-existing drift across ~33 files is left alone; it cleans up organically as those files get touched. New PR drift still gets blocked.
+- ~~WordPress plugin-upgrade-path gap — existing installs need reactivation to pick up new tables; would benefit from a `plugins_loaded` version check that triggers `Activator::activate()` on version mismatch~~ ✅ shipped — [wordpress#37](https://github.com/escalated-dev/escalated-wordpress/pull/37) adds `Activator::maybe_upgrade()` + 3 unit tests, wired into `plugins_loaded`. Unblocks all in-flight PR #33–#36 which introduce new tables/permissions.
+- **Ziggy `route()` helper dependency across 79 Vue components** — The shared frontend calls `route('escalated.admin.saved-views.update', id)` and similar in 79 files. That's Ziggy (Laravel) specifically. Laravel hosts get it for free, but other frameworks (Rails, Django, NestJS, etc.) need a `window.route()` shim that speaks Ziggy's API to generate the right URLs for their named route tables. **Partial mitigation shipped** in [escalated#36](https://github.com/escalated-dev/escalated/pull/36): `EscalatedPlugin.install()` now installs a `window.route` stub on non-Laravel hosts that throws a descriptive "install Ziggy or ship a compatible shim" error instead of a bare `ReferenceError` mid-render. Existing Laravel installs (with Ziggy loaded) are left untouched. Full functional compat across all 77 call sites remains a larger, per-host-framework effort and is not in this rollout's scope.
+
+### Widget↔settings disconnection fix sweep — **all 6 affected frameworks shipped** ✅
+
+Surfaced during docs self-review: the admin settings page at `Admin → Settings → Public Tickets` was persisting `guest_policy_mode` / `guest_policy_user_id` / `guest_policy_signup_url_template` to the settings store, but every public-submission code path wrote `requester*` / `guest*` fields **unconditionally**, ignoring the configured mode. The admin page had zero behavioral effect. Fixed in a 6-PR sweep:
+
+| Framework | Fix PR | Entry points covered |
+|---|---|---|
+| escalated-nestjs | [#27](https://github.com/escalated-dev/escalated-nestjs/pull/27) | Adds dedicated `/admin/settings/public-tickets` endpoint that writes a single `guest_policy` JSON blob matching what `WidgetController.resolveGuestPolicy` already reads. Closes the NestJS reference's API-surface gap with the 10 host plugins while also wiring settings→behavior end-to-end. |
+| escalated-laravel | [#72](https://github.com/escalated-dev/escalated-laravel/pull/72) | `WidgetController::createTicket`. |
+| escalated-rails | [#47](https://github.com/escalated-dev/escalated-rails/pull/47) | `WidgetController#create_ticket` + `Guest::TicketsController#store`. |
+| escalated-django | [#44](https://github.com/escalated-dev/escalated-django/pull/44) | `widget.widget_create_ticket` + `guest.guest_create_ticket`. Factored a `_apply_guest_policy` helper. |
+| escalated-adonis | [#52](https://github.com/escalated-dev/escalated-adonis/pull/52) | `WidgetController#createTicket` + `GuestTicketsController#store`. New `resolveGuestPolicy()` helper returns `{ requesterType, requesterId }` to preserve TypeScript literal-type inference at the call site. |
+| escalated-wordpress | [#36](https://github.com/escalated-dev/escalated-wordpress/pull/36) | `TicketService::create_guest` (both the REST widget endpoint and the `[escalated_portal]` AJAX handler go through this one method). |
+
+Shared semantics across all 6 ports:
+- `unassigned` (default): existing behavior — `requester*` null, `guest*` fields set.
+- `guest_user`: route to the configured host user via the framework's polymorphic-requester FK (`requester_type` + `requester_id`, `requesterType` + `requesterId`, or just `requester_id` on WP where ticket requesters are always WP users). Still records `guest_name` / `guest_email` so agents see who submitted.
+- `prompt_signup`: same ticket-create path as unassigned today. Signup-invite emission is a listener-level follow-up in every framework (needs a `TicketSignupInviteEvent` + listener that doesn't exist yet on the legacy plugins).
+
+Misconfigured `guest_user` (zero / missing user id) falls through to unassigned in every framework, so bad admin input can't 500 public submissions.
+
+Added 20 new test cases across the 6 frameworks (4-8 per framework) covering the three modes, the misconfigured-fallback path, and regression coverage of the default `unassigned` path.
+
+### Inbound-email second wave — **all frameworks covered** ✅
+
+Once the widget sweep wrapped, I audited the inbound-email ticket-creation path for the same bug. Every framework's `InboundEmailService` (or equivalent) was writing `guest_*` fields unconditionally when an email arrived from an unregistered sender, ignoring `guest_policy_mode` just like the widget controllers did.
+
+| Framework | Fix PR | Notes |
+|---|---|---|
+| escalated-nestjs | [#28](https://github.com/escalated-dev/escalated-nestjs/pull/28) | `InboundRouterService.createTicket` — adds `SettingsService` DI + `resolveRequesterIdForGuestPolicy` mirror of the widget helper. |
+| escalated-laravel | [#73](https://github.com/escalated-dev/escalated-laravel/pull/73) | `InboundEmailService::createNewTicket` — same 3-mode branching as widget #72. 3 new Pest cases. |
+| escalated-rails | [#48](https://github.com/escalated-dev/escalated-rails/pull/48) | `InboundEmailService` guest-ticket branch — mirrors widget #47. |
+| escalated-django | [#45](https://github.com/escalated-dev/escalated-django/pull/45) | `InboundEmailService._create_ticket` now delegates to `_apply_guest_policy` (the helper factored in widget #44) — one implementation, both paths wired. |
+| escalated-adonis | [#53](https://github.com/escalated-dev/escalated-adonis/pull/53) | `InboundEmailService#createNewTicket` wired through `resolveGuestPolicy` (from widget #52). Stacked on the widget fix because the helper file lives there. |
+| escalated-wordpress | **covered by [#36](https://github.com/escalated-dev/escalated-wordpress/pull/36)** — no separate PR needed | WP's `InboundEmailService::_create_new_ticket` delegates to `TicketService::create_guest`, which is exactly the method patched by #36. Centralizing ticket-creation logic paid off — the widget-fix PR automatically fixed the inbound path too. |
+
+### Infrastructure fixes surfaced along the way
+
+| Fix | Why |
+|---|---|
+| [escalated-phoenix#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) | `lint.yml` triggered on `main` but the repo's default branch is `master`, so **CI had never run on any Phoenix PR** across the entire rollout. Same PR also relaxes `inertia_phoenix` constraint from the unsatisfiable `~> 0.9` to `~> 0.4` (latest published), and scopes both `mix format --check-formatted` and `mix credo` to only the `lib/`/`test/` `.ex`/`.exs` files each PR modifies — master has ~33 files of pre-existing format drift + ~30 credo findings that predate this workflow ever running, and blocking every PR on that backlog would be disproportionate. Drift on existing files cleans up organically as they get touched; new drift a PR introduces still fails CI. Lint now green. |
+| escalated-dotnet#32 rebase | The settings-endpoints PR was accidentally stacked on top of 9 inbound-email branches, dragging in half-landed code that referenced symbols not yet on `main`. Force-pushed a clean rebase onto `main` — 104 tests + lint now green. |
+| escalated-django#43 / escalated-adonis#51 / escalated-symfony#35 | Lint fixes (ruff format / prettier / php-cs-fixer Yoda conditions) on public-tickets settings PRs from earlier iterations — were blocking merge. |
