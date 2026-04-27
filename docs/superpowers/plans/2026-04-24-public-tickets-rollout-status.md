@@ -575,3 +575,33 @@ After three consecutive Ralph-loop iterations of merge-and-recover work, the pub
 When working through deep stacks (Symfony, Phoenix, .NET, Spring all had 7-10 stacked PRs), aggressive single-PR rebases (taking `--theirs` for all add/add conflicts) collapse the stack into one super-PR that captures everything. After that PR merges, the upper PRs can be closed as superseded.
 
 **Total this session: 107 PRs merged across 11 framework repos, ~22 hours of work.**
+
+## 2026-04-26/27 — rollout closeout
+
+**128+ PRs merged, 10 of 11 frameworks fully clean (Phoenix #43 included).** Only one PR (.NET #37 inbound-email-controller) was still in flight at the end of this push, blocked on a `using Microsoft.AspNetCore.Http` import for `Request.EnableBuffering()`.
+
+**WordPress v1.2.0 released:** https://github.com/escalated-dev/escalated-wordpress/releases/tag/v1.2.0
+
+The release bundles every escalated-wordpress merge from this rollout: Pattern B contacts, public-ticket guest-policy admin page + widget/inbound enforcement, the workflow stack (executor + runner + listener + delay), RFC 5322 email threading, `Activator::maybe_upgrade()`, the brand chevron sidebar icon, plus a fix for the wp-admin Tickets page rendering twice (root cause: `add_menu_page` auto-creates a submenu with the parent slug, and adding an explicit `add_submenu_page` with that same slug re-registers the callback on the page-load hook).
+
+**Per-repo recovered-PR counts** (closed-unmerged PRs that resulted from squash-cascade auto-closing stacked branches, then got rebased onto main as new PRs):
+
+| Repo | Recovered |
+|---|---|
+| escalated-laravel | 2 |
+| escalated-rails | 2 |
+| escalated-django | 2 |
+| escalated-adonis | 3 |
+| escalated-symfony | 9 |
+| escalated-wordpress | 5 |
+| escalated-phoenix | 8 |
+| escalated-go | 10 |
+| escalated-spring | 10 |
+| escalated-nestjs | 8 |
+| escalated-dotnet | 5 |
+
+Phoenix's `lint.yml` workflow went through three iterations to land a working PR-changed-file scope: regex with empty-string-bug → literal-grep with ANSI strip → defensive empty-array guard. Final form runs `mix credo --strict --mute-exit-status` over the whole project, strips ANSI codes, then per-PR-changed file does `grep -F "$f:"`. Pre-existing master drift stays visible in the log but doesn't block PRs that don't touch the offending files.
+
+WordPress's recovery surfaced a substantial pre-existing bug — the wp-admin `Tickets` page rendered twice on every load — which was exposed only when the workflow-listener PR's tests started failing the runner-test count assertions. Fix in [#43](https://github.com/escalated-dev/escalated-wordpress/pull/43) drops the redundant `add_submenu_page` and routes the auto-created submenu's title via `menu_title`.
+
+.NET `WorkflowEngine.EvaluateConditions` had a long-standing bug where JSON-loaded conditions silently bypassed all checks (the type-pattern match only fired for in-memory `List<Dictionary>` shapes; JSON deserialization yields `JsonElement` arrays). Fixed in the workflow-runner recovery PR ([#35](https://github.com/escalated-dev/escalated-dotnet/pull/35)).
