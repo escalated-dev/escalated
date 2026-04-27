@@ -2,9 +2,7 @@
 
 > **For agentic workers (Ralph Loop, etc.):** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax. **Never skip the TDD red step (write failing test → confirm failure → implement).**
 
-**Goal:** Ship an end-to-end public (anonymous) ticketing system: a guest can submit a ticket via a public form *or* inbound email, the ticket is routed automatically by admin-configured rules, the guest receives outbound confirmation/reply emails that thread correctly, and admin has a configurable policy for what identity the guest gets (guest user / unassigned / invited to create an account). Additionally, ship a Macros admin UI so the existing `Macro` backend has a first-class home in the admin surface.
-
-**Note on Workflows / Automations / Macros:** earlier drafts of this plan framed the work as "repurpose the dead Automations UI into Macros." That framing was wrong — see [`escalated-developer-context/decisions/2026-04-24-admin-agent-tool-split.md`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md). The locked taxonomy: **Workflows** (admin, event-driven), **Automations** (admin, time-based), **Macros** (agent, manual). All three co-exist permanently; the Automations folder + sidebar link stay. Macros gets its own admin UI at `Admin/Macros/`.
+**Goal:** Ship an end-to-end public (anonymous) ticketing system: a guest can submit a ticket via a public form *or* inbound email, the ticket is routed automatically by admin-configured rules, the guest receives outbound confirmation/reply emails that thread correctly, and admin has a configurable policy for what identity the guest gets (guest user / unassigned / invited to create an account). Additionally, resolve the Workflows-vs-Automations split: Workflows remain the admin automation engine; the Automations UI is repurposed into an agent-facing Macros system.
 
 **Architecture:**
 - **Backend:** NestJS v10 module in `C:\Users\work\escalated-nestjs` (TypeORM, EventEmitter2, Jest).
@@ -12,10 +10,7 @@
 - **Email:** `@nestjs-modules/mailer` + `nodemailer` for outbound; a single webhook endpoint with a pluggable parser interface for inbound (Postmark first, Mailgun/SendGrid stub adapters).
 - **Extension model:** Pure event listeners (`@OnEvent`) — no new plugin runtime. Mirrors the existing WebhookService / EscalatedGateway patterns.
 - **Data model additions:** `Contact` entity (new, first-class), `Macro` entity (new), Workflow action executor (new), Contact-aware ticket creation. `requesterId: number` is preserved on `Ticket` for host-app user mapping; a nullable `contactId: number | null` is added for guest/contact-based tickets.
-- **Three-surface split (locked by ADR 2026-04-24-admin-agent-tool-split):**
-  - **Workflows** — admin, event-driven (`ticket.created`, `reply.created`, …). Existing entity + service.
-  - **Automations** — admin, time-based (cron scans `hours_since_*` conditions). Backend exists in 7/11 hosts; NestJS port is a follow-up. Frontend folder + sidebar link stay.
-  - **Macros** — agent, manual one-click action bundles. Existing entity + service in NestJS. Phase 7 ships its admin UI at `Admin/Macros/` (separate from `Admin/Automations/`).
+- **Two-audience split (final):** **Workflows** = admin-managed, automatic, runs on events. **Macros** = agent-applied, manual one-click action bundles (replaces the dead Automations UI).
 
 **Tech stack:** TypeScript 5, NestJS 10, TypeORM 0.3, EventEmitter2, Jest 29 + ts-jest, Vue 3, Inertia, Vitest 2, nodemailer, @nestjs-modules/mailer.
 
@@ -27,14 +22,12 @@
 
 ## Audit corrections (discovered during execution)
 
-- **2026-04-24:** Macro entity, service (CRUD + execute), admin & agent controllers already exist in `escalated-nestjs`. Action set: `set_status`, `set_priority`, `set_department`, `assign`, `add_reply`, `add_note`. Phase 7 is therefore reduced to: (a) add `insert_canned_reply` with Handlebars-style interpolation, (b) add a frontend Macros admin UI at `Admin/Macros/` that points at the existing backend, (c) add a MacroMenu component on the agent ticket detail. See Phase 7 notes below.
-
-- **2026-04-24 (later):** Earlier in this plan an audit recommended deleting the `Admin/Automations/` frontend folder as "dead UI." That audit was wrong — Automations has a working time-based backend in 7 of 11 host plugins (Laravel, Rails, Django, Adonis, WordPress, .NET, Spring) and is a permanent admin surface. See ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md) for the canonical taxonomy. The deletion commit (`0b3cc25`) has been reverted on this branch. Macros gets its own folder at `Admin/Macros/` independent of Automations.
+- **2026-04-24:** Macro entity, service (CRUD + execute), admin & agent controllers already exist in `escalated-nestjs`. Action set: `set_status`, `set_priority`, `set_department`, `assign`, `add_reply`, `add_note`. Phase 7 is therefore reduced to: (a) add `insert_canned_reply` with Handlebars-style interpolation, (b) delete the dead `Admin/Automations/` frontend, (c) add a frontend Macros admin UI that points at the existing backend, (d) add a MacroMenu component on the agent ticket detail. See Phase 7 notes below.
 
 ## Product decisions locked before coding starts
 
-1. **Workflows, Automations, and Macros are three separate surfaces — all permanent.** Locked by ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md). Workflows = admin event-driven. Automations = admin time-based (cron). Macros = agent manual. None of them subsume each other; none are being removed or renamed.
-2. **Phase 7 of this plan ships only the Macros admin UI.** New folder `src/pages/Admin/Macros/`. The pre-existing `src/pages/Admin/Automations/` folder + sidebar link stay untouched. NestJS port of the Automation backend is tracked separately (next reference work after this plan completes).
+1. **Workflows stay as the admin automation engine.** The existing `Workflow` entity, service, Builder.vue, and Logs.vue are canonical.
+2. **Automations frontend folder is renamed/repurposed to Macros.** It currently has no backend, so there is no data migration. No user-facing breaking change (per user confirmation: "won't break existing builds").
 3. **Contact is a first-class entity.** A guest ticket always has a `Contact` record (`email`, optional `name`, `userId` nullable). Repeat guests are deduped by email. `Ticket.requesterId` remains for host-app user references; `Ticket.contactId` is added for contacts.
 4. **Admin-configurable guest identity policy** with three modes (default = `unassigned`):
    - `unassigned` — no host-app user is linked. `ticket.requesterId = 0`. Contact carries email/name.
@@ -117,8 +110,8 @@
 | `src/widget/EscalatedWidget.vue` | Modify: collect `email` and `name`, pass in payload. |
 | `src/pages/Guest/Create.vue` | Modify: drop `requesterId` dependency; send email/name. |
 | `src/pages/Admin/Macros/Index.vue` | New (copy structure from existing Workflows Index). |
-| `src/pages/Admin/Macros/Form.vue` | New (independent from Automations — Macros is a separate feature). |
-| `src/pages/Admin/Automations/` | **Untouched.** Stays as-is; serves the time-based admin engine that exists in 7/11 host plugins. |
+| `src/pages/Admin/Macros/Form.vue` | New (evolves from dead `Admin/Automations/Form.vue`). |
+| `src/pages/Admin/Automations/` | Delete (dead UI; confirmed by user). |
 | `src/pages/Admin/Settings/PublicTickets.vue` | New: Guest policy + inbound email config. |
 | `src/pages/Agent/Tickets/MacroMenu.vue` | New: dropdown on ticket detail. |
 
@@ -135,7 +128,7 @@ The plan is broken into nine phases. Each phase ships something useful on its ow
 - **Phase 4 — Outbound email (transactional).**
 - **Phase 5 — Inbound email ingress (new ticket + reply threading).**
 - **Phase 6 — Guest policy + admin settings UI.**
-- **Phase 7 — Macros admin UI** (independent of Automations).
+- **Phase 7 — Macros (repurposed from Automations).**
 - **Phase 8 — Frontend wiring (widget + Guest page).**
 - **Phase 9 — Cleanup + docs.**
 
@@ -1405,17 +1398,15 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 
 ---
 
-# Phase 7 — Macros admin UI
-
-**Note:** earlier drafts framed this phase as "repurposing the dead Automations UI." That framing was wrong (see ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md)). Macros is its own admin feature with its own folder; the Automations folder + sidebar link stay untouched.
+# Phase 7 — Macros (repurposed Automations)
 
 **Definition of done:**
 - `Macro` entity exists (`name`, `description`, `scope: 'personal' | 'shared'`, `ownerId: number | null`, `actions: JSON`).
 - `MacroService.list(agentId)`, `apply(macroId, ticketId, agentId)`.
 - Admin CRUD + agent-apply endpoints.
-- Frontend `Admin/Macros/Index.vue` (+ optional `Form.vue`) — independent of Automations.
-- Agent ticket detail gets a `MacroDropdown.vue` component with an "Apply Macro" dropdown.
-- `Admin/Automations/` folder + sidebar link **stay** (untouched by this phase).
+- Frontend `Admin/Macros/Index.vue` + `Admin/Macros/Form.vue` replace the old `Admin/Automations/` folder.
+- Agent ticket detail gets a `MacroMenu.vue` component with a "Apply Macro" dropdown.
+- Old `Admin/Automations/` folder is deleted.
 
 ### Tasks 7.1 – 7.9 — Mirror the Contact / Workflow phase pattern — COMPLETED
 
@@ -1427,7 +1418,7 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 - [x] **7.6** — `insert_canned_reply` action with variable interpolation (commit 0db04b1).
 - [x] **7.7** — `src/controllers/admin/macro.controller.ts` (admin CRUD, permission-guarded).
 - [x] **7.8** — `src/controllers/agent/macro.controller.ts` (agent apply endpoint).
-- [x] **7.9** — Frontend: `src/pages/Admin/Macros/Index.vue` ships inline form (modal pattern — no separate `Form.vue` needed). `src/components/MacroDropdown.vue` wired into both Admin and Agent ticket Show pages. The `Admin/Automations/` folder is **kept** (the prior plan called for deleting it, but that was reverted on 2026-04-24 — see ADR).
+- [x] **7.9** — Frontend: `src/pages/Admin/Macros/Index.vue` ships inline form (modal pattern — no separate `Form.vue` needed). `src/components/MacroDropdown.vue` wired into both Admin and Agent ticket Show pages. Old `Admin/Automations/` folder was already deleted in an earlier phase (Task 9.1).
 
 ---
 
@@ -1450,13 +1441,10 @@ Each task's spec covers: success path, no-op path (e.g. status slug missing), an
 
 # Phase 9 — Cleanup + docs
 
-### Task 9.1 — REVERTED — Automations UI was NOT actually dead
+### Task 9.1 — Delete dead Automations UI — COMPLETED
 
-This task was originally "Delete dead Automations UI" and was marked complete by commit `0b3cc25` on this branch. **That deletion was reverted on 2026-04-24** by commit `d5fdb58`.
-
-The original audit was wrong — it observed only the NestJS reference (which has never had an `AutomationRunner`) and missed that 7 of 11 host plugins (Laravel, Rails, Django, Adonis, WordPress, .NET, Spring) ship a working time-based Automation backend. Deleting the UI would strand that feature.
-
-The corrected taxonomy is locked in ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md). The NestJS Automation port is tracked as a follow-up to this plan.
+- [ ] Delete `C:\Users\work\escalated\src\pages\Admin\Automations\` folder.
+- [ ] Search for stale imports/references. Remove.
 
 ### Task 9.2 — README updates in both repos — COMPLETED (backend README + CHANGELOG)
 
@@ -1549,7 +1537,7 @@ git commit -m "docs: record public ticket acceptance test run" --allow-empty
 - `src/pages/Guest/Create.vue`
 
 **Frontend — deleted:**
-- _(none — the prior plan called for deleting `src/pages/Admin/Automations/` but that was reverted on 2026-04-24; see ADR [`2026-04-24-admin-agent-tool-split`](https://github.com/escalated-dev/escalated-developer-context/blob/main/decisions/2026-04-24-admin-agent-tool-split.md))_
+- `src/pages/Admin/Automations/` (entire folder)
 
 ---
 

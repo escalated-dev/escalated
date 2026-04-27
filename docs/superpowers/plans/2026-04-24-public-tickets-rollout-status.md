@@ -525,3 +525,83 @@ Once the widget sweep wrapped, I audited the inbound-email ticket-creation path 
 | [escalated-phoenix#46](https://github.com/escalated-dev/escalated-phoenix/pull/46) | `lint.yml` triggered on `main` but the repo's default branch is `master`, so **CI had never run on any Phoenix PR** across the entire rollout. Same PR also relaxes `inertia_phoenix` constraint from the unsatisfiable `~> 0.9` to `~> 0.4` (latest published), and scopes both `mix format --check-formatted` and `mix credo` to only the `lib/`/`test/` `.ex`/`.exs` files each PR modifies — master has ~33 files of pre-existing format drift + ~30 credo findings that predate this workflow ever running, and blocking every PR on that backlog would be disproportionate. Drift on existing files cleans up organically as they get touched; new drift a PR introduces still fails CI. Lint now green. |
 | escalated-dotnet#32 rebase | The settings-endpoints PR was accidentally stacked on top of 9 inbound-email branches, dragging in half-landed code that referenced symbols not yet on `main`. Force-pushed a clean rebase onto `main` — 104 tests + lint now green. |
 | escalated-django#43 / escalated-adonis#51 / escalated-symfony#35 | Lint fixes (ruff format / prettier / php-cs-fixer Yoda conditions) on public-tickets settings PRs from earlier iterations — were blocking merge. |
+
+## 2026-04-26/27 — stacked-PR merge sweep
+
+Merged 68 PRs across 11 framework repos in one session. Strategy: merge bottom-of-stack PRs first; recover auto-closed stacked PRs by rebasing onto `main` and creating fresh PRs (since GitHub closes — never auto-retargets — stacked PRs when their base is squash-deleted).
+
+**Fully clean (0 open):**
+- escalated-laravel — 7 merged (incl. #72 widget guest_policy)
+- escalated-rails — 7 merged (incl. #43 email-message-id, #49 wireup recovery, #47 widget, #48 inbound)
+- escalated-django — 7 merged (incl. #40 email, #46 wireup recovery, #44 widget, #45 inbound)
+
+**Partially landed:**
+- escalated-adonis — 4 merged, 3 open (recovered #54 wireup, #55 inbound-honors)
+- escalated-symfony — 7 merged, 8 open (recovered #42 wireup; deep inbound stack still pending)
+- escalated-wordpress — 7 merged, 3 open (recovered #38 wireup; #39 workflow-runner, #40 workflow-delay tests fail because `workflows` table missing from activator — needs schema add)
+- escalated-phoenix — 7 merged, 14 open (recovered #50 wireup, #51 workflow-runner, #52 workflow-delay; deep inbound stack still pending; #45 admin-settings hit pre-existing format drift)
+- escalated-go — 7 merged, 8 open (recovered #42 wireup)
+- escalated-dotnet — 6 merged, 11 open (recovered #34 wireup, #35 workflow-runner, #36 inbound-email-webhook; #35 workflow-runner test failures need investigation)
+- escalated-spring — 7 merged, 10 open (recovered #38 wireup, #40 workflow-delay; #39 workflow-runner test failures)
+- escalated-nestjs — 2 merged, 3 open
+
+**Recovery pattern:** for each auto-closed stacked PR, the head branch survived the close. `git rebase --onto origin/main {old-base-sha} {head-branch}` → `git push -f` → `gh pr create --base main` reproduces the diff with squashed-base commits dropped. Skip-cherry-picks warnings during rebase mean the bottom commit's content is already upstream — that's expected and benign.
+
+**Outstanding work for follow-up:**
+1. Deep inbound chains (Symfony 8, Phoenix ~10, Go ~8, .NET ~9, Spring ~10) — each needs the same recovery treatment up the stack: PostmarkParser → MailgunParser → InboundEmailService orchestration → AttachmentDownloader → SESParser → parser-equivalence tests.
+2. WordPress workflow tests — `workflows` table missing from `class-activator.php`; both #39 and #40 will keep failing until it's added.
+3. .NET workflow-runner test failures — `RunForEvent_StopOnMatch_OnlyAppliesOnMatch` expects 2 executions, gets 1. Likely a behavior-vs-test mismatch introduced by the rebase onto main.
+4. Spring #39 workflow-runner test failures — same family as .NET.
+
+## 2026-04-26/27 — final summary (107 PRs merged, 7 frameworks clean)
+
+After three consecutive Ralph-loop iterations of merge-and-recover work, the public-ticket-system rollout is now 88% complete:
+
+**Fully clean (0 open):** Laravel, Rails, Django, Adonis, Symfony, Go, Spring — 7 of 11 framework repos.
+
+**Remaining (14 open across 3 repos):**
+- escalated-phoenix (5): inbound docs/test/attachment/ses/parser-equivalence — pre-existing Credo refactoring issues + complex `mix format` wrapping in PR-added files. Need an Elixir toolchain to run `mix format` + `mix credo` locally.
+- escalated-dotnet (8): Mailgun parser switch-arm whitespace + InboundEmailController build fixes propagating up the stack.
+- escalated-wordpress (1): #41 workflow-listener — TypeError + 5 test failures need investigation; pre-existing test-DB schema gaps (`escalated_ticket_links` table missing from activator).
+
+**Infrastructure fixes shipped along the way:**
+- Phoenix lint workflow rewritten 3 times (commits #53 / #55 / #59 to escalated-phoenix master) — final approach: run `mix credo --strict --mute-exit-status` over whole project, strip ANSI codes from output, then `grep -F "$f:"` per PR-changed file. Failures only block when issues exist in PR-touched files.
+- WordPress activator now creates `escalated_workflows` + `escalated_workflow_logs` tables (was missing — workflow-runner tests had nothing to insert into).
+- .NET `EscalatedOptions` gained `EmailOptions { InboundSecret, Domain }` config for inbound webhook secret verification.
+- .NET `WorkflowEngine.EvaluateConditions` no longer falls through to `return true` for JsonElement-shaped conditions (the type-pattern only matched in-memory `List<Dictionary>` shape; JSON-loaded conditions silently bypassed all checks). Added `NormalizeConditionList` helper that handles both shapes.
+
+**Recovery pattern documented:** for each auto-closed stacked PR, the head branch survives the close. `git rebase --onto origin/main {old-base-sha} {head-branch}` → `git push -f` → `gh pr create --base main` reproduces the diff with squashed-base commits dropped. `--reapply-cherry-picks` warning during rebase indicates the bottom commit's content is already upstream — that's expected.
+
+When working through deep stacks (Symfony, Phoenix, .NET, Spring all had 7-10 stacked PRs), aggressive single-PR rebases (taking `--theirs` for all add/add conflicts) collapse the stack into one super-PR that captures everything. After that PR merges, the upper PRs can be closed as superseded.
+
+**Total this session: 107 PRs merged across 11 framework repos, ~22 hours of work.**
+
+## 2026-04-26/27 — rollout closeout
+
+**128+ PRs merged, 10 of 11 frameworks fully clean (Phoenix #43 included).** Only one PR (.NET #37 inbound-email-controller) was still in flight at the end of this push, blocked on a `using Microsoft.AspNetCore.Http` import for `Request.EnableBuffering()`.
+
+**WordPress v1.2.0 released:** https://github.com/escalated-dev/escalated-wordpress/releases/tag/v1.2.0
+
+The release bundles every escalated-wordpress merge from this rollout: Pattern B contacts, public-ticket guest-policy admin page + widget/inbound enforcement, the workflow stack (executor + runner + listener + delay), RFC 5322 email threading, `Activator::maybe_upgrade()`, the brand chevron sidebar icon, plus a fix for the wp-admin Tickets page rendering twice (root cause: `add_menu_page` auto-creates a submenu with the parent slug, and adding an explicit `add_submenu_page` with that same slug re-registers the callback on the page-load hook).
+
+**Per-repo recovered-PR counts** (closed-unmerged PRs that resulted from squash-cascade auto-closing stacked branches, then got rebased onto main as new PRs):
+
+| Repo | Recovered |
+|---|---|
+| escalated-laravel | 2 |
+| escalated-rails | 2 |
+| escalated-django | 2 |
+| escalated-adonis | 3 |
+| escalated-symfony | 9 |
+| escalated-wordpress | 5 |
+| escalated-phoenix | 8 |
+| escalated-go | 10 |
+| escalated-spring | 10 |
+| escalated-nestjs | 8 |
+| escalated-dotnet | 5 |
+
+Phoenix's `lint.yml` workflow went through three iterations to land a working PR-changed-file scope: regex with empty-string-bug → literal-grep with ANSI strip → defensive empty-array guard. Final form runs `mix credo --strict --mute-exit-status` over the whole project, strips ANSI codes, then per-PR-changed file does `grep -F "$f:"`. Pre-existing master drift stays visible in the log but doesn't block PRs that don't touch the offending files.
+
+WordPress's recovery surfaced a substantial pre-existing bug — the wp-admin `Tickets` page rendered twice on every load — which was exposed only when the workflow-listener PR's tests started failing the runner-test count assertions. Fix in [#43](https://github.com/escalated-dev/escalated-wordpress/pull/43) drops the redundant `add_submenu_page` and routes the auto-created submenu's title via `menu_title`.
+
+.NET `WorkflowEngine.EvaluateConditions` had a long-standing bug where JSON-loaded conditions silently bypassed all checks (the type-pattern match only fired for in-memory `List<Dictionary>` shapes; JSON deserialization yields `JsonElement` arrays). Fixed in the workflow-runner recovery PR ([#35](https://github.com/escalated-dev/escalated-dotnet/pull/35)).
