@@ -12,6 +12,10 @@ vi.mock('../../src/composables/useChat', () => ({
     }),
 }));
 
+vi.mock('@inertiajs/vue3', () => ({
+    usePage: () => ({ props: { escalated: { prefix: 'support' } } }),
+}));
+
 function mountPanel(props = {}, dark = false) {
     return mount(ActiveChatsPanel, {
         props: {

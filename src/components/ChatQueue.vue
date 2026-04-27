@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { useChat } from '../composables/useChat';
 
@@ -66,8 +67,13 @@ async function acceptChat(session) {
     }
 }
 
-// Subscribe to queue for real-time updates
-const { subscribeToChatQueue } = useChat();
+// Subscribe to queue for real-time updates. Read the host framework's
+// route prefix from Inertia page props so chat API calls resolve
+// correctly on NestJS backends ('/escalated/widget') as well as every
+// other framework ('/support/widget').
+const page = usePage();
+const routePrefix = page.props.escalated?.prefix || 'support';
+const { subscribeToChatQueue } = useChat({ widgetPath: `/${routePrefix}/widget` });
 
 onMounted(() => {
     subscribeToChatQueue({

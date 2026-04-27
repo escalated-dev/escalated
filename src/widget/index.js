@@ -7,6 +7,10 @@ import EscalatedWidget from './EscalatedWidget.vue';
 
     const config = {
         baseUrl: scriptTag?.getAttribute('data-base-url') || globalConfig.baseUrl || '',
+        // Host-framework-specific path prefix. Every plugin except the NestJS
+        // reference mounts at /support/widget; NestJS mounts at
+        // /escalated/widget. Set via data-widget-path on NestJS backends.
+        widgetPath: scriptTag?.getAttribute('data-widget-path') || globalConfig.widgetPath || '/support/widget',
         color: scriptTag?.getAttribute('data-color') || globalConfig.color || '#4F46E5',
         position: scriptTag?.getAttribute('data-position') || globalConfig.position || 'bottom-right',
     };
@@ -29,6 +33,7 @@ import EscalatedWidget from './EscalatedWidget.vue';
         render() {
             return h(EscalatedWidget, {
                 baseUrl: config.baseUrl,
+                widgetPath: config.widgetPath,
                 initialColor: config.color,
                 initialPosition: config.position,
             });

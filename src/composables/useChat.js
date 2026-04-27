@@ -6,8 +6,17 @@ import { useRealtime } from './useRealtime';
  *
  * Provides methods to start, send messages, end, and rate chat sessions,
  * plus real-time subscription via useRealtime.
+ *
+ * @param {Object} [options]
+ * @param {string} [options.widgetPath] - Path prefix under which the host
+ *   framework mounts widget routes. Defaults to `/support/widget` which
+ *   matches every host-adapter plugin (Laravel / Rails / Django / Adonis /
+ *   WordPress / Filament / Symfony / .NET / Go / Spring / Phoenix). On a
+ *   NestJS backend, pass `/escalated/widget` (or read from whatever
+ *   configuration channel the host app exposes to the client).
  */
-export function useChat() {
+export function useChat(options = {}) {
+    const widgetPath = options.widgetPath ?? '/support/widget';
     const connectionState = ref('disconnected'); // disconnected | connecting | connected
     const messageBuffer = ref([]);
 
@@ -40,7 +49,7 @@ export function useChat() {
      * @returns {Promise<Object>} The created chat session
      */
     async function startChat(data) {
-        return apiRequest('POST', '/support/widget/chat/start', data);
+        return apiRequest('POST', `${widgetPath}/chat/start`, data);
     }
 
     /**
@@ -50,7 +59,7 @@ export function useChat() {
      * @returns {Promise<Object>}
      */
     async function sendMessage(sessionId, body) {
-        const message = await apiRequest('POST', `/support/widget/chat/${sessionId}/messages`, body);
+        const message = await apiRequest('POST', `${widgetPath}/chat/${sessionId}/messages`, body);
         return message;
     }
 
@@ -65,7 +74,7 @@ export function useChat() {
         if (now - lastTypingSent < 3000) return;
         lastTypingSent = now;
         try {
-            await apiRequest('POST', `/support/widget/chat/${sessionId}/typing`);
+            await apiRequest('POST', `${widgetPath}/chat/${sessionId}/typing`);
         } catch {
             // silently ignore typing failures
         }
@@ -77,7 +86,7 @@ export function useChat() {
      * @returns {Promise<Object>}
      */
     async function endChat(sessionId) {
-        return apiRequest('POST', `/support/widget/chat/${sessionId}/end`);
+        return apiRequest('POST', `${widgetPath}/chat/${sessionId}/end`);
     }
 
     /**
@@ -88,7 +97,7 @@ export function useChat() {
      * @returns {Promise<Object>}
      */
     async function rateChat(sessionId, rating, comment = '') {
-        return apiRequest('POST', `/support/widget/chat/${sessionId}/rate`, { rating, comment });
+        return apiRequest('POST', `${widgetPath}/chat/${sessionId}/rate`, { rating, comment });
     }
 
     /**
@@ -98,7 +107,7 @@ export function useChat() {
      */
     async function checkAvailability(departmentId = null) {
         const query = departmentId ? `?department_id=${departmentId}` : '';
-        return apiRequest('GET', `/support/widget/chat/availability${query}`);
+        return apiRequest('GET', `${widgetPath}/chat/availability${query}`);
     }
 
     /**

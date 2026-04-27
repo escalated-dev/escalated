@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { useChat } from '../composables/useChat';
 import { timeAgo } from '../utils/formatting';
@@ -88,8 +89,13 @@ function chatInitials(chat) {
         .slice(0, 2);
 }
 
-// Real-time: listen for new chats assigned to this agent
-const { subscribeToChatQueue } = useChat();
+// Real-time: listen for new chats assigned to this agent. Read the
+// host framework's route prefix from Inertia page props (default
+// 'support') so chat API calls resolve correctly on NestJS backends
+// that use '/escalated/widget' instead of '/support/widget'.
+const page = usePage();
+const routePrefix = page.props.escalated?.prefix || 'support';
+const { subscribeToChatQueue } = useChat({ widgetPath: `/${routePrefix}/widget` });
 
 onMounted(() => {
     subscribeToChatQueue({
