@@ -1,6 +1,6 @@
 {
   "name": "@escalated-dev/escalated",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Vue 3 + Inertia.js UI components for Escalated \u00e2\u20ac\u201d the embeddable support ticket system",
   "author": "Escalated Dev <hello@escalated.dev>",
   "license": "MIT",
