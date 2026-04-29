@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-04-28
+
 ### Changed
 - `peerDependencies."@inertiajs/vue3"` widened from `^1.0.0 || ^2.0.0` to `^1.0.0 || ^2.0.0 || ^3.0.0`. Host apps on `@inertiajs/vue3` 3.x no longer trip an `npm install` peer-dep conflict. We use only `Link`, `router`, `useForm`, and `usePage` from this package, all stable across the v1/v2/v3 line.
 
