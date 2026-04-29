@@ -27,21 +27,57 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      # Storybook screenshots only need re-rendering when something
+      # visual actually changed — Vue components, Storybook config /
+      # global CSS, or the screenshot Playwright config itself. Skip
+      # the (~5 min) build + render + upload work otherwise. Always
+      # run on workflow_dispatch so manual reruns aren't blocked.
+      - name: Detect visual changes since previous tag
+        id: visual_diff
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "manual dispatch — running"
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PREV_TAG=$(git describe --abbrev=0 --tags HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "no previous tag — running"
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --quiet "$PREV_TAG" HEAD -- \
+                'src/**/*.vue' \
+                'src/**/*.css' \
+                '.storybook/**' \
+                'playwright-screenshots.config.js'; then
+            echo "no visual changes since $PREV_TAG — skipping"
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "visual changes detected since $PREV_TAG — running"
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node.js
+        if: steps.visual_diff.outputs.should_run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Install dependencies
+        if: steps.visual_diff.outputs.should_run == 'true'
         run: npm install
 
       - name: Install Playwright Chromium
+        if: steps.visual_diff.outputs.should_run == 'true'
         run: npx playwright install chromium --with-deps
 
       - name: Build Storybook
+        if: steps.visual_diff.outputs.should_run == 'true'
         run: npx storybook build --output-dir storybook-static
 
       - name: Take screenshots
+        if: steps.visual_diff.outputs.should_run == 'true'
         run: |
           npx http-server storybook-static -p 6006 -s &
           sleep 3
@@ -50,14 +86,14 @@ jobs:
 
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.visual_diff.outputs.should_run == 'true'
         with:
           name: component-screenshots
           path: screenshot-results/*.png
           retention-days: 30
 
       - name: Commit updated README screenshots
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: steps.visual_diff.outputs.should_run == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
