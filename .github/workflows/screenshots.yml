@@ -16,8 +16,16 @@ jobs:
     name: Component Screenshots
 
     steps:
-      - name: Checkout code
+      # Tag-triggered runs default to a detached-HEAD checkout of the
+      # tagged commit, which makes the screenshot-update commit at the
+      # bottom of this job unpushable. Pin to main so we can commit +
+      # push back. The Storybook content is the same either way (main
+      # HEAD == tag commit when the tag is fresh).
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -54,8 +62,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/assets/escalated_admin_1.png docs/assets/escalated_admin_2.png
-          git diff --cached --quiet && echo "No screenshot changes" || {
-            git commit -m "chore: update README screenshots from Storybook"
-            git push
-          }
+          if git diff --cached --quiet; then
+            echo "No screenshot changes"
+          else
+            git commit -m "chore: update README screenshots from Storybook [skip ci]"
+            git push origin HEAD:main
+          fi
 
