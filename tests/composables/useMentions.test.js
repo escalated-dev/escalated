@@ -3,6 +3,17 @@ import { mount } from '@vue/test-utils';
 import { defineComponent, ref, nextTick } from 'vue';
 import { useMentions } from '../../src/composables/useMentions';
 
+// Stub fetch — empty queries (cursor positioned right after `@`) bypass the
+// debounce timer in useMentions and fire fetchSuggestions synchronously.
+// Without a stub, happy-dom would attempt a real request to localhost:3000.
+vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([]),
+    }),
+);
+
 // Helper component to test the composable
 const TestComponent = defineComponent({
     setup() {
