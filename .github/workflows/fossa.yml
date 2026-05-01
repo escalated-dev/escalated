@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   analyze:
-    if: ${{ secrets.FOSSA_API_KEY != '' }}
     runs-on: ubuntu-latest
     name: FOSSA Analysis
 
