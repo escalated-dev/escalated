@@ -60,7 +60,7 @@ jobs:
 
       - name: Setup Node.js
         if: steps.visual_diff.outputs.should_run == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 22
 
