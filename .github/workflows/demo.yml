@@ -100,7 +100,7 @@ jobs:
           fi
 
       - name: Upload GIF artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: demo-gif
           path: .github/profile/demo.gif
@@ -108,7 +108,7 @@ jobs:
 
       - name: Upload debug frames
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: demo-debug-frames
           path: .github/profile/demo_frame_*.png
