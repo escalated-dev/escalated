@@ -3,6 +3,8 @@ name: fossa
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -12,6 +14,7 @@ jobs:
   analyze:
     if: ${{ secrets.FOSSA_API_KEY != '' }}
     runs-on: ubuntu-latest
+    name: FOSSA Analysis
 
     steps:
       - name: Checkout code
@@ -24,3 +27,8 @@ jobs:
         env:
           FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
         run: fossa analyze
+
+      - name: Run FOSSA policy test
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+        run: fossa test
