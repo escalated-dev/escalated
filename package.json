@@ -66,7 +66,7 @@
     "eslint": "^10.0.1",
     "eslint-plugin-storybook": "^10.2.12",
     "eslint-plugin-vue": "^10.8.0",
-    "happy-dom": "^15.0.0",
+    "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "playwright": "^1.50.0",
