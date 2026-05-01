@@ -19,9 +19,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run FOSSA scan and test
+      - name: Run FOSSA scan
         uses: fossas/fossa-action@main
         with:
           api-key: ${{ secrets.FOSSA_API_KEY }}
           branch: ${{ github.head_ref || github.ref_name }}
+
+      - name: Run FOSSA policy test
+        uses: fossas/fossa-action@main
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
           run-tests: true
