@@ -22,7 +22,7 @@ jobs:
       # push back. The Storybook content is the same either way (main
       # HEAD == tag commit when the tag is fresh).
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: main
           fetch-depth: 0
