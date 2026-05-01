@@ -117,7 +117,7 @@ jobs:
 
       - name: Commit updated GIF
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'chore: update demo GIF [skip ci]'
           file_pattern: '.github/profile/demo.gif'
