@@ -4,6 +4,9 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- feat: consume translations from `@escalated-dev/locale` as the canonical base source, with `src/locales/*.json` retained as local plugin overrides that win over central. Public `useI18n().t()` / `$t` API is unchanged.
+
 ## [0.7.1] - 2026-04-28
 
 ### Changed
