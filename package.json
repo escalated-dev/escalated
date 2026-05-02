@@ -32,6 +32,9 @@
     "@inertiajs/vue3": "^1.0.0 || ^2.0.0 || ^3.0.0",
     "vue": "^3.3.0"
   },
+  "dependencies": {
+    "@escalated-dev/locale": "^0.1.0"
+  },
   "scripts": {
     "test": "vitest run",
     "lint": "eslint src/ --max-warnings 0",
