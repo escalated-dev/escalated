@@ -1,5 +1,17 @@
 import { ref, computed } from 'vue';
-import locales from '../locales/index.js';
+import overrideLocales from '../locales/index.js';
+
+// Central translations published from escalated-dev/escalated-locale.
+// This is the BASE layer. Local src/locales/*.json files in this repo are
+// loaded as OVERRIDES and win over the central source for any matching key.
+//
+// Until @escalated-dev/locale v0.1.0 ships its consolidated strings, this
+// import resolves to a stub object with the same shape. Local overrides
+// (src/locales/) preserve the current behavior so components keep rendering
+// the strings they always rendered. After Codex finishes consolidating
+// translations into the central package, the local override files can be
+// trimmed (or deleted entirely) and the central source becomes authoritative.
+import centralLocales from '@escalated-dev/locale';
 
 const currentLocale = ref('en');
 const customMessages = ref({});
@@ -55,21 +67,31 @@ export function useI18n() {
     function t(key, replacements) {
         const lang = currentLocale.value;
 
-        // Try custom messages for current locale
+        // 1. Host-app supplied messages for the current locale (highest priority).
         const custom = resolve(customMessages.value[lang], key);
         if (typeof custom === 'string') return applyReplacements(custom, replacements);
 
-        // Try built-in messages for current locale
-        const msg = resolve(locales[lang], key);
-        if (typeof msg === 'string') return applyReplacements(msg, replacements);
+        // 2. Local plugin overrides for the current locale (src/locales/*.json).
+        //    These exist to let this repo win over the central source for any
+        //    string the plugin needs to phrase differently.
+        const override = resolve(overrideLocales[lang], key);
+        if (typeof override === 'string') return applyReplacements(override, replacements);
 
-        // Fallback to English
+        // 3. Central source for the current locale (@escalated-dev/locale).
+        //    This is the canonical base layer.
+        const central = resolve(centralLocales?.[lang], key);
+        if (typeof central === 'string') return applyReplacements(central, replacements);
+
+        // 4. English fallbacks, in the same priority order.
         if (lang !== 'en') {
             const customEn = resolve(customMessages.value.en, key);
             if (typeof customEn === 'string') return applyReplacements(customEn, replacements);
 
-            const fallback = resolve(locales.en, key);
-            if (typeof fallback === 'string') return applyReplacements(fallback, replacements);
+            const overrideEn = resolve(overrideLocales.en, key);
+            if (typeof overrideEn === 'string') return applyReplacements(overrideEn, replacements);
+
+            const centralEn = resolve(centralLocales?.en, key);
+            if (typeof centralEn === 'string') return applyReplacements(centralEn, replacements);
         }
 
         // Return raw key
