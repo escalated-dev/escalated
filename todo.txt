@@ -1,0 +1,6 @@
+# todo.txt — escalated frontend repo
+
+x 2026-05-06 `gh issue list` across all 12 repos shows zero BLOCKER/BUG issues
+  resolved: claim holds — 0 BLOCKER + 0 BUG across all 17 portfolio repos
+  see: docs/snapshots/2026-05-06-issue-triage.md
+  AiTaskManager task: c5174d19-ca89-4dc1-85bf-adf8ae48ff30
