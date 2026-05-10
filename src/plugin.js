@@ -94,7 +94,7 @@ function darken(hex, percent) {
 }
 
 function scaleBorderRadius(radius, factor) {
-    const match = radius.match(/^([\d.]+)(.*)$/);
+    const match = radius.match(/^(\d+(?:\.\d+)?|\.\d+)(.*)$/);
     if (!match) return radius;
     return `${(parseFloat(match[1]) * factor).toFixed(2)}${match[2] || 'rem'}`;
 }
