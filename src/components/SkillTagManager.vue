@@ -2,31 +2,35 @@
 import { ref, computed } from 'vue';
 
 const props = defineProps({
-    availableSkills: { type: Array, default: () => [] },
+    items: { type: Array, default: () => [] },
     modelValue: { type: Array, default: () => [] },
+    addLabel: { type: String, default: 'Add Item' },
+    emptyLabel: { type: String, default: 'No items selected' },
+    itemLabelKey: { type: String, default: 'name' },
+    itemValueKey: { type: String, default: 'id' },
 });
 
 const emit = defineEmits(['update:modelValue']);
 
 const showDropdown = ref(false);
 
-const selectedSkills = computed(() => {
-    return props.availableSkills.filter((s) => props.modelValue.includes(s.id));
+const selectedItems = computed(() => {
+    return props.items.filter((item) => props.modelValue.includes(item[props.itemValueKey]));
 });
 
-const unselectedSkills = computed(() => {
-    return props.availableSkills.filter((s) => !props.modelValue.includes(s.id));
+const unselectedItems = computed(() => {
+    return props.items.filter((item) => !props.modelValue.includes(item[props.itemValueKey]));
 });
 
-function addSkill(skillId) {
-    emit('update:modelValue', [...props.modelValue, skillId]);
+function addItem(value) {
+    emit('update:modelValue', [...props.modelValue, value]);
     showDropdown.value = false;
 }
 
-function removeSkill(skillId) {
+function removeItem(value) {
     emit(
         'update:modelValue',
-        props.modelValue.filter((id) => id !== skillId),
+        props.modelValue.filter((id) => id !== value),
     );
 }
 </script>
@@ -36,42 +40,42 @@ function removeSkill(skillId) {
         <!-- Selected skill tags -->
         <div class="flex flex-wrap gap-1.5">
             <span
-                v-for="skill in selectedSkills"
-                :key="skill.id"
+                v-for="item in selectedItems"
+                :key="item[itemValueKey]"
                 class="inline-flex items-center gap-1 rounded-md bg-cyan-500/15 px-2 py-1 text-xs font-medium text-cyan-300 ring-1 ring-cyan-500/20"
             >
-                {{ skill.name }}
+                {{ item[itemLabelKey] }}
                 <button
-                    aria-label="Remove skill"
+                    :aria-label="`Remove ${item[itemLabelKey]}`"
                     class="ml-0.5 text-cyan-400 hover:text-cyan-200"
-                    @click="removeSkill(skill.id)"
+                    @click="removeItem(item[itemValueKey])"
                 >
                     &times;
                 </button>
             </span>
-            <span v-if="!selectedSkills.length" class="text-xs text-neutral-500">No skills assigned</span>
+            <span v-if="!selectedItems.length" class="text-xs text-neutral-500">{{ emptyLabel }}</span>
         </div>
 
         <!-- Add button / dropdown -->
         <div class="relative">
             <button
-                v-if="unselectedSkills.length"
+                v-if="unselectedItems.length"
                 class="rounded-lg border border-dashed border-white/[0.08] px-2 py-1 text-xs text-neutral-400 transition-colors hover:border-white/[0.15] hover:text-neutral-300"
                 @click="showDropdown = !showDropdown"
             >
-                + Add Skill
+                + {{ addLabel }}
             </button>
             <div
-                v-if="showDropdown && unselectedSkills.length"
+                v-if="showDropdown && unselectedItems.length"
                 class="absolute left-0 top-full z-10 mt-1 max-h-40 w-48 overflow-y-auto rounded-lg border border-white/[0.06] bg-neutral-900 py-1 shadow-xl"
             >
                 <button
-                    v-for="skill in unselectedSkills"
-                    :key="skill.id"
+                    v-for="item in unselectedItems"
+                    :key="item[itemValueKey]"
                     class="w-full px-3 py-1.5 text-left text-xs text-neutral-300 transition-colors hover:bg-white/[0.04]"
-                    @click="addSkill(skill.id)"
+                    @click="addItem(item[itemValueKey])"
                 >
-                    {{ skill.name }}
+                    {{ item[itemLabelKey] }}
                 </button>
             </div>
         </div>
