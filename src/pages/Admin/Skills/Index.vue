@@ -33,7 +33,12 @@ function destroy(id) {
                         <th
                             class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                         >
-                            Agents
+                            Routing
+                        </th>
+                        <th
+                            class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
+                            Updated
                         </th>
                         <th
                             class="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
@@ -44,7 +49,7 @@ function destroy(id) {
                 </thead>
                 <tbody class="divide-y divide-[var(--esc-panel-border)]">
                     <tr v-if="!skills?.length">
-                        <td colspan="3" class="px-4 py-12 text-center">
+                        <td colspan="4" class="px-4 py-12 text-center">
                             <svg
                                 class="mx-auto mb-3 h-8 w-8 text-[var(--esc-panel-text-muted)]"
                                 fill="none"
@@ -73,7 +78,13 @@ function destroy(id) {
                             {{ skill.name }}
                         </td>
                         <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
-                            {{ skill.agents_count }}
+                            <div>{{ skill.agents_count }} agents</div>
+                            <div class="text-xs text-[var(--esc-panel-text-muted)]">
+                                {{ skill.routing_tags_count }} tags / {{ skill.routing_departments_count }} departments
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            {{ skill.updated_at ? new Date(skill.updated_at).toLocaleDateString() : '-' }}
                         </td>
                         <td class="px-4 py-3 text-right text-sm">
                             <Link
