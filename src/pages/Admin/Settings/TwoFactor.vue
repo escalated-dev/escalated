@@ -12,6 +12,7 @@ defineProps({
 const page = usePage();
 const showSetup = ref(false);
 const setupData = computed(() => page.props.flash?.two_factor_setup);
+const confirmedData = computed(() => page.props.flash?.two_factor_confirmed);
 
 function startSetup() {
     router.post(
@@ -98,12 +99,37 @@ function disable() {
                 v-if="setupData && !enabled"
                 class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
             >
-                <TwoFactorSetup
-                    :qr-uri="setupData.qr_uri"
-                    :recovery-codes="setupData.recovery_codes"
-                    @confirm="confirmCode"
-                    @cancel="showSetup = false"
-                />
+                <TwoFactorSetup :qr-uri="setupData.qr_uri" @confirm="confirmCode" @cancel="showSetup = false" />
+            </div>
+
+            <div
+                v-if="confirmedData?.recovery_codes?.length"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-[var(--esc-panel-text)]">Recovery Codes</h3>
+                        <p class="mt-2 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            Save these codes now. Each one can be used once if you lose access to your authenticator.
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        class="rounded-lg border border-[var(--esc-panel-border)] px-4 py-2 text-sm text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-surface-alt)]"
+                        @click="navigator.clipboard?.writeText(confirmedData.recovery_codes.join('\n'))"
+                    >
+                        Copy Codes
+                    </button>
+                </div>
+                <div class="mt-4 grid gap-2 md:grid-cols-2">
+                    <code
+                        v-for="code in confirmedData.recovery_codes"
+                        :key="code"
+                        class="rounded-lg bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-center text-sm font-mono text-[var(--esc-panel-text-secondary)]"
+                    >
+                        {{ code }}
+                    </code>
+                </div>
             </div>
         </div>
     </EscalatedLayout>

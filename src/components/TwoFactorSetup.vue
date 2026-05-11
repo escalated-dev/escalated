@@ -2,9 +2,8 @@
 import { ref } from 'vue';
 import TotpInput from './TotpInput.vue';
 
-const props = defineProps({
+defineProps({
     qrUri: { type: String, default: '' },
-    recoveryCodes: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(['confirm', 'cancel']);
@@ -24,12 +23,6 @@ function confirmCode() {
     }
     error.value = '';
     emit('confirm', code.value);
-    step.value = 3;
-}
-
-function copyRecoveryCodes() {
-    const text = props.recoveryCodes.join('\n');
-    navigator.clipboard?.writeText(text);
 }
 </script>
 
@@ -77,35 +70,6 @@ function copyRecoveryCodes() {
                     @click="emit('cancel')"
                 >
                     Cancel
-                </button>
-            </div>
-        </div>
-
-        <!-- Step 3: Recovery Codes -->
-        <div v-if="step === 3">
-            <h3 class="mb-4 text-sm font-semibold text-white">Step 3: Save Recovery Codes</h3>
-            <p class="mb-4 text-sm text-neutral-400">
-                Save these recovery codes in a safe place. Each code can only be used once to access your account if you
-                lose your authenticator device.
-            </p>
-            <div class="rounded-lg border border-white/[0.06] bg-neutral-950 p-4">
-                <div class="grid grid-cols-2 gap-2">
-                    <code
-                        v-for="(rc, idx) in recoveryCodes"
-                        :key="idx"
-                        class="rounded bg-neutral-900 px-3 py-1.5 text-center text-sm font-mono text-neutral-200"
-                    >
-                        {{ rc }}
-                    </code>
-                </div>
-            </div>
-            <div class="mt-4 flex gap-3">
-                <button
-                    type="button"
-                    class="rounded-lg border border-white/10 px-4 py-2 text-sm text-neutral-400 hover:text-neutral-200"
-                    @click="copyRecoveryCodes"
-                >
-                    Copy Codes
                 </button>
             </div>
         </div>
