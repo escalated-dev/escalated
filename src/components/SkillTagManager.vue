@@ -46,6 +46,7 @@ function removeItem(value) {
             >
                 {{ item[itemLabelKey] }}
                 <button
+                    type="button"
                     :aria-label="`Remove ${item[itemLabelKey]}`"
                     class="ml-0.5 text-cyan-400 hover:text-cyan-200"
                     @click="removeItem(item[itemValueKey])"
@@ -60,6 +61,7 @@ function removeItem(value) {
         <div class="relative">
             <button
                 v-if="unselectedItems.length"
+                type="button"
                 class="rounded-lg border border-dashed border-white/[0.08] px-2 py-1 text-xs text-neutral-400 transition-colors hover:border-white/[0.15] hover:text-neutral-300"
                 @click="showDropdown = !showDropdown"
             >
@@ -72,6 +74,7 @@ function removeItem(value) {
                 <button
                     v-for="item in unselectedItems"
                     :key="item[itemValueKey]"
+                    type="button"
                     class="w-full px-3 py-1.5 text-left text-xs text-neutral-300 transition-colors hover:bg-white/[0.04]"
                     @click="addItem(item[itemValueKey])"
                 >
