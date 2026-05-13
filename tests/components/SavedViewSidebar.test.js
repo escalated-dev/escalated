@@ -139,7 +139,8 @@ describe('SavedViewSidebar', () => {
         });
 
         it('calls confirm dialog on delete', async () => {
-            const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+            const confirmSpy = vi.fn().mockReturnValue(false);
+            vi.stubGlobal('confirm', confirmSpy);
             vi.stubGlobal('fetch', vi.fn());
 
             const wrapper = mountSidebar();
@@ -150,11 +151,11 @@ describe('SavedViewSidebar', () => {
             await deleteBtn.trigger('click');
 
             expect(confirmSpy).toHaveBeenCalledWith('Delete view "Open Bugs"?');
-            confirmSpy.mockRestore();
+            vi.unstubAllGlobals();
         });
 
         it('does not call fetch when confirm is cancelled', async () => {
-            vi.spyOn(window, 'confirm').mockReturnValue(false);
+            vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
             const fetchSpy = vi.fn();
             vi.stubGlobal('fetch', fetchSpy);
 
@@ -166,7 +167,7 @@ describe('SavedViewSidebar', () => {
             await deleteBtn.trigger('click');
 
             expect(fetchSpy).not.toHaveBeenCalled();
-            vi.restoreAllMocks();
+            vi.unstubAllGlobals();
         });
     });
 });
