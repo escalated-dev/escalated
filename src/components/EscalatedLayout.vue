@@ -26,6 +26,7 @@ const isPanel = computed(() => isAdminSection.value || isAgentSection.value);
 const isDark = computed(() => isPanel.value && panelConfig.mode !== 'light');
 const showPoweredBy = computed(() => page.props.escalated?.show_powered_by !== false);
 const kbEnabled = computed(() => page.props.escalated?.knowledge_base_enabled !== false);
+const newslettersEnabled = computed(() => page.props.escalated?.features?.newsletters === true);
 const kbPublic = computed(() => page.props.escalated?.knowledge_base_public !== false);
 const chatEnabled = computed(() => page.props.escalated?.chat_enabled === true);
 const activeChats = computed(() => page.props.escalated?.active_chats || []);
@@ -116,6 +117,16 @@ const adminLinks = computed(() => {
             icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
             position: 80,
         },
+        ...(newslettersEnabled.value
+            ? [
+                  {
+                      href: `${p}/admin/newsletters`,
+                      label: 'Newsletters',
+                      icon: 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
+                      position: 81,
+                  },
+              ]
+            : []),
         {
             href: `${p}/admin/skills`,
             label: 'Skills',
