@@ -10,6 +10,7 @@ import ChatActionBar from '../../components/ChatActionBar.vue';
 import TicketSidebar from '../../components/TicketSidebar.vue';
 import AttachmentList from '../../components/AttachmentList.vue';
 import MacroDropdown from '../../components/MacroDropdown.vue';
+import CustomTicketActions from '../../components/CustomTicketActions.vue';
 import FollowButton from '../../components/FollowButton.vue';
 import PresenceIndicator from '../../components/PresenceIndicator.vue';
 import PinnedNotes from '../../components/PinnedNotes.vue';
@@ -31,6 +32,7 @@ const props = defineProps({
     tags: Array,
     cannedResponses: Array,
     macros: { type: Array, default: () => [] },
+    customActions: { type: Array, default: () => [] },
     is_following: { type: Boolean, default: false },
     followers_count: { type: Number, default: 0 },
 });
@@ -253,6 +255,8 @@ onMounted(() => {
                         <option value="critical">Critical</option>
                     </select>
                 </template>
+                <!-- Host-defined custom ticket actions -->
+                <CustomTicketActions :actions="customActions" />
                 <!-- Context Panel Toggle -->
                 <button
                     type="button"

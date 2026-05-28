@@ -74,6 +74,7 @@ describe('index.js exports', () => {
         'ContextPanel',
         'ContextPanelSection',
         'CustomFieldRenderer',
+        'CustomTicketActions',
         'EscalatedLayout',
         'FileDropzone',
         'FollowButton',
@@ -120,8 +121,8 @@ describe('index.js exports', () => {
             expect(typeof component).toBe('object');
         });
 
-        it('exports exactly 54 components', () => {
-            expect(expectedComponents).toHaveLength(54);
+        it('exports exactly 55 components', () => {
+            expect(expectedComponents).toHaveLength(55);
             for (const name of expectedComponents) {
                 expect(escalated[name]).toBeDefined();
             }
@@ -141,8 +142,8 @@ describe('index.js exports', () => {
 
         it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 55 components + 2 saved-view components + 1 plugin + 7 composables + 1 helper + 5 pages + 6 utils = 77
-            expect(keys).toHaveLength(77);
+            // 56 components + 2 saved-view components + 1 plugin + 7 composables + 1 helper + 5 pages + 6 utils = 78
+            expect(keys).toHaveLength(78);
         });
 
         it('every export key is a non-empty string', () => {
