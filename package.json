@@ -33,7 +33,7 @@
     "vue": "^3.3.0"
   },
   "dependencies": {
-    "@escalated-dev/locale": "github:escalated-dev/escalated-locale#v0.1.2"
+    "@escalated-dev/locale": "github:escalated-dev/escalated-locale#v0.1.8"
   },
   "scripts": {
     "test": "vitest run",
