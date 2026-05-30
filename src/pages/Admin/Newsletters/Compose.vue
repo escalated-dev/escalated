@@ -84,7 +84,7 @@ import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import MarkdownEditor from '../../../components/admin/newsletters/MarkdownEditor.vue';
 import MergeFieldDropdown from '../../../components/admin/newsletters/MergeFieldDropdown.vue';
 import PreviewIframe from '../../../components/admin/newsletters/PreviewIframe.vue';
-import { reactive, ref, toRef } from 'vue';
+import { reactive, ref, toRef, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { usePreview } from './usePreview.js';
 
@@ -97,18 +97,22 @@ const props = defineProps({
     defaultFromEmail: { type: String, default: '' },
     defaultReplyTo: { type: String, default: '' },
     defaultTheme: { type: String, default: 'default' },
+    // When present, the page is editing an existing draft/scheduled newsletter.
+    newsletter: { type: Object, default: null },
 });
 
+const isEditing = computed(() => props.newsletter != null && props.newsletter.id != null);
+
 const form = reactive({
-    subject: '',
-    from_name: '',
-    from_email: props.defaultFromEmail,
-    reply_to: props.defaultReplyTo,
-    target_list_id: props.lists[0]?.id ?? null,
-    template_id: null,
-    theme: props.defaultTheme,
-    body_markdown: '',
-    scheduled_at: '',
+    subject: props.newsletter?.subject ?? '',
+    from_name: props.newsletter?.from_name ?? '',
+    from_email: props.newsletter?.from_email ?? props.defaultFromEmail,
+    reply_to: props.newsletter?.reply_to ?? props.defaultReplyTo,
+    target_list_id: props.newsletter?.target_list_id ?? props.lists[0]?.id ?? null,
+    template_id: props.newsletter?.template_id ?? null,
+    theme: props.newsletter?.theme ?? props.defaultTheme,
+    body_markdown: props.newsletter?.body_markdown ?? '',
+    scheduled_at: props.newsletter?.scheduled_at ?? '',
 });
 
 const editorRef = ref(null);
@@ -118,7 +122,11 @@ function insertField(path) {
     editorRef.value?.insertMergeField(path);
 }
 function save(status) {
-    router.post('/admin/newsletters', { ...form, status });
+    if (isEditing.value) {
+        router.put(`/admin/newsletters/${props.newsletter.id}`, { ...form, status });
+    } else {
+        router.post('/admin/newsletters', { ...form, status });
+    }
 }
 function testSend() {
     router.post('/admin/newsletters/test', form);

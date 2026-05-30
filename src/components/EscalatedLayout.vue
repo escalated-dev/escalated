@@ -117,7 +117,7 @@ const adminLinks = computed(() => {
             icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
             position: 80,
         },
-        ...(newslettersEnabled.value
+        ...(newslettersEnabled.value && isAdmin.value
             ? [
                   {
                       href: `${p}/admin/newsletters`,
