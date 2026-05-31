@@ -725,5 +725,164 @@
             "update": "Update Workflow",
             "create": "Create Workflow"
         }
+    },
+    "newsletters": {
+        "nav": {
+            "newsletters": "Newsletters"
+        },
+        "index": {
+            "title": "Newsletters",
+            "new": "New newsletter",
+            "tabs": {
+                "drafts": "Drafts",
+                "scheduled": "Scheduled",
+                "sent": "Sent"
+            },
+            "empty": {
+                "drafts": "No drafts yet.",
+                "scheduled": "No scheduled sends.",
+                "sent": "No newsletters sent yet."
+            },
+            "columns": {
+                "subject": "Subject",
+                "list": "List",
+                "status": "Status",
+                "scheduled": "Scheduled",
+                "sent": "Sent",
+                "recipients": "Recipients"
+            }
+        },
+        "compose": {
+            "title": "New newsletter",
+            "subject": "Subject",
+            "from_name": "From name",
+            "from_email": "From email",
+            "reply_to": "Reply-To",
+            "list": "Target list",
+            "schedule": "Schedule send",
+            "schedule_at": "Send at",
+            "template": "Start from template",
+            "body": "Body (Markdown)",
+            "preview": "Preview",
+            "actions": {
+                "save_draft": "Save draft",
+                "test_send": "Send test to me",
+                "schedule": "Schedule",
+                "send_now": "Send now"
+            },
+            "mail_not_configured": "Configure outbound mail before sending newsletters."
+        },
+        "detail": {
+            "tabs": {
+                "overview": "Overview",
+                "deliveries": "Deliveries",
+                "analytics": "Analytics"
+            },
+            "status": {
+                "draft": "Draft",
+                "scheduled": "Scheduled",
+                "sending": "Sending",
+                "sent": "Sent",
+                "paused": "Paused",
+                "failed": "Failed"
+            },
+            "actions": {
+                "edit": "Edit",
+                "pause": "Pause",
+                "resume": "Resume",
+                "duplicate": "Duplicate"
+            }
+        },
+        "deliveries": {
+            "columns": {
+                "contact": "Contact",
+                "status": "Status",
+                "sent_at": "Sent",
+                "opened_at": "Opened",
+                "clicked_at": "Last clicked",
+                "bounce_reason": "Bounce reason"
+            },
+            "status": {
+                "pending": "Pending",
+                "queued": "Queued",
+                "sent": "Sent",
+                "bounced": "Bounced",
+                "complained": "Complained",
+                "suppressed": "Suppressed",
+                "failed": "Failed"
+            },
+            "filter": "Filter by status",
+            "export": "Export CSV"
+        },
+        "analytics": {
+            "tiles": {
+                "sent": "Sent",
+                "delivered": "Delivered",
+                "opened": "Opened",
+                "clicked": "Clicked",
+                "bounced": "Bounced"
+            },
+            "top_clicked": "Top clicked URLs"
+        },
+        "lists": {
+            "title": "Lists",
+            "new": "New list",
+            "kind": {
+                "static": "Static",
+                "dynamic": "Dynamic"
+            },
+            "columns": {
+                "name": "Name",
+                "kind": "Kind",
+                "members": "Members",
+                "opted_out": "Opted out"
+            },
+            "create": {
+                "static_help": "Manually add contacts or import a CSV.",
+                "dynamic_help": "Saved filter that re-evaluates on every send."
+            },
+            "members": {
+                "add": "Add contact",
+                "remove": "Remove",
+                "import_csv": "Import CSV"
+            },
+            "filter_builder": {
+                "matches": "{count} contacts match"
+            }
+        },
+        "templates": {
+            "title": "Templates",
+            "new": "New template",
+            "columns": {
+                "name": "Name",
+                "theme": "Theme",
+                "last_used": "Last used"
+            },
+            "theme": "Theme",
+            "subject_template": "Default subject",
+            "body": "Body (Markdown)"
+        },
+        "settings": {
+            "title": "Newsletter settings",
+            "default_from": "Default From address",
+            "default_reply_to": "Default Reply-To",
+            "default_theme": "Default theme",
+            "rate_limit": "Rate limit (sends per minute)",
+            "batch_size": "Dispatcher batch size",
+            "tracking_enabled": "Enable open & click tracking",
+            "tracking_help": "When off, pixel and click-rewriting are skipped. Bounces and complaints from your ESP still update delivery status."
+        },
+        "merge_fields": {
+            "label": "Insert merge field",
+            "contact_name": "Contact's full name",
+            "contact_first_name": "Contact's first name",
+            "contact_email": "Contact's email",
+            "unsubscribe_url": "Unsubscribe URL",
+            "view_in_browser_url": "View-in-browser URL"
+        },
+        "permissions": {
+            "no_manage": "You need the newsletters.manage permission to view this page.",
+            "no_send": "You need the newsletters.send permission to send or schedule."
+        }
     }
 }
