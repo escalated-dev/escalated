@@ -7,6 +7,7 @@ import AssigneeSelect from './AssigneeSelect.vue';
 import TagSelect from './TagSelect.vue';
 import TicketTypeSelector from './TicketTypeSelector.vue';
 import ActivityTimeline from './ActivityTimeline.vue';
+import TicketSubjects from './TicketSubjects.vue';
 
 defineProps({
     ticket: { type: Object, required: true },
@@ -84,6 +85,9 @@ function renderStars(rating) {
                 </div>
             </dl>
         </div>
+
+        <!-- Related host-app entities this ticket is about (Project, Customer, …) -->
+        <TicketSubjects :subjects="ticket.subjects || []" />
 
         <!-- Satisfaction Rating (read-only) -->
         <div v-if="ticket.satisfaction_rating" :class="cardClass">
