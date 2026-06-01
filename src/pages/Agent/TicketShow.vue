@@ -66,7 +66,12 @@ function changePriority(priority) {
 }
 
 function assignToMe() {
-    assignForm.agent_id = page.props.auth.user.id;
+    // auth.user may be absent if the host app hasn't shared it (other call
+    // sites in this page already guard with auth?.user?.id). Bail rather than
+    // crash on the click.
+    const userId = page.props.auth?.user?.id;
+    if (userId == null) return;
+    assignForm.agent_id = userId;
     assignForm.post(route('escalated.agent.tickets.assign', props.ticket.reference), { preserveScroll: true });
 }
 

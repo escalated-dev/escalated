@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -15,6 +15,25 @@ const escDark = inject(
 const following = ref(props.isFollowing);
 const count = ref(props.followersCount);
 const processing = ref(false);
+
+// Re-sync local state when the props change. Inertia reuses this component
+// instance when navigating between tickets (Vue does not re-run setup), so the
+// refs above are only seeded from the FIRST ticket's props. Without these
+// watchers the button shows a stale follow state — e.g. an already-followed
+// ticket renders as "Follow" — and the optimistic toggle below would also
+// drift from the server's authoritative value after a reload.
+watch(
+    () => props.isFollowing,
+    (value) => {
+        following.value = value;
+    },
+);
+watch(
+    () => props.followersCount,
+    (value) => {
+        count.value = value;
+    },
+);
 
 function toggle() {
     if (processing.value) return;
