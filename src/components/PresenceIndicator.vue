@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
+import { ref, computed, inject, onUnmounted, watch } from 'vue';
 
 const props = defineProps({
     ticketReference: { type: String, required: true },
@@ -20,6 +20,9 @@ const viewers = ref([]);
 const hovering = ref(false);
 let intervalId = null;
 let presenceChannel = null;
+// Track the exact channel name we joined so we leave the RIGHT channel when the
+// ticket changes — props.ticketId would already hold the new id by then.
+let joinedChannelName = null;
 
 async function fetchPresence() {
     try {
@@ -49,7 +52,8 @@ function initPresenceChannel() {
     if (!echoAvailable || !props.ticketId) return false;
 
     try {
-        presenceChannel = window.Echo.join(`escalated.tickets.${props.ticketId}`);
+        joinedChannelName = `escalated.tickets.${props.ticketId}`;
+        presenceChannel = window.Echo.join(joinedChannelName);
 
         presenceChannel
             .here((users) => {
@@ -99,29 +103,40 @@ function getColor(index) {
     return colors[index % colors.length];
 }
 
-onMounted(() => {
+function teardown() {
+    if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+    }
+    if (presenceChannel) {
+        try {
+            window.Echo.leave(joinedChannelName);
+        } catch {
+            // ignore
+        }
+        presenceChannel = null;
+        joinedChannelName = null;
+    }
+}
+
+function start() {
+    // Tear down any subscription for the previously viewed ticket first. Inertia
+    // reuses this component across ticket navigation, so without re-initialising
+    // we would keep showing the old ticket's viewers and leak its channel.
+    teardown();
+    viewers.value = [];
     // Prefer presence channels via Echo; fall back to polling
     const usingEcho = initPresenceChannel();
     if (!usingEcho) {
         fetchPresence();
         intervalId = setInterval(fetchPresence, effectiveInterval.value);
     }
-});
+}
 
-onUnmounted(() => {
-    if (intervalId) {
-        clearInterval(intervalId);
-        intervalId = null;
-    }
-    if (presenceChannel && props.ticketId) {
-        try {
-            window.Echo.leave(`escalated.tickets.${props.ticketId}`);
-        } catch {
-            // ignore
-        }
-        presenceChannel = null;
-    }
-});
+// (Re)initialise whenever the ticket identity changes; `immediate` covers mount.
+watch(() => [props.ticketId, props.ticketReference], start, { immediate: true });
+
+onUnmounted(teardown);
 </script>
 
 <template>
