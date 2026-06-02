@@ -1,6 +1,7 @@
 export default {
     plugins: {
-        tailwindcss: {},
+        // Tailwind v4 moved its PostCSS plugin to a separate package.
+        '@tailwindcss/postcss': {},
         autoprefixer: {},
     },
 };
