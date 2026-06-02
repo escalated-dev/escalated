@@ -23,6 +23,7 @@ export { default as ConditionalFieldRules } from './components/ConditionalFieldR
 export { default as ContextPanel } from './components/ContextPanel.vue';
 export { default as ContextPanelSection } from './components/ContextPanelSection.vue';
 export { default as CustomFieldRenderer } from './components/CustomFieldRenderer.vue';
+export { default as CustomTicketActions } from './components/CustomTicketActions.vue';
 export { default as EscalatedLayout } from './components/EscalatedLayout.vue';
 export { default as FileDropzone } from './components/FileDropzone.vue';
 export { default as FollowButton } from './components/FollowButton.vue';

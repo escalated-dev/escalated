@@ -33,7 +33,7 @@
     "vue": "^3.3.0"
   },
   "dependencies": {
-    "@escalated-dev/locale": "github:escalated-dev/escalated-locale#v0.1.2"
+    "@escalated-dev/locale": "github:escalated-dev/escalated-locale#v0.1.8"
   },
   "scripts": {
     "test": "vitest run",
@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@inertiajs/vue3": "^2.0.0",
+    "@inertiajs/vue3": "^3.2.0",
     "@playwright/test": "^1.50.0",
     "@storybook/addon-a11y": "^10.2.12",
     "@storybook/addon-docs": "^10.2.12",
@@ -71,12 +71,12 @@
     "eslint-plugin-vue": "^10.8.0",
     "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^17.0.5",
     "playwright": "^1.50.0",
     "postcss": "^8.5.0",
     "prettier": "^3.8.1",
     "storybook": "^10.2.12",
-    "tailwindcss": "^3.4.0",
+    "tailwindcss": "^4.3.0",
     "vitest": "^4.1.6",
     "vue": "^3.5.0",
     "wait-on": "^9.0.5"

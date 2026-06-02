@@ -10,6 +10,7 @@ import ChatActionBar from '../../components/ChatActionBar.vue';
 import TicketSidebar from '../../components/TicketSidebar.vue';
 import AttachmentList from '../../components/AttachmentList.vue';
 import MacroDropdown from '../../components/MacroDropdown.vue';
+import CustomTicketActions from '../../components/CustomTicketActions.vue';
 import FollowButton from '../../components/FollowButton.vue';
 import PresenceIndicator from '../../components/PresenceIndicator.vue';
 import PinnedNotes from '../../components/PinnedNotes.vue';
@@ -23,7 +24,7 @@ import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { useRealtime } from '../../composables/useRealtime';
 import { useChat } from '../../composables/useChat';
 import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ref, computed, inject, onMounted } from 'vue';
+import { ref, computed, inject, onUnmounted, watch } from 'vue';
 
 const props = defineProps({
     ticket: Object,
@@ -31,6 +32,7 @@ const props = defineProps({
     tags: Array,
     cannedResponses: Array,
     macros: { type: Array, default: () => [] },
+    customActions: { type: Array, default: () => [] },
     is_following: { type: Boolean, default: false },
     followers_count: { type: Number, default: 0 },
 });
@@ -64,7 +66,12 @@ function changePriority(priority) {
 }
 
 function assignToMe() {
-    assignForm.agent_id = page.props.auth.user.id;
+    // auth.user may be absent if the host app hasn't shared it (other call
+    // sites in this page already guard with auth?.user?.id). Bail rather than
+    // crash on the click.
+    const userId = page.props.auth?.user?.id;
+    if (userId == null) return;
+    assignForm.agent_id = userId;
     assignForm.post(route('escalated.agent.tickets.assign', props.ticket.reference), { preserveScroll: true });
 }
 
@@ -87,10 +94,29 @@ const chatTypingUser = ref(null);
 // serves Escalated under (config on NestJS, default /support elsewhere).
 const { subscribeToChat } = useChat({ widgetPath: widgetPath.value });
 let chatTypingTimer = null;
+let chatUnsubscribe = null;
 
-onMounted(() => {
+// Re-seed the chat thread whenever we navigate to a different ticket. Inertia
+// reuses this page component across ticket navigation (setup() does not re-run),
+// so without this the previous ticket's chat would persist.
+watch(
+    () => props.ticket.id,
+    () => {
+        chatMessages.value = props.ticket.chat_messages || [];
+    },
+);
+
+// (Re)subscribe to the chat channel whenever the live chat session changes —
+// including navigating from a non-chat ticket to a chat ticket. The old
+// subscription is torn down first so we never leak a channel or receive
+// messages for the ticket we just left.
+function setupChatSubscription() {
+    if (chatUnsubscribe) {
+        chatUnsubscribe();
+        chatUnsubscribe = null;
+    }
     if (!isChatMode.value || !props.ticket.chat_session_id) return;
-    subscribeToChat(props.ticket.chat_session_id, {
+    chatUnsubscribe = subscribeToChat(props.ticket.chat_session_id, {
         onMessage(data) {
             chatMessages.value.push(data.message);
         },
@@ -108,6 +134,15 @@ onMounted(() => {
             router.reload({ preserveScroll: true });
         },
     });
+}
+
+watch(() => [props.ticket.chat_session_id, isChatMode.value], setupChatSubscription, {
+    immediate: true,
+});
+
+onUnmounted(() => {
+    if (chatUnsubscribe) chatUnsubscribe();
+    clearTimeout(chatTypingTimer);
 });
 
 function onChatSend(payload) {
@@ -153,11 +188,21 @@ useKeyboardShortcuts({
 
 // Real-time updates via WebSocket (gracefully degrades to no-op when Echo is absent)
 const { echoAvailable, subscribeToTicket } = useRealtime();
+let ticketUnsubscribe = null;
 
-onMounted(() => {
+// (Re)subscribe whenever the ticket id changes. Because Inertia reuses this
+// page across ticket navigation, an onMounted-only subscription would stay
+// bound to the first ticket — realtime updates for the ticket you navigated to
+// would never arrive, and the previous ticket's events would keep triggering
+// reloads. Tear down the old subscription before binding the new one.
+function setupTicketSubscription() {
+    if (ticketUnsubscribe) {
+        ticketUnsubscribe();
+        ticketUnsubscribe = null;
+    }
     if (!echoAvailable.value || !props.ticket?.id) return;
 
-    subscribeToTicket(props.ticket.id, {
+    ticketUnsubscribe = subscribeToTicket(props.ticket.id, {
         onReplyCreated() {
             router.reload({ only: ['ticket'], preserveScroll: true });
         },
@@ -174,6 +219,12 @@ onMounted(() => {
             router.reload({ only: ['ticket'], preserveScroll: true });
         },
     });
+}
+
+watch(() => props.ticket?.id, setupTicketSubscription, { immediate: true });
+
+onUnmounted(() => {
+    if (ticketUnsubscribe) ticketUnsubscribe();
 });
 </script>
 
@@ -253,6 +304,8 @@ onMounted(() => {
                         <option value="critical">Critical</option>
                     </select>
                 </template>
+                <!-- Host-defined custom ticket actions -->
+                <CustomTicketActions :actions="customActions" />
                 <!-- Context Panel Toggle -->
                 <button
                     type="button"
