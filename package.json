@@ -62,6 +62,7 @@
     "@storybook/addon-a11y": "^10.2.12",
     "@storybook/addon-docs": "^10.2.12",
     "@storybook/vue3-vite": "^10.2.12",
+    "@tailwindcss/postcss": "^4.3.0",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/test-utils": "^2.4.0",
     "autoprefixer": "^10.4.20",
