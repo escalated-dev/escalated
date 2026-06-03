@@ -2,6 +2,8 @@
 import { computed, inject, provide } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
+import { usePermissions } from '../composables/usePermissions';
+import { useI18n } from '../composables/useI18n';
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
 
 defineProps({
@@ -35,6 +37,8 @@ const agentId = computed(() => page.props.auth?.user?.id);
 provide('esc-dark', isDark);
 
 const { menuItems: pluginMenuItems } = usePluginExtensions();
+const { hasPermission } = usePermissions();
+const { t } = useI18n();
 
 const adminLinks = computed(() => {
     const p = prefix.value;
@@ -117,11 +121,11 @@ const adminLinks = computed(() => {
             icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
             position: 80,
         },
-        ...(newslettersEnabled.value && isAdmin.value
+        ...(newslettersEnabled.value && isAdmin.value && hasPermission('newsletters.manage')
             ? [
                   {
                       href: `${p}/admin/newsletters`,
-                      label: 'Newsletters',
+                      label: t('newsletters.nav.newsletters'),
                       icon: 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
                       position: 81,
                   },
