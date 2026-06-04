@@ -16,10 +16,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-      # Pin npm to the major that generated package-lock.json. node 22 ships
-      # npm 10.x, whose resolver rejects this lock (wants esbuild 0.28.0 vs the
-      # locked 0.21.5); npm 11 dedupes identically to the lock so `npm ci` passes.
-      - run: npm install -g npm@11
       - run: npm ci
       - run: npm test
 
@@ -35,8 +31,9 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org/
-      - run: npm install -g npm@11
+      # OIDC trusted publishing needs npm >= 11.5.1; node 22 ships npm 10.9.
+      # Auth is via GitHub's OIDC token (id-token: write) + a Trusted Publisher
+      # configured for this package on npmjs.com — no NPM_TOKEN required.
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
