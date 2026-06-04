@@ -5,7 +5,7 @@
                 <h1>{{ isNew ? $t('newsletters.templates.new') : template.name }}</h1>
             </header>
             <label>
-                Name
+                {{ $t('newsletters.templates.columns.name') }}
                 <input v-model="form.name" required />
             </label>
             <label>
@@ -22,7 +22,7 @@
                 <div class="editor-toolbar"><MergeFieldDropdown @insert="onInsert" /></div>
                 <MarkdownEditor ref="editorRef" v-model="form.body_markdown" />
             </div>
-            <button type="submit">Save</button>
+            <button type="submit">{{ $t('form.save') }}</button>
         </form>
     </EscalatedLayout>
 </template>

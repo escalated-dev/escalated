@@ -5,7 +5,7 @@
                 <div>
                     <h1>{{ newsletter.subject }}</h1>
                     <div class="show__meta">
-                        From
+                        {{ $t('newsletters.detail.from') }}
                         {{
                             newsletter.from_name
                                 ? `${newsletter.from_name} <${newsletter.from_email}>`
@@ -24,19 +24,19 @@
                     :href="`/admin/newsletters/${newsletter.id}?tab=overview`"
                     :class="{ active: tab === 'overview' }"
                 >
-                    Overview
+                    {{ $t('newsletters.detail.tabs.overview') }}
                 </Link>
                 <Link
                     :href="`/admin/newsletters/${newsletter.id}?tab=deliveries`"
                     :class="{ active: tab === 'deliveries' }"
                 >
-                    Deliveries
+                    {{ $t('newsletters.detail.tabs.deliveries') }}
                 </Link>
                 <Link
                     :href="`/admin/newsletters/${newsletter.id}?tab=analytics`"
                     :class="{ active: tab === 'analytics' }"
                 >
-                    Analytics
+                    {{ $t('newsletters.detail.tabs.analytics') }}
                 </Link>
             </nav>
 

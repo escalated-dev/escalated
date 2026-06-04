@@ -3,15 +3,15 @@
         <form class="lists-create" @submit.prevent="submit">
             <h1>{{ $t('newsletters.lists.new') }}</h1>
             <label>
-                Name
+                {{ $t('newsletters.lists.columns.name') }}
                 <input v-model="form.name" required />
             </label>
             <label>
-                Description
+                {{ $t('form.description') }}
                 <textarea v-model="form.description" />
             </label>
             <fieldset>
-                <legend>Kind</legend>
+                <legend>{{ $t('newsletters.lists.columns.kind') }}</legend>
                 <label class="radio">
                     <input v-model="form.kind" type="radio" value="static" />
                     {{ $t('newsletters.lists.kind.static') }}
@@ -23,7 +23,7 @@
                 </label>
                 <p class="help">{{ $t('newsletters.lists.create.dynamic_help') }}</p>
             </fieldset>
-            <button type="submit">Create</button>
+            <button type="submit">{{ $t('form.create') }}</button>
         </form>
     </EscalatedLayout>
 </template>

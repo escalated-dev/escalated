@@ -10,10 +10,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Kind</th>
-                        <th>Members</th>
-                        <th>Opted out</th>
+                        <th>{{ $t('newsletters.lists.columns.name') }}</th>
+                        <th>{{ $t('newsletters.lists.columns.kind') }}</th>
+                        <th>{{ $t('newsletters.lists.columns.members') }}</th>
+                        <th>{{ $t('newsletters.lists.columns.opted_out') }}</th>
                     </tr>
                 </thead>
                 <tbody>

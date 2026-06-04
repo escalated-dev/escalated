@@ -773,6 +773,7 @@
             "mail_not_configured": "Configure outbound mail before sending newsletters."
         },
         "detail": {
+            "from": "From",
             "tabs": {
                 "overview": "Overview",
                 "deliveries": "Deliveries",

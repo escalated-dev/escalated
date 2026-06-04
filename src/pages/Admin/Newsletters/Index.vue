@@ -9,23 +9,23 @@
             </header>
             <nav class="newsletters-index__tabs">
                 <Link
-                    v-for="t in tabs"
-                    :key="t.key"
-                    :href="`/admin/newsletters?tab=${t.key}`"
-                    :class="{ active: tab === t.key }"
+                    v-for="tabItem in tabs"
+                    :key="tabItem.key"
+                    :href="`/admin/newsletters?tab=${tabItem.key}`"
+                    :class="{ active: tab === tabItem.key }"
                 >
-                    {{ t.label }}
+                    {{ $t(`newsletters.index.tabs.${tabItem.key}`) }}
                 </Link>
             </nav>
             <table>
                 <thead>
                     <tr>
-                        <th>Subject</th>
-                        <th>List</th>
-                        <th>Status</th>
-                        <th>Scheduled</th>
-                        <th>Sent</th>
-                        <th>Recipients</th>
+                        <th>{{ $t('newsletters.index.columns.subject') }}</th>
+                        <th>{{ $t('newsletters.index.columns.list') }}</th>
+                        <th>{{ $t('newsletters.index.columns.status') }}</th>
+                        <th>{{ $t('newsletters.index.columns.scheduled') }}</th>
+                        <th>{{ $t('newsletters.index.columns.sent') }}</th>
+                        <th>{{ $t('newsletters.index.columns.recipients') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,28 +54,27 @@
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useI18n } from '../../../composables/useI18n';
 
 const props = defineProps({
     newsletters: { type: Array, required: true },
     tab: { type: String, default: 'drafts' },
 });
 
+const { t } = useI18n();
+
 const tabs = [
-    { key: 'drafts', label: 'Drafts', statuses: ['draft'] },
-    { key: 'scheduled', label: 'Scheduled', statuses: ['scheduled', 'sending', 'paused'] },
-    { key: 'sent', label: 'Sent', statuses: ['sent', 'failed'] },
+    { key: 'drafts', statuses: ['draft'] },
+    { key: 'scheduled', statuses: ['scheduled', 'sending', 'paused'] },
+    { key: 'sent', statuses: ['sent', 'failed'] },
 ];
 
 const filtered = computed(() => {
-    const active = tabs.find((t) => t.key === props.tab) ?? tabs[0];
+    const active = tabs.find((tab) => tab.key === props.tab) ?? tabs[0];
     return props.newsletters.filter((n) => active.statuses.includes(n.status));
 });
 
-const emptyMessage = computed(() => {
-    if (props.tab === 'scheduled') return 'No scheduled sends.';
-    if (props.tab === 'sent') return 'No newsletters sent yet.';
-    return 'No drafts yet.';
-});
+const emptyMessage = computed(() => t(`newsletters.index.empty.${props.tab}`));
 </script>
 
 <style scoped>

@@ -29,7 +29,7 @@
                 {{ $t('newsletters.settings.tracking_enabled') }}
             </label>
             <p class="help">{{ $t('newsletters.settings.tracking_help') }}</p>
-            <button type="submit">Save</button>
+            <button type="submit">{{ $t('form.save') }}</button>
         </form>
     </EscalatedLayout>
 </template>
