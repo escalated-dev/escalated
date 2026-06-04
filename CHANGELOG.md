@@ -4,8 +4,15 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-06-04
+
 ### Added
-- feat: consume translations from `@escalated-dev/locale` as the canonical base source, with `src/locales/*.json` retained as local plugin overrides that win over central. Public `useI18n().t()` / `$t` API is unchanged.
+- **Newsletter system admin UI (Wave 0).** Full Vue/Inertia admin surface for the newsletter feature: compose / index / show pages, deliveries table, analytics tiles, dynamic segment-filter builder, list-member table, markdown editor, merge-field dropdown, preview iframe, and supporting components + Storybook stories. (#75)
+- `usePermissions()` composable and permission-gated admin navigation — the newsletter nav entry renders only for users holding `newsletters.manage`, matching the backend permission enforcement (escalated-laravel #129). (#96)
+- Consume translations from `@escalated-dev/locale` as the canonical base source, with `src/locales/*.json` retained as local plugin overrides that win over central. Public `useI18n().t()` / `$t` API is unchanged.
+
+### Changed
+- Newsletter admin pages wired to locale strings (i18n). (#96)
 
 ## [0.7.1] - 2026-04-28
 
