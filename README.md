@@ -27,6 +27,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <p align="center">
+  <a href="https://escalated.dev">
+    <img src=".github/og.png" alt="Escalated — support tickets, built into your app" width="840" />
+  </a>
+</p>
+
+<p align="center">
   <img src=".github/profile/demo.gif" alt="Escalated demo: filing a ticket and replying from the agent inbox" width="800" />
 </p>
 
