@@ -15,10 +15,12 @@
   <a href="docs/translations/README.zh-CN.md">简体中文</a>
 </p>
 
-<h1>
+<h1 align="center">
   <img src="https://escalated.dev/apple-touch-icon.png" width="28" style="vertical-align:middle;" />
   Escalated
 </h1>
+
+<div align="center">
 
 [![Tests](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml/badge.svg)](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml)
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B62107%2Fgithub.com%2Fescalated-dev%2Fescalated.svg?type=shield)](https://app.fossa.com/projects/custom%2B62107%2Fgithub.com%2Fescalated-dev%2Fescalated?ref=badge_shield)
@@ -26,14 +28,12 @@
 [![Vue 3](https://img.shields.io/badge/vue-3.x-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+</div>
+
 <p align="center">
   <a href="https://escalated.dev">
     <img src=".github/og.png" alt="Escalated — support tickets, built into your app" width="840" />
   </a>
-</p>
-
-<p align="center">
-  <img src=".github/profile/demo.gif" alt="Escalated demo: filing a ticket and replying from the agent inbox" width="800" />
 </p>
 
 Escalated is an embeddable support ticket system with SLA tracking, escalation rules, agent workflows, and a customer portal. This repo contains all the shared frontend assets (Vue 3 + Inertia.js) used across every supported backend framework.
@@ -41,6 +41,10 @@ Escalated is an embeddable support ticket system with SLA tracking, escalation r
 👉 **Learn more, view demos, and compare Cloud vs Self-Hosted options at** **[https://escalated.dev](https://escalated.dev)**
 
 **You don't install this package directly.** Start with the backend package for your framework — it handles everything including pulling in these frontend assets.
+
+<p align="center">
+  <img src=".github/profile/demo.gif" alt="Escalated demo: filing a ticket and replying from the agent inbox" width="800" />
+</p>
 
 ## Features
 
