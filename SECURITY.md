@@ -6,11 +6,13 @@ Escalated follows a major-version support model.
 
 Because individual patch and minor releases may vary between installations, only the latest release within a supported major version receives security updates.
 
+Example: 
+
 | Major Version | Supported |
 | ------------- | --------- |
-| 2.x           | ✅         |
-| 1.x           | ✅         |
-| < 1.0         | ❌         |
+| 2.x           | ✅        |
+
+In this example, 1.x may not be supported unless specifically marked with LTS.
 
 Older major versions may receive security fixes at the discretion of the maintainers but should be considered unsupported.
 
