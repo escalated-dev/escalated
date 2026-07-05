@@ -5,6 +5,10 @@ import { ref, computed } from 'vue';
 
 const props = defineProps({
     plugins: { type: Array, default: () => [] },
+    // Backends that load plugins from uploaded ZIPs (e.g. Laravel) support the
+    // upload flow; backends where plugins are compiled host modules registered
+    // in config (e.g. Phoenix) pass can_upload: false to hide it.
+    can_upload: { type: Boolean, default: true },
 });
 
 const confirmingDelete = ref(null);
@@ -93,7 +97,7 @@ function statusLabel(plugin) {
                     {{ activePlugins.length }} active, {{ inactivePlugins.length }} inactive
                 </p>
             </div>
-            <div>
+            <div v-if="can_upload">
                 <input ref="fileInput" type="file" accept=".zip" class="hidden" @change="handleUpload" />
                 <button
                     :disabled="uploading"
@@ -144,8 +148,11 @@ function statusLabel(plugin) {
                 />
             </svg>
             <h3 class="text-sm font-medium text-[var(--esc-panel-text-secondary)]">No plugins installed</h3>
-            <p class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
+            <p v-if="can_upload" class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
                 Upload a plugin ZIP to extend Escalated with custom functionality.
+            </p>
+            <p v-else class="mt-1 text-xs text-[var(--esc-panel-text-muted)]">
+                Register a plugin in the host application to extend Escalated with custom functionality.
             </p>
         </div>
 
@@ -234,6 +241,7 @@ function statusLabel(plugin) {
                                 </svg>
                                 Installed {{ plugin.installed_at }}
                             </span>
+                            <span v-if="plugin.module" class="font-mono">{{ plugin.module }}</span>
                         </div>
 
                         <!-- Provided extensions summary -->
