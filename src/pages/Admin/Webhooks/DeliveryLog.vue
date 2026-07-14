@@ -108,8 +108,7 @@ function togglePayload(id) {
                             <td colspan="5" class="bg-[var(--esc-panel-hover)] px-4 py-3">
                                 <pre
                                     class="max-h-40 overflow-auto rounded-lg bg-[var(--esc-panel-surface-alt)] p-3 text-xs text-[var(--esc-panel-text-tertiary)]"
-                                    >{{ JSON.stringify(delivery.payload, null, 2) }}</pre
-                                >
+                                    >{{ JSON.stringify(delivery.payload, null, 2) }}</pre>
                             </td>
                         </tr>
                     </template>
