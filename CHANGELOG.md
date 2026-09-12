@@ -4,6 +4,23 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.5] - 2026-09-12
+
+### Added
+- **`Error.vue`**, the refusal and not-found screen. `escalated-rails` renders
+  `Escalated/Error` for every 403 and 404 inside the panel and no component has
+  ever existed behind it, so a refusal arrived as a blank page — and a refusal
+  that says nothing is indistinguishable from a bug.
+
+  It takes the `status` and the backend's already-translated `message`, and
+  falls back to its own wording when a status arrives bare. Like the two-factor
+  challenge it does not use `EscalatedLayout`: the usual reason to be here is
+  having been refused, and the layout's navigation is a list of places the
+  viewer may equally not be allowed to go. The way back is rendered only when
+  the backend says where that is, since a host mounts Escalated under its own
+  prefix and this page is reached without a layout to resolve one.
+
+## [0.11.4] - 2026-09-12
 ## [0.11.4] - 2026-09-12
 
 ### Added

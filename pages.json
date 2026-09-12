@@ -89,6 +89,7 @@
         "Escalated/Customer/KnowledgeBase/Article",
         "Escalated/Customer/KnowledgeBase/Index",
         "Escalated/Customer/Show",
+        "Escalated/Error",
         "Escalated/Guest/Create",
         "Escalated/Guest/Show",
         "Escalated/Plugin/Page"
