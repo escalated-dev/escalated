@@ -4,6 +4,41 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-12
+
+### Added
+- **Automations screens** (`Admin/Automations/Index.vue`, `Admin/Automations/Form.vue`). Six backends render
+  `Escalated/Admin/Automations/*` and this package had no component behind either name, so the screen came up blank —
+  Inertia resolves a missing page to nothing rather than to an error. Automations are the time-based half of the admin
+  automation surface; Workflows are the event-driven half. They are separate surfaces and both need a screen.
+
+  The form offers only the fields, operators and actions the backend runner actually evaluates. Anything else would save
+  cleanly and then silently never match a ticket.
+
+- **Public tickets settings** (`Admin/Settings/PublicTickets.vue`). Rendered by five backends, previously blank. Each
+  guest policy mode asks for exactly the value the backend requires alongside it, because a mode saved without its
+  companion value is rejected server-side and the field has to be on screen to be filled in.
+
+- **Plugin pages** (`Plugin/Page.vue`). A plugin declares a route on the backend and a component on the frontend, and
+  this is where the two meet. Two backends render `Escalated/Plugin/Page`; with nothing behind the name, every plugin
+  page was blank — and blank in the same way whether the plugin was installed on the frontend or not. It now resolves
+  the registered component, and names what is missing when there is none.
+
+- **`Admin/Workflows/Form.vue`**, the name the backends render for the workflow editor. `Builder.vue` is the editor and
+  takes exactly these props; the name simply had no page behind it.
+
+- **`scripts/audit-page-parity.py`**, which compares every page name the backends render against the components this
+  package ships. That comparison is the only way to see this class of bug: the request succeeds, the tests pass, and the
+  screen is empty.
+
+- **An `Automations` entry in the admin navigation.** The screen the backends render had no way in.
+
+### Changed
+- **Test runner on vitest 5**, with `@storybook/*` 10.6 and happy-dom 20.14. The suite runs in roughly half the time.
+- **`.gitattributes` normalising line endings.** Prettier's `endOfLine` defaults to `lf`, so a Windows checkout with
+  `core.autocrlf=true` failed `format:check` on files that were perfectly formatted — a failure that appeared only on a
+  contributor's machine and never in CI.
+
 ## [0.10.0] - 2026-09-11
 
 ### Added

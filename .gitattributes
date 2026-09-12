@@ -1,0 +1,12 @@
+# Normalise line endings. Prettier's endOfLine defaults to lf, so a Windows
+# checkout with core.autocrlf=true fails `npm run format:check` on files that
+# are perfectly formatted -- CI on Linux sees lf and passes, which makes the
+# failure look like a real one only on a contributor's machine.
+* text=auto eol=lf
+
+# Binary, and not to be touched.
+*.png binary
+*.jpg binary
+*.gif binary
+*.woff binary
+*.woff2 binary

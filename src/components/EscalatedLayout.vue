@@ -86,6 +86,15 @@ const adminLinks = computed(() => {
             position: 53,
         },
         {
+            href: `${p}/admin/automations`,
+            label: 'Automations',
+            // Time-based rules, next to the event-driven ones. The two are
+            // separate surfaces and always have been; this entry was simply
+            // never added, so the screen the backends render had no way in.
+            icon: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
+            position: 53.5,
+        },
+        {
             href: `${p}/admin/webhooks`,
             label: 'Webhooks',
             icon: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
