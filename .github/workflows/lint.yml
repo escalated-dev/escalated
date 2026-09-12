@@ -30,3 +30,9 @@ jobs:
 
       - name: Check formatting
         run: npm run format:check
+
+      # pages.json is generated from src/pages and is what the backends check
+      # their own page names against. A stale one sends them looking for a bug
+      # that is really a missing regeneration here.
+      - name: Check the page manifest is current
+        run: npm run pages:check

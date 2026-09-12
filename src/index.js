@@ -1,6 +1,10 @@
 // Plugin
 export { EscalatedPlugin } from './plugin';
 
+// Page resolution. A page name with no component behind it resolves to nothing
+// in Inertia -- a 200 and a blank panel -- so this says so instead.
+export { resolveEscalatedPage, isEscalatedPage, escalatedPages, suggestPages } from './resolvePage';
+
 // Components
 export { default as ActiveChatsPanel } from './components/ActiveChatsPanel.vue';
 export { default as ActivityTimeline } from './components/ActivityTimeline.vue';
