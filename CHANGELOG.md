@@ -4,6 +4,11 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-11
+
+### Added
+- **Database connection settings screen** (`Admin/Settings/DatabaseConnection.vue`). Shows which database Escalated is reading and writing, lists the connections it could use, probes each without committing to it, and switches between them. An unmigrated or unreachable connection is disabled with the reason shown — pointing Escalated at a database with no Escalated tables does not error, it renders an empty panel, which reads exactly like data loss. When `escalated.connection` is pinned in config the form is not rendered at all.
+
 ## [0.9.0] - 2026-06-04
 
 ### Added
