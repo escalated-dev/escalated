@@ -4,6 +4,21 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.4] - 2026-09-12
+
+### Added
+- **`Auth/TwoFactorChallenge.vue`**, the post-login two-factor challenge.
+  `escalated-adonis` has been rendering `Escalated/Auth/TwoFactorChallenge` with
+  no component behind it, so the challenge screen was blank — and a blank
+  challenge is not a locked door, it is a dead end for anyone with 2FA enabled.
+
+  It deliberately does not use `EscalatedLayout`: the sign-in is not finished at
+  that point, and nothing on the page should suggest access that has not been
+  granted. A TOTP code and a recovery code post to the same endpoint, and only
+  the field in use is sent, so a blank companion field cannot read as an attempt
+  with an empty code.
+
+## [0.11.3] - 2026-09-12
 ## [0.11.3] - 2026-09-12
 
 ### Fixed
