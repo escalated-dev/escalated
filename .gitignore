@@ -7,3 +7,7 @@ screenshot-results/
 # Demo-recording intermediates (the produced GIF is committed to .github/profile/)
 recordings/
 .github/profile/demo_frame_*.png
+
+# Local clone of the locale package, pulled in for development. It is a
+# separate repository and must never be committed here as a gitlink.
+/escalated-locale/
