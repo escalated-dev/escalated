@@ -4,6 +4,24 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-09-12
+
+### Fixed
+- **The package could not be published at all.** `@escalated-dev/locale` was
+  depended on as a git reference — `github:escalated-dev/escalated-locale#v0.1.8`
+  — and npm refuses to fetch git-type packages while publishing:
+
+      npm error code EALLOWGIT
+      npm error Fetching packages of type "git" have been disabled
+
+  `npm publish` failed for **v0.10.0 and v0.11.0**, leaving 0.9.0 as the latest
+  version on the registry while two releases sat tagged and unpublished. The
+  same package is on npm as `@escalated-dev/locale@0.1.8`; it is now depended on
+  from there.
+
+  A git dependency is also invisible to Dependabot, so nothing was ever going to
+  flag it.
+
 ## [0.11.0] - 2026-09-12
 
 ### Added
