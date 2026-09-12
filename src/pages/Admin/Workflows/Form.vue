@@ -13,9 +13,18 @@ defineProps({
     workflow: { type: Object, default: null },
 
     // Passed by the backends alongside the workflow. Builder derives its own
-    // trigger list, so this is accepted rather than forwarded; declaring it
-    // keeps it out of the fallthrough attributes.
-    triggerEvents: { type: [Array, Object], default: null },
+    // trigger list, operators and action types, so these are accepted rather
+    // than forwarded; declaring them keeps them out of the fallthrough
+    // attributes.
+    //
+    // Declared in snake_case because that is what arrives. Vue folds
+    // kebab-case into camelCase and nothing else, so a `triggerEvents`
+    // declaration never matched the `trigger_events` the backends send -- it
+    // landed on Builder's root element as an attribute, which is the thing the
+    // declaration exists to prevent.
+    trigger_events: { type: [Array, Object], default: null },
+    operators: { type: [Array, Object], default: null },
+    action_types: { type: [Array, Object], default: null },
 });
 </script>
 
