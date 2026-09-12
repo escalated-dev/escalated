@@ -1,6 +1,6 @@
 {
   "name": "@escalated-dev/escalated",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Vue 3 + Inertia.js UI components for Escalated â€” the embeddable support ticket system",
   "author": "Escalated Dev <hello@escalated.dev>",
   "license": "MIT",
@@ -59,9 +59,9 @@
     "@eslint/js": "^10.0.1",
     "@inertiajs/vue3": "^3.7.0",
     "@playwright/test": "^1.62.1",
-    "@storybook/addon-a11y": "^10.5.10",
-    "@storybook/addon-docs": "^10.5.10",
-    "@storybook/vue3-vite": "^10.5.10",
+    "@storybook/addon-a11y": "^10.6.0",
+    "@storybook/addon-docs": "^10.6.0",
+    "@storybook/vue3-vite": "^10.6.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.5.0",
@@ -70,7 +70,7 @@
     "eslint": "^10.9.1",
     "eslint-plugin-storybook": "^10.5.10",
     "eslint-plugin-vue": "^10.10.0",
-    "happy-dom": "^20.12.0",
+    "happy-dom": "^20.14.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "playwright": "^1.62.1",
@@ -78,7 +78,7 @@
     "prettier": "^3.9.6",
     "storybook": "^10.5.10",
     "tailwindcss": "^4.3.3",
-    "vitest": "^4.1.11",
+    "vitest": "^5.0.0",
     "vue": "^3.5.42",
     "wait-on": "^9.1.0"
   }
