@@ -21,19 +21,10 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.environ.get('ESCALATED_ROOT') or os.path.dirname(HERE)
 FRONTEND = HERE
 
-BACKENDS = [
-    ('laravel', ('.php',)),
-    ('rails', ('.rb',)),
-    ('django', ('.py',)),
-    ('adonis', ('.ts', '.js')),
-    ('symfony', ('.php',)),
-    ('nestjs', ('.ts',)),
-    ('wordpress', ('.php',)),
-    ('phoenix', ('.ex', '.exs')),
-    ('go', ('.go',)),
-    ('dotnet', ('.cs',)),
-    ('spring', ('.java',)),
-]
+# Every sibling repo, not a hand-kept list. A hardcoded one silently skipped
+# escalated-laravel-mobile-api, which renders page names like any other backend.
+SUFFIXES = ('.php', '.rb', '.py', '.ts', '.js', '.ex', '.exs', '.go', '.cs', '.java', '.dart')
+
 
 SKIP_DIRS = {
     '.git', 'node_modules', 'vendor', 'build', 'dist', '_build', 'deps',
@@ -52,24 +43,38 @@ def walk(root, suffixes):
                 yield os.path.join(base, name)
 
 
+def backend_repos():
+    """Every Escalated repo beside this one, this one excepted."""
+    if not os.path.isdir(ROOT):
+        return []
+
+    return sorted(
+        name for name in os.listdir(ROOT)
+        if name.startswith('escalated-')
+        and os.path.isdir(os.path.join(ROOT, name))
+        # .git is a directory in a clone and a file in a worktree; skipping
+        # the file form silently dropped escalated-laravel-mobile-api, which
+        # renders page names like any other backend.
+        and os.path.exists(os.path.join(ROOT, name, '.git'))
+    )
+
+
 def rendered_pages():
-    """page name -> set of backends that render it."""
+    """page name -> set of repos that render it."""
     found = {}
 
-    for backend, suffixes in BACKENDS:
-        root = os.path.join(ROOT, 'escalated-' + backend)
+    for repo in backend_repos():
+        root = os.path.join(ROOT, repo)
+        label = repo.replace('escalated-', '')
 
-        if not os.path.isdir(root):
-            continue
-
-        for path in walk(root, suffixes):
+        for path in walk(root, SUFFIXES):
             try:
                 source = open(path, encoding='utf-8', errors='ignore').read()
             except OSError:
                 continue
 
             for page in PAGE.findall(source):
-                found.setdefault(page, set()).add(backend)
+                found.setdefault(page, set()).add(label)
 
     return found
 
