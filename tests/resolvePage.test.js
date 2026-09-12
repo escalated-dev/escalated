@@ -97,12 +97,14 @@ describe('the page manifest', () => {
 
     it('every name in it actually resolves', async () => {
         // The manifest is what the backends check themselves against, so a
-        // name in it that does not resolve would send them looking for a bug
-        // that is really here.
-        for (const name of manifest.pages) {
-            await expect(resolveEscalatedPage(name)).resolves.toBeTruthy();
-        }
-    });
+        // name in it that does not resolve would send them looking for a
+        // bug that is really here.
+        //
+        // Eighty-odd dynamic imports is more than the default timeout
+        // allows for when the suite is under load, and a timeout here would
+        // read as a broken manifest rather than a slow one.
+        await Promise.all(manifest.pages.map((name) => expect(resolveEscalatedPage(name)).resolves.toBeTruthy()));
+    }, 30_000);
 
     it('names are all namespaced', () => {
         expect(manifest.pages.every((page) => page.startsWith('Escalated/'))).toBe(true);

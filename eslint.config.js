@@ -47,8 +47,9 @@ export default [
         },
     },
     {
-        // Node-side scripts (demo recording pipeline, build helpers).
-        files: ['scripts/**/*.js'],
+        // Node-side scripts (demo recording pipeline, build helpers) and the
+        // tests that inspect the package itself rather than the browser code.
+        files: ['scripts/**/*.js', 'tests/packaging.test.js'],
         languageOptions: {
             globals: {
                 process: 'readonly',
