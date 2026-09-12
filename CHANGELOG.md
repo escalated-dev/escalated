@@ -4,6 +4,19 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-09-12
+
+### Fixed
+- **`pages.json` was not in the published package.** `files` listed only `src`,
+  so the manifest every backend is meant to check its own page names against was
+  exported, documented, and absent from the tarball. `exports` and `files` are
+  independent lists and nothing compares them, so `npm publish` said nothing.
+
+  `tests/packaging.test.js` now reads the real file list from
+  `npm pack --dry-run --json` and fails if any path named in `exports` is not in
+  it.
+
+## [0.11.2] - 2026-09-12
 ## [0.11.2] - 2026-09-12
 
 ### Added
