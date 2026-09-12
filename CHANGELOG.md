@@ -4,6 +4,36 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-09-12
+
+### Added
+- **`resolveEscalatedPage()`**, so a page name with no component behind it says
+  so. Inertia resolves an unknown name to nothing: Vue renders nothing and the
+  panel comes up blank on a 200 response, which reads as a permissions problem
+  or an empty dataset. It is how four screens shipped blank. The resolver throws
+  in development, naming what was asked for and the nearest thing that exists,
+  and in production logs the same message rather than rendering an empty page.
+
+  ```js
+  createInertiaApp({
+      resolve: (name) =>
+          resolveEscalatedPage(name, () =>
+              resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**')),
+          ),
+  });
+  ```
+
+  Suggestions are ranked on path-segment overlap rather than leaf equality —
+  nearly every page ends in `Index` or `Form`, so matching on the last segment
+  ranks half the package equally.
+
+- **`pages.json`**, the list of every page name this package can resolve,
+  generated from `src/pages` and exported at `@escalated-dev/escalated/pages.json`.
+  It is what each backend checks its own page names against in CI, which is the
+  only place both halves of that comparison are known. `npm run pages:check`
+  fails if it has drifted from the components, and CI runs it.
+
+## [0.11.1] - 2026-09-12
 ## [0.11.1] - 2026-09-12
 
 ### Fixed
