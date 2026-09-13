@@ -2,12 +2,23 @@
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { humanize } from '../../../utils/workflowContract.js';
 
 defineProps({
     workflows: { type: Array, default: () => [] },
 });
 
 const dragIndex = ref(null);
+
+// Backends send `trigger_event` and `is_active` (workflow-admin-contract.md).
+// `trigger` and `active` are read too, for anything still sending the aliases.
+function triggerOf(workflow) {
+    return workflow.trigger_event ?? workflow.trigger ?? '';
+}
+
+function isActive(workflow) {
+    return workflow.is_active ?? workflow.active ?? false;
+}
 
 function destroy(id) {
     if (confirm('Delete this workflow? This cannot be undone.')) {
@@ -16,9 +27,7 @@ function destroy(id) {
 }
 
 function toggleActive(workflow) {
-    router.put(route('escalated.admin.workflows.toggle', workflow.id), {
-        active: !workflow.active,
-    });
+    router.post(route('escalated.admin.workflows.toggle', workflow.id));
 }
 
 function onDragStart(index) {
@@ -35,7 +44,7 @@ function onDrop(event, workflows, targetIndex) {
     const ids = workflows.map((w) => w.id);
     const [moved] = ids.splice(dragIndex.value, 1);
     ids.splice(targetIndex, 0, moved);
-    router.post(route('escalated.admin.workflows.reorder'), { ids });
+    router.post(route('escalated.admin.workflows.reorder'), { workflow_ids: ids });
     dragIndex.value = null;
 }
 
@@ -45,22 +54,19 @@ function onDragEnd() {
 
 function triggerBadgeClass(trigger) {
     const classes = {
-        ticket_created: 'bg-blue-500/10 text-blue-400',
-        ticket_updated: 'bg-cyan-500/10 text-cyan-400',
-        reply_added: 'bg-emerald-500/10 text-emerald-400',
-        status_changed: 'bg-violet-500/10 text-violet-400',
-        ticket_assigned: 'bg-indigo-500/10 text-indigo-400',
-        ticket_escalated: 'bg-red-500/10 text-red-400',
-        sla_breached: 'bg-rose-500/10 text-rose-400',
-        sla_warning: 'bg-amber-500/10 text-amber-400',
-        chat_started: 'bg-teal-500/10 text-teal-400',
-        chat_ended: 'bg-gray-500/10 text-gray-400',
+        'ticket.created': 'bg-blue-500/10 text-blue-400',
+        'ticket.updated': 'bg-cyan-500/10 text-cyan-400',
+        'reply.created': 'bg-emerald-500/10 text-emerald-400',
+        'ticket.replied': 'bg-emerald-500/10 text-emerald-400',
+        'ticket.status_changed': 'bg-violet-500/10 text-violet-400',
+        'ticket.assigned': 'bg-indigo-500/10 text-indigo-400',
+        'ticket.escalated': 'bg-red-500/10 text-red-400',
+        'sla.breached': 'bg-rose-500/10 text-rose-400',
+        'sla.warning': 'bg-amber-500/10 text-amber-400',
+        'chat.started': 'bg-teal-500/10 text-teal-400',
+        'chat.ended': 'bg-gray-500/10 text-gray-400',
     };
     return classes[trigger] || 'bg-gray-500/10 text-gray-400';
-}
-
-function triggerLabel(trigger) {
-    return (trigger || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 </script>
 
@@ -192,21 +198,21 @@ function triggerLabel(trigger) {
                         <td class="px-4 py-3">
                             <span
                                 class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium"
-                                :class="triggerBadgeClass(workflow.trigger)"
+                                :class="triggerBadgeClass(triggerOf(workflow))"
                             >
-                                {{ triggerLabel(workflow.trigger) }}
+                                {{ humanize(triggerOf(workflow)) }}
                             </span>
                         </td>
                         <td class="px-4 py-3">
                             <button
                                 type="button"
                                 class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                                :class="workflow.active ? 'bg-emerald-500' : 'bg-[var(--esc-panel-border)]'"
+                                :class="isActive(workflow) ? 'bg-emerald-500' : 'bg-[var(--esc-panel-border)]'"
                                 @click="toggleActive(workflow)"
                             >
                                 <span
                                     class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                    :class="workflow.active ? 'translate-x-4' : 'translate-x-0'"
+                                    :class="isActive(workflow) ? 'translate-x-4' : 'translate-x-0'"
                                 />
                             </button>
                         </td>

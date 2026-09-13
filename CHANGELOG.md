@@ -4,6 +4,29 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- **The workflow builder sent a shape no backend reads.** It posted
+  `trigger: 'ticket_created'`, conditions as `{match, conditions}` and actions as
+  `{type, config}`. Every backend engine evaluates `trigger_event` with dotted
+  names (`ticket.created`), conditions as `{all: [...]}` or `{any: [...]}`, and
+  actions as `{type, value}`. So a workflow built here failed validation on
+  Laravel, and wherever it did save it could never match an event.
+
+  The builder now sends the body fixed in escalated-developer-context
+  `domain-model/workflow-admin-contract.md`. It still opens workflows stored in
+  the older shapes, including Laravel's `{match, rules}`, and saves them back in
+  the new one.
+- **The builder offers what the backend can actually do.** `Form` hands the
+  `trigger_events`, `action_types` and `operators` a backend sends to the
+  builder, in any of the three shapes the contract allows, instead of swallowing
+  them. Without them it offers the contract's defaults: five triggers, the core
+  action catalog and twelve operators. Operators no backend evaluates (`in`,
+  `matches`) and fields no backend resolves (`type`, `assigned_agent`,
+  `reply_count`, `custom_field`) are gone.
+- **The workflows list showed every workflow as disabled.** It read `active`,
+  and backends send `is_active`. Toggling now POSTs to the toggle route, which
+  is a POST everywhere, where it used to PUT. Reordering sends `workflow_ids`.
+
 ## [0.11.5] - 2026-09-12
 
 ### Added

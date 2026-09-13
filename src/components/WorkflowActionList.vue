@@ -1,93 +1,72 @@
 <script setup>
 import { ref, computed } from 'vue';
 import WorkflowActionConfig from './WorkflowActionConfig.vue';
+import { CORE_ACTION_TYPES, normalizeOptions } from '../utils/workflowContract.js';
 
 const props = defineProps({
+    // `[{type, value}]` (workflow-admin-contract.md).
     modelValue: { type: Array, default: () => [] },
+    // What the backend executes. Absent means the core catalog every backend
+    // handles; anything else the backend lists is offered as well.
+    actionTypes: { type: [Array, Object], default: null },
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-const actionTypes = [
-    {
-        value: 'assign_agent',
-        label: 'Assign Agent',
-        icon: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
-        color: 'text-blue-400 bg-blue-500/10',
-    },
-    {
-        value: 'change_status',
-        label: 'Change Status',
+const PERSON_ICON =
+    'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z';
+const TAG_ICON =
+    'M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z';
+const DEPARTMENT_ICON =
+    'M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75z';
+const NOTE_ICON =
+    'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z';
+const MAIL_ICON =
+    'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75';
+const BOLT_ICON = 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z';
+
+const ACTION_STYLES = {
+    assign_agent: { icon: PERSON_ICON, color: 'text-blue-400 bg-blue-500/10' },
+    change_status: {
         icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         color: 'text-emerald-400 bg-emerald-500/10',
     },
-    {
-        value: 'change_priority',
-        label: 'Change Priority',
+    change_priority: {
         icon: 'M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12',
         color: 'text-red-400 bg-red-500/10',
     },
-    {
-        value: 'add_tag',
-        label: 'Add Tag',
-        icon: 'M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z',
-        color: 'text-violet-400 bg-violet-500/10',
-    },
-    {
-        value: 'remove_tag',
-        label: 'Remove Tag',
-        icon: 'M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z',
-        color: 'text-pink-400 bg-pink-500/10',
-    },
-    {
-        value: 'move_department',
-        label: 'Move Department',
-        icon: 'M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75z',
-        color: 'text-cyan-400 bg-cyan-500/10',
-    },
-    {
-        value: 'add_note',
-        label: 'Add Internal Note',
-        icon: 'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z',
-        color: 'text-amber-400 bg-amber-500/10',
-    },
-    {
-        value: 'send_email',
-        label: 'Send Email Notification',
-        icon: 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
-        color: 'text-sky-400 bg-sky-500/10',
-    },
-    {
-        value: 'send_webhook',
-        label: 'Send Webhook',
+    add_tag: { icon: TAG_ICON, color: 'text-violet-400 bg-violet-500/10' },
+    remove_tag: { icon: TAG_ICON, color: 'text-pink-400 bg-pink-500/10' },
+    set_department: { icon: DEPARTMENT_ICON, color: 'text-cyan-400 bg-cyan-500/10' },
+    move_department: { icon: DEPARTMENT_ICON, color: 'text-cyan-400 bg-cyan-500/10' },
+    add_note: { icon: NOTE_ICON, color: 'text-amber-400 bg-amber-500/10' },
+    add_internal_note: { icon: NOTE_ICON, color: 'text-amber-400 bg-amber-500/10' },
+    insert_canned_reply: { icon: MAIL_ICON, color: 'text-sky-400 bg-sky-500/10' },
+    send_notification: { icon: MAIL_ICON, color: 'text-sky-400 bg-sky-500/10' },
+    add_follower: { icon: PERSON_ICON, color: 'text-indigo-400 bg-indigo-500/10' },
+    send_webhook: {
         icon: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
         color: 'text-indigo-400 bg-indigo-500/10',
     },
-    {
-        value: 'delay',
-        label: 'Delay',
-        icon: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
-        color: 'text-orange-400 bg-orange-500/10',
-    },
-    {
-        value: 'apply_macro',
-        label: 'Apply Macro',
-        icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
-        color: 'text-yellow-400 bg-yellow-500/10',
-    },
-    {
-        value: 'close_ticket',
-        label: 'Close Ticket',
+    delay: { icon: 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-orange-400 bg-orange-500/10' },
+    apply_macro: { icon: BOLT_ICON, color: 'text-yellow-400 bg-yellow-500/10' },
+    close_ticket: {
         icon: 'M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         color: 'text-gray-400 bg-gray-500/10',
     },
-    {
-        value: 'snooze',
-        label: 'Snooze',
+    snooze_ticket: {
         icon: 'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0',
         color: 'text-teal-400 bg-teal-500/10',
     },
-];
+};
+
+const DEFAULT_STYLE = { icon: BOLT_ICON, color: 'text-gray-400 bg-gray-500/10' };
+
+function withStyle(option) {
+    return { ...option, ...(ACTION_STYLES[option.value] ?? DEFAULT_STYLE) };
+}
+
+const availableTypes = computed(() => normalizeOptions(props.actionTypes, CORE_ACTION_TYPES).map(withStyle));
 
 const showTypeSelector = ref(false);
 const expandedIndex = ref(null);
@@ -95,12 +74,16 @@ const dragIndex = ref(null);
 
 const actions = computed(() => props.modelValue);
 
+// A stored action may have a type the backend no longer lists; it still gets a
+// label, derived from its name.
 function getActionType(value) {
-    return actionTypes.find((t) => t.value === value) || actionTypes[0];
+    const listed = availableTypes.value.find((t) => t.value === value);
+
+    return listed ?? withStyle(normalizeOptions([value], CORE_ACTION_TYPES)[0]);
 }
 
 function addAction(typeValue) {
-    const newActions = [...actions.value, { type: typeValue, config: {} }];
+    const newActions = [...actions.value, { type: typeValue, value: '' }];
     emit('update:modelValue', newActions);
     showTypeSelector.value = false;
     expandedIndex.value = newActions.length - 1;
@@ -112,8 +95,8 @@ function removeAction(index) {
     if (expandedIndex.value === index) expandedIndex.value = null;
 }
 
-function updateConfig(index, config) {
-    const newActions = actions.value.map((a, i) => (i === index ? { ...a, config } : a));
+function updateValue(index, value) {
+    const newActions = actions.value.map((a, i) => (i === index ? { ...a, value } : a));
     emit('update:modelValue', newActions);
 }
 
@@ -122,40 +105,16 @@ function toggleExpand(index) {
 }
 
 function getActionSummary(action) {
-    const c = action.config || {};
-    switch (action.type) {
-        case 'assign_agent':
-            return c.mode === 'round_robin'
-                ? 'Round robin'
-                : c.mode === 'least_busy'
-                  ? 'Least busy'
-                  : c.agent || 'Not configured';
-        case 'change_status':
-            return c.status || 'Not configured';
-        case 'change_priority':
-            return c.priority || 'Not configured';
-        case 'add_tag':
-        case 'remove_tag':
-            return c.tag || 'Not configured';
-        case 'move_department':
-            return c.department || 'Not configured';
-        case 'add_note':
-            return c.body ? c.body.substring(0, 40) + (c.body.length > 40 ? '...' : '') : 'Not configured';
-        case 'send_email':
-            return c.to || 'Not configured';
-        case 'send_webhook':
-            return c.url || 'Not configured';
-        case 'delay':
-            return `Wait ${c.duration || 1} ${c.unit || 'hours'}`;
-        case 'apply_macro':
-            return c.macro || 'Not configured';
-        case 'close_ticket':
-            return 'Close immediately';
-        case 'snooze':
-            return `${c.duration || 1} ${c.unit || 'hours'}`;
-        default:
-            return 'Not configured';
-    }
+    const value = action.value;
+
+    if (action.type === 'delay') return `Wait ${value || 1} minutes`;
+    if (action.type === 'close_ticket') return 'Close immediately';
+    if (value === null || value === undefined || value === '') return 'Not configured';
+    if (typeof value === 'object') return 'Configured outside the builder';
+
+    const text = String(value);
+
+    return text.length > 40 ? `${text.substring(0, 40)}...` : text;
 }
 
 // Drag-and-drop reordering
@@ -294,8 +253,8 @@ function onDragEnd() {
                 <div v-if="expandedIndex === i" class="border-t border-[var(--esc-panel-border)] px-4 pb-4">
                     <WorkflowActionConfig
                         :action-type="action.type"
-                        :model-value="action.config"
-                        @update:model-value="updateConfig(i, $event)"
+                        :model-value="action.value"
+                        @update:model-value="updateValue(i, $event)"
                     />
                 </div>
             </div>
@@ -325,7 +284,7 @@ function onDragEnd() {
                 class="absolute left-0 z-20 mt-2 w-full rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] py-2 shadow-2xl"
             >
                 <button
-                    v-for="at in actionTypes"
+                    v-for="at in availableTypes"
                     :key="at.value"
                     type="button"
                     class="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors hover:bg-[var(--esc-panel-hover)]"

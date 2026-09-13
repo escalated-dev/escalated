@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import WorkflowActionList from '../../src/components/WorkflowActionList.vue';
 
-function mountList(modelValue = []) {
+function mountList(modelValue = [], props = {}) {
     return mount(WorkflowActionList, {
-        props: { modelValue },
+        props: { modelValue, ...props },
         global: {
             stubs: {
                 WorkflowActionConfig: true,
@@ -13,108 +13,103 @@ function mountList(modelValue = []) {
     });
 }
 
+async function openTypeSelector(wrapper) {
+    const addBtn = wrapper.findAll('button').find((b) => b.text().includes('Add Action'));
+    await addBtn.trigger('click');
+}
+
 describe('WorkflowActionList', () => {
     describe('add actions', () => {
         it('shows Add Action button', () => {
-            const wrapper = mountList();
-            expect(wrapper.text()).toContain('Add Action');
+            expect(mountList().text()).toContain('Add Action');
         });
 
-        it('opens type selector when Add Action is clicked', async () => {
+        it('offers the core action catalog when the backend sends no list', async () => {
             const wrapper = mountList();
-            const addBtn = wrapper.findAll('button').find((b) => b.text().includes('Add Action'));
-            await addBtn.trigger('click');
-            // Should show all action types in the dropdown
-            expect(wrapper.text()).toContain('Assign Agent');
-            expect(wrapper.text()).toContain('Change Status');
-            expect(wrapper.text()).toContain('Send Email Notification');
+            await openTypeSelector(wrapper);
+
+            const text = wrapper.text();
+            expect(text).toContain('Assign Agent');
+            expect(text).toContain('Change Status');
+            expect(text).toContain('Set Department');
+            expect(text).toContain('Add Internal Note');
+            expect(text).toContain('Insert Canned Reply');
+            expect(text).not.toContain('Delay');
+            expect(text).not.toContain('Send Webhook');
+        });
+
+        it('offers exactly the actions the backend lists', async () => {
+            const wrapper = mountList([], { actionTypes: ['add_follower', 'delay'] });
+            await openTypeSelector(wrapper);
+
+            expect(wrapper.text()).toContain('Add Follower');
             expect(wrapper.text()).toContain('Delay');
+            expect(wrapper.text()).not.toContain('Change Status');
         });
 
-        it('emits action when an action type is selected', async () => {
+        it('adds the chosen action as {type, value}', async () => {
             const wrapper = mountList();
-            // Open selector
-            const addBtn = wrapper.findAll('button').find((b) => b.text().includes('Add Action'));
-            await addBtn.trigger('click');
-            // Click "Change Status"
+            await openTypeSelector(wrapper);
+
             const statusBtn = wrapper.findAll('button').find((b) => b.text().trim() === 'Change Status');
             await statusBtn.trigger('click');
-            const emitted = wrapper.emitted('update:modelValue');
-            expect(emitted).toBeTruthy();
-            expect(emitted[0][0]).toHaveLength(1);
-            expect(emitted[0][0][0].type).toBe('change_status');
+
+            expect(wrapper.emitted('update:modelValue')[0][0]).toEqual([{ type: 'change_status', value: '' }]);
         });
     });
 
     describe('remove actions', () => {
         it('removes an action when remove button is clicked', async () => {
             const wrapper = mountList([
-                { type: 'change_status', config: {} },
-                { type: 'add_tag', config: {} },
+                { type: 'change_status', value: 'open' },
+                { type: 'add_tag', value: 'vip' },
             ]);
-            // Find remove buttons (X icons in action cards)
             const removeButtons = wrapper.findAll('button').filter((b) => {
                 return b.classes().some((c) => c.includes('rose') || c.includes('hover:text-rose'));
             });
-            // Click the first remove button
+
             await removeButtons[0].trigger('click');
-            const emitted = wrapper.emitted('update:modelValue');
-            expect(emitted).toBeTruthy();
-            expect(emitted[0][0]).toHaveLength(1);
-            expect(emitted[0][0][0].type).toBe('add_tag');
+
+            expect(wrapper.emitted('update:modelValue')[0][0]).toEqual([{ type: 'add_tag', value: 'vip' }]);
         });
     });
 
     describe('reorder actions', () => {
         it('renders actions in correct order', () => {
-            const wrapper = mountList([
-                { type: 'change_status', config: {} },
-                { type: 'add_tag', config: {} },
-                { type: 'assign_agent', config: {} },
-            ]);
-            const text = wrapper.text();
-            const statusPos = text.indexOf('Change Status');
-            const tagPos = text.indexOf('Add Tag');
-            const assignPos = text.indexOf('Assign Agent');
-            expect(statusPos).toBeLessThan(tagPos);
-            expect(tagPos).toBeLessThan(assignPos);
+            const text = mountList([
+                { type: 'change_status', value: '' },
+                { type: 'add_tag', value: '' },
+                { type: 'assign_agent', value: '' },
+            ]).text();
+
+            expect(text.indexOf('Change Status')).toBeLessThan(text.indexOf('Add Tag'));
+            expect(text.indexOf('Add Tag')).toBeLessThan(text.indexOf('Assign Agent'));
         });
     });
 
     describe('delay rendering', () => {
-        it('renders delay action as a visual wait divider', () => {
+        it('renders delay as a wait divider, in minutes', () => {
             const wrapper = mountList([
-                { type: 'change_status', config: {} },
-                { type: 'delay', config: { duration: 2, unit: 'hours' } },
-                { type: 'add_tag', config: {} },
+                { type: 'change_status', value: 'open' },
+                { type: 'delay', value: 30 },
+                { type: 'add_tag', value: 'later' },
             ]);
-            expect(wrapper.text()).toContain('Wait 2 hours');
-        });
 
-        it('renders default delay values when config is empty', () => {
-            const wrapper = mountList([{ type: 'delay', config: {} }]);
-            expect(wrapper.text()).toContain('Wait 1 hours');
+            expect(wrapper.text()).toContain('Wait 30 minutes');
         });
     });
 
     describe('action display', () => {
-        it('shows action type labels', () => {
-            const wrapper = mountList([
-                { type: 'assign_agent', config: {} },
-                { type: 'send_webhook', config: { url: 'https://example.com' } },
-            ]);
-            expect(wrapper.text()).toContain('Assign Agent');
-            expect(wrapper.text()).toContain('Send Webhook');
+        it('shows the value as the summary', () => {
+            expect(mountList([{ type: 'change_status', value: 'resolved' }]).text()).toContain('resolved');
         });
 
-        it('shows action summary text', () => {
-            const wrapper = mountList([{ type: 'change_status', config: { status: 'resolved' } }]);
-            expect(wrapper.text()).toContain('resolved');
+        it('shows Not configured when there is no value', () => {
+            expect(mountList([{ type: 'change_status', value: '' }]).text()).toContain('Not configured');
         });
 
-        it('shows Not configured when no config', () => {
-            const wrapper = mountList([{ type: 'change_status', config: {} }]);
-            expect(wrapper.text()).toContain('Not configured');
+        it('labels an action type it has no metadata for', () => {
+            expect(mountList([{ type: 'snooze_ticket', value: '4' }]).text()).toContain('Snooze Ticket');
         });
     });
 });
