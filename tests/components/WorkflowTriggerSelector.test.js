@@ -2,59 +2,63 @@ import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import WorkflowTriggerSelector from '../../src/components/WorkflowTriggerSelector.vue';
 
-function mountSelector(modelValue = '') {
+function mountSelector(props = {}) {
     return mount(WorkflowTriggerSelector, {
-        props: { modelValue },
+        props: { modelValue: '', ...props },
     });
 }
 
 describe('WorkflowTriggerSelector', () => {
-    it('renders all trigger options', () => {
+    it('offers the five canonical triggers when the backend sends none', () => {
+        const text = mountSelector().text();
+
+        expect(text).toContain('Ticket Created');
+        expect(text).toContain('Ticket Updated');
+        expect(text).toContain('Ticket Assigned');
+        expect(text).toContain('Status Changed');
+        expect(text).toContain('Reply Added');
+        expect(mountSelector().findAll('button')).toHaveLength(5);
+    });
+
+    it('emits the dotted event name the backends match on', async () => {
         const wrapper = mountSelector();
-        expect(wrapper.text()).toContain('Ticket Created');
-        expect(wrapper.text()).toContain('Ticket Updated');
-        expect(wrapper.text()).toContain('Reply Added');
-        expect(wrapper.text()).toContain('Status Changed');
-        expect(wrapper.text()).toContain('Ticket Assigned');
-        expect(wrapper.text()).toContain('Ticket Escalated');
+
+        await wrapper.findAll('button')[0].trigger('click');
+
+        expect(wrapper.emitted('update:modelValue')[0]).toEqual(['ticket.created']);
+    });
+
+    it('offers exactly the triggers the backend lists', () => {
+        const wrapper = mountSelector({ options: ['ticket.replied', 'sla.breached'] });
+
+        expect(wrapper.findAll('button')).toHaveLength(2);
+        expect(wrapper.text()).toContain('Ticket Replied');
         expect(wrapper.text()).toContain('SLA Breached');
-        expect(wrapper.text()).toContain('SLA Warning');
-        expect(wrapper.text()).toContain('Chat Started');
-        expect(wrapper.text()).toContain('Chat Ended');
     });
 
-    it('displays descriptions for each trigger', () => {
-        const wrapper = mountSelector();
-        expect(wrapper.text()).toContain('When a new ticket is submitted');
-        expect(wrapper.text()).toContain('When any ticket field is modified');
+    it('uses the labels a backend sends as a value -> label map', () => {
+        const wrapper = mountSelector({ options: { 'chat.started': 'When chat opens' } });
+
+        expect(wrapper.text()).toContain('When chat opens');
     });
 
-    it('highlights the selected trigger', () => {
-        const wrapper = mountSelector('ticket_created');
-        const buttons = wrapper.findAll('button');
-        const ticketCreatedBtn = buttons[0];
-        expect(ticketCreatedBtn.classes()).toContain('border-blue-500');
+    it('displays descriptions for known triggers', () => {
+        const text = mountSelector().text();
+
+        expect(text).toContain('When a new ticket is submitted');
+        expect(text).toContain('When any ticket field is modified');
     });
 
-    it('emits update:modelValue when a trigger is clicked', async () => {
-        const wrapper = mountSelector();
-        const buttons = wrapper.findAll('button');
-        await buttons[2].trigger('click'); // Reply Added (3rd option)
-        expect(wrapper.emitted('update:modelValue')).toBeTruthy();
-        expect(wrapper.emitted('update:modelValue')[0]).toEqual(['reply_added']);
+    it('highlights the selected trigger and no other', () => {
+        const buttons = mountSelector({ modelValue: 'ticket.created' }).findAll('button');
+
+        expect(buttons[0].classes()).toContain('border-blue-500');
+        expect(buttons[1].classes()).not.toContain('border-blue-500');
     });
 
     it('shows a checkmark on the selected trigger', () => {
-        const wrapper = mountSelector('sla_breached');
-        // The check SVG should be present within the selected trigger
-        const checkmarks = wrapper.findAll('[class*="bg-blue-500"][class*="rounded-full"]');
-        expect(checkmarks.length).toBe(1);
-    });
+        const wrapper = mountSelector({ modelValue: 'reply.created' });
 
-    it('does not highlight unselected triggers', () => {
-        const wrapper = mountSelector('ticket_created');
-        const buttons = wrapper.findAll('button');
-        // Second button (Ticket Updated) should not have the selected class
-        expect(buttons[1].classes()).not.toContain('border-blue-500');
+        expect(wrapper.findAll('[class*="bg-blue-500"][class*="rounded-full"]')).toHaveLength(1);
     });
 });

@@ -1,15 +1,21 @@
 <script setup>
 import { computed } from 'vue';
+import { DEFAULT_OPERATORS, humanize, normalizeOptions } from '../utils/workflowContract.js';
 
 const props = defineProps({
+    // The editor's `{match, conditions}`; the builder sends it as `{all}` or
+    // `{any}` (workflow-admin-contract.md).
     modelValue: {
         type: Object,
         default: () => ({ match: 'all', conditions: [] }),
     },
+    // The operators the backend evaluates. Absent means the contract's twelve.
+    operators: { type: [Array, Object], default: null },
 });
 
 const emit = defineEmits(['update:modelValue']);
 
+// The field names every backend resolves (workflow-admin-contract.md#conditions).
 const fields = [
     {
         value: 'status',
@@ -28,42 +34,47 @@ const fields = [
     },
     { value: 'priority', label: 'Priority', type: 'enum', options: ['low', 'medium', 'high', 'urgent', 'critical'] },
     {
-        value: 'type',
+        value: 'ticket_type',
         label: 'Type',
         type: 'enum',
         options: ['question', 'problem', 'incident', 'task', 'feature_request'],
     },
     { value: 'channel', label: 'Channel', type: 'enum', options: ['web', 'email', 'chat', 'api', 'phone'] },
-    { value: 'tags', label: 'Tags', type: 'text' },
-    { value: 'department', label: 'Department', type: 'text' },
-    { value: 'assigned_agent', label: 'Assigned Agent', type: 'text' },
     { value: 'subject', label: 'Subject', type: 'text' },
+    { value: 'description', label: 'Description', type: 'text' },
+    { value: 'tags', label: 'Tags', type: 'text' },
+    { value: 'department_id', label: 'Department', type: 'text' },
+    { value: 'assigned_to', label: 'Assigned Agent', type: 'text' },
     { value: 'hours_since_created', label: 'Hours Since Created', type: 'number' },
     { value: 'hours_since_updated', label: 'Hours Since Updated', type: 'number' },
-    { value: 'reply_count', label: 'Reply Count', type: 'number' },
-    { value: 'custom_field', label: 'Custom Field', type: 'text' },
 ];
 
-const operatorsByType = {
-    enum: [
-        { value: 'equals', label: 'equals' },
-        { value: 'not_equals', label: 'not equals' },
-        { value: 'in', label: 'in' },
-    ],
-    text: [
-        { value: 'equals', label: 'equals' },
-        { value: 'not_equals', label: 'not equals' },
-        { value: 'contains', label: 'contains' },
-        { value: 'is_empty', label: 'is empty' },
-        { value: 'matches', label: 'matches' },
-    ],
-    number: [
-        { value: 'equals', label: 'equals' },
-        { value: 'not_equals', label: 'not equals' },
-        { value: 'greater_than', label: 'greater than' },
-        { value: 'less_than', label: 'less than' },
-    ],
+const OPERATOR_LABELS = {
+    equals: 'equals',
+    not_equals: 'not equals',
+    contains: 'contains',
+    not_contains: 'does not contain',
+    starts_with: 'starts with',
+    ends_with: 'ends with',
+    greater_than: 'greater than',
+    less_than: 'less than',
+    greater_or_equal: 'at least',
+    less_or_equal: 'at most',
+    is_empty: 'is empty',
+    is_not_empty: 'is not empty',
 };
+
+const operatorsByType = {
+    enum: ['equals', 'not_equals', 'is_empty', 'is_not_empty'],
+    text: ['equals', 'not_equals', 'contains', 'not_contains', 'starts_with', 'ends_with', 'is_empty', 'is_not_empty'],
+    number: ['equals', 'not_equals', 'greater_than', 'less_than', 'greater_or_equal', 'less_or_equal'],
+};
+
+const VALUELESS_OPERATORS = ['is_empty', 'is_not_empty'];
+
+const backendOperators = computed(() =>
+    props.operators ? normalizeOptions(props.operators, []).map((o) => o.value) : null,
+);
 
 const data = computed(() => props.modelValue);
 
@@ -94,14 +105,28 @@ function getFieldConfig(fieldValue) {
     return fields.find((f) => f.value === fieldValue) || fields[0];
 }
 
+function operatorLabel(operator) {
+    return OPERATOR_LABELS[operator] ?? humanize(operator).toLowerCase();
+}
+
+// The operators that make sense for the field. When the backend lists its own,
+// only those are offered: the canonical ones that fit the field, plus any
+// extras it evaluates.
 function getOperators(fieldValue) {
-    const field = getFieldConfig(fieldValue);
-    return operatorsByType[field.type] || operatorsByType.text;
+    const forType = operatorsByType[getFieldConfig(fieldValue).type] || operatorsByType.text;
+    const listed = backendOperators.value;
+    const values = listed ? listed.filter((op) => forType.includes(op) || !DEFAULT_OPERATORS.includes(op)) : forType;
+
+    return values.map((value) => ({ value, label: operatorLabel(value) }));
+}
+
+function valueless(operator) {
+    return VALUELESS_OPERATORS.includes(operator);
 }
 
 function onFieldChange(index, newField) {
     const operators = getOperators(newField);
-    updateCondition(index, { field: newField, operator: operators[0].value, value: '' });
+    updateCondition(index, { field: newField, operator: operators[0]?.value ?? 'equals', value: '' });
 }
 
 const previewText = computed(() => {
@@ -110,11 +135,9 @@ const previewText = computed(() => {
     return data.value.conditions
         .map((c) => {
             const field = getFieldConfig(c.field);
-            const opLabel =
-                (operatorsByType[field.type] || []).find((o) => o.value === c.operator)?.label || c.operator;
-            if (c.operator === 'is_empty') return `${field.label} is empty`;
+            if (valueless(c.operator)) return `${field.label} ${operatorLabel(c.operator)}`;
             const val = Array.isArray(c.value) ? `[${c.value.join(', ')}]` : c.value;
-            return `${field.label} ${opLabel} ${val}`;
+            return `${field.label} ${operatorLabel(c.operator)} ${val}`;
         })
         .join(joiner);
 });
@@ -179,30 +202,15 @@ const previewText = computed(() => {
                 </select>
 
                 <!-- Value (contextual) -->
-                <template v-if="condition.operator !== 'is_empty'">
+                <template v-if="!valueless(condition.operator)">
                     <!-- Enum select for enum fields -->
                     <select
-                        v-if="getFieldConfig(condition.field).type === 'enum' && condition.operator !== 'in'"
+                        v-if="getFieldConfig(condition.field).type === 'enum'"
                         :value="condition.value"
                         class="rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-2 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none"
                         @change="updateCondition(i, { value: $event.target.value })"
                     >
                         <option value="">Select...</option>
-                        <option v-for="opt in getFieldConfig(condition.field).options" :key="opt" :value="opt">
-                            {{ opt }}
-                        </option>
-                    </select>
-
-                    <!-- Multi-select for "in" operator on enum fields -->
-                    <select
-                        v-else-if="getFieldConfig(condition.field).type === 'enum' && condition.operator === 'in'"
-                        :value="condition.value"
-                        multiple
-                        class="min-h-[60px] rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-2 py-1.5 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none"
-                        @change="
-                            updateCondition(i, { value: Array.from($event.target.selectedOptions, (o) => o.value) })
-                        "
-                    >
                         <option v-for="opt in getFieldConfig(condition.field).options" :key="opt" :value="opt">
                             {{ opt }}
                         </option>

@@ -5,14 +5,14 @@ import Form from '../../src/pages/Admin/Workflows/Form.vue';
 /**
  * The workflow form.
  *
- * Backends pass the workflow alongside a trigger-event list, an operator list
- * and an action-type list. The builder derives all three itself, so they are
- * declared here to be swallowed rather than forwarded -- an undeclared prop
- * falls through onto the root element as an attribute.
+ * Backends pass the workflow alongside the trigger events they fire, the
+ * operators and the action types they execute. The builder offers exactly
+ * those lists (see workflow-admin-contract.md), so Form hands them on.
  *
  * They have to be declared under the names that actually arrive. Vue folds
  * kebab-case into camelCase and nothing else, so `triggerEvents` never matched
- * the `trigger_events` every backend sends.
+ * the `trigger_events` every backend sends, and an undeclared prop falls
+ * through onto the root element as an attribute.
  */
 vi.mock('@inertiajs/vue3', () => ({
     useForm: vi.fn((data) => ({ ...data, errors: {}, processing: false, post: vi.fn(), put: vi.fn() })),
@@ -22,7 +22,11 @@ vi.mock('@inertiajs/vue3', () => ({
 }));
 
 vi.mock('../../src/pages/Admin/Workflows/Builder.vue', () => ({
-    default: { name: 'Builder', props: ['workflow'], template: '<div class="builder" />' },
+    default: {
+        name: 'Builder',
+        props: ['workflow', 'triggerEvents', 'actionTypes', 'operators'],
+        template: '<div class="builder" />',
+    },
 }));
 
 const mountOptions = { global: { mocks: { route: (name) => `/${name}` } } };
@@ -35,8 +39,15 @@ const backendProps = {
 };
 
 describe('Admin/Workflows/Form', () => {
-    it('swallows the lists the backends send alongside the workflow', () => {
-        // Undeclared, they land on the builder's root element as attributes.
+    it('hands the lists the backend sends to the builder', () => {
+        const builder = mount(Form, { props: backendProps, ...mountOptions }).findComponent({ name: 'Builder' });
+
+        expect(builder.props('triggerEvents')).toEqual(backendProps.trigger_events);
+        expect(builder.props('actionTypes')).toEqual(backendProps.action_types);
+        expect(builder.props('operators')).toEqual(backendProps.operators);
+    });
+
+    it('keeps them off the builder root as attributes', () => {
         const builder = mount(Form, { props: backendProps, ...mountOptions }).find('.builder');
 
         expect(builder.attributes('trigger_events')).toBeUndefined();

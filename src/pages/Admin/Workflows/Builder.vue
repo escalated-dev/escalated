@@ -5,18 +5,26 @@ import WorkflowConditionBuilder from '../../../components/WorkflowConditionBuild
 import WorkflowActionList from '../../../components/WorkflowActionList.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { toActionState, toConditionState, toWirePayload } from '../../../utils/workflowContract.js';
 
 const props = defineProps({
     workflow: { type: Object, default: null },
+    // What the backend fires, executes and evaluates. Any shape
+    // normalizeOptions accepts; absent means the contract's defaults.
+    triggerEvents: { type: [Array, Object], default: null },
+    actionTypes: { type: [Array, Object], default: null },
+    operators: { type: [Array, Object], default: null },
 });
 
+// The form holds the editor's state; submit() sends it in the shape every
+// backend reads (escalated-developer-context domain-model/workflow-admin-contract.md).
 const form = useForm({
     name: props.workflow?.name || '',
     description: props.workflow?.description || '',
-    trigger: props.workflow?.trigger || '',
-    conditions: props.workflow?.conditions || { match: 'all', conditions: [] },
-    actions: props.workflow?.actions || [],
-    active: props.workflow?.active ?? true,
+    trigger_event: props.workflow?.trigger_event || props.workflow?.trigger || '',
+    conditions: toConditionState(props.workflow?.conditions),
+    actions: toActionState(props.workflow?.actions),
+    is_active: props.workflow?.is_active ?? props.workflow?.active ?? true,
 });
 
 const expandedStep = ref(props.workflow ? null : 1);
@@ -26,6 +34,8 @@ function toggleStep(step) {
 }
 
 function submit() {
+    form.transform(toWirePayload);
+
     if (props.workflow) {
         form.put(route('escalated.admin.workflows.update', props.workflow.id));
     } else {
@@ -34,7 +44,7 @@ function submit() {
 }
 
 const isValid = computed(() => {
-    return form.name && form.trigger && form.actions.length > 0;
+    return form.name && form.trigger_event && form.actions.length > 0;
 });
 
 const stepBorderColors = {
@@ -64,7 +74,7 @@ const stepDescriptions = {
 function stepHasData(step) {
     switch (step) {
         case 1:
-            return !!form.trigger;
+            return !!form.trigger_event;
         case 2:
             return form.conditions?.conditions?.length > 0;
         case 3:
@@ -108,7 +118,7 @@ function stepHasData(step) {
                     <div>
                         <label class="flex items-center gap-2 text-sm text-[var(--esc-panel-text-secondary)]">
                             <input
-                                v-model="form.active"
+                                v-model="form.is_active"
                                 type="checkbox"
                                 class="rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-cyan-500 focus:ring-cyan-500/20"
                             />
@@ -175,13 +185,17 @@ function stepHasData(step) {
                     <!-- Step content -->
                     <div v-if="expandedStep === step" class="border-t border-[var(--esc-panel-border)] px-6 py-4">
                         <!-- Trigger selector -->
-                        <WorkflowTriggerSelector v-if="step === 1" v-model="form.trigger" />
+                        <WorkflowTriggerSelector
+                            v-if="step === 1"
+                            v-model="form.trigger_event"
+                            :options="triggerEvents"
+                        />
 
                         <!-- Condition builder -->
-                        <WorkflowConditionBuilder v-if="step === 2" v-model="form.conditions" />
+                        <WorkflowConditionBuilder v-if="step === 2" v-model="form.conditions" :operators="operators" />
 
                         <!-- Action list -->
-                        <WorkflowActionList v-if="step === 3" v-model="form.actions" />
+                        <WorkflowActionList v-if="step === 3" v-model="form.actions" :action-types="actionTypes" />
                     </div>
                 </div>
             </div>
