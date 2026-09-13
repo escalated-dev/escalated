@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.6] - 2026-09-13
+
 ### Fixed
 - **The workflow builder sent a shape no backend reads.** It posted
   `trigger: 'ticket_created'`, conditions as `{match, conditions}` and actions as
