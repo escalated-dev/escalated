@@ -13,6 +13,7 @@ empty screen. The only way to see it is to compare the two lists.
 """
 import os
 import re
+import subprocess
 import sys
 
 # The sibling checkouts: every Escalated repo lives beside this one. Set
@@ -97,6 +98,39 @@ def frontend_pages():
     return pages
 
 
+def checked_out_branch(repo):
+    """The branch a repo or worktree currently has checked out, if it can say."""
+    try:
+        result = subprocess.run(
+            ['git', '-C', os.path.join(ROOT, repo), 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True, text=True, timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+    return result.stdout.strip() or None
+
+
+def off_default_branch():
+    """Checkouts sitting on something other than their default branch.
+
+    A worktree parked on a feature branch renders whatever page names that
+    branch had, which the report above cannot tell from a backend that is
+    genuinely rendering them today. escalated-laravel-mobile-api sat on a
+    branch whose work had already been squash-merged, and reported four blank
+    screens that no longer existed anywhere.
+    """
+    out = []
+
+    for repo in backend_repos():
+        branch = checked_out_branch(repo)
+
+        if branch and branch not in ('main', 'master', 'HEAD'):
+            out.append((repo.replace('escalated-', ''), branch))
+
+    return out
+
+
 def main():
     rendered = rendered_pages()
     shipped = frontend_pages()
@@ -126,6 +160,21 @@ def main():
 
     if not unused:
         print('  none')
+
+    stale = off_default_branch()
+
+    if stale:
+        print()
+        print('=' * 74)
+        print('READ FROM A CHECKOUT THAT IS NOT ON ITS DEFAULT BRANCH')
+        print('=' * 74)
+
+        for repo, branch in stale:
+            print('  %-52s %s' % (repo, branch))
+
+        print()
+        print('  Names above attributed to these came from that branch, which may be')
+        print('  behind, ahead, or already merged. Check before believing them.')
 
     return 1 if missing else 0
 
