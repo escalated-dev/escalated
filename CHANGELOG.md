@@ -4,6 +4,24 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.7] - 2026-09-14
+
+### Added
+- **`pages.json` now publishes the props each page reads**, alongside the names
+  it already published, and which of those the component declares required.
+
+  The names let a backend catch a page that renders into nothing. The props are
+  the same fault one level down, and the one nothing could see: a backend that
+  sends `data` to a component reading `period_days` renders the chrome and no
+  content, on a 200 — and an empty report reads as a quiet week rather than a
+  wiring fault. Twenty-seven report screens across four backends are in exactly
+  that state today.
+
+  Read out of the compiler's own binding metadata rather than matched out of
+  the source, so a `defineProps` spread over lines, given types, or written as
+  an array still reports what Vue will actually accept.
+
+## [0.11.6] - 2026-09-13
 ## [0.11.6] - 2026-09-13
 
 ### Fixed
