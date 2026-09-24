@@ -26,6 +26,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@escalated-dev/escalated)](https://www.npmjs.com/package/@escalated-dev/escalated)
 [![Vue 3](https://img.shields.io/badge/vue-3.x-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Views](https://hits.sh/github.com/escalated-dev/escalated.svg?style=flat&label=views&color=007ec6)](https://hits.sh/github.com/escalated-dev/escalated/)
 
 </div>
 
