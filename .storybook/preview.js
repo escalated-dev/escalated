@@ -1,4 +1,5 @@
 import { computed } from 'vue';
+import './tailwind.css';
 import './storybook.css';
 
 const panelDarkDefaults = {

@@ -1,0 +1,20 @@
+/* Tailwind for Storybook.
+ *
+ * This package ships Vue components that style themselves with Tailwind
+ * utilities but carries no stylesheet of its own: the consuming app builds
+ * Tailwind and scans these files through its own config. Storybook renders the
+ * components on their own, so it has to build Tailwind itself or every
+ * component comes out unstyled.
+ *
+ * Without this, the story markup still looks right because it uses inline
+ * style attributes, while the components inside do not: badges lose their pill
+ * fill and a trend arrow with no size utility renders at its intrinsic size,
+ * which is how escalated_admin_1.png ended up with 200px arrows.
+ *
+ * @source is explicit rather than relying on v4 automatic detection, so it does
+ * not depend on where the build is invoked from.
+ */
+@import "tailwindcss";
+
+@source "../src/**/*.vue";
+@source "../src/**/*.js";

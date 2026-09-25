@@ -81,7 +81,7 @@ jobs:
         run: |
           npx http-server storybook-static -p 6006 -s &
           sleep 3
-          npx playwright test --config=playwright-screenshots.config.js --reporter=list || true
+          npx playwright test --config=playwright-screenshots.config.js --reporter=list
           kill %1 2>/dev/null || true
 
       - name: Upload screenshots
@@ -97,7 +97,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/assets/escalated_admin_1.png docs/assets/escalated_admin_2.png
+          # The spec writes five README screenshots. Adding two of them left
+          # admin_3, ticket_list and ticket_view frozen at whatever they were
+          # last committed by hand, so they silently stopped tracking the
+          # components they are supposed to show.
+          git add docs/assets/escalated_admin_1.png \n                  docs/assets/escalated_admin_2.png \n                  docs/assets/escalated_admin_3.png \n                  docs/assets/escalated_ticket_list.png \n                  docs/assets/escalated_ticket_view.png
           if git diff --cached --quiet; then
             echo "No screenshot changes"
           else
