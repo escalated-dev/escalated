@@ -387,4 +387,4 @@ This is the shared frontend for the Escalated support ticket system. Host framew
 
 ## License
 
-MIT
+MIT - Copyright (c) Escalated.dev. See [LICENSE](LICENSE).
