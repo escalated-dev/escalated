@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.8] - 2026-09-26
+
 ### Fixed
 - **Custom object records could not be added or edited.** `Admin/CustomObjects/Records`
   kept each record's field values in a form field named `data`, which is one of
