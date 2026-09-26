@@ -4,6 +4,14 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- **Custom object records could not be added or edited.** `Admin/CustomObjects/Records`
+  kept each record's field values in a form field named `data`, which is one of
+  `useForm`'s own methods. Inertia logged a conflict error on every visit to the
+  screen, and filling in a record assigned over the method the form submits with.
+  The values now live under `values` and are sent as `{ data }`, the body every
+  backend validates, so nothing changes on the wire.
+
 ## [0.11.7] - 2026-09-14
 
 ### Added

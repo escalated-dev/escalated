@@ -12,20 +12,27 @@ const fields = computed(() => props.object.fields_schema || []);
 const editingId = ref(null);
 const showAddForm = ref(false);
 
+// The record's field values travel as `data`, which is what every backend
+// validates. They cannot live under that name on the form itself: `data()` is
+// one of useForm's own methods, Inertia refuses the field (and logs an error),
+// and assigning to it replaced the method the form submits with. They are kept
+// as `values` and renamed on the way out.
+const toRecordBody = (form) => ({ data: form.values });
+
 const newRecordForm = useForm({
-    data: {},
-});
+    values: {},
+}).transform(toRecordBody);
 
 const editForm = useForm({
-    data: {},
-});
+    values: {},
+}).transform(toRecordBody);
 
 function startAdd() {
     const data = {};
     fields.value.forEach((f) => {
         data[f.name] = '';
     });
-    newRecordForm.data = data;
+    newRecordForm.values = data;
     showAddForm.value = true;
 }
 
@@ -41,7 +48,7 @@ function addRecord() {
 
 function startEdit(record) {
     editingId.value = record.id;
-    editForm.data = { ...(record.data || {}) };
+    editForm.values = { ...(record.data || {}) };
 }
 
 function saveEdit(record) {
@@ -96,7 +103,7 @@ function deleteRecord(record) {
                     </label>
                     <select
                         v-if="field.type === 'select'"
-                        v-model="newRecordForm.data[field.name]"
+                        v-model="newRecordForm.values[field.name]"
                         class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                     >
                         <option value="">Select...</option>
@@ -104,19 +111,19 @@ function deleteRecord(record) {
                     </select>
                     <input
                         v-else-if="field.type === 'date'"
-                        v-model="newRecordForm.data[field.name]"
+                        v-model="newRecordForm.values[field.name]"
                         type="date"
                         class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                     />
                     <input
                         v-else-if="field.type === 'number'"
-                        v-model="newRecordForm.data[field.name]"
+                        v-model="newRecordForm.values[field.name]"
                         type="number"
                         class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                     />
                     <input
                         v-else
-                        v-model="newRecordForm.data[field.name]"
+                        v-model="newRecordForm.values[field.name]"
                         type="text"
                         class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                     />
@@ -171,7 +178,7 @@ function deleteRecord(record) {
                             <!-- Edit mode -->
                             <template v-if="editingId === record.id">
                                 <input
-                                    v-model="editForm.data[field.name]"
+                                    v-model="editForm.values[field.name]"
                                     :type="field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'"
                                     class="w-full rounded border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-2 py-1 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none"
                                 />
