@@ -61,9 +61,9 @@ const overlayPreviousData = computed(() => {
 
 <template>
     <EscalatedLayout title="Period Comparison">
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <PeriodSelector :model-value="periodDays" @update:model-value="changePeriod" />
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <ReportExportButton report-name="comparison" :period-days="periodDays" />
                 <Link
                     :href="route('escalated.admin.reports')"
@@ -75,7 +75,7 @@ const overlayPreviousData = computed(() => {
         </div>
 
         <!-- Period Labels -->
-        <div class="mb-6 flex items-center gap-4">
+        <div class="mb-6 flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
                 <span class="inline-block h-3 w-3 rounded-full bg-cyan-500"></span>
                 <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"

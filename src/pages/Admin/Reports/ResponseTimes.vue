@@ -58,9 +58,9 @@ function toggleSort(col) {
 
 <template>
     <EscalatedLayout title="First Response Time Analysis">
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <PeriodSelector :model-value="periodDays" @update:model-value="changePeriod" />
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <ReportExportButton report-name="response-times" :period-days="periodDays" />
                 <Link
                     :href="route('escalated.admin.reports')"

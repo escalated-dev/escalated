@@ -31,7 +31,7 @@ const { getPageComponents } = usePluginExtensions();
     <EscalatedLayout title="Reports">
         <!-- Sub-report navigation -->
         <div
-            class="mb-6 flex items-center gap-3 rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] p-3"
+            class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] p-3"
         >
             <span class="text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
                 >Detailed Reports:</span
