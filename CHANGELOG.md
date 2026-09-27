@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.10] - 2026-09-27
+
 ### Fixed
 - **The database settings page was wider than a phone** when a connection
   had a long database value (a SQLite path, a long host): the summary grid
