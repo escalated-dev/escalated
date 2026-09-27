@@ -439,7 +439,7 @@ const colCount = computed(() => {
                             type="checkbox"
                             :checked="allSelected"
                             aria-label="Select all tickets"
-                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            class="h-4 w-4 rounded border-gray-300 text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]"
                             @change="toggleAll"
                         />
                     </th>
@@ -490,7 +490,7 @@ const colCount = computed(() => {
                                     <input
                                         type="checkbox"
                                         :checked="isColumnActive(col.key)"
-                                        class="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        class="h-3.5 w-3.5 rounded border-gray-300 text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]"
                                         @change="toggleColumn(col.key)"
                                     />
                                     {{ col.label }}
@@ -504,14 +504,17 @@ const colCount = computed(() => {
                 <tr
                     v-for="(ticket, index) in tickets.data"
                     :key="ticket.id"
-                    :class="['group', navigable && focusedIndex === index ? 'bg-indigo-50' : 'hover:bg-gray-50']"
+                    :class="[
+                        'group',
+                        navigable && focusedIndex === index ? 'bg-[var(--esc-panel-active)]' : 'hover:bg-gray-50',
+                    ]"
                 >
                     <td v-if="selectable" class="w-10 px-3 py-3">
                         <input
                             type="checkbox"
                             :checked="selectedIds.includes(ticket.id)"
                             aria-label="Select ticket"
-                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            class="h-4 w-4 rounded border-gray-300 text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]"
                             @change="toggleOne(ticket.id)"
                         />
                     </td>
@@ -527,7 +530,7 @@ const colCount = computed(() => {
                             ></span>
                             <Link
                                 :href="route(`${routePrefix}.show`, ticket.reference)"
-                                class="text-indigo-600 hover:text-indigo-900"
+                                class="text-[var(--esc-panel-accent)] hover:text-[var(--esc-panel-accent-hover)]"
                             >
                                 {{ ticket.reference }}
                             </Link>
