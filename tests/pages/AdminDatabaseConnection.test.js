@@ -187,4 +187,31 @@ describe('Admin database connection', () => {
 
         expect(wrapper.text()).toContain('has no Escalated tables');
     });
+
+    /*
+     * A long database value (a Windows path to a SQLite file, a long host) is
+     * a single unbreakable word. The summary grid's columns grew to fit it and
+     * the connection list never wrapped it, so on a phone the page was wider
+     * than the window.
+     */
+    it('wraps long database values instead of widening the page', () => {
+        const longPath = '/home/someone/herd/application-name/database/escalated-browser-testing.sqlite';
+        const wrapper = mountPage({
+            connections: connections.map((c) => (c.is_current ? { ...c, database: longPath } : c)),
+        });
+
+        expect(wrapper.find('dl').classes()).toContain('grid-cols-[auto_minmax(0,1fr)]');
+        // The innermost span holding the value: the line that has to wrap.
+        const line = wrapper
+            .findAll('span')
+            .filter((s) => s.text().includes(longPath))
+            .at(-1);
+        expect(line?.classes()).toContain('break-all');
+    });
+
+    it('draws the submit button in the panel accent colour', () => {
+        const button = mountPage().find('button[type="submit"]');
+
+        expect(button.classes()).toContain('bg-[var(--esc-panel-accent)]');
+    });
 });

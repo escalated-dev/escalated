@@ -88,7 +88,7 @@ function formatCount(value) {
                     table is not affected — it stays wherever your application keeps it.
                 </p>
 
-                <dl v-if="active" class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                <dl v-if="active" class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-3 text-sm">
                     <dt class="text-[var(--esc-panel-text-muted)]">Connection</dt>
                     <dd class="font-medium text-[var(--esc-panel-text)]">
                         {{ active.name }}
@@ -160,7 +160,7 @@ function formatCount(value) {
                                         {{ statusLabel(connection) }}
                                     </span>
                                 </span>
-                                <span class="mt-0.5 block text-xs text-[var(--esc-panel-text-muted)]">
+                                <span class="mt-0.5 block break-all text-xs text-[var(--esc-panel-text-muted)]">
                                     {{ connection.driver ?? 'unknown driver' }} ·
                                     {{ connection.database ?? 'no database configured' }}
                                     <template v-if="connection.ticket_count !== null">
@@ -217,7 +217,7 @@ function formatCount(value) {
                     <button
                         type="submit"
                         :disabled="form.processing || !isChanging"
-                        class="rounded-lg bg-[var(--esc-accent)] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                        class="rounded-lg bg-[var(--esc-panel-accent)] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                     >
                         {{ form.processing ? 'Saving…' : 'Use this connection' }}
                     </button>

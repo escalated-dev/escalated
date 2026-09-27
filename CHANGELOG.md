@@ -4,6 +4,16 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- **The database settings page was wider than a phone** when a connection
+  had a long database value (a SQLite path, a long host): the summary grid
+  grew to fit it and the connection list never wrapped it. Both wrap now.
+- **Its "Use this connection" button had no background**: it used an
+  undefined `--esc-accent` token. It now uses the panel accent.
+- **Ticket references, row focus, checkboxes and the active quick-filter tab
+  were fixed blue and indigo in light mode**, so a host's panel theme never
+  reached them. They now use the panel accent and active tokens.
+
 ## [0.11.9] - 2026-09-27
 
 ### Fixed
