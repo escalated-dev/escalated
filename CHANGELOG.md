@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.11.9] - 2026-09-27
+
 ### Fixed
 - **The admin and agent panels were desktop-only.** At a phone width every
   panel screen was 460-1093px wide: the 256px admin sidebar never folded
