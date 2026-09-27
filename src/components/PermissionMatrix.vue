@@ -56,7 +56,7 @@ function isGroupAllChecked(group) {
 </script>
 
 <template>
-    <div class="overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/60">
+    <div class="esc-table-scroll rounded-xl border border-white/[0.06] bg-neutral-900/60">
         <table class="min-w-full divide-y divide-white/[0.06]">
             <thead>
                 <tr class="bg-white/[0.02]">

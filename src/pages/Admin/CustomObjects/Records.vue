@@ -148,7 +148,7 @@ function deleteRecord(record) {
         </div>
 
         <!-- Records Table -->
-        <div v-if="records.length" class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+        <div v-if="records.length" class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)]">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">

@@ -60,7 +60,7 @@ const statusColors = {
         <!-- Import history -->
         <div v-if="jobs.length">
             <h3 class="mb-3 text-sm font-semibold text-[var(--esc-panel-text)]">Import History</h3>
-            <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+            <div class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)]">
                 <table class="w-full text-sm">
                     <thead class="bg-[var(--esc-panel-surface-alt)]">
                         <tr>

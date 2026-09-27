@@ -114,51 +114,59 @@ function toggleSort(col) {
             <div class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-4 py-3">
                 <h3 class="text-sm font-semibold text-[var(--esc-panel-text-secondary)]">Resolution Time by Agent</h3>
             </div>
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-[var(--esc-panel-border)]">
-                        <th
-                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+            <div class="esc-table-scroll">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-[var(--esc-panel-border)]">
+                            <th
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                            >
+                                Agent
+                            </th>
+                            <th
+                                v-for="col in [
+                                    { key: 'avg', label: 'Avg' },
+                                    { key: 'median', label: 'Median' },
+                                    { key: 'p90', label: 'P90' },
+                                ]"
+                                :key="col.key"
+                                class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
+                                @click="toggleSort(col.key)"
+                            >
+                                {{ col.label }}
+                                <span v-if="sortColumn === col.key">{{
+                                    sortDir === 'asc' ? ' &#9650;' : ' &#9660;'
+                                }}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--esc-panel-border)]">
+                        <tr
+                            v-for="agent in sortedAgents"
+                            :key="agent.agent_id"
+                            class="hover:bg-[var(--esc-panel-hover)]"
                         >
-                            Agent
-                        </th>
-                        <th
-                            v-for="col in [
-                                { key: 'avg', label: 'Avg' },
-                                { key: 'median', label: 'Median' },
-                                { key: 'p90', label: 'P90' },
-                            ]"
-                            :key="col.key"
-                            class="cursor-pointer px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]"
-                            @click="toggleSort(col.key)"
-                        >
-                            {{ col.label }}
-                            <span v-if="sortColumn === col.key">{{ sortDir === 'asc' ? ' &#9650;' : ' &#9660;' }}</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[var(--esc-panel-border)]">
-                    <tr v-for="agent in sortedAgents" :key="agent.agent_id" class="hover:bg-[var(--esc-panel-hover)]">
-                        <td class="px-4 py-3 text-sm font-medium text-[var(--esc-panel-text-secondary)]">
-                            {{ agent.agent_name }}
-                        </td>
-                        <td class="px-4 py-3 text-sm font-medium" :class="resColor(agent.avg)">
-                            {{ agent.avg ?? '—' }}h
-                        </td>
-                        <td class="px-4 py-3 text-sm font-medium" :class="resColor(agent.median)">
-                            {{ agent.median ?? '—' }}h
-                        </td>
-                        <td class="px-4 py-3 text-sm font-medium" :class="resColor(agent.p90)">
-                            {{ agent.p90 ?? '—' }}h
-                        </td>
-                    </tr>
-                    <tr v-if="!sortedAgents.length">
-                        <td colspan="4" class="px-4 py-8 text-center text-sm text-[var(--esc-panel-text-muted)]">
-                            No agent data for this period.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td class="px-4 py-3 text-sm font-medium text-[var(--esc-panel-text-secondary)]">
+                                {{ agent.agent_name }}
+                            </td>
+                            <td class="px-4 py-3 text-sm font-medium" :class="resColor(agent.avg)">
+                                {{ agent.avg ?? '—' }}h
+                            </td>
+                            <td class="px-4 py-3 text-sm font-medium" :class="resColor(agent.median)">
+                                {{ agent.median ?? '—' }}h
+                            </td>
+                            <td class="px-4 py-3 text-sm font-medium" :class="resColor(agent.p90)">
+                                {{ agent.p90 ?? '—' }}h
+                            </td>
+                        </tr>
+                        <tr v-if="!sortedAgents.length">
+                            <td colspan="4" class="px-4 py-8 text-center text-sm text-[var(--esc-panel-text-muted)]">
+                                No agent data for this period.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </EscalatedLayout>
 </template>

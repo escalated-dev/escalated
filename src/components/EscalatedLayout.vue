@@ -1,9 +1,10 @@
 <script setup>
-import { computed, inject, provide } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
 import { usePermissions } from '../composables/usePermissions';
 import { useI18n } from '../composables/useI18n';
+import { watchScrollAffordance } from '../utils/scrollAffordance';
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
 
 defineProps({
@@ -225,6 +226,8 @@ const agentLinks = computed(() => [
     {
         href: `${prefix.value}/agent`,
         label: 'Dashboard',
+        // Every agent URL starts with this one; only the dashboard itself is it.
+        exact: true,
         icon: 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
     },
     {
@@ -237,26 +240,77 @@ const agentLinks = computed(() => [
 const userName = computed(() => page.props.auth?.user?.name || 'User');
 const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 
-function isActive(href) {
+function isActive(href, exact = false) {
     if (!currentUrl.value) return false;
-    return currentUrl.value === href || currentUrl.value.startsWith(href + '/');
+    const path = currentUrl.value.split(/[?#]/)[0];
+    if (exact) return path === href;
+    return path === href || path.startsWith(href + '/');
 }
+
+// Below the `lg` breakpoint the admin sidebar and the agent nav links fold
+// away behind a menu button. It starts closed on the server and the client
+// alike, so SSR markup hydrates without a mismatch; CSS alone decides whether
+// the navigation shows at a given width.
+const navOpen = ref(false);
+function toggleNav() {
+    navOpen.value = !navOpen.value;
+}
+function closeNav() {
+    navOpen.value = false;
+}
+watch(currentUrl, closeNav);
+
+function onKeydown(event) {
+    if (event.key === 'Escape' && navOpen.value) closeNav();
+}
+
+// Tables scroll sideways inside `.esc-table-scroll`; mark the edges that have
+// more content past them so the scroll is visible before anyone tries it.
+const contentRoot = ref(null);
+let stopScrollAffordance = () => {};
+
+onMounted(() => {
+    window.addEventListener('keydown', onKeydown);
+    stopScrollAffordance = watchScrollAffordance(contentRoot.value);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', onKeydown);
+    stopScrollAffordance();
+});
 </script>
 
 <template>
-    <!-- MODE 1: Admin — dark sidebar layout -->
+    <!-- MODE 1: Admin — sidebar layout; the sidebar folds into a drawer below lg -->
     <div
         v-if="isAdminSection"
         class="flex min-h-screen bg-[var(--esc-panel-bg)]"
         :style="{ colorScheme: panelConfig.mode === 'light' ? 'light' : 'dark' }"
     >
+        <!-- Drawer backdrop (narrow screens only) -->
+        <div
+            v-if="navOpen"
+            class="fixed inset-0 z-30 bg-black/40 lg:hidden"
+            aria-hidden="true"
+            data-testid="esc-nav-backdrop"
+            @click="closeNav"
+        ></div>
+
         <!-- Sidebar -->
         <aside
-            class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)]"
+            id="esc-admin-sidebar"
+            :class="[
+                'fixed inset-y-0 left-0 z-40 flex w-64 max-w-[85vw] flex-col border-r border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)] transition-[transform,visibility] duration-200 lg:visible lg:translate-x-0 lg:shadow-none',
+                navOpen ? 'visible translate-x-0 shadow-2xl' : 'invisible -translate-x-full',
+            ]"
+            data-testid="esc-admin-sidebar"
         >
             <!-- Logo -->
             <div class="flex h-16 items-center gap-3 px-5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--esc-panel-border-input)]">
+                <div
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--esc-panel-logo-tile-bg,var(--esc-panel-border-input))] text-[var(--esc-panel-logo-tile-fg,var(--esc-panel-text))]"
+                    data-testid="esc-logo-tile"
+                >
                     <img
                         v-if="typeof panelConfig.logo === 'string'"
                         :src="panelConfig.logo"
@@ -288,7 +342,7 @@ function isActive(href) {
                         </g>
                     </svg>
                 </div>
-                <div>
+                <div class="min-w-0">
                     <span class="text-sm font-bold text-[var(--esc-panel-text)] tracking-wide">{{
                         panelConfig.appName
                     }}</span>
@@ -297,6 +351,17 @@ function isActive(href) {
                         >ADMIN</span
                     >
                 </div>
+                <button
+                    type="button"
+                    class="-mr-2 ml-auto rounded-lg p-2 text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] lg:hidden"
+                    aria-label="Close navigation"
+                    data-testid="esc-nav-close"
+                    @click="closeNav"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             <!-- Nav -->
@@ -309,15 +374,16 @@ function isActive(href) {
                     :class="[
                         'group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all',
                         isActive(link.href)
-                            ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]'
+                            ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-active-text,var(--esc-panel-text))]'
                             : 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
                     ]"
+                    @click="closeNav"
                 >
                     <svg
                         :class="[
                             'h-[18px] w-[18px] shrink-0',
                             isActive(link.href)
-                                ? 'text-[var(--esc-panel-text)]'
+                                ? 'text-[var(--esc-panel-active-text,var(--esc-panel-text))]'
                                 : 'text-[var(--esc-panel-text-muted)] group-hover:text-[var(--esc-panel-text-tertiary)]',
                         ]"
                         fill="none"
@@ -342,7 +408,7 @@ function isActive(href) {
                 <Link
                     v-if="isAgent"
                     :href="`${prefix}/agent`"
-                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]"
+                    class="flex items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2 text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]"
                 >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path
@@ -355,7 +421,7 @@ function isActive(href) {
                 </Link>
                 <Link
                     :href="prefix"
-                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]"
+                    class="flex items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2 text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]"
                 >
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path
@@ -370,11 +436,11 @@ function isActive(href) {
                 <!-- User -->
                 <div class="mt-2 flex items-center gap-3 rounded-lg bg-[var(--esc-panel-hover)] px-3 py-2.5">
                     <div
-                        class="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-xs font-semibold text-[var(--esc-panel-text-tertiary)]"
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-xs font-semibold text-[var(--esc-panel-text-tertiary)]"
                     >
                         {{ userInitial }}
                     </div>
-                    <span class="text-sm text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
+                    <span class="truncate text-sm text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
                 </div>
             </div>
 
@@ -401,23 +467,42 @@ function isActive(href) {
         </aside>
 
         <!-- Main content -->
-        <div class="flex flex-1 flex-col pl-64">
+        <div class="flex min-w-0 flex-1 flex-col lg:pl-64">
             <!-- Top bar -->
             <header
                 role="banner"
-                class="sticky top-0 z-20 flex h-14 items-center border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-topbar-bg)] px-6 backdrop-blur-xl"
+                class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-header-bg,var(--esc-panel-topbar-bg))] px-4 backdrop-blur-xl sm:px-6"
             >
-                <h1 class="text-sm font-semibold text-[var(--esc-panel-text)]">{{ title }}</h1>
+                <button
+                    type="button"
+                    class="-ml-2 rounded-lg p-2 text-[var(--esc-panel-header-text,var(--esc-panel-text))] hover:bg-[var(--esc-panel-hover)] lg:hidden"
+                    aria-controls="esc-admin-sidebar"
+                    :aria-expanded="navOpen ? 'true' : 'false'"
+                    aria-label="Open navigation"
+                    data-testid="esc-nav-toggle"
+                    @click="toggleNav"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                        />
+                    </svg>
+                </button>
+                <h1 class="truncate text-sm font-semibold text-[var(--esc-panel-header-text,var(--esc-panel-text))]">
+                    {{ title }}
+                </h1>
             </header>
 
             <!-- Page content -->
-            <main role="main" class="flex-1 p-6">
+            <main ref="contentRoot" role="main" class="min-w-0 flex-1 p-4 sm:p-6">
                 <slot />
             </main>
         </div>
     </div>
 
-    <!-- MODE 2: Agent — dark top-nav layout -->
+    <!-- MODE 2: Agent — top-nav layout; the links fold behind a menu button below lg -->
     <div
         v-else-if="isAgentSection"
         class="min-h-screen bg-[var(--esc-panel-bg)]"
@@ -425,12 +510,16 @@ function isActive(href) {
     >
         <!-- Top nav -->
         <nav
-            class="sticky top-0 z-30 border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)] backdrop-blur-xl"
+            aria-label="Agent navigation"
+            class="sticky top-0 z-30 border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-header-bg,var(--esc-panel-sidebar-bg))] backdrop-blur-xl"
         >
-            <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
                 <!-- Left: branding -->
-                <div class="flex items-center gap-3">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--esc-panel-border-input)]">
+                <div class="flex min-w-0 items-center gap-3">
+                    <div
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--esc-panel-logo-tile-bg,var(--esc-panel-border-input))] text-[var(--esc-panel-logo-tile-fg,var(--esc-panel-text))]"
+                        data-testid="esc-logo-tile"
+                    >
                         <img
                             v-if="typeof panelConfig.logo === 'string'"
                             :src="panelConfig.logo"
@@ -462,22 +551,23 @@ function isActive(href) {
                             </g>
                         </svg>
                     </div>
-                    <span class="text-sm font-bold text-[var(--esc-panel-text)] tracking-wide">{{
-                        panelConfig.appName
-                    }}</span>
+                    <span
+                        class="truncate text-sm font-bold tracking-wide text-[var(--esc-panel-header-text,var(--esc-panel-text))]"
+                        >{{ panelConfig.appName }}</span
+                    >
                 </div>
 
-                <!-- Center: nav links -->
-                <div class="flex items-center gap-1">
+                <!-- Center: nav links (lg and up) -->
+                <div class="hidden items-center gap-1 lg:flex">
                     <Link
                         v-for="link in agentLinks"
                         :key="link.href"
                         :href="link.href"
-                        :aria-current="isActive(link.href) ? 'page' : undefined"
+                        :aria-current="isActive(link.href, link.exact) ? 'page' : undefined"
                         :class="[
-                            'flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all',
-                            isActive(link.href)
-                                ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]'
+                            'flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all',
+                            isActive(link.href, link.exact)
+                                ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-active-text,var(--esc-panel-text))]'
                                 : 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
                         ]"
                     >
@@ -488,36 +578,110 @@ function isActive(href) {
                     </Link>
                 </div>
 
-                <!-- Right: user + links -->
-                <div class="flex items-center gap-3">
+                <!-- Right: user + links (lg and up) -->
+                <div class="hidden items-center gap-3 lg:flex">
                     <Link
                         v-if="isAdmin"
                         :href="`${prefix}/admin/reports`"
-                        class="text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
+                        class="whitespace-nowrap text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
                     >
                         Admin
                     </Link>
                     <Link
                         :href="prefix"
-                        class="text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
+                        class="whitespace-nowrap text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
                     >
                         Back to App
                     </Link>
                     <div class="ml-1 h-5 w-px bg-[var(--esc-panel-active)]"></div>
                     <div class="flex items-center gap-2">
                         <div
-                            class="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-tertiary)]"
+                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-tertiary)]"
                         >
                             {{ userInitial }}
                         </div>
-                        <span class="text-[13px] text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
+                        <span class="max-w-[12rem] truncate text-[13px] text-[var(--esc-panel-text-tertiary)]">{{
+                            userName
+                        }}</span>
                     </div>
+                </div>
+
+                <!-- Menu button (below lg) -->
+                <button
+                    type="button"
+                    class="-mr-2 rounded-lg p-2 text-[var(--esc-panel-header-text,var(--esc-panel-text))] hover:bg-[var(--esc-panel-hover)] lg:hidden"
+                    aria-controls="esc-agent-menu"
+                    :aria-expanded="navOpen ? 'true' : 'false'"
+                    :aria-label="navOpen ? 'Close navigation' : 'Open navigation'"
+                    data-testid="esc-nav-toggle"
+                    @click="toggleNav"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path v-if="navOpen" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <path
+                            v-else
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Collapsed menu (below lg) -->
+            <div
+                v-if="navOpen"
+                id="esc-agent-menu"
+                class="space-y-1 border-t border-[var(--esc-panel-border)] px-4 py-3 lg:hidden"
+                data-testid="esc-agent-menu"
+            >
+                <Link
+                    v-for="link in agentLinks"
+                    :key="link.href"
+                    :href="link.href"
+                    :aria-current="isActive(link.href, link.exact) ? 'page' : undefined"
+                    :class="[
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',
+                        isActive(link.href, link.exact)
+                            ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-active-text,var(--esc-panel-text))]'
+                            : 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
+                    ]"
+                    @click="closeNav"
+                >
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" :d="link.icon" />
+                    </svg>
+                    {{ link.label }}
+                </Link>
+                <div class="my-2 h-px bg-[var(--esc-panel-border)]"></div>
+                <Link
+                    v-if="isAdmin"
+                    :href="`${prefix}/admin/reports`"
+                    class="block rounded-lg px-3 py-2 text-sm text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
+                    @click="closeNav"
+                >
+                    Admin
+                </Link>
+                <Link
+                    :href="prefix"
+                    class="block rounded-lg px-3 py-2 text-sm text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
+                    @click="closeNav"
+                >
+                    Back to App
+                </Link>
+                <div class="flex items-center gap-2 px-3 py-2">
+                    <div
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-tertiary)]"
+                    >
+                        {{ userInitial }}
+                    </div>
+                    <span class="truncate text-sm text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
                 </div>
             </div>
         </nav>
 
         <!-- Page content -->
-        <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <main ref="contentRoot" class="mx-auto min-w-0 max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <slot />
         </main>
 
@@ -626,3 +790,25 @@ function isActive(href) {
         </footer>
     </div>
 </template>
+
+<style>
+/* Tables in the panels scroll sideways inside this container rather than
+   widening the page. A shadow on an edge says there is more past it; the
+   layout keeps data-esc-overflow current (see utils/scrollAffordance.js). */
+.esc-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+.esc-table-scroll[data-esc-overflow='end'] {
+    box-shadow: inset -14px 0 12px -12px rgb(0 0 0 / 0.3);
+}
+.esc-table-scroll[data-esc-overflow='start'] {
+    box-shadow: inset 14px 0 12px -12px rgb(0 0 0 / 0.3);
+}
+.esc-table-scroll[data-esc-overflow='start end'] {
+    box-shadow:
+        inset 14px 0 12px -12px rgb(0 0 0 / 0.3),
+        inset -14px 0 12px -12px rgb(0 0 0 / 0.3);
+}
+</style>

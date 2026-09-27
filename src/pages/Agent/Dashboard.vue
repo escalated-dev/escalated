@@ -144,7 +144,7 @@ const loadWidgetComponent = (plugin, component) => {
                     </h2>
                     <div
                         :class="[
-                            'overflow-hidden rounded-xl border',
+                            'esc-table-scroll rounded-xl border',
                             escDark ? 'border-white/[0.06] bg-neutral-900/60' : 'border-gray-200 bg-white',
                         ]"
                     >

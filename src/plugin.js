@@ -159,6 +159,18 @@ const panelTokenMap = {
     active: '--esc-panel-active',
 };
 
+// Optional panel hooks. The layout reads each through a CSS fallback to the
+// token it used before the hook existed, so a host that leaves one unset sees
+// no change. They are set only when given, and cleared otherwise, so a host
+// stylesheet can also set them on :root.
+const panelOptionalTokenMap = {
+    activeText: '--esc-panel-active-text', // active nav item text + icon (falls back to text)
+    headerBg: '--esc-panel-header-bg', // admin top bar / agent top nav (falls back to topbarBg / sidebarBg)
+    headerText: '--esc-panel-header-text', // page title and menu button in that bar (falls back to text)
+    logoTileBg: '--esc-panel-logo-tile-bg', // square behind the logo (falls back to borderInput)
+    logoTileFg: '--esc-panel-logo-tile-fg', // currentColor inside the logo tile (falls back to text)
+};
+
 function applyPanelTheme(panelConfig) {
     const defaults = panelConfig.mode === 'light' ? panelLightDefaults : panelDarkDefaults;
     const overrides = {};
@@ -171,5 +183,12 @@ function applyPanelTheme(panelConfig) {
     const style = document.documentElement.style;
     for (const [key, cssVar] of Object.entries(panelTokenMap)) {
         style.setProperty(cssVar, merged[key]);
+    }
+    for (const [key, cssVar] of Object.entries(panelOptionalTokenMap)) {
+        if (panelConfig[key] !== undefined && panelConfig[key] !== null) {
+            style.setProperty(cssVar, panelConfig[key]);
+        } else {
+            style.removeProperty(cssVar);
+        }
     }
 }

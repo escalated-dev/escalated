@@ -1,32 +1,34 @@
 <template>
-    <table class="list-member-table">
-        <thead>
-            <tr>
-                <th>Contact</th>
-                <th>Added</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="m in members" :key="m.id">
-                <td>
-                    <div>{{ m.contact.name ?? '—' }}</div>
-                    <div class="list-member-table__email">{{ m.contact.email }}</div>
-                </td>
-                <td>{{ new Date(m.added_at).toLocaleDateString() }}</td>
-                <td>
-                    <button
-                        type="button"
-                        data-action="remove"
-                        :data-contact-id="m.contact.id"
-                        @click="$emit('remove', m.contact.id)"
-                    >
-                        Remove
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="esc-table-scroll">
+        <table class="list-member-table">
+            <thead>
+                <tr>
+                    <th>Contact</th>
+                    <th>Added</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="m in members" :key="m.id">
+                    <td>
+                        <div>{{ m.contact.name ?? '—' }}</div>
+                        <div class="list-member-table__email">{{ m.contact.email }}</div>
+                    </td>
+                    <td>{{ new Date(m.added_at).toLocaleDateString() }}</td>
+                    <td>
+                        <button
+                            type="button"
+                            data-action="remove"
+                            :data-contact-id="m.contact.id"
+                            @click="$emit('remove', m.contact.id)"
+                        >
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </template>
 
 <script setup>

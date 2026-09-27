@@ -141,7 +141,7 @@ function renderSparkline(points) {
         </div>
 
         <!-- Ranked Table -->
-        <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+        <div class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)]">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">

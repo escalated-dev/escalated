@@ -40,7 +40,7 @@ function changePeriod(days) {
         </div>
 
         <!-- Agent Table -->
-        <div class="mb-8 overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+        <div class="mb-8 esc-table-scroll rounded-xl border border-[var(--esc-panel-border)]">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">

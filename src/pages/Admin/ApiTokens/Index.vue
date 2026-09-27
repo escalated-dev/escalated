@@ -287,7 +287,7 @@ function formatDate(iso) {
             <!-- Tokens table -->
             <div
                 :class="dark ? 'border-[var(--esc-panel-border)]' : 'border-gray-200'"
-                class="overflow-hidden rounded-lg border"
+                class="esc-table-scroll rounded-lg border"
             >
                 <table class="w-full text-sm">
                     <thead
