@@ -7,26 +7,28 @@
                     {{ $t('newsletters.lists.new') }}
                 </Link>
             </header>
-            <table>
-                <thead>
-                    <tr>
-                        <th>{{ $t('newsletters.lists.columns.name') }}</th>
-                        <th>{{ $t('newsletters.lists.columns.kind') }}</th>
-                        <th>{{ $t('newsletters.lists.columns.members') }}</th>
-                        <th>{{ $t('newsletters.lists.columns.opted_out') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="l in lists" :key="l.id">
-                        <td>
-                            <Link :href="`/admin/newsletters/lists/${l.id}`">{{ l.name }}</Link>
-                        </td>
-                        <td>{{ l.kind }}</td>
-                        <td>{{ l.member_count }}</td>
-                        <td>{{ l.opted_out_count }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="esc-table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ $t('newsletters.lists.columns.name') }}</th>
+                            <th>{{ $t('newsletters.lists.columns.kind') }}</th>
+                            <th>{{ $t('newsletters.lists.columns.members') }}</th>
+                            <th>{{ $t('newsletters.lists.columns.opted_out') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="l in lists" :key="l.id">
+                            <td>
+                                <Link :href="`/admin/newsletters/lists/${l.id}`">{{ l.name }}</Link>
+                            </td>
+                            <td>{{ l.kind }}</td>
+                            <td>{{ l.member_count }}</td>
+                            <td>{{ l.opted_out_count }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </EscalatedLayout>
 </template>

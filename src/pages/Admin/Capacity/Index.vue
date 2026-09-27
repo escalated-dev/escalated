@@ -26,7 +26,7 @@ function saveEdit(id) {
 
 <template>
     <EscalatedLayout title="Agent Capacity">
-        <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]">
+        <div class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]">
             <table class="min-w-full divide-y divide-[var(--esc-panel-border)]">
                 <thead>
                     <tr class="bg-[var(--esc-panel-hover)]">

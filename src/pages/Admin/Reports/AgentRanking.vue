@@ -67,9 +67,9 @@ function renderSparkline(points) {
 
 <template>
     <EscalatedLayout title="Agent Performance Rankings">
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <PeriodSelector :model-value="periodDays" @update:model-value="changePeriod" />
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <ReportExportButton report-name="agent-ranking" :period-days="periodDays" />
                 <Link
                     :href="route('escalated.admin.reports')"
@@ -141,7 +141,7 @@ function renderSparkline(points) {
         </div>
 
         <!-- Ranked Table -->
-        <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+        <div class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)]">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">

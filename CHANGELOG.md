@@ -4,6 +4,28 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- **The admin and agent panels were desktop-only.** At a phone width every
+  panel screen was 460-1093px wide: the 256px admin sidebar never folded
+  away, the agent top nav ran off the screen with Back to App wrapped over
+  three lines, and the Tickets table overflowed even a 1024px window. Below
+  1024px the admin sidebar is now a drawer behind a menu button, and the
+  agent nav folds into a menu. Every panel table scrolls sideways inside its
+  card, with a shadow on the edge that has more, instead of widening the
+  page; report, ticket and audit-log toolbars wrap.
+- **The agent Dashboard link was highlighted on every agent page**, since
+  every agent URL starts with its href. It now matches only the dashboard.
+- **Audit log entries were near-invisible on a light panel.** They used fixed
+  dark-mode colours; they now take the panel tokens.
+
+### Added
+- **Panel theme hooks** for the pieces a host most often brands:
+  `activeText` (current nav item), `headerBg` and `headerText` (admin top bar
+  and agent top nav) and `logoTileBg`/`logoTileFg` (the square behind the
+  logo). Each is optional and falls back to the token it replaces. Panel
+  theming, including the existing tokens, is now documented in
+  `docs/theming.md`.
+
 ## [0.11.8] - 2026-09-26
 
 ### Fixed

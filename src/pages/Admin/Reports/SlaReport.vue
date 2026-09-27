@@ -89,74 +89,76 @@ const resolutionBreaches = computed(() => {
             <div class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] px-4 py-3">
                 <h3 class="text-sm font-semibold text-[var(--esc-panel-text-secondary)]">Breach Details</h3>
             </div>
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-[var(--esc-panel-border)]">
-                        <th
-                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
-                        >
-                            Ticket
-                        </th>
-                        <th
-                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
-                        >
-                            Subject
-                        </th>
-                        <th
-                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
-                        >
-                            SLA Policy
-                        </th>
-                        <th
-                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
-                        >
-                            Breach Type
-                        </th>
-                        <th
-                            class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
-                        >
-                            Created
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[var(--esc-panel-border)]">
-                    <tr v-for="ticket in breaches" :key="ticket.id" class="hover:bg-[var(--esc-panel-hover)]">
-                        <td class="px-4 py-3 text-sm font-mono text-[var(--esc-panel-accent)]">
-                            {{ ticket.reference }}
-                        </td>
-                        <td class="max-w-xs truncate px-4 py-3 text-sm text-[var(--esc-panel-text-secondary)]">
-                            {{ ticket.subject }}
-                        </td>
-                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
-                            {{ ticket.sla_policy?.name || '—' }}
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex gap-1.5">
-                                <span
-                                    v-if="ticket.sla_first_response_breached"
-                                    class="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400"
-                                >
-                                    Response
-                                </span>
-                                <span
-                                    v-if="ticket.sla_resolution_breached"
-                                    class="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400"
-                                >
-                                    Resolution
-                                </span>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-muted)]">
-                            {{ ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : '—' }}
-                        </td>
-                    </tr>
-                    <tr v-if="!breaches?.length">
-                        <td colspan="5" class="px-4 py-8 text-center text-sm text-[var(--esc-panel-text-muted)]">
-                            No SLA breaches in this period.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="esc-table-scroll">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-[var(--esc-panel-border)]">
+                            <th
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                            >
+                                Ticket
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                            >
+                                Subject
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                            >
+                                SLA Policy
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                            >
+                                Breach Type
+                            </th>
+                            <th
+                                class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                            >
+                                Created
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--esc-panel-border)]">
+                        <tr v-for="ticket in breaches" :key="ticket.id" class="hover:bg-[var(--esc-panel-hover)]">
+                            <td class="px-4 py-3 text-sm font-mono text-[var(--esc-panel-accent)]">
+                                {{ ticket.reference }}
+                            </td>
+                            <td class="max-w-xs truncate px-4 py-3 text-sm text-[var(--esc-panel-text-secondary)]">
+                                {{ ticket.subject }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-tertiary)]">
+                                {{ ticket.sla_policy?.name || '—' }}
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex gap-1.5">
+                                    <span
+                                        v-if="ticket.sla_first_response_breached"
+                                        class="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400"
+                                    >
+                                        Response
+                                    </span>
+                                    <span
+                                        v-if="ticket.sla_resolution_breached"
+                                        class="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400"
+                                    >
+                                        Resolution
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-[var(--esc-panel-text-muted)]">
+                                {{ ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : '—' }}
+                            </td>
+                        </tr>
+                        <tr v-if="!breaches?.length">
+                            <td colspan="5" class="px-4 py-8 text-center text-sm text-[var(--esc-panel-text-muted)]">
+                                No SLA breaches in this period.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </EscalatedLayout>
 </template>

@@ -38,7 +38,7 @@ function formatLabel(days) {
 </script>
 
 <template>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
         <button
             v-for="d in options"
             :key="d"

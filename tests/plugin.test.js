@@ -294,6 +294,11 @@ describe('Panel theming', () => {
         '--esc-panel-accent-secondary-hover',
         '--esc-panel-hover',
         '--esc-panel-active',
+        '--esc-panel-active-text',
+        '--esc-panel-header-bg',
+        '--esc-panel-header-text',
+        '--esc-panel-logo-tile-bg',
+        '--esc-panel-logo-tile-fg',
     ];
 
     beforeEach(() => {
@@ -340,6 +345,38 @@ describe('Panel theming', () => {
         const style = document.documentElement.style;
         expect(style.getPropertyValue('--esc-panel-accent')).toBe('#e94560');
         expect(style.getPropertyValue('--esc-panel-bg')).toBe('#f9fafb');
+    });
+
+    it('sets the optional nav, header and logo-tile hooks when given', () => {
+        installPlugin({
+            theme: {
+                panel: {
+                    mode: 'light',
+                    activeText: '#0f766e',
+                    headerBg: '#134e4a',
+                    headerText: '#ffffff',
+                    logoTileBg: '#0d9488',
+                    logoTileFg: '#ffffff',
+                },
+            },
+        });
+        const style = document.documentElement.style;
+        expect(style.getPropertyValue('--esc-panel-active-text')).toBe('#0f766e');
+        expect(style.getPropertyValue('--esc-panel-header-bg')).toBe('#134e4a');
+        expect(style.getPropertyValue('--esc-panel-header-text')).toBe('#ffffff');
+        expect(style.getPropertyValue('--esc-panel-logo-tile-bg')).toBe('#0d9488');
+        expect(style.getPropertyValue('--esc-panel-logo-tile-fg')).toBe('#ffffff');
+    });
+
+    it('leaves the optional hooks unset when not given, so the layout falls back', () => {
+        document.documentElement.style.setProperty('--esc-panel-header-bg', '#123456');
+        installPlugin({ theme: { panel: { mode: 'light' } } });
+        const style = document.documentElement.style;
+        // Cleared rather than defaulted: the layout's own var() fallback then
+        // picks the token each hook replaced.
+        expect(style.getPropertyValue('--esc-panel-header-bg')).toBe('');
+        expect(style.getPropertyValue('--esc-panel-active-text')).toBe('');
+        expect(style.getPropertyValue('--esc-panel-logo-tile-bg')).toBe('');
     });
 
     it('provides panel config including appName and logo via Vue provide', () => {

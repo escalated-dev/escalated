@@ -204,7 +204,7 @@ const colCount = computed(() => {
 
 <template>
     <!-- Dark mode -->
-    <div v-if="escDark" class="overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/60">
+    <div v-if="escDark" class="esc-table-scroll rounded-xl border border-white/[0.06] bg-neutral-900/60">
         <table class="min-w-full divide-y divide-white/[0.06]">
             <thead>
                 <tr class="bg-white/[0.02]">
@@ -430,7 +430,7 @@ const colCount = computed(() => {
     </div>
 
     <!-- Light mode -->
-    <div v-else class="overflow-hidden rounded-lg border border-gray-200 bg-white">
+    <div v-else class="esc-table-scroll rounded-lg border border-gray-200 bg-white">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>

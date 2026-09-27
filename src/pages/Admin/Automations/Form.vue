@@ -156,7 +156,11 @@ function submit() {
                     </button>
                 </div>
 
-                <div v-for="(condition, i) in form.conditions" :key="`condition-${i}`" class="mb-2 flex gap-2">
+                <div
+                    v-for="(condition, i) in form.conditions"
+                    :key="`condition-${i}`"
+                    class="mb-2 flex flex-col gap-2 sm:flex-row"
+                >
                     <select
                         v-model="condition.field"
                         :aria-label="`Condition ${i + 1} field`"
@@ -227,7 +231,11 @@ function submit() {
                     </button>
                 </div>
 
-                <div v-for="(action, i) in form.actions" :key="`action-${i}`" class="mb-2 flex gap-2">
+                <div
+                    v-for="(action, i) in form.actions"
+                    :key="`action-${i}`"
+                    class="mb-2 flex flex-col gap-2 sm:flex-row"
+                >
                     <select
                         v-model="action.type"
                         :aria-label="`Action ${i + 1} type`"

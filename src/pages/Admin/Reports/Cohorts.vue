@@ -73,9 +73,9 @@ function toggleSort(col) {
 
 <template>
     <EscalatedLayout title="Cohort Analysis">
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <PeriodSelector :model-value="periodDays" @update:model-value="changePeriod" />
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <ReportExportButton report-name="cohorts" :period-days="periodDays" />
                 <Link
                     :href="route('escalated.admin.reports')"
@@ -87,12 +87,14 @@ function toggleSort(col) {
         </div>
 
         <!-- Tab Selector -->
-        <div class="mb-6 flex gap-1 rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] p-1">
+        <div
+            class="mb-6 flex gap-1 overflow-x-auto rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] p-1"
+        >
             <button
                 v-for="tab in tabs"
                 :key="tab.key"
                 :class="[
-                    'rounded-md px-4 py-2 text-sm font-medium transition-all',
+                    'shrink-0 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-all',
                     activeTab === tab.key
                         ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]'
                         : 'text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-secondary)]',
@@ -114,7 +116,7 @@ function toggleSort(col) {
         </div>
 
         <!-- Cohort Table -->
-        <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+        <div class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)]">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">

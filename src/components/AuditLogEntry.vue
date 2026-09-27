@@ -46,30 +46,36 @@ const formattedDate = computed(() => {
 
 <template>
     <div
-        class="flex gap-3 rounded-lg border border-white/[0.04] bg-white/[0.02] px-4 py-3 transition-colors hover:bg-white/[0.03]"
+        class="flex gap-3 rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] px-4 py-3 transition-colors hover:bg-[var(--esc-panel-hover)]"
     >
         <!-- Avatar -->
         <div
-            class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/20 to-violet-500/20 text-xs font-semibold text-neutral-300"
+            class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/20 to-violet-500/20 text-xs font-semibold text-[var(--esc-panel-text-tertiary)]"
         >
             {{ userInitial }}
         </div>
 
         <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-2 text-sm">
-                <span class="font-medium text-neutral-200">{{ log.user?.name || 'System' }}</span>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+                <span class="font-medium text-[var(--esc-panel-text-secondary)]">{{ log.user?.name || 'System' }}</span>
                 <span :class="['inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium', actionColor]">
                     {{ log.action }}
                 </span>
-                <span class="text-neutral-400">{{ resourceName }}</span>
-                <span class="text-neutral-600">#{{ log.auditable_id }}</span>
-                <span class="ml-auto text-xs text-neutral-500">{{ formattedDate }}</span>
+                <span class="text-[var(--esc-panel-text-tertiary)]">{{ resourceName }}</span>
+                <span class="text-[var(--esc-panel-text-muted)]">#{{ log.auditable_id }}</span>
+                <span class="ml-auto whitespace-nowrap text-xs text-[var(--esc-panel-text-muted)]">{{
+                    formattedDate
+                }}</span>
             </div>
 
             <!-- Changed fields diff -->
             <div v-if="changedFields.length" class="mt-2 space-y-1">
-                <div v-for="change in changedFields" :key="change.field" class="flex items-center gap-2 text-xs">
-                    <span class="font-medium text-neutral-400">{{ change.field }}:</span>
+                <div
+                    v-for="change in changedFields"
+                    :key="change.field"
+                    class="flex flex-wrap items-center gap-2 text-xs"
+                >
+                    <span class="font-medium text-[var(--esc-panel-text-tertiary)]">{{ change.field }}:</span>
                     <span class="text-rose-400/70 line-through">{{
                         typeof change.old === 'object' ? JSON.stringify(change.old) : change.old
                     }}</span>

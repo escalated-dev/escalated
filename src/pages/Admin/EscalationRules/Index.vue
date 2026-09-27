@@ -107,7 +107,7 @@ function toggleCategory(cat) {
 
             <div
                 v-if="!collapsedCategories[category]"
-                class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]"
+                class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]"
             >
                 <table class="min-w-full divide-y divide-[var(--esc-panel-border)]">
                     <thead>

@@ -17,35 +17,37 @@
                     {{ $t(`newsletters.index.tabs.${tabItem.key}`) }}
                 </Link>
             </nav>
-            <table>
-                <thead>
-                    <tr>
-                        <th>{{ $t('newsletters.index.columns.subject') }}</th>
-                        <th>{{ $t('newsletters.index.columns.list') }}</th>
-                        <th>{{ $t('newsletters.index.columns.status') }}</th>
-                        <th>{{ $t('newsletters.index.columns.scheduled') }}</th>
-                        <th>{{ $t('newsletters.index.columns.sent') }}</th>
-                        <th>{{ $t('newsletters.index.columns.recipients') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="!filtered.length">
-                        <td colspan="6" class="empty">{{ emptyMessage }}</td>
-                    </tr>
-                    <tr v-for="n in filtered" :key="n.id">
-                        <td>
-                            <Link :href="`/admin/newsletters/${n.id}`">{{ n.subject }}</Link>
-                        </td>
-                        <td>{{ n.target_list.name }}</td>
-                        <td>
-                            <span :class="`status status--${n.status}`">{{ n.status }}</span>
-                        </td>
-                        <td>{{ n.scheduled_at ? new Date(n.scheduled_at).toLocaleString() : '—' }}</td>
-                        <td>{{ n.sent_at ? new Date(n.sent_at).toLocaleString() : '—' }}</td>
-                        <td>{{ n.summary_total ?? '—' }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="esc-table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ $t('newsletters.index.columns.subject') }}</th>
+                            <th>{{ $t('newsletters.index.columns.list') }}</th>
+                            <th>{{ $t('newsletters.index.columns.status') }}</th>
+                            <th>{{ $t('newsletters.index.columns.scheduled') }}</th>
+                            <th>{{ $t('newsletters.index.columns.sent') }}</th>
+                            <th>{{ $t('newsletters.index.columns.recipients') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="!filtered.length">
+                            <td colspan="6" class="empty">{{ emptyMessage }}</td>
+                        </tr>
+                        <tr v-for="n in filtered" :key="n.id">
+                            <td>
+                                <Link :href="`/admin/newsletters/${n.id}`">{{ n.subject }}</Link>
+                            </td>
+                            <td>{{ n.target_list.name }}</td>
+                            <td>
+                                <span :class="`status status--${n.status}`">{{ n.status }}</span>
+                            </td>
+                            <td>{{ n.scheduled_at ? new Date(n.scheduled_at).toLocaleString() : '—' }}</td>
+                            <td>{{ n.sent_at ? new Date(n.sent_at).toLocaleString() : '—' }}</td>
+                            <td>{{ n.summary_total ?? '—' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </EscalatedLayout>
 </template>

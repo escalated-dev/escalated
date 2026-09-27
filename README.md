@@ -157,6 +157,13 @@ The `theme` option sets CSS custom properties you can reference in your own styl
 | `--esc-radius-lg` | auto-scaled | Border radius for cards and panels |
 | `--esc-font-family` | inherit | Font family override |
 
+### Admin and Agent Panels
+
+`theme.panel` colours the admin and agent panels: navigation, header, logo
+tile, links and surfaces, in dark or light mode. Both panels collapse their
+navigation behind a menu button below 1024px. See
+[docs/theming.md](docs/theming.md) for every token.
+
 ### Framework Examples
 
 **Laravel** (Inertia + Vue 3):

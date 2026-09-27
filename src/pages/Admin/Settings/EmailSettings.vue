@@ -71,7 +71,7 @@ const dkimStatusClasses = {
                 <!-- Address Table -->
                 <div
                     v-if="form.addresses.length"
-                    class="overflow-hidden rounded-lg border border-[var(--esc-panel-border)]"
+                    class="esc-table-scroll rounded-lg border border-[var(--esc-panel-border)]"
                 >
                     <table class="w-full">
                         <thead>

@@ -11,33 +11,35 @@
             </select>
             <button type="button" class="deliveries-table__export" @click="$emit('export')">Export CSV</button>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Contact</th>
-                    <th>Status</th>
-                    <th>Sent</th>
-                    <th>Opened</th>
-                    <th>Last clicked</th>
-                    <th>Bounce reason</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="row in rows" :key="row.id">
-                    <td>
-                        <div>{{ row.contact.name ?? '—' }}</div>
-                        <div class="deliveries-table__email">{{ row.contact.email }}</div>
-                    </td>
-                    <td>
-                        <span :class="`status status--${row.status}`">{{ row.status }}</span>
-                    </td>
-                    <td>{{ row.sent_at ? new Date(row.sent_at).toLocaleString() : '—' }}</td>
-                    <td>{{ row.opened_at ? new Date(row.opened_at).toLocaleString() : '—' }}</td>
-                    <td>{{ row.last_clicked_at ? new Date(row.last_clicked_at).toLocaleString() : '—' }}</td>
-                    <td>{{ row.bounce_reason ?? '—' }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="esc-table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th>Sent</th>
+                        <th>Opened</th>
+                        <th>Last clicked</th>
+                        <th>Bounce reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="row in rows" :key="row.id">
+                        <td>
+                            <div>{{ row.contact.name ?? '—' }}</div>
+                            <div class="deliveries-table__email">{{ row.contact.email }}</div>
+                        </td>
+                        <td>
+                            <span :class="`status status--${row.status}`">{{ row.status }}</span>
+                        </td>
+                        <td>{{ row.sent_at ? new Date(row.sent_at).toLocaleString() : '—' }}</td>
+                        <td>{{ row.opened_at ? new Date(row.opened_at).toLocaleString() : '—' }}</td>
+                        <td>{{ row.last_clicked_at ? new Date(row.last_clicked_at).toLocaleString() : '—' }}</td>
+                        <td>{{ row.bounce_reason ?? '—' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 

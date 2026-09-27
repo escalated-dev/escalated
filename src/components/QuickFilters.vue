@@ -33,7 +33,10 @@ function selectTab(tab) {
 
 <template>
     <div
-        :class="['flex items-center gap-0 border-b', escDark ? 'border-white/[0.08]' : 'border-gray-200']"
+        :class="[
+            'flex items-center gap-0 overflow-x-auto border-b',
+            escDark ? 'border-white/[0.08]' : 'border-gray-200',
+        ]"
         role="tablist"
         aria-label="Ticket view tabs"
     >
@@ -43,7 +46,7 @@ function selectTab(tab) {
             role="tab"
             :aria-selected="activeTab === tab.key"
             :class="[
-                'relative px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap',
+                'relative shrink-0 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-0',
                 activeTab === tab.key
                     ? escDark

@@ -70,7 +70,7 @@ function destroy(id) {
                 {{ categoryLabels[cat] || cat }}
             </h3>
             <div
-                class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]"
+                class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]"
             >
                 <table class="min-w-full divide-y divide-[var(--esc-panel-border)]">
                     <thead>

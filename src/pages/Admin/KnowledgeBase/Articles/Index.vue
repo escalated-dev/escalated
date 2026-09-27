@@ -46,8 +46,8 @@ const statusColors = {
 
 <template>
     <EscalatedLayout title="Knowledge Base — Articles">
-        <div class="mb-6 flex items-center justify-between">
-            <div class="flex items-center gap-3">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <input
                     v-model="search"
                     type="text"
@@ -78,7 +78,7 @@ const statusColors = {
             </Link>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-[var(--esc-panel-border)]">
+        <div class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)]">
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)]">
