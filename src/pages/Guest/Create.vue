@@ -27,7 +27,8 @@ const form = useForm({
 });
 
 const page = usePage();
-const context = () => `${props.verification_url}|${page.props.escalated?.broadcast_channel_prefix || ''}`;
+const context = () =>
+    `${props.verification_url}|${props.lookup_url}|${page.props.escalated?.broadcasting?.channel_prefix || ''}`;
 const requestCode = (email, purpose) => guestRequest(props.verification_url, { email, purpose });
 const verification = useGuestVerification(() => form.guest_email, 'ticket', requestCode, context);
 const lookup = reactive({ email: '', reference: '', pending: false, error: '', searched: false });
