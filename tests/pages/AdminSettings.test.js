@@ -199,6 +199,37 @@ describe('Admin/Settings - Knowledge Base toggles', () => {
 });
 
 describe('backend settings capabilities', () => {
+    it('preserves invalid input and errors when validation returns fresh props for the same account', async () => {
+        const wrapper = mountSettings({}, { supported_settings: ['show_powered_by'] });
+        mockForm.show_powered_by = false;
+        mockForm.errors = { show_powered_by: 'Could not save.' };
+        await wrapper.setProps({
+            settings: { show_powered_by: true },
+            supported_settings: ['show_powered_by'],
+        });
+        expect(mockForm.show_powered_by).toBe(false);
+        expect(mockForm.errors).toEqual({ show_powered_by: 'Could not save.' });
+        expect(mockForm.cancel).not.toHaveBeenCalled();
+        wrapper.unmount();
+    });
+
+    it('only exposes widget department choices when supported, including as the only capability', async () => {
+        const wrapper = mountSettings(
+            { widget_enabled: true },
+            {
+                departments: [{ id: 5, name: 'Billing' }],
+                supported_settings: ['widget_color'],
+            },
+        );
+        expect(wrapper.text()).not.toContain('Select which departments');
+        await wrapper.setProps({ supported_settings: ['widget_departments'] });
+        expect(wrapper.text()).toContain('Select which departments');
+        await wrapper.find('input[type="checkbox"]').setValue(true);
+        await wrapper.find('form').trigger('submit');
+        expect(submittedData).toEqual({ widget_departments: '5' });
+        wrapper.unmount();
+    });
+
     it('replaces values and clears credentials when Inertia reuses the page for another account', async () => {
         const wrapper = mountSettings({ imap_password: 'account-a-secret', show_powered_by: true });
         await wrapper.setProps({

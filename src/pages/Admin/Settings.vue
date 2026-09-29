@@ -75,11 +75,11 @@ const settingsData = () => ({
 });
 const form = useForm(settingsData());
 watch(
-    () => [
-        props.settings,
-        props.supported_settings,
-        props.update_url,
-        page.props.escalated?.broadcasting?.channel_prefix,
+    [
+        () => (props.supported_settings === null ? null : [...props.supported_settings].sort().join(',')),
+        () => props.update_url,
+        () => page.props.escalated?.broadcasting?.channel_prefix,
+        () => page.props.auth?.user?.id,
     ],
     () => {
         // Inertia can reuse this page after an account/backend switch. Discard
@@ -88,6 +88,8 @@ watch(
         form.defaults(settingsData());
         form.reset();
         form.clearErrors();
+        form.wasSuccessful = false;
+        form.recentlySuccessful = false;
     },
 );
 
@@ -676,7 +678,15 @@ function submit() {
 
             <!-- Support Widget -->
             <div
-                v-if="supportsAny(['widget_color', 'widget_enabled', 'widget_greeting', 'widget_position'])"
+                v-if="
+                    supportsAny([
+                        'widget_color',
+                        'widget_enabled',
+                        'widget_greeting',
+                        'widget_position',
+                        'widget_departments',
+                    ])
+                "
                 class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
             >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Support Widget</h3>
@@ -708,7 +718,8 @@ function submit() {
                     </label>
                     <template
                         v-if="
-                            form.widget_enabled && supportsAny(['widget_color', 'widget_greeting', 'widget_position'])
+                            form.widget_enabled &&
+                            supportsAny(['widget_color', 'widget_greeting', 'widget_position', 'widget_departments'])
                         "
                     >
                         <div v-if="supports('widget_color')">
@@ -755,7 +766,7 @@ function submit() {
                                 class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             />
                         </div>
-                        <div v-if="departments?.length">
+                        <div v-if="supports('widget_departments') && departments?.length">
                             <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Departments</label
                             >
