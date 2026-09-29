@@ -564,7 +564,9 @@
         "Escalated/Admin/Settings": {
             "props": [
                 "departments",
-                "settings"
+                "settings",
+                "supported_settings",
+                "update_url"
             ],
             "required": []
         },

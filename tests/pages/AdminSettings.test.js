@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import Settings from '../../src/pages/Admin/Settings.vue';
 
+let initialData;
+let submittedData;
+
 // Stub Inertia
 const mockForm = {
     guest_tickets_enabled: true,
@@ -30,12 +33,29 @@ const mockForm = {
     processing: false,
     recentlySuccessful: false,
     post: vi.fn(),
+    cancel: vi.fn(),
+    clearErrors: vi.fn(),
+    defaults: vi.fn((data) => {
+        initialData = data;
+    }),
+    reset: vi.fn(() => {
+        Object.assign(mockForm, initialData);
+    }),
+    transform: vi.fn((callback) => {
+        mockForm.submitTransform = callback;
+        return mockForm;
+    }),
 };
 
 vi.mock('@inertiajs/vue3', () => ({
     useForm: vi.fn((data) => {
         // Copy initial data into mockForm
         Object.assign(mockForm, data);
+        initialData = data;
+        mockForm.post.mockImplementation(() => {
+            const values = Object.fromEntries(Object.keys(initialData).map((key) => [key, mockForm[key]]));
+            submittedData = mockForm.submitTransform ? mockForm.submitTransform(values) : values;
+        });
         return mockForm;
     }),
     usePage: vi.fn(() => ({
@@ -48,7 +68,7 @@ vi.stubGlobal(
     vi.fn(() => '/mocked-route'),
 );
 
-function mountSettings(settingsOverrides = {}) {
+function mountSettings(settingsOverrides = {}, extraProps = {}) {
     return mount(Settings, {
         props: {
             settings: {
@@ -64,6 +84,7 @@ function mountSettings(settingsOverrides = {}) {
                 show_powered_by: true,
                 ...settingsOverrides,
             },
+            ...extraProps,
         },
         global: {
             stubs: {
@@ -174,5 +195,70 @@ describe('Admin/Settings - Knowledge Base toggles', () => {
             // Third toggle is Article Feedback
             expect(kbToggles[2].className).toContain('bg-neutral-700');
         });
+    });
+});
+
+describe('backend settings capabilities', () => {
+    it('replaces values and clears credentials when Inertia reuses the page for another account', async () => {
+        const wrapper = mountSettings({ imap_password: 'account-a-secret', show_powered_by: true });
+        await wrapper.setProps({
+            settings: { show_powered_by: false },
+            supported_settings: ['show_powered_by'],
+            update_url: '/account-b/settings',
+        });
+        expect(mockForm.imap_password).toBe('');
+        expect(mockForm.cancel).toHaveBeenCalled();
+        await wrapper.find('form').trigger('submit');
+        expect(submittedData).toEqual({ show_powered_by: false });
+        expect(mockForm.post).toHaveBeenCalledWith('/account-b/settings');
+        wrapper.unmount();
+    });
+    it('shows and submits only supported fields using the supplied endpoint', async () => {
+        const fields = [
+            'knowledge_base_enabled',
+            'knowledge_base_public',
+            'knowledge_base_feedback_enabled',
+            'show_powered_by',
+        ];
+        const wrapper = mountSettings({}, { supported_settings: fields, update_url: '/help/admin/settings' });
+        expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual(['Knowledge Base', 'Branding']);
+        expect(wrapper.text()).not.toContain('Guest Tickets');
+        expect(wrapper.text()).not.toContain('Support Widget');
+        expect(wrapper.findAll('button[type="button"]')).toHaveLength(4);
+        await wrapper.find('form').trigger('submit');
+        expect(mockForm.post).toHaveBeenCalledWith('/help/admin/settings');
+        expect(submittedData).toEqual({
+            knowledge_base_enabled: true,
+            knowledge_base_public: true,
+            knowledge_base_feedback_enabled: true,
+            show_powered_by: true,
+        });
+        wrapper.unmount();
+    });
+
+    it('hides individual unsupported controls within a supported section', async () => {
+        const wrapper = mountSettings({}, { supported_settings: ['knowledge_base_public'] });
+        expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual(['Knowledge Base']);
+        expect(wrapper.findAll('button[type="button"]')).toHaveLength(1);
+        await wrapper.find('form').trigger('submit');
+        expect(submittedData).toEqual({ knowledge_base_public: true });
+        wrapper.unmount();
+    });
+
+    it('retains the complete legacy payload when capabilities are omitted', async () => {
+        const wrapper = mountSettings();
+        await wrapper.find('form').trigger('submit');
+        expect(Object.keys(submittedData)).toHaveLength(53);
+        expect(submittedData.guest_tickets_enabled).toBe(true);
+        expect(mockForm.post).toHaveBeenCalledWith('/mocked-route');
+        wrapper.unmount();
+    });
+
+    it('does not post hidden defaults when the backend exposes no editable settings', async () => {
+        const wrapper = mountSettings({}, { supported_settings: [] });
+        expect(wrapper.findAll('h3')).toHaveLength(0);
+        await wrapper.find('form').trigger('submit');
+        expect(submittedData).toEqual({});
+        wrapper.unmount();
     });
 });
