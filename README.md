@@ -392,6 +392,21 @@ import CustomerIndex from '@escalated-dev/escalated/pages/Customer/Index.vue'
 
 Peer dependencies: `vue` ^3.3.0, `@inertiajs/vue3` ^1.0.0 || ^2.0.0
 
+## Backend settings capabilities
+
+The `Escalated/Admin/Settings` page accepts optional `supported_settings` and
+`update_url` props. Pass an array of editable setting names to show and submit only
+those fields, and a URL accepting a flat POST payload. An empty array exposes no
+editable settings. Omitting these props preserves the full settings form and its
+Laravel named route. Backends must validate their own setting allowlist; hiding a
+control is not authorization.
+
+For example, a backend implementing only knowledge-base and branding preferences
+can expose `knowledge_base_enabled`, `knowledge_base_public`,
+`knowledge_base_feedback_enabled`, and `show_powered_by`. Supply typed values in
+the `settings` prop. Changing the settings/account props clears stale form values
+and pending requests, including previously entered credentials.
+
 ## Ecosystem
 
 This is the shared frontend for the Escalated support ticket system. Host framework packages and client SDKs available across the ecosystem:

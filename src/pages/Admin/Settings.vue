@@ -2,13 +2,21 @@
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
-const props = defineProps({ settings: Object, departments: Array });
+const props = defineProps({
+    settings: { type: Object, default: () => ({}) },
+    departments: Array,
+    supported_settings: { type: Array, default: null },
+    update_url: { type: String, default: null },
+});
+const supported = computed(() => (props.supported_settings === null ? null : new Set(props.supported_settings)));
+const supports = (key) => supported.value === null || supported.value.has(key);
+const supportsAny = (keys) => keys.some(supports);
 const page = usePage();
 
-const form = useForm({
+const settingsData = () => ({
     guest_tickets_enabled: props.settings.guest_tickets_enabled,
     allow_customer_close: props.settings.allow_customer_close,
     auto_close_resolved_after_days: props.settings.auto_close_resolved_after_days,
@@ -65,9 +73,31 @@ const form = useForm({
     widget_pre_chat_message: props.settings.widget_pre_chat_message ?? '',
     widget_chat_header_text: props.settings.widget_chat_header_text ?? 'Support',
 });
+const form = useForm(settingsData());
+watch(
+    [
+        () => (props.supported_settings === null ? null : [...props.supported_settings].sort().join(',')),
+        () => props.update_url,
+        () => page.props.escalated?.broadcasting?.channel_prefix,
+        () => page.props.auth?.user?.id,
+    ],
+    () => {
+        // Inertia can reuse this page after an account/backend switch. Discard
+        // the previous account's pending request, fields and credentials.
+        form.cancel();
+        form.defaults(settingsData());
+        form.reset();
+        form.clearErrors();
+        form.wasSuccessful = false;
+        form.recentlySuccessful = false;
+    },
+);
 
 const webhookBaseUrl = computed(() => {
-    const prefix = page.props.escalated?.prefix || 'support';
+    const prefix = (page.props.escalated?.prefix || page.props.escalated?.route_prefix || 'support').replace(
+        /^\/+|\/+$/g,
+        '',
+    );
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     return `${origin}/${prefix}/inbound`;
 });
@@ -75,18 +105,30 @@ const webhookBaseUrl = computed(() => {
 const { getPageComponents } = usePluginExtensions();
 
 function submit() {
-    form.post(route('escalated.admin.settings.update'));
+    form.transform((data) => Object.fromEntries(Object.entries(data).filter(([key]) => supports(key)))).post(
+        props.update_url || route('escalated.admin.settings.update'),
+    );
 }
 </script>
 
 <template>
     <EscalatedLayout title="Settings">
         <form class="mx-auto max-w-2xl space-y-6" @submit.prevent="submit">
+            <div
+                v-if="form.hasErrors"
+                role="alert"
+                class="rounded-xl border border-red-400/40 p-4 text-sm text-red-500"
+            >
+                <p v-for="(message, key) in form.errors" :key="key">{{ message }}</p>
+            </div>
             <!-- General -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="supportsAny(['allow_customer_close', 'auto_close_resolved_after_days', 'guest_tickets_enabled'])"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">General</h3>
                 <div class="space-y-5">
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('guest_tickets_enabled')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Guest Tickets</span
@@ -112,7 +154,7 @@ function submit() {
                         </button>
                     </label>
 
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('allow_customer_close')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Allow Customer Close</span
@@ -138,7 +180,7 @@ function submit() {
                         </button>
                     </label>
 
-                    <div>
+                    <div v-if="supports('auto_close_resolved_after_days')">
                         <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Auto-close resolved tickets after</label
                         >
@@ -160,10 +202,13 @@ function submit() {
             </div>
 
             <!-- Limits -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="supportsAny(['max_attachment_size_kb', 'max_attachments_per_reply'])"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Limits</h3>
                 <div class="space-y-5">
-                    <div>
+                    <div v-if="supports('max_attachments_per_reply')">
                         <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Max attachments per reply</label
                         >
@@ -175,7 +220,7 @@ function submit() {
                             class="mt-2 w-24 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                         />
                     </div>
-                    <div>
+                    <div v-if="supports('max_attachment_size_kb')">
                         <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Max attachment size</label
                         >
@@ -197,7 +242,10 @@ function submit() {
             </div>
 
             <!-- Tickets -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="supports('ticket_reference_prefix')"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Tickets</h3>
                 <div class="space-y-5">
                     <div>
@@ -218,10 +266,29 @@ function submit() {
             </div>
 
             <!-- Inbound Email -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="
+                    supportsAny([
+                        'imap_encryption',
+                        'imap_host',
+                        'imap_mailbox',
+                        'imap_password',
+                        'imap_port',
+                        'imap_username',
+                        'inbound_email_adapter',
+                        'inbound_email_address',
+                        'inbound_email_enabled',
+                        'mailgun_signing_key',
+                        'postmark_inbound_token',
+                        'ses_region',
+                        'ses_topic_arn',
+                    ])
+                "
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Inbound Email</h3>
                 <div class="space-y-5">
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('inbound_email_enabled')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Inbound Email</span
@@ -247,8 +314,26 @@ function submit() {
                         </button>
                     </label>
 
-                    <template v-if="form.inbound_email_enabled">
-                        <div>
+                    <template
+                        v-if="
+                            form.inbound_email_enabled &&
+                            supportsAny([
+                                'imap_encryption',
+                                'imap_host',
+                                'imap_mailbox',
+                                'imap_password',
+                                'imap_port',
+                                'imap_username',
+                                'inbound_email_adapter',
+                                'inbound_email_address',
+                                'mailgun_signing_key',
+                                'postmark_inbound_token',
+                                'ses_region',
+                                'ses_topic_arn',
+                            ])
+                        "
+                    >
+                        <div v-if="supports('inbound_email_adapter')">
                             <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Email Provider</label
                             >
@@ -266,7 +351,7 @@ function submit() {
                             </select>
                         </div>
 
-                        <div>
+                        <div v-if="supports('inbound_email_address')">
                             <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Support Email Address</label
                             >
@@ -282,7 +367,7 @@ function submit() {
                         </div>
 
                         <!-- Mailgun -->
-                        <template v-if="form.inbound_email_adapter === 'mailgun'">
+                        <template v-if="form.inbound_email_adapter === 'mailgun' && supports('mailgun_signing_key')">
                             <div>
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Signing Key</label
@@ -310,7 +395,9 @@ function submit() {
                         </template>
 
                         <!-- Postmark -->
-                        <template v-if="form.inbound_email_adapter === 'postmark'">
+                        <template
+                            v-if="form.inbound_email_adapter === 'postmark' && supports('postmark_inbound_token')"
+                        >
                             <div>
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Inbound Token</label
@@ -338,8 +425,10 @@ function submit() {
                         </template>
 
                         <!-- AWS SES -->
-                        <template v-if="form.inbound_email_adapter === 'ses'">
-                            <div>
+                        <template
+                            v-if="form.inbound_email_adapter === 'ses' && supportsAny(['ses_region', 'ses_topic_arn'])"
+                        >
+                            <div v-if="supports('ses_region')">
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Region</label
                                 >
@@ -350,7 +439,7 @@ function submit() {
                                     class="mt-2 w-48 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
-                            <div>
+                            <div v-if="supports('ses_topic_arn')">
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Topic ARN</label
                                 >
@@ -378,8 +467,20 @@ function submit() {
                         </template>
 
                         <!-- IMAP -->
-                        <template v-if="form.inbound_email_adapter === 'imap'">
-                            <div>
+                        <template
+                            v-if="
+                                form.inbound_email_adapter === 'imap' &&
+                                supportsAny([
+                                    'imap_encryption',
+                                    'imap_host',
+                                    'imap_mailbox',
+                                    'imap_password',
+                                    'imap_port',
+                                    'imap_username',
+                                ])
+                            "
+                        >
+                            <div v-if="supports('imap_host')">
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Host</label
                                 >
@@ -390,8 +491,8 @@ function submit() {
                                     class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
-                            <div class="flex items-end gap-4">
-                                <div>
+                            <div v-if="supportsAny(['imap_encryption', 'imap_port'])" class="flex items-end gap-4">
+                                <div v-if="supports('imap_port')">
                                     <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                         >Port</label
                                     >
@@ -403,7 +504,7 @@ function submit() {
                                         class="mt-2 w-24 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                     />
                                 </div>
-                                <div>
+                                <div v-if="supports('imap_encryption')">
                                     <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                         >Encryption</label
                                     >
@@ -417,7 +518,7 @@ function submit() {
                                     </select>
                                 </div>
                             </div>
-                            <div>
+                            <div v-if="supports('imap_username')">
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Username</label
                                 >
@@ -427,7 +528,7 @@ function submit() {
                                     class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
-                            <div>
+                            <div v-if="supports('imap_password')">
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Password</label
                                 >
@@ -437,7 +538,7 @@ function submit() {
                                     class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                                 />
                             </div>
-                            <div>
+                            <div v-if="supports('imap_mailbox')">
                                 <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                     >Mailbox</label
                                 >
@@ -454,10 +555,15 @@ function submit() {
             </div>
 
             <!-- Knowledge Base -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="
+                    supportsAny(['knowledge_base_enabled', 'knowledge_base_feedback_enabled', 'knowledge_base_public'])
+                "
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Knowledge Base</h3>
                 <div class="space-y-5">
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('knowledge_base_enabled')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Enable Knowledge Base</span
@@ -482,7 +588,7 @@ function submit() {
                             />
                         </button>
                     </label>
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('knowledge_base_public')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Public Access</span
@@ -507,7 +613,7 @@ function submit() {
                             />
                         </button>
                     </label>
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('knowledge_base_feedback_enabled')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Article Feedback</span
@@ -536,7 +642,10 @@ function submit() {
             </div>
 
             <!-- Branding -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="supports('show_powered_by')"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Branding</h3>
                 <div class="space-y-5">
                     <label class="flex items-center justify-between">
@@ -568,10 +677,21 @@ function submit() {
             </div>
 
             <!-- Support Widget -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="
+                    supportsAny([
+                        'widget_color',
+                        'widget_enabled',
+                        'widget_greeting',
+                        'widget_position',
+                        'widget_departments',
+                    ])
+                "
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Support Widget</h3>
                 <div class="space-y-5">
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('widget_enabled')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Enable Widget</span
@@ -596,8 +716,13 @@ function submit() {
                             />
                         </button>
                     </label>
-                    <template v-if="form.widget_enabled">
-                        <div>
+                    <template
+                        v-if="
+                            form.widget_enabled &&
+                            supportsAny(['widget_color', 'widget_greeting', 'widget_position', 'widget_departments'])
+                        "
+                    >
+                        <div v-if="supports('widget_color')">
                             <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Widget Color</label
                             >
@@ -618,7 +743,7 @@ function submit() {
                                 />
                             </div>
                         </div>
-                        <div>
+                        <div v-if="supports('widget_position')">
                             <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Position</label
                             >
@@ -630,7 +755,7 @@ function submit() {
                                 <option value="bottom-left">Bottom Left</option>
                             </select>
                         </div>
-                        <div>
+                        <div v-if="supports('widget_greeting')">
                             <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Greeting Message</label
                             >
@@ -641,7 +766,7 @@ function submit() {
                                 class="mt-2 w-full max-w-sm rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             />
                         </div>
-                        <div v-if="departments?.length">
+                        <div v-if="supports('widget_departments') && departments?.length">
                             <label class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Departments</label
                             >
@@ -696,10 +821,13 @@ function submit() {
             </div>
 
             <!-- Live Chat -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="supportsAny(['chat_enabled', 'chat_sound_notifications'])"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Live Chat</h3>
                 <div class="space-y-5">
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('chat_enabled')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Enable Live Chat</span
@@ -716,7 +844,7 @@ function submit() {
                             class="h-4 w-4 rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]/20"
                         />
                     </label>
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('chat_sound_notifications')" class="flex items-center justify-between">
                         <div>
                             <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Sound Notifications</span
@@ -738,12 +866,23 @@ function submit() {
 
             <!-- Chat Routing -->
             <div
-                v-if="form.chat_enabled"
+                v-if="
+                    form.chat_enabled &&
+                    supportsAny([
+                        'chat_auto_close_minutes',
+                        'chat_concurrent_limit',
+                        'chat_max_queue',
+                        'chat_offline_behavior',
+                        'chat_offline_message',
+                        'chat_queue_message',
+                        'chat_routing_strategy',
+                    ])
+                "
                 class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
             >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Chat Routing</h3>
                 <div class="space-y-5">
-                    <div>
+                    <div v-if="supports('chat_routing_strategy')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Routing Strategy</label
                         >
@@ -756,7 +895,7 @@ function submit() {
                             <option value="manual">Manual (Queue)</option>
                         </select>
                     </div>
-                    <div>
+                    <div v-if="supports('chat_offline_behavior')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Offline Behavior</label
                         >
@@ -769,8 +908,8 @@ function submit() {
                             <option value="hide">Hide Chat</option>
                         </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
+                    <div v-if="supportsAny(['chat_concurrent_limit', 'chat_max_queue'])" class="grid grid-cols-2 gap-4">
+                        <div v-if="supports('chat_max_queue')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Max Queue Size</label
                             >
@@ -781,7 +920,7 @@ function submit() {
                                 class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
                             />
                         </div>
-                        <div>
+                        <div v-if="supports('chat_concurrent_limit')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Concurrent Limit</label
                             >
@@ -793,7 +932,7 @@ function submit() {
                             />
                         </div>
                     </div>
-                    <div>
+                    <div v-if="supports('chat_auto_close_minutes')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Auto-close after (minutes)</label
                         >
@@ -804,7 +943,7 @@ function submit() {
                             class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)]"
                         />
                     </div>
-                    <div>
+                    <div v-if="supports('chat_queue_message')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Queue Message</label
                         >
@@ -815,7 +954,7 @@ function submit() {
                             class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
                         />
                     </div>
-                    <div>
+                    <div v-if="supports('chat_offline_message')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Offline Message</label
                         >
@@ -830,11 +969,42 @@ function submit() {
             </div>
 
             <!-- Widget Theme -->
-            <div class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6">
+            <div
+                v-if="
+                    supportsAny([
+                        'widget_agent_bubble_color',
+                        'widget_background_color',
+                        'widget_border_radius',
+                        'widget_chat_header_text',
+                        'widget_custom_css',
+                        'widget_customer_bubble_color',
+                        'widget_font_family',
+                        'widget_header_background',
+                        'widget_launcher_size',
+                        'widget_pre_chat_message',
+                        'widget_primary_color',
+                        'widget_show_branding',
+                        'widget_text_color',
+                    ])
+                "
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
                 <h3 class="mb-5 text-sm font-semibold text-[var(--esc-panel-text)]">Widget Theme</h3>
                 <div class="space-y-5">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
+                    <div
+                        v-if="
+                            supportsAny([
+                                'widget_agent_bubble_color',
+                                'widget_background_color',
+                                'widget_customer_bubble_color',
+                                'widget_header_background',
+                                'widget_primary_color',
+                                'widget_text_color',
+                            ])
+                        "
+                        class="grid grid-cols-2 gap-4"
+                    >
+                        <div v-if="supports('widget_primary_color')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Primary Color</label
                             >
@@ -844,7 +1014,7 @@ function submit() {
                                 class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
                             />
                         </div>
-                        <div>
+                        <div v-if="supports('widget_header_background')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Header Background</label
                             >
@@ -854,7 +1024,7 @@ function submit() {
                                 class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
                             />
                         </div>
-                        <div>
+                        <div v-if="supports('widget_agent_bubble_color')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Agent Bubble Color</label
                             >
@@ -864,7 +1034,7 @@ function submit() {
                                 class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
                             />
                         </div>
-                        <div>
+                        <div v-if="supports('widget_customer_bubble_color')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Customer Bubble Color</label
                             >
@@ -874,7 +1044,7 @@ function submit() {
                                 class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
                             />
                         </div>
-                        <div>
+                        <div v-if="supports('widget_background_color')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Background Color</label
                             >
@@ -884,7 +1054,7 @@ function submit() {
                                 class="h-10 w-full cursor-pointer rounded-lg border border-[var(--esc-panel-border-input)]"
                             />
                         </div>
-                        <div>
+                        <div v-if="supports('widget_text_color')">
                             <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                                 >Text Color</label
                             >
@@ -895,7 +1065,7 @@ function submit() {
                             />
                         </div>
                     </div>
-                    <div>
+                    <div v-if="supports('widget_font_family')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Font Family</label
                         >
@@ -912,7 +1082,7 @@ function submit() {
                             <option value="Nunito">Nunito</option>
                         </select>
                     </div>
-                    <div>
+                    <div v-if="supports('widget_border_radius')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Border Radius ({{ form.widget_border_radius }}px)</label
                         >
@@ -924,7 +1094,7 @@ function submit() {
                             class="w-full"
                         />
                     </div>
-                    <div>
+                    <div v-if="supports('widget_launcher_size')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Launcher Size</label
                         >
@@ -946,7 +1116,7 @@ function submit() {
                             </label>
                         </div>
                     </div>
-                    <label class="flex items-center justify-between">
+                    <label v-if="supports('widget_show_branding')" class="flex items-center justify-between">
                         <span class="text-sm font-medium text-[var(--esc-panel-text-secondary)]">Show Branding</span>
                         <input
                             v-model="form.widget_show_branding"
@@ -956,7 +1126,7 @@ function submit() {
                             class="h-4 w-4 rounded border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]/20"
                         />
                     </label>
-                    <div>
+                    <div v-if="supports('widget_pre_chat_message')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Pre-chat Message</label
                         >
@@ -966,7 +1136,7 @@ function submit() {
                             class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
                         />
                     </div>
-                    <div>
+                    <div v-if="supports('widget_chat_header_text')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Chat Header Text</label
                         >
@@ -976,7 +1146,7 @@ function submit() {
                             class="w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] placeholder-[var(--esc-panel-text-muted)]"
                         />
                     </div>
-                    <div>
+                    <div v-if="supports('widget_custom_css')">
                         <label class="mb-1 block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
                             >Custom CSS</label
                         >
