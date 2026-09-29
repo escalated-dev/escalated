@@ -1,17 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { ref } from 'vue';
 import { useRealtime } from '../../src/composables/useRealtime.js';
 
 /**
  * Helper: mount a tiny wrapper component that calls useRealtime and
  * exposes the returned API via the component's setupState.
  */
-function mountWithRealtime() {
+function mountWithRealtime(options = {}) {
     let api;
     const wrapper = mount({
         template: '<div>test</div>',
         setup() {
-            api = useRealtime();
+            api = useRealtime(options);
             return { api };
         },
     });
@@ -168,11 +169,17 @@ describe('useRealtime', () => {
             };
             api.subscribeToTicket(1, handlers);
 
-            expect(mockChannel.listen).toHaveBeenCalledWith('.reply.created', handlers.onReplyCreated);
-            expect(mockChannel.listen).toHaveBeenCalledWith('.ticket.updated', handlers.onTicketUpdated);
-            expect(mockChannel.listen).toHaveBeenCalledWith('.ticket.status_changed', handlers.onStatusChanged);
-            expect(mockChannel.listen).toHaveBeenCalledWith('.ticket.assigned', handlers.onTicketAssigned);
-            expect(mockChannel.listen).toHaveBeenCalledWith('.ticket.escalated', handlers.onTicketEscalated);
+            for (const [event, handler] of Object.entries({
+                '.reply.created': handlers.onReplyCreated,
+                '.ticket.updated': handlers.onTicketUpdated,
+                '.ticket.status_changed': handlers.onStatusChanged,
+                '.ticket.assigned': handlers.onTicketAssigned,
+                '.ticket.escalated': handlers.onTicketEscalated,
+            })) {
+                const callback = mockChannel.listen.mock.calls.find(([name]) => name === event)[1];
+                callback({ ticket_id: 1 });
+                expect(handler).toHaveBeenCalledWith({ ticket_id: 1 });
+            }
             wrapper.unmount();
         });
 
@@ -244,5 +251,48 @@ describe('useRealtime', () => {
             expect(window.Echo.leave).toHaveBeenCalledWith('test-channel');
             wrapper.unmount();
         });
+    });
+});
+
+describe('tenant subscription lifecycle', () => {
+    it('leaves the previous namespace and ignores queued callbacks after an account switch', () => {
+        const channels = new Map();
+        window.Echo = {
+            private: vi.fn((name) => {
+                const channel = createMockChannel();
+                channels.set(name, channel);
+                return channel;
+            }),
+            leave: vi.fn(),
+        };
+        const prefix = ref('escalated.tenants.a');
+        const { wrapper, api } = mountWithRealtime({ channelPrefix: prefix });
+        const received = vi.fn();
+        const stop = api.subscribeToTicket(42, { onReplyCreated: received });
+        const oldCallback = channels.get('escalated.tenants.a.tickets.42').listen.mock.calls[0][1];
+        oldCallback('a');
+        prefix.value = 'escalated.tenants.b';
+        expect(window.Echo.leave).toHaveBeenCalledWith('escalated.tenants.a.tickets.42');
+        oldCallback('stale');
+        channels.get('escalated.tenants.b.tickets.42').listen.mock.calls[0][1]('b');
+        expect(received.mock.calls).toEqual([['a'], ['b']]);
+        stop();
+        prefix.value = 'escalated.tenants.c';
+        expect(window.Echo.private).toHaveBeenCalledTimes(2);
+        wrapper.unmount();
+        delete window.Echo;
+    });
+
+    it('keeps shared channels connected until their last subscriber leaves', () => {
+        window.Echo = { private: vi.fn(() => createMockChannel()), leave: vi.fn() };
+        const first = mountWithRealtime();
+        const second = mountWithRealtime();
+        first.api.subscribeToTicket(42);
+        second.api.subscribeToTicket(42);
+        first.wrapper.unmount();
+        expect(window.Echo.leave).not.toHaveBeenCalled();
+        second.wrapper.unmount();
+        expect(window.Echo.leave).toHaveBeenCalledExactlyOnceWith('escalated.tickets.42');
+        delete window.Echo;
     });
 });

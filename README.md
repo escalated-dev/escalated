@@ -359,6 +359,20 @@ npm install @escalated-dev/plugin-jira
 
 ## For Package Maintainers
 
+Backends with account isolation can share `escalated.broadcasting.channel_prefix`
+through Inertia, for example `escalated.tenants.<opaque-account-namespace>`.
+Ticket, agent, chat and presence subscriptions use this prefix and rejoin when it
+changes. Omitting it preserves the existing `escalated` channels. Standalone
+`PresenceIndicator` consumers can pass its `channelPrefix` prop; `useRealtime`
+and `useChat` accept `channelPrefix` as a string, ref or getter. Raw
+`useRealtime().listen(channel, event, callback)` still treats the channel literally.
+
+The backend must authorize the current account and each private/presence join.
+Channel names alone are not authorization. Ticket presence should expose only
+agent identity/display names, with requester access limited to private ticket
+updates. Deploy a frontend version containing this support before enabling a
+backend's account-scoped channels.
+
 If you're building a new backend integration, this package is available on npm:
 
 ```bash

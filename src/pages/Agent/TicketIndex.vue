@@ -49,7 +49,9 @@ function applyQuickFilter(filter) {
 }
 
 // Real-time updates - refresh the ticket list when new tickets arrive or statuses change
-const { echoAvailable, subscribeToTickets, subscribeToAgent } = useRealtime();
+const { echoAvailable, subscribeToTickets, subscribeToAgent } = useRealtime({
+    channelPrefix: () => page.props.escalated?.broadcasting?.channel_prefix,
+});
 
 onMounted(() => {
     if (!echoAvailable.value) return;
