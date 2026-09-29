@@ -95,7 +95,10 @@ function chatInitials(chat) {
 // that use '/escalated/widget' instead of '/support/widget'.
 const page = usePage();
 const routePrefix = page.props.escalated?.prefix || 'support';
-const { subscribeToChatQueue } = useChat({ widgetPath: `/${routePrefix}/widget` });
+const { subscribeToChatQueue } = useChat({
+    channelPrefix: () => page.props.escalated?.broadcasting?.channel_prefix,
+    widgetPath: `/${routePrefix}/widget`,
+});
 
 onMounted(() => {
     subscribeToChatQueue({

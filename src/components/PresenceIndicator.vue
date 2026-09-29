@@ -4,6 +4,7 @@ import { ref, computed, inject, onUnmounted, watch } from 'vue';
 const props = defineProps({
     ticketReference: { type: String, required: true },
     ticketId: { type: [Number, String], default: null },
+    channelPrefix: { type: String, default: 'escalated' },
     routePrefix: { type: String, required: true },
     pollInterval: { type: Number, default: 30000 },
     showLabel: { type: Boolean, default: false },
@@ -23,11 +24,18 @@ let presenceChannel = null;
 // Track the exact channel name we joined so we leave the RIGHT channel when the
 // ticket changes — props.ticketId would already hold the new id by then.
 let joinedChannelName = null;
+let generation = 0;
+let pendingRequest = null;
 
 async function fetchPresence() {
+    const currentGeneration = generation;
+    pendingRequest?.abort();
+    const controller = new window.AbortController();
+    pendingRequest = controller;
     try {
         const response = await fetch(route(`${props.routePrefix}.tickets.presence`, props.ticketReference), {
             method: 'POST',
+            signal: controller.signal,
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
@@ -37,7 +45,9 @@ async function fetchPresence() {
         });
         if (response.ok) {
             const data = await response.json();
-            viewers.value = data.viewers || data || [];
+            if (currentGeneration === generation && !controller.signal.aborted) {
+                viewers.value = data.viewers || data || [];
+            }
         }
     } catch {
         // silently ignore network errors
@@ -52,19 +62,23 @@ function initPresenceChannel() {
     if (!echoAvailable || !props.ticketId) return false;
 
     try {
-        joinedChannelName = `escalated.tickets.${props.ticketId}`;
+        const currentGeneration = generation;
+        joinedChannelName = `${props.channelPrefix}.tickets.${props.ticketId}`;
         presenceChannel = window.Echo.join(joinedChannelName);
 
         presenceChannel
             .here((users) => {
+                if (currentGeneration !== generation) return;
                 viewers.value = users;
             })
             .joining((user) => {
+                if (currentGeneration !== generation) return;
                 if (!viewers.value.find((v) => v.id === user.id)) {
                     viewers.value = [...viewers.value, user];
                 }
             })
             .leaving((user) => {
+                if (currentGeneration !== generation) return;
                 viewers.value = viewers.value.filter((v) => v.id !== user.id);
             });
 
@@ -104,13 +118,17 @@ function getColor(index) {
 }
 
 function teardown() {
+    generation++;
+    pendingRequest?.abort();
+    pendingRequest = null;
     if (intervalId) {
         clearInterval(intervalId);
         intervalId = null;
     }
     if (presenceChannel) {
         try {
-            window.Echo.leave(joinedChannelName);
+            if (window.Echo.leaveChannel) window.Echo.leaveChannel(`presence-${joinedChannelName}`);
+            else window.Echo.leave(`presence-${joinedChannelName}`);
         } catch {
             // ignore
         }
@@ -134,7 +152,10 @@ function start() {
 }
 
 // (Re)initialise whenever the ticket identity changes; `immediate` covers mount.
-watch(() => [props.ticketId, props.ticketReference], start, { immediate: true });
+watch(() => [props.ticketId, props.ticketReference, props.routePrefix, props.channelPrefix], start, {
+    immediate: true,
+    flush: 'sync',
+});
 
 onUnmounted(teardown);
 </script>

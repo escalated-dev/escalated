@@ -92,7 +92,10 @@ const chatTypingUser = ref(null);
 // Subscribe to chat channel for real-time messages. Pass widgetPath so
 // useChat's API calls resolve against whatever prefix the host framework
 // serves Escalated under (config on NestJS, default /support elsewhere).
-const { subscribeToChat } = useChat({ widgetPath: widgetPath.value });
+const { subscribeToChat } = useChat({
+    channelPrefix: () => page.props.escalated?.broadcasting?.channel_prefix,
+    widgetPath: widgetPath.value,
+});
 let chatTypingTimer = null;
 let chatUnsubscribe = null;
 
@@ -100,9 +103,11 @@ let chatUnsubscribe = null;
 // reuses this page component across ticket navigation (setup() does not re-run),
 // so without this the previous ticket's chat would persist.
 watch(
-    () => props.ticket.id,
+    () => [props.ticket.id, page.props.escalated?.broadcasting?.channel_prefix],
     () => {
         chatMessages.value = props.ticket.chat_messages || [];
+        chatTypingUser.value = null;
+        clearTimeout(chatTypingTimer);
     },
 );
 
@@ -187,7 +192,9 @@ useKeyboardShortcuts({
 });
 
 // Real-time updates via WebSocket (gracefully degrades to no-op when Echo is absent)
-const { echoAvailable, subscribeToTicket } = useRealtime();
+const { echoAvailable, subscribeToTicket } = useRealtime({
+    channelPrefix: () => page.props.escalated?.broadcasting?.channel_prefix,
+});
 let ticketUnsubscribe = null;
 
 // (Re)subscribe whenever the ticket id changes. Because Inertia reuses this
@@ -243,6 +250,7 @@ onUnmounted(() => {
             <PresenceIndicator
                 :ticket-reference="ticket.reference"
                 :ticket-id="ticket.id"
+                :channel-prefix="page.props.escalated?.broadcasting?.channel_prefix"
                 route-prefix="escalated.agent"
             />
             <div class="ml-auto flex items-center gap-2">

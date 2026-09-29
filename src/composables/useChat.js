@@ -20,7 +20,7 @@ export function useChat(options = {}) {
     const connectionState = ref('disconnected'); // disconnected | connecting | connected
     const messageBuffer = ref([]);
 
-    const { echoAvailable, listen } = useRealtime();
+    const { echoAvailable, listenScoped } = useRealtime(options);
 
     function csrfToken() {
         return typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.content || '' : '';
@@ -123,26 +123,17 @@ export function useChat(options = {}) {
     function subscribeToChat(sessionId, callbacks = {}) {
         if (!echoAvailable.value) return () => {};
 
-        const channelName = `escalated.chat.${sessionId}`;
-        const unsubs = [];
-
-        if (callbacks.onMessage) {
-            unsubs.push(listen(channelName, '.chat.message', callbacks.onMessage));
-        }
-        if (callbacks.onTyping) {
-            unsubs.push(listen(channelName, '.chat.typing', callbacks.onTyping));
-        }
-        if (callbacks.onEnded) {
-            unsubs.push(listen(channelName, '.chat.ended', callbacks.onEnded));
-        }
-        if (callbacks.onAssigned) {
-            unsubs.push(listen(channelName, '.chat.assigned', callbacks.onAssigned));
-        }
+        const unsubscribe = listenScoped(`chat.${sessionId}`, {
+            '.chat.message': callbacks.onMessage,
+            '.chat.typing': callbacks.onTyping,
+            '.chat.ended': callbacks.onEnded,
+            '.chat.assigned': callbacks.onAssigned,
+        });
 
         connectionState.value = 'connected';
 
         return () => {
-            unsubs.forEach((fn) => fn());
+            unsubscribe();
             connectionState.value = 'disconnected';
         };
     }
@@ -157,19 +148,10 @@ export function useChat(options = {}) {
     function subscribeToChatQueue(callbacks = {}) {
         if (!echoAvailable.value) return () => {};
 
-        const channelName = 'escalated.chat.queue';
-        const unsubs = [];
-
-        if (callbacks.onNewChat) {
-            unsubs.push(listen(channelName, '.chat.new', callbacks.onNewChat));
-        }
-        if (callbacks.onChatAccepted) {
-            unsubs.push(listen(channelName, '.chat.accepted', callbacks.onChatAccepted));
-        }
-
-        return () => {
-            unsubs.forEach((fn) => fn());
-        };
+        return listenScoped('chat.queue', {
+            '.chat.new': callbacks.onNewChat,
+            '.chat.accepted': callbacks.onChatAccepted,
+        });
     }
 
     return {
