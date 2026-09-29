@@ -1,6 +1,9 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
+import GuestEmailCode from '../components/GuestEmailCode.vue';
+import { useGuestVerification } from '../composables/useGuestVerification';
+import { guestCsrfHeaders } from '../utils/guestRequests';
 
 const props = defineProps({
     baseUrl: { type: String, default: '' },
@@ -67,53 +70,117 @@ const ticketSuccess = ref(null);
 const statusForm = ref({ email: '', reference: '' });
 const statusLoading = ref(false);
 const statusResult = ref(null);
+const statusMatches = ref([]);
+let destinationGeneration = 0;
+let disposed = false;
+const verificationRequired = computed(() => widgetConfig.value?.guest_verification_required === true);
+const verificationContext = () => `${props.baseUrl}|${props.widgetPath}`;
+const requestCode = (email, purpose) => api('POST', '/verification', { email, purpose });
+const ticketVerification = useGuestVerification(
+    () => ticketForm.value.email,
+    'ticket',
+    requestCode,
+    verificationContext,
+);
+const chatVerification = useGuestVerification(() => preChatForm.value.email, 'chat', requestCode, verificationContext);
+const statusVerification = useGuestVerification(
+    () => statusForm.value.email,
+    'lookup',
+    requestCode,
+    verificationContext,
+);
+watch(
+    () => `${statusForm.value.email}|${statusForm.value.reference}`,
+    () => {
+        statusMatches.value = [];
+        statusResult.value = null;
+    },
+    { flush: 'sync' },
+);
+
+watch(
+    verificationContext,
+    () => {
+        destinationGeneration++;
+        stopChatPolling();
+        clearTimeout(chatTypingTimer);
+        ticketSuccess.value = null;
+        statusMatches.value = [];
+        statusResult.value = null;
+        startNewChat();
+        ticketForm.value = { name: '', email: '', subject: '', description: '', department_id: '' };
+        statusForm.value = { email: '', reference: '' };
+        widgetConfig.value = null;
+        chatAvailable.value = false;
+        error.value = '';
+        loadWidget();
+    },
+    { flush: 'sync' },
+);
 
 let searchTimer = null;
 
-async function api(method, apiPath, body = null) {
+async function api(method, apiPath, body = null, token = null) {
+    const generation = destinationGeneration;
     const url = `${props.baseUrl}${props.widgetPath}${apiPath}`;
     const opts = {
         method,
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
+            ...guestCsrfHeaders(url),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
     };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
     const data = await res.json();
-    if (!res.ok) throw { status: res.status, data };
+    if (disposed || generation !== destinationGeneration)
+        throw Object.assign(new Error('Widget destination changed.'), { name: 'AbortError' });
+    if (!res.ok)
+        throw Object.assign(
+            new Error(data.errors ? Object.values(data.errors).flat().join(' ') : data.message || 'Request failed.'),
+            { status: res.status, data },
+        );
     return data;
 }
 
-onMounted(async () => {
+async function loadWidget() {
+    const generation = destinationGeneration;
     try {
         widgetConfig.value = await api('GET', '/config');
     } catch {
         // Widget may be disabled
     }
+    if (disposed || generation !== destinationGeneration) return;
     // Check chat availability
     try {
         const avail = await api('GET', '/chat/availability');
         chatAvailable.value = avail.available;
         chatAvailabilityMessage.value = avail.message || '';
     } catch {
-        chatAvailable.value = false;
+        if (generation === destinationGeneration && !disposed) chatAvailable.value = false;
     }
-});
+}
+onMounted(loadWidget);
 
 // Chat functions
 async function startLiveChat() {
+    const email = preChatForm.value.email;
     chatStarting.value = true;
     error.value = '';
     try {
+        if (verificationRequired.value && !(await chatVerification.ready())) return;
         const session = await api('POST', '/chat/start', {
             name: preChatForm.value.name,
             email: preChatForm.value.email,
             department_id: preChatForm.value.department_id || null,
             message: preChatForm.value.message,
+            ...(verificationRequired.value ? chatVerification.fields() : {}),
         });
+        if (email !== preChatForm.value.email) return;
         chatSession.value = session;
+        chatVerification.reset();
         chatPhase.value = 'live';
         chatMessages.value = session.messages || [];
         if (session.agent) {
@@ -122,6 +189,7 @@ async function startLiveChat() {
         chatConnectionStatus.value = 'connected';
         startChatPolling();
     } catch (e) {
+        if (e.name === 'AbortError') return;
         if (e.data?.errors) {
             error.value = Object.values(e.data.errors).flat().join(' ');
         } else {
@@ -181,8 +249,10 @@ function startChatPolling() {
     stopChatPolling();
     chatPollTimer = setInterval(async () => {
         if (!chatSession.value) return;
+        const sessionId = chatSession.value.id;
         try {
             const data = await api('GET', `/chat/${chatSession.value.id}/messages`);
+            if (chatSession.value?.id !== sessionId) return;
             if (data.messages) {
                 chatMessages.value = data.messages;
             }
@@ -202,7 +272,8 @@ function startChatPolling() {
             }
             chatConnectionStatus.value = 'connected';
             chatReconnectAttempts = 0;
-        } catch {
+        } catch (e) {
+            if (e.name === 'AbortError' || chatSession.value?.id !== sessionId) return;
             chatReconnectAttempts++;
             if (chatReconnectAttempts > 3) {
                 chatConnectionStatus.value = 'disconnected';
@@ -220,31 +291,46 @@ function stopChatPolling() {
     }
 }
 
+onUnmounted(() => {
+    disposed = true;
+    stopChatPolling();
+    clearTimeout(searchTimer);
+    clearTimeout(chatTypingTimer);
+});
+
 async function endLiveChat() {
     if (!chatSession.value) return;
+    const sessionId = chatSession.value.id;
     try {
         await api('POST', `/chat/${chatSession.value.id}/end`);
     } catch {
         // ignore
     }
+    if (chatSession.value?.id !== sessionId || disposed) return;
     chatPhase.value = 'post';
     stopChatPolling();
 }
 
 async function submitChatRating() {
     if (!chatSession.value || !chatRating.value) return;
+    const sessionId = chatSession.value.id;
     try {
         await api('POST', `/chat/${chatSession.value.id}/rate`, {
             rating: chatRating.value,
             comment: chatComment.value,
         });
-        chatRatingSubmitted.value = true;
-    } catch {
+        if (chatSession.value?.id === sessionId) chatRatingSubmitted.value = true;
+    } catch (e) {
+        if (e.name === 'AbortError' || chatSession.value?.id !== sessionId) return;
         error.value = 'Failed to submit rating.';
     }
 }
 
 function startNewChat() {
+    stopChatPolling();
+    clearTimeout(chatTypingTimer);
+    chatTypingUser.value = null;
+    chatReconnectAttempts = 0;
     chatPhase.value = 'pre';
     chatSession.value = null;
     chatMessages.value = [];
@@ -303,17 +389,22 @@ function backToSearch() {
 }
 
 async function submitTicket() {
+    const email = ticketForm.value.email;
     ticketSubmitting.value = true;
     error.value = '';
     try {
+        if (verificationRequired.value && !(await ticketVerification.ready())) return;
         const data = await api('POST', '/tickets', {
             name: ticketForm.value.name,
             email: ticketForm.value.email,
             subject: ticketForm.value.subject,
             description: ticketForm.value.description,
             department_id: ticketForm.value.department_id || null,
+            ...(verificationRequired.value ? ticketVerification.fields() : {}),
         });
+        if (email !== ticketForm.value.email) return;
         ticketSuccess.value = data;
+        ticketVerification.reset();
         ticketForm.value = {
             name: '',
             email: '',
@@ -322,6 +413,7 @@ async function submitTicket() {
             department_id: '',
         };
     } catch (e) {
+        if (e.name === 'AbortError') return;
         if (e.data?.errors) {
             error.value = Object.values(e.data.errors).flat().join(' ');
         } else {
@@ -333,19 +425,48 @@ async function submitTicket() {
 }
 
 async function checkStatus() {
+    const identity = `${statusForm.value.email}|${statusForm.value.reference}`;
     statusLoading.value = true;
     error.value = '';
     statusResult.value = null;
     try {
+        if (verificationRequired.value) {
+            if (!(await statusVerification.ready())) return;
+            const result = await api('POST', '/lookup', { ...statusForm.value, ...statusVerification.fields() });
+            if (identity !== `${statusForm.value.email}|${statusForm.value.reference}`) return;
+            statusVerification.reset();
+            statusMatches.value = result.data || [];
+            if (statusMatches.value.length === 1) await loadVerifiedStatus(statusMatches.value[0]);
+            if (!statusMatches.value.length) error.value = 'No tickets matched that reference and email.';
+            return;
+        }
         const data = await api(
             'GET',
             `/tickets/${encodeURIComponent(statusForm.value.reference)}?email=${encodeURIComponent(statusForm.value.email)}`,
         );
-        statusResult.value = data;
+        if (identity === `${statusForm.value.email}|${statusForm.value.reference}`) statusResult.value = data;
     } catch (e) {
+        if (e.name === 'AbortError') return;
         error.value = e.data?.message || 'Ticket not found.';
     } finally {
         statusLoading.value = false;
+    }
+}
+
+async function loadVerifiedStatus(match) {
+    const identity = `${statusForm.value.email}|${statusForm.value.reference}`;
+    error.value = '';
+    try {
+        const result = await api(
+            'GET',
+            `/tickets/${encodeURIComponent(match.reference)}`,
+            null,
+            match.guest_access_token,
+        );
+        if (identity === `${statusForm.value.email}|${statusForm.value.reference}`) statusResult.value = result;
+    } catch (e) {
+        if (e.name === 'AbortError') return;
+        error.value = e.data?.message || 'The link has expired. Verify your email for a new one.';
     }
 }
 
@@ -526,13 +647,24 @@ function formatDate(iso) {
                                 </option>
                             </select>
                         </div>
+                        <GuestEmailCode
+                            v-if="verificationRequired"
+                            :verification="ticketVerification"
+                            @code="ticketVerification.state.code = $event"
+                        />
                         <button
                             type="submit"
                             class="esc-w-btn"
                             :style="{ backgroundColor: color }"
-                            :disabled="ticketSubmitting"
+                            :disabled="ticketSubmitting || ticketVerification.state.pending"
                         >
-                            {{ ticketSubmitting ? 'Submitting...' : 'Submit Ticket' }}
+                            {{
+                                ticketSubmitting
+                                    ? 'Submitting...'
+                                    : verificationRequired && !ticketVerification.state.id
+                                      ? 'Send verification code'
+                                      : 'Submit Ticket'
+                            }}
                         </button>
                     </form>
                 </template>
@@ -569,13 +701,24 @@ function formatDate(iso) {
                             <label class="esc-w-label">Message (optional)</label>
                             <textarea v-model="preChatForm.message" class="esc-w-textarea"></textarea>
                         </div>
+                        <GuestEmailCode
+                            v-if="verificationRequired"
+                            :verification="chatVerification"
+                            @code="chatVerification.state.code = $event"
+                        />
                         <button
                             type="submit"
                             class="esc-w-btn"
                             :style="{ backgroundColor: color }"
-                            :disabled="chatStarting"
+                            :disabled="chatStarting || chatVerification.state.pending"
                         >
-                            {{ chatStarting ? 'Starting...' : 'Start Chat' }}
+                            {{
+                                chatStarting
+                                    ? 'Starting...'
+                                    : verificationRequired && !chatVerification.state.id
+                                      ? 'Send verification code'
+                                      : 'Start Chat'
+                            }}
                         </button>
                     </form>
                 </template>
@@ -723,7 +866,9 @@ function formatDate(iso) {
                             />
                         </div>
                         <div class="esc-w-field">
-                            <label class="esc-w-label">Ticket Reference</label>
+                            <label class="esc-w-label">{{
+                                verificationRequired ? 'Tracking or ticket reference' : 'Ticket Reference'
+                            }}</label>
                             <input
                                 v-model="statusForm.reference"
                                 type="text"
@@ -732,15 +877,33 @@ function formatDate(iso) {
                                 required
                             />
                         </div>
+                        <GuestEmailCode
+                            v-if="verificationRequired"
+                            :verification="statusVerification"
+                            @code="statusVerification.state.code = $event"
+                        />
                         <button
                             type="submit"
                             class="esc-w-btn"
                             :style="{ backgroundColor: color }"
-                            :disabled="statusLoading"
+                            :disabled="statusLoading || statusVerification.state.pending"
                         >
-                            {{ statusLoading ? 'Checking...' : 'Check Status' }}
+                            {{
+                                statusLoading
+                                    ? 'Checking...'
+                                    : verificationRequired && !statusVerification.state.id
+                                      ? 'Send verification code'
+                                      : 'Check Status'
+                            }}
                         </button>
                     </form>
+                    <ul v-if="statusMatches.length" class="esc-w-results">
+                        <li v-for="match in statusMatches" :key="match.reference">
+                            <button type="button" class="esc-w-back" @click="loadVerifiedStatus(match)">
+                                {{ match.reference }}: {{ match.subject }}
+                            </button>
+                        </li>
+                    </ul>
                 </template>
                 <template v-else>
                     <button

@@ -839,7 +839,9 @@
         "Escalated/Guest/Create": {
             "props": [
                 "departments",
-                "priorities"
+                "lookup_url",
+                "priorities",
+                "verification_url"
             ],
             "required": []
         },
