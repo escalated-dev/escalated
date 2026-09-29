@@ -359,6 +359,28 @@ npm install @escalated-dev/plugin-jira
 
 ## For Package Maintainers
 
+Verified guest access is enabled by backend capabilities. `Escalated/Guest/Create`
+accepts optional `verification_url` and `lookup_url` props. With these URLs, the
+form requests an email code before posting a ticket; a separate form verifies
+email to find existing tickets by tracking/ticket reference and renew private
+links. `Guest/Show` displays `ticket.guest_access_expires_at` when supplied.
+
+The built-in widget enables the same flow only when `/config` returns
+`guest_verification_required: true`. The backend must provide POST `/verification`
+with email and purpose (`ticket`, `chat`, `lookup`), returning `verification_id`;
+creation accepts `verification_id` and the eight-digit `verification_code`.
+POST `/lookup` returns `{ data: [{ reference, subject, guest_access_token,
+expires_at }] }`; subsequent widget status reads send the token as a Bearer
+header. Chat creation returns an opaque `id` and polling uses
+`/chat/{id}/messages`. Proofs and private results are cleared on destination or
+identity changes. Tokens remain in component memory. CSRF headers are sent only
+to the page's own origin.
+
+Backends that omit these capabilities retain their existing form contract. Hosts
+must ship these forms before requiring verification in their backend. This does
+not implement verification in the other backend packages, release the separate
+web-widget plugin, or configure cross-origin CORS/CSRF policy.
+
 Backends with account isolation can share `escalated.broadcasting.channel_prefix`
 through Inertia, for example `escalated.tenants.<opaque-account-namespace>`.
 Ticket, agent, chat and presence subscriptions use this prefix and rejoin when it

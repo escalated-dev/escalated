@@ -1,11 +1,17 @@
 <script setup>
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import FileDropzone from '../../components/FileDropzone.vue';
-import { useForm, Link } from '@inertiajs/vue3';
+import GuestEmailCode from '../../components/GuestEmailCode.vue';
+import { useGuestVerification } from '../../composables/useGuestVerification';
+import { guestRequest } from '../../utils/guestRequests';
+import { useForm, usePage, Link } from '@inertiajs/vue3';
+import { reactive, ref, watch } from 'vue';
 
-defineProps({
+const props = defineProps({
     departments: Array,
     priorities: Array,
+    verification_url: { type: String, default: null },
+    lookup_url: { type: String, default: null },
 });
 
 const form = useForm({
@@ -16,10 +22,61 @@ const form = useForm({
     priority: 'medium',
     department_id: '',
     attachments: [],
+    verification_id: '',
+    verification_code: '',
 });
 
-function submit() {
-    form.post(route('escalated.guest.tickets.store'));
+const page = usePage();
+const context = () => `${props.verification_url}|${page.props.escalated?.broadcast_channel_prefix || ''}`;
+const requestCode = (email, purpose) => guestRequest(props.verification_url, { email, purpose });
+const verification = useGuestVerification(() => form.guest_email, 'ticket', requestCode, context);
+const lookup = reactive({ email: '', reference: '', pending: false, error: '', searched: false });
+const matches = ref([]);
+watch(
+    () => `${lookup.email}|${lookup.reference}`,
+    () => {
+        matches.value = [];
+        lookup.searched = false;
+    },
+);
+const lookupVerification = useGuestVerification(() => lookup.email, 'lookup', requestCode, context);
+watch(context, () => {
+    form.cancel();
+    form.reset();
+    Object.assign(lookup, { email: '', reference: '', pending: false, error: '', searched: false });
+    matches.value = [];
+});
+
+async function submit() {
+    if (props.verification_url) {
+        if (!(await verification.ready())) return;
+        Object.assign(form, verification.fields());
+    }
+    form.post(route('escalated.guest.tickets.store'), { onSuccess: () => verification.reset() });
+}
+
+async function findTickets() {
+    lookup.error = '';
+    if (!(await lookupVerification.ready())) return;
+    lookup.pending = true;
+    const current = context();
+    const email = lookup.email;
+    const reference = lookup.reference;
+    try {
+        const data = await guestRequest(props.lookup_url, {
+            email,
+            reference: lookup.reference,
+            ...lookupVerification.fields(),
+        });
+        if (current !== context() || email !== lookup.email || reference !== lookup.reference) return;
+        matches.value = data.data || [];
+        lookup.searched = true;
+        lookupVerification.reset();
+    } catch (error) {
+        if (current === context() && email === lookup.email) lookup.error = error.message;
+    } finally {
+        if (current === context()) lookup.pending = false;
+    }
 }
 </script>
 
@@ -28,7 +85,13 @@ function submit() {
         <div class="mx-auto max-w-2xl">
             <div class="mb-6 text-center">
                 <h1 class="text-xl font-semibold text-gray-900">Submit a Support Ticket</h1>
-                <p class="mt-1 text-sm text-gray-500">No account needed. We'll give you a link to track your ticket.</p>
+                <p class="mt-1 text-sm text-gray-500">
+                    {{
+                        verification_url
+                            ? 'No account needed. Verify your email to submit a ticket and receive a private link.'
+                            : "No account needed. We'll give you a link to track your ticket."
+                    }}
+                </p>
                 <Link :href="route('login')" class="mt-2 inline-block text-sm text-indigo-600 hover:text-indigo-700">
                     Already have an account? Sign in
                 </Link>
@@ -107,15 +170,81 @@ function submit() {
                     <FileDropzone v-model="form.attachments" />
                 </div>
 
+                <GuestEmailCode
+                    v-if="verification_url"
+                    :verification="verification"
+                    @code="verification.state.code = $event"
+                />
+                <p
+                    v-if="form.errors.verification_code || form.errors.verification_id"
+                    class="text-sm text-red-600"
+                    role="alert"
+                >
+                    {{ form.errors.verification_code || form.errors.verification_id }}
+                </p>
                 <div class="flex justify-end">
                     <button
                         type="submit"
-                        :disabled="form.processing"
+                        :disabled="form.processing || verification.state.pending"
                         class="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ form.processing ? 'Submitting...' : 'Submit Ticket' }}
+                        {{
+                            form.processing
+                                ? 'Submitting...'
+                                : verification_url && !verification.state.id
+                                  ? 'Send verification code'
+                                  : 'Submit Ticket'
+                        }}
                     </button>
                 </div>
+            </form>
+
+            <form
+                v-if="lookup_url"
+                class="mt-8 space-y-4 rounded-lg border border-gray-200 bg-white p-6"
+                @submit.prevent="findTickets"
+            >
+                <h2 class="text-lg font-semibold">Find a ticket or renew your link</h2>
+                <label class="block text-sm"
+                    >Email address
+                    <input
+                        v-model="lookup.email"
+                        type="email"
+                        required
+                        class="mt-1 block w-full rounded-lg border-gray-300"
+                    />
+                </label>
+                <label class="block text-sm"
+                    >Tracking or ticket reference
+                    <input
+                        v-model="lookup.reference"
+                        type="text"
+                        maxlength="255"
+                        required
+                        class="mt-1 block w-full rounded-lg border-gray-300"
+                    />
+                </label>
+                <GuestEmailCode :verification="lookupVerification" @code="lookupVerification.state.code = $event" />
+                <p v-if="lookup.error" class="text-sm text-red-600" role="alert">{{ lookup.error }}</p>
+                <button
+                    type="submit"
+                    :disabled="lookup.pending || lookupVerification.state.pending"
+                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+                >
+                    {{ lookupVerification.state.id ? 'Find tickets' : 'Send verification code' }}
+                </button>
+                <p v-if="lookup.searched && !matches.length" class="text-sm">
+                    No tickets matched that reference and email.
+                </p>
+                <ul v-if="matches.length" class="space-y-2">
+                    <li v-for="match in matches" :key="match.reference">
+                        <a
+                            :href="route('escalated.guest.tickets.show', match.guest_access_token)"
+                            class="text-indigo-600 underline"
+                            >{{ match.reference }}: {{ match.subject }}</a
+                        >
+                    </li>
+                </ul>
             </form>
         </div>
     </EscalatedLayout>

@@ -52,6 +52,12 @@ function copyLink() {
                         <p class="mt-0.5 text-xs text-amber-600">
                             This is your private link to view and reply to this ticket.
                         </p>
+                        <p v-if="ticket.guest_access_expires_at" class="mt-1 text-xs text-amber-600">
+                            Expires {{ new Date(ticket.guest_access_expires_at).toLocaleString() }}.
+                            <a :href="route('escalated.guest.tickets.create')" class="underline"
+                                >Verify your email to renew it.</a
+                            >
+                        </p>
                     </div>
                     <button
                         class="ml-auto shrink-0 rounded-md border border-amber-300 bg-white px-2.5 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50"
