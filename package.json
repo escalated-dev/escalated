@@ -59,6 +59,11 @@
             "prettier --write"
         ]
     },
+    "overrides": {
+        "concurrently": {
+            "shell-quote": "^1.12.0"
+        }
+    },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
         "@inertiajs/vue3": "^3.7.0",
