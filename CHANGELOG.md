@@ -4,6 +4,56 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-08
+
+### Added
+- **Verified guest access.** `Escalated/Guest/Create` accepts optional
+  `verification_url` and `lookup_url` props. With them, the ticket and chat
+  forms request an eight-digit email code before posting, and a separate form
+  verifies a mailbox to find existing tickets by tracking or ticket reference
+  and renew private links. `Guest/Show` displays
+  `ticket.guest_access_expires_at` when supplied. The built-in widget enables
+  the same flow when `/config` returns `guest_verification_required: true`,
+  and widget status reads send the returned grant as a Bearer header (#186).
+- **Account-scoped realtime channels.** Backends with account isolation can
+  share `escalated.broadcasting.channel_prefix` through Inertia. Ticket, agent,
+  chat and presence subscriptions use that namespace, leave the old channels on
+  an account switch, and ignore stale socket callbacks and polling responses.
+  `PresenceIndicator` takes a `channelPrefix` prop; `useRealtime` and `useChat`
+  accept `channelPrefix` as a string, ref or getter (#184).
+- **Backend settings capabilities.** `Escalated/Admin/Settings` accepts optional
+  `supported_settings` and `update_url` props, so a backend shows and submits
+  only the settings it implements. Validation errors are rendered (#185).
+
+### Fixed
+- Guest forms clear drafts, email proofs and lookup results when the tenant
+  namespace (`channel_prefix`) or the lookup endpoint changes at the same URL,
+  and discard private responses that arrive after the change (#187).
+- The settings page resets its values and pending requests when Inertia reuses
+  it for another account, so credentials typed for one account cannot be
+  submitted to another account's settings endpoint (#185).
+
+### Security
+- Patched vulnerable transitive dependencies (brace-expansion, Joi,
+  postcss-selector-parser, source-map-js, shell-quote) (#188).
+
+### Upgrading
+- Every new prop and capability is optional. A backend that sends none of them
+  keeps the 0.11 behaviour: no email-code step, the plain `escalated` channels,
+  and the full settings form posting to the Laravel named route.
+- **Ship this version before turning the backend features on.** A backend that
+  requires guest email verification (escalated-laravel 1.9) or uses
+  account-scoped channels needs these forms and subscriptions in the browser
+  first, or guest ticket creation and realtime updates stop working.
+- Hosts pinning `^0.11.x` must widen the range to `^0.12.0`; npm caret ranges
+  on 0.x do not cross minor versions.
+- `channel_prefix` is a namespace, not authorization: the backend must still
+  authorize every private and presence channel join. Hiding a setting with
+  `supported_settings` is not authorization either; validate the allowlist on
+  the server.
+- Raw `useRealtime().listen(channel, event, callback)` still treats `channel`
+  literally and is not prefixed.
+
 ## [0.11.10] - 2026-09-27
 
 ### Fixed
