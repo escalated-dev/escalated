@@ -188,3 +188,25 @@ describe('useChat', () => {
         });
     });
 });
+
+describe('typing throttle session isolation', () => {
+    it('sends the first indicator in each session but throttles repeated indicators', async () => {
+        const clock = vi.spyOn(Date, 'now').mockReturnValue(10000);
+        mockFetch.mockResolvedValue({ ok: true, json: async () => ({}) });
+        try {
+            const chat = useChat();
+            await chat.sendTyping(1);
+            await chat.sendTyping('1');
+            await chat.sendTyping(2);
+            expect(mockFetch.mock.calls.map(([url]) => url)).toEqual([
+                '/support/widget/chat/1/typing',
+                '/support/widget/chat/2/typing',
+            ]);
+            clock.mockReturnValue(13000);
+            await chat.sendTyping(1);
+            expect(mockFetch).toHaveBeenCalledTimes(3);
+        } finally {
+            clock.mockRestore();
+        }
+    });
+});
