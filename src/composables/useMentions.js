@@ -20,6 +20,7 @@ export function useMentions(options = {}) {
     const loading = ref(false);
 
     let timer = null;
+    let requestVersion = 0;
 
     function clearTimer() {
         if (timer !== null) {
@@ -55,18 +56,21 @@ export function useMentions(options = {}) {
 
     function debouncedFetch(searchQuery) {
         clearTimer();
+        const version = ++requestVersion;
+        suggestions.value = [];
+        loading.value = false;
 
         if (searchQuery.length < 1) {
-            fetchSuggestions('');
+            fetchSuggestions('', version);
             return;
         }
 
         timer = window.setTimeout(() => {
-            fetchSuggestions(searchQuery);
+            fetchSuggestions(searchQuery, version);
         }, debounce);
     }
 
-    async function fetchSuggestions(searchQuery) {
+    async function fetchSuggestions(searchQuery, version) {
         loading.value = true;
         try {
             const endpoint = options.searchEndpoint || '/support/admin/agents/search';
@@ -78,15 +82,12 @@ export function useMentions(options = {}) {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                 },
             });
-            if (response.ok) {
-                suggestions.value = await response.json();
-            } else {
-                suggestions.value = [];
-            }
+            const results = response.ok ? await response.json() : [];
+            if (version === requestVersion) suggestions.value = results;
         } catch {
-            suggestions.value = [];
+            if (version === requestVersion) suggestions.value = [];
         } finally {
-            loading.value = false;
+            if (version === requestVersion) loading.value = false;
         }
     }
 
@@ -113,6 +114,8 @@ export function useMentions(options = {}) {
     }
 
     function close() {
+        requestVersion++;
+        loading.value = false;
         isActive.value = false;
         suggestions.value = [];
         query.value = '';
@@ -120,7 +123,7 @@ export function useMentions(options = {}) {
         clearTimer();
     }
 
-    onUnmounted(clearTimer);
+    onUnmounted(close);
 
     return {
         suggestions,

@@ -121,3 +121,58 @@ describe('useMentions', () => {
         expect(vm.query).toBe('');
     });
 });
+
+describe('mention request lifecycle', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.useRealTimers();
+    });
+
+    it('ignores a previous query even while the next query is debouncing', async () => {
+        let resolve;
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(
+                () =>
+                    new Promise((r) => {
+                        resolve = r;
+                    }),
+            ),
+        );
+        const wrapper = mount(TestComponent);
+        wrapper.vm.onTextChange({ selectionStart: 1 }, '@');
+        wrapper.vm.onTextChange({ selectionStart: 2 }, '@A');
+        resolve({ ok: true, json: async () => [{ name: 'Old agent' }] });
+        await vi.advanceTimersByTimeAsync(0);
+        expect(wrapper.vm.suggestions).toEqual([]);
+        wrapper.unmount();
+    });
+
+    it.each(['close', 'unmount'])('ignores responses after %s', async (action) => {
+        let resolve;
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(
+                () =>
+                    new Promise((r) => {
+                        resolve = r;
+                    }),
+            ),
+        );
+        const wrapper = mount(TestComponent);
+        const vm = wrapper.vm;
+        vm.onTextChange({ selectionStart: 1 }, '@');
+        if (action === 'close') vm.close();
+        else wrapper.unmount();
+        resolve({ ok: true, json: async () => [{ name: 'Late agent' }] });
+        await nextTick();
+        await nextTick();
+        await nextTick();
+        expect(vm.suggestions).toEqual([]);
+        expect(vm.loading).toBe(false);
+        if (action === 'close') wrapper.unmount();
+    });
+});
