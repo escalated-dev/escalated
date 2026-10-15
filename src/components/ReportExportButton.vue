@@ -9,9 +9,12 @@ const props = defineProps({
 
 const open = ref(false);
 const loading = ref(false);
+const error = ref('');
 
 async function exportAs(format) {
+    if (loading.value) return;
     loading.value = true;
+    error.value = '';
     try {
         const separator = props.exportUrl.includes('?') ? '&' : '?';
         const url = props.exportUrl ? `${props.exportUrl}${separator}format=${format}&days=${props.periodDays}` : '#';
@@ -28,6 +31,7 @@ async function exportAs(format) {
             URL.revokeObjectURL(a.href);
         } else {
             const response = await fetch(url);
+            if (!response.ok) throw new Error(`Export failed (${response.status}). Please try again.`);
             const blob = await response.blob();
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -35,6 +39,8 @@ async function exportAs(format) {
             a.click();
             URL.revokeObjectURL(a.href);
         }
+    } catch {
+        error.value = 'Export failed. Please try again.';
     } finally {
         loading.value = false;
         open.value = false;
@@ -44,7 +50,10 @@ async function exportAs(format) {
 
 <template>
     <div class="relative">
+        <p v-if="error" role="alert" class="mb-2 text-sm text-red-600">{{ error }}</p>
         <button
+            type="button"
+            :disabled="loading"
             class="flex items-center gap-2 rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] px-3.5 py-1.5 text-sm font-medium text-[var(--esc-panel-text-tertiary)] transition-all hover:text-[var(--esc-panel-text-secondary)]"
             @click="open = !open"
         >
@@ -66,6 +75,8 @@ async function exportAs(format) {
             class="absolute right-0 top-full z-10 mt-1 w-44 rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] py-1 shadow-xl"
         >
             <button
+                type="button"
+                :disabled="loading"
                 class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)]"
                 @click="exportAs('csv')"
             >
@@ -85,6 +96,8 @@ async function exportAs(format) {
                 Export as CSV
             </button>
             <button
+                type="button"
+                :disabled="loading"
                 class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)]"
                 @click="exportAs('json')"
             >

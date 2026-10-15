@@ -42,9 +42,14 @@ export function useRealtime(options = {}) {
         const echo = window.Echo;
         const channel = echo.private(channelName);
         const release = retainChannel(echo, channelName, false);
-        channel.listen(eventName, callback);
+        let active = true;
+        const guarded = (...args) => {
+            if (active) callback(...args);
+        };
+        channel.listen(eventName, guarded);
         return track(() => {
-            channel.stopListening(eventName, callback);
+            active = false;
+            channel.stopListening(eventName, guarded);
             release();
         });
     }
