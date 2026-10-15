@@ -11,6 +11,8 @@ export function useKeyboardShortcuts(shortcuts, options = {}) {
     const ignoredTags = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
 
     function handleKeydown(event) {
+        if (event.defaultPrevented || event.isComposing || event.keyCode === 229) return;
+
         // Check if shortcuts are enabled
         if (options.enabled !== undefined && !unref(options.enabled)) {
             return;
