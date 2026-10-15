@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { defineComponent, ref, nextTick } from 'vue';
+import { defineComponent, nextTick } from 'vue';
 import { useMentions } from '../../src/composables/useMentions';
 
 // Stub fetch — empty queries (cursor positioned right after `@`) bypass the
