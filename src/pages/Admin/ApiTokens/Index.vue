@@ -2,6 +2,7 @@
 import { ref, computed, inject } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
+import { readFlash } from '../../../utils/flash';
 
 defineProps({
     tokens: Array,
@@ -33,10 +34,8 @@ function createToken() {
     form.post(`${prefix.value}/admin/api-tokens`, {
         preserveScroll: true,
         onSuccess: (page) => {
-            const flash = page.props.flash || {};
-            if (flash.plain_text_token) {
-                copiedToken.value = flash.plain_text_token;
-            }
+            const token = readFlash(page).plain_text_token;
+            copiedToken.value = typeof token === 'string' ? token : null;
             form.reset();
             showCreate.value = false;
         },

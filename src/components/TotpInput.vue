@@ -25,7 +25,7 @@ function handleInput(index, event) {
         nextTick(() => inputs.value[index + 1]?.focus());
     }
 
-    if (code.length === 6 && !code.includes('')) {
+    if (code.length === 6) {
         emit('complete', code);
     }
 }
