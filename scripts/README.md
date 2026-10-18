@@ -27,7 +27,8 @@ to `main` (and on PRs that touch the recording code) via
 
 ## Regenerating locally
 
-You need Node 22+, ffmpeg, and Playwright's Chromium download.
+You need Node 22.22.2+ on 22.x, 24.15.0+ on 24.x, or 26+, plus ffmpeg and
+Playwright's Chromium download. Run `npm ci` from the repo root first.
 
 ```bash
 # one-time setup
@@ -42,6 +43,8 @@ npm run demo
 
 `npm run demo` boots the server, waits for it on :3000, records, and writes
 the GIF. The intermediate `.webm` is cleaned up unless you set `KEEP_WEBM=1`.
+The recorder command controls the exit status (`concurrently -s command-1`),
+and `-k` stops the server after the recorder finishes, including on failure.
 
 ## Customising the recording
 

@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [22, 20]
+        node: ['22.22.2', '24.15.0', '26']
 
     name: Node ${{ matrix.node }}
 
@@ -29,7 +29,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Validate package structure
         run: |
@@ -53,3 +53,11 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Build Storybook
+        if: matrix.node == '22.22.2'
+        run: npm run build-storybook -- --disable-telemetry
+
+      - name: Audit locked dependencies
+        if: matrix.node == '22.22.2'
+        run: npm audit
