@@ -22,7 +22,9 @@ function inlineCssIntoShadowRoot() {
             const styles = Object.values(bundle).filter(
                 (file) => file.type === 'asset' && file.fileName.endsWith('.css'),
             );
-            const css = styles.map((file) => String(file.source)).join('\n');
+            // Drop Vite's internal /*$vite$:N*/ chunk markers; they are build
+            // bookkeeping, not styles.
+            const css = styles.map((file) => String(file.source).replace(/\/\*\$vite\$:\d+\*\//g, '')).join('\n');
             for (const file of styles) delete bundle[file.fileName];
             const entry = Object.values(bundle).find((file) => file.type === 'chunk' && file.isEntry);
             entry.code = `/*! @escalated-dev/escalated ${version} widget | MIT */\nglobalThis.__ESCALATED_WIDGET_CSS__=${JSON.stringify(css)};\n${entry.code}`;
