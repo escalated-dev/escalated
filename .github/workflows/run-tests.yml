@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # dist/widget is listed in "files" and only exists after this build
+      # (npm pack and npm publish run it through prepack).
+      - name: Build widget bundle
+        run: npm run build:widget
+
       - name: Validate package structure
         run: |
           node -e "
