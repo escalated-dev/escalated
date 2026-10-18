@@ -31,10 +31,13 @@
         "./locales": "./src/locales/index.js",
         "./locales/*": "./src/locales/*",
         ".": "./src/index.js",
-        "./pages.json": "./pages.json"
+        "./pages.json": "./pages.json",
+        "./widget": "./dist/widget/escalated-widget.js",
+        "./widget/source": "./src/widget/index.js"
     },
     "files": [
         "src",
+        "dist/widget",
         "pages.json"
     ],
     "peerDependencies": {
@@ -59,7 +62,9 @@
         "demo:record": "node scripts/generate-demo.js",
         "demo": "concurrently -k -s command-1 \"npm run demo:serve\" \"wait-on http://localhost:3000 && npm run demo:record\"",
         "pages:manifest": "node scripts/generate-page-manifest.js",
-        "pages:check": "node scripts/generate-page-manifest.js --check"
+        "pages:check": "node scripts/generate-page-manifest.js --check",
+        "build:widget": "vite build -c vite.widget.config.js",
+        "prepack": "vite build -c vite.widget.config.js --logLevel error"
     },
     "lint-staged": {
         "*.{js,vue}": [
@@ -95,6 +100,7 @@
         "prettier": "^3.9.6",
         "storybook": "^10.5.10",
         "tailwindcss": "^4.3.3",
+        "vite": "^8.2.2",
         "vitest": "^5.0.0",
         "vue": "^3.5.42",
         "wait-on": "^9.1.0"

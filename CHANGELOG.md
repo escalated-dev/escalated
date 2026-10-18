@@ -4,6 +4,29 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- **Embed the widget on other sites.** A standalone bundle
+  (`dist/widget/escalated-widget.js`, exported as
+  `@escalated-dev/escalated/widget`) that backends serve at
+  `{widgetPath}/embed.js`. Loaded from there, it finds its backend without
+  `data-base-url`. Host parameters set from `data-*` attributes or
+  `window.EscalatedWidget`: inline mode for an on-page support form, a tab
+  subset and default tab, a preselected or locked department, visitor prefill,
+  title and greeting, open on load, a hidden launcher, and metadata sent with
+  tickets and chats when `/config` returns `accepts_metadata: true`. A
+  JavaScript API (`open`, `close`, `toggle`, `identify`, `setMetadata`,
+  `setDepartment`, `mount`, `destroy`) and an `escalated:widget-ready` event.
+  See `docs/embedding-the-widget.md`.
+- `Escalated/Admin/Settings` shows a **Sites that can embed the widget** field
+  (`widget_allowed_origins`) when the backend supports it, and the embed
+  snippet now uses an absolute script URL.
+
+### Fixed
+- `window.EscalatedWidget.open()` and `close()` now drive the widget's own
+  state instead of toggling a CSS class that the next render removed.
+- The widget starts on the first tab it can show, instead of an empty panel
+  when the knowledge base is off.
+
 ## [0.12.0] - 2026-10-08
 
 ### Added

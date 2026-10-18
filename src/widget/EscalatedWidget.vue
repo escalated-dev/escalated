@@ -16,19 +16,59 @@ const props = defineProps({
     widgetPath: { type: String, default: '/support/widget' },
     initialColor: { type: String, default: '#4F46E5' },
     initialPosition: { type: String, default: 'bottom-right' },
+    // 'launcher' floats a button on the page; 'inline' renders the panel in
+    // place, e.g. as the support form on a host site's contact page.
+    mode: { type: String, default: 'launcher' },
+    // Subset and order of tabs to offer: help, contact, chat, status.
+    tabs: { type: Array, default: null },
+    defaultTab: { type: String, default: null },
+    // Department to preselect; lockDepartment hides the department choice.
+    department: { type: [String, Number], default: null },
+    lockDepartment: { type: Boolean, default: false },
+    // Visitor details the host page already knows: name, email, subject, message.
+    prefill: { type: Object, default: () => ({}) },
+    title: { type: String, default: 'Support' },
+    greeting: { type: String, default: null },
+    openOnLoad: { type: Boolean, default: false },
+    hideLauncher: { type: Boolean, default: false },
+    // Host parameters (order number, plan, ...) sent with tickets and chats
+    // when the backend accepts them. metadataProvider is called at submit.
+    metadata: { type: Object, default: () => ({}) },
+    metadataProvider: { type: Function, default: null },
 });
 
-const isOpen = ref(false);
-const activeTab = ref('help');
+const inline = computed(() => props.mode === 'inline');
+
+const isOpen = ref(props.mode === 'inline' || props.openOnLoad);
+const activeTab = ref(props.defaultTab);
 const error = ref('');
 const widgetConfig = ref(null);
 
 const color = computed(() => widgetConfig.value?.color || props.initialColor);
 const position = computed(() => widgetConfig.value?.position || props.initialPosition);
-const greeting = computed(() => widgetConfig.value?.greeting || 'Hi there! How can we help?');
+const greeting = computed(() => props.greeting || widgetConfig.value?.greeting || 'Hi there! How can we help?');
 const departments = computed(() => widgetConfig.value?.departments || []);
 const kbEnabled = computed(() => widgetConfig.value?.kb_enabled ?? true);
 const chatAvailable = ref(false);
+const visibleTabs = computed(() => {
+    const available = {
+        help: kbEnabled.value,
+        contact: true,
+        chat: chatAvailable.value,
+        status: true,
+    };
+    const wanted = props.tabs?.length ? props.tabs : ['help', 'contact', 'chat', 'status'];
+    return wanted.filter((tab) => available[tab]);
+});
+// The chosen tab while it is on offer, otherwise the first one that is.
+const currentTab = computed(() =>
+    visibleTabs.value.includes(activeTab.value) ? activeTab.value : visibleTabs.value[0] || null,
+);
+const identity = ref({ name: props.prefill?.name || '', email: props.prefill?.email || '' });
+const lockedDepartment = ref(props.lockDepartment && props.department != null ? props.department : null);
+const presetDepartment = ref(props.department ?? '');
+const departmentLocked = computed(() => lockedDepartment.value != null);
+const hostMetadata = ref({ ...(props.metadata || {}) });
 const chatAvailabilityMessage = ref('');
 
 // Chat state
@@ -43,7 +83,20 @@ const chatRatingSubmitted = ref(false);
 const chatInput = ref('');
 const chatSending = ref(false);
 const chatConnectionStatus = ref('disconnected'); // connected | reconnecting | disconnected
-const preChatForm = ref({ name: '', email: '', department_id: '', message: '' });
+const blankChatForm = () => ({
+    name: identity.value.name,
+    email: identity.value.email,
+    department_id: presetDepartment.value,
+    message: props.prefill?.message || '',
+});
+const blankTicketForm = () => ({
+    name: identity.value.name,
+    email: identity.value.email,
+    subject: props.prefill?.subject || '',
+    description: props.prefill?.message || '',
+    department_id: presetDepartment.value,
+});
+const preChatForm = ref(blankChatForm());
 const chatStarting = ref(false);
 
 // WebSocket / polling for chat
@@ -57,17 +110,11 @@ const searchLoading = ref(false);
 const selectedArticle = ref(null);
 const articleLoading = ref(false);
 
-const ticketForm = ref({
-    name: '',
-    email: '',
-    subject: '',
-    description: '',
-    department_id: '',
-});
+const ticketForm = ref(blankTicketForm());
 const ticketSubmitting = ref(false);
 const ticketSuccess = ref(null);
 
-const statusForm = ref({ email: '', reference: '' });
+const statusForm = ref({ email: identity.value.email, reference: '' });
 const statusLoading = ref(false);
 const statusResult = ref(null);
 const statusMatches = ref([]);
@@ -108,8 +155,8 @@ watch(
         statusMatches.value = [];
         statusResult.value = null;
         startNewChat();
-        ticketForm.value = { name: '', email: '', subject: '', description: '', department_id: '' };
-        statusForm.value = { email: '', reference: '' };
+        ticketForm.value = blankTicketForm();
+        statusForm.value = { email: identity.value.email, reference: '' };
         widgetConfig.value = null;
         chatAvailable.value = false;
         error.value = '';
@@ -176,6 +223,7 @@ async function startLiveChat() {
             email: preChatForm.value.email,
             department_id: preChatForm.value.department_id || null,
             message: preChatForm.value.message,
+            ...metadataPayload(),
             ...(verificationRequired.value ? chatVerification.fields() : {}),
         });
         if (email !== preChatForm.value.email) return;
@@ -340,7 +388,7 @@ function startNewChat() {
     chatRatingSubmitted.value = false;
     chatInput.value = '';
     chatConnectionStatus.value = 'disconnected';
-    preChatForm.value = { name: '', email: '', department_id: '', message: '' };
+    preChatForm.value = blankChatForm();
 }
 
 function chatBubbleInitials(name) {
@@ -400,18 +448,13 @@ async function submitTicket() {
             subject: ticketForm.value.subject,
             description: ticketForm.value.description,
             department_id: ticketForm.value.department_id || null,
+            ...metadataPayload(),
             ...(verificationRequired.value ? ticketVerification.fields() : {}),
         });
         if (email !== ticketForm.value.email) return;
         ticketSuccess.value = data;
         ticketVerification.reset();
-        ticketForm.value = {
-            name: '',
-            email: '',
-            subject: '',
-            description: '',
-            department_id: '',
-        };
+        ticketForm.value = blankTicketForm();
     } catch (e) {
         if (e.name === 'AbortError') return;
         if (e.data?.errors) {
@@ -470,10 +513,75 @@ async function loadVerifiedStatus(match) {
     }
 }
 
+/**
+ * Host parameters for a ticket or chat, plus the page it came from (origin
+ * and path only: query strings can carry tokens). Only sent to backends
+ * whose /config says they accept them, so older backends see no new field.
+ */
+function metadataPayload() {
+    if (widgetConfig.value?.accepts_metadata !== true) return {};
+    let provided;
+    try {
+        provided = props.metadataProvider?.() || {};
+    } catch {
+        provided = {};
+    }
+    const metadata = { ...hostMetadata.value, ...(typeof provided === 'object' ? provided : {}) };
+    if (metadata.page_url == null && typeof window !== 'undefined' && window.location?.origin) {
+        metadata.page_url = window.location.origin + window.location.pathname;
+    }
+    return { metadata };
+}
+
+const TAB_LABELS = { help: 'Help', contact: 'Contact', chat: 'Chat', status: 'Check Status' };
+
+function selectTab(tab) {
+    activeTab.value = tab;
+    error.value = '';
+    if (tab === 'contact') ticketSuccess.value = null;
+    if (tab === 'status') statusResult.value = null;
+}
+
 function togglePanel() {
+    if (inline.value) return;
     isOpen.value = !isOpen.value;
     error.value = '';
 }
+
+function open(tab = null) {
+    if (tab) activeTab.value = tab;
+    isOpen.value = true;
+}
+
+function close() {
+    if (!inline.value) isOpen.value = false;
+}
+
+/** Fill in who the visitor is, without overwriting what they typed. */
+function identify(person = {}) {
+    identity.value = {
+        name: person.name ?? identity.value.name,
+        email: person.email ?? identity.value.email,
+    };
+    for (const form of [ticketForm, preChatForm]) {
+        if (!form.value.name) form.value.name = identity.value.name;
+        if (!form.value.email) form.value.email = identity.value.email;
+    }
+    if (!statusForm.value.email) statusForm.value.email = identity.value.email;
+}
+
+function setMetadata(metadata = {}, { merge = true } = {}) {
+    hostMetadata.value = merge ? { ...hostMetadata.value, ...metadata } : { ...metadata };
+}
+
+function setDepartment(id, { lock = false } = {}) {
+    presetDepartment.value = id ?? '';
+    lockedDepartment.value = lock && id != null ? id : null;
+    ticketForm.value.department_id = presetDepartment.value;
+    preChatForm.value.department_id = presetDepartment.value;
+}
+
+defineExpose({ open, close, toggle: togglePanel, identify, setMetadata, setDepartment });
 
 function formatDate(iso) {
     try {
@@ -491,6 +599,7 @@ function formatDate(iso) {
 
 <template>
     <button
+        v-if="!inline && !hideLauncher"
         class="esc-w-fab"
         :class="position"
         :style="{ backgroundColor: color }"
@@ -510,64 +619,29 @@ function formatDate(iso) {
 
     <div
         class="esc-w-panel"
-        :class="[position, { 'esc-open': isOpen }]"
+        :class="inline ? ['esc-w-inline', 'esc-open'] : [position, { 'esc-open': isOpen }]"
         :style="{ '--esc-widget-color': color }"
         data-widget-panel
     >
         <div class="esc-w-header" :style="{ backgroundColor: color }">
-            <h2>Support</h2>
+            <h2>{{ title }}</h2>
             <p>{{ greeting }}</p>
         </div>
 
-        <div class="esc-w-tabs">
+        <div v-if="visibleTabs.length > 1" class="esc-w-tabs">
             <button
-                v-if="kbEnabled"
+                v-for="tab in visibleTabs"
+                :key="tab"
                 class="esc-w-tab"
-                :class="{ active: activeTab === 'help' }"
-                @click="
-                    activeTab = 'help';
-                    error = '';
-                "
+                :class="{ active: currentTab === tab }"
+                @click="selectTab(tab)"
             >
-                Help
-            </button>
-            <button
-                class="esc-w-tab"
-                :class="{ active: activeTab === 'contact' }"
-                @click="
-                    activeTab = 'contact';
-                    error = '';
-                    ticketSuccess = null;
-                "
-            >
-                Contact
-            </button>
-            <button
-                v-if="chatAvailable"
-                class="esc-w-tab"
-                :class="{ active: activeTab === 'chat' }"
-                @click="
-                    activeTab = 'chat';
-                    error = '';
-                "
-            >
-                Chat
-            </button>
-            <button
-                class="esc-w-tab"
-                :class="{ active: activeTab === 'status' }"
-                @click="
-                    activeTab = 'status';
-                    error = '';
-                    statusResult = null;
-                "
-            >
-                Check Status
+                {{ TAB_LABELS[tab] }}
             </button>
         </div>
 
         <div class="esc-w-body">
-            <template v-if="activeTab === 'help' && kbEnabled">
+            <template v-if="currentTab === 'help' && kbEnabled">
                 <template v-if="!selectedArticle">
                     <div class="esc-w-field">
                         <input v-model="searchQuery" type="text" class="esc-w-input" placeholder="Search for help..." />
@@ -606,7 +680,7 @@ function formatDate(iso) {
                 </template>
             </template>
 
-            <template v-if="activeTab === 'contact'">
+            <template v-if="currentTab === 'contact'">
                 <template v-if="ticketSuccess">
                     <div class="esc-w-success">
                         <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -638,7 +712,7 @@ function formatDate(iso) {
                             <label class="esc-w-label">Description</label>
                             <textarea v-model="ticketForm.description" class="esc-w-textarea" required></textarea>
                         </div>
-                        <div v-if="departments.length" class="esc-w-field">
+                        <div v-if="departments.length && !departmentLocked" class="esc-w-field">
                             <label class="esc-w-label">Department</label>
                             <select v-model="ticketForm.department_id" class="esc-w-select">
                                 <option value="">Select a department...</option>
@@ -671,7 +745,7 @@ function formatDate(iso) {
             </template>
 
             <!-- Chat Tab -->
-            <template v-if="activeTab === 'chat'">
+            <template v-if="currentTab === 'chat'">
                 <!-- Pre-chat form -->
                 <template v-if="chatPhase === 'pre'">
                     <div class="esc-w-chat-avail">
@@ -688,7 +762,7 @@ function formatDate(iso) {
                             <label class="esc-w-label">Email</label>
                             <input v-model="preChatForm.email" type="email" class="esc-w-input" required />
                         </div>
-                        <div v-if="departments.length > 1" class="esc-w-field">
+                        <div v-if="departments.length > 1 && !departmentLocked" class="esc-w-field">
                             <label class="esc-w-label">Department</label>
                             <select v-model="preChatForm.department_id" class="esc-w-select">
                                 <option value="">Select a department...</option>
@@ -851,7 +925,7 @@ function formatDate(iso) {
                 </template>
             </template>
 
-            <template v-if="activeTab === 'status'">
+            <template v-if="currentTab === 'status'">
                 <div v-if="error" class="esc-w-error">{{ error }}</div>
                 <template v-if="!statusResult">
                     <form @submit.prevent="checkStatus">

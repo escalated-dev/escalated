@@ -230,6 +230,31 @@ describe('backend settings capabilities', () => {
         wrapper.unmount();
     });
 
+    it('lets admins list the sites that may embed the widget, only when supported', async () => {
+        const wrapper = mountSettings(
+            { widget_enabled: true, widget_allowed_origins: 'https://shop.example.com' },
+            { supported_settings: ['widget_enabled'] },
+        );
+        expect(wrapper.find('#widget-allowed-origins').exists()).toBe(false);
+
+        await wrapper.setProps({ supported_settings: ['widget_enabled', 'widget_allowed_origins'] });
+        const field = wrapper.find('#widget-allowed-origins');
+        expect(field.element.value).toBe('https://shop.example.com');
+        const origins = ['https://shop.example.com', 'https://*.brand.test'].join('\n');
+        await field.setValue(origins);
+        await wrapper.find('form').trigger('submit');
+
+        expect(submittedData).toEqual({ widget_enabled: true, widget_allowed_origins: origins });
+        wrapper.unmount();
+    });
+
+    it('gives an embed snippet with an absolute script URL that works on other sites', () => {
+        const wrapper = mountSettings({ widget_enabled: true });
+
+        expect(wrapper.text()).toContain(`<script src="${window.location.origin}/support/widget/embed.js"`);
+        wrapper.unmount();
+    });
+
     it('replaces values and clears credentials when Inertia reuses the page for another account', async () => {
         const wrapper = mountSettings({ imap_password: 'account-a-secret', show_powered_by: true });
         await wrapper.setProps({
@@ -279,7 +304,7 @@ describe('backend settings capabilities', () => {
     it('retains the complete legacy payload when capabilities are omitted', async () => {
         const wrapper = mountSettings();
         await wrapper.find('form').trigger('submit');
-        expect(Object.keys(submittedData)).toHaveLength(53);
+        expect(Object.keys(submittedData)).toHaveLength(54);
         expect(submittedData.guest_tickets_enabled).toBe(true);
         expect(mockForm.post).toHaveBeenCalledWith('/mocked-route');
         wrapper.unmount();

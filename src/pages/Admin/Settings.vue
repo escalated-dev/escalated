@@ -15,6 +15,8 @@ const supported = computed(() => (props.supported_settings === null ? null : new
 const supports = (key) => supported.value === null || supported.value.has(key);
 const supportsAny = (keys) => keys.some(supports);
 const page = usePage();
+// Absolute, so the snippet also works when pasted into another site.
+const siteOrigin = typeof window === 'undefined' ? '' : window.location.origin;
 
 const settingsData = () => ({
     guest_tickets_enabled: props.settings.guest_tickets_enabled,
@@ -42,6 +44,7 @@ const settingsData = () => ({
     widget_position: props.settings.widget_position ?? 'bottom-right',
     widget_greeting: props.settings.widget_greeting ?? 'Hi there! How can we help?',
     widget_departments: props.settings.widget_departments ?? '',
+    widget_allowed_origins: props.settings.widget_allowed_origins ?? '',
     knowledge_base_enabled: props.settings.knowledge_base_enabled ?? true,
     knowledge_base_public: props.settings.knowledge_base_public ?? true,
     knowledge_base_feedback_enabled: props.settings.knowledge_base_feedback_enabled ?? true,
@@ -685,6 +688,7 @@ function submit() {
                         'widget_greeting',
                         'widget_position',
                         'widget_departments',
+                        'widget_allowed_origins',
                     ])
                 "
                 class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
@@ -719,7 +723,13 @@ function submit() {
                     <template
                         v-if="
                             form.widget_enabled &&
-                            supportsAny(['widget_color', 'widget_greeting', 'widget_position', 'widget_departments'])
+                            supportsAny([
+                                'widget_color',
+                                'widget_greeting',
+                                'widget_position',
+                                'widget_departments',
+                                'widget_allowed_origins',
+                            ])
                         "
                     >
                         <div v-if="supports('widget_color')">
@@ -799,6 +809,26 @@ function submit() {
                                 </label>
                             </div>
                         </div>
+                        <div v-if="supports('widget_allowed_origins')">
+                            <label
+                                for="widget-allowed-origins"
+                                class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                                >Sites that can embed the widget</label
+                            >
+                            <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                                One site per line, such as https://shop.example.com. Use https://*.example.com for every
+                                subdomain. Leave empty to allow this site only.
+                            </p>
+                            <textarea
+                                id="widget-allowed-origins"
+                                v-model="form.widget_allowed_origins"
+                                rows="3"
+                                maxlength="5000"
+                                spellcheck="false"
+                                placeholder="https://shop.example.com"
+                                class="mt-2 w-full max-w-lg rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 font-mono text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                            ></textarea>
+                        </div>
                         <div
                             class="rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface-alt)] p-4"
                         >
@@ -810,8 +840,9 @@ function submit() {
                             </p>
                             <code
                                 class="mt-2 block whitespace-pre-wrap break-all rounded-lg bg-[var(--esc-panel-bg)] p-3 text-xs text-[var(--esc-panel-text-tertiary)] select-all"
-                                >&lt;script src="/{{ page.props.escalated?.prefix || 'support' }}/widget/embed.js"
-                                data-color="{{ form.widget_color }}" data-position="{{
+                                >&lt;script src="{{ siteOrigin }}/{{
+                                    page.props.escalated?.prefix || 'support'
+                                }}/widget/embed.js" data-color="{{ form.widget_color }}" data-position="{{
                                     form.widget_position
                                 }}"&gt;&lt;/script&gt;</code
                             >

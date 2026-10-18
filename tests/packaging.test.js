@@ -51,6 +51,12 @@ describe('the published package', () => {
         expect(packedFiles()).toContain('pages.json');
     });
 
+    it('ships the standalone widget bundle', () => {
+        // Backends serve this file at {widgetPath}/embed.js so other sites can
+        // load the widget with one <script> tag; prepack builds it.
+        expect(packedFiles()).toContain('dist/widget/escalated-widget.js');
+    });
+
     it('ships the source', () => {
         expect(packedFiles().some((file) => file.startsWith('src/'))).toBe(true);
     });
