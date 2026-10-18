@@ -412,7 +412,29 @@ import { StatusBadge, SlaTimer } from '@escalated-dev/escalated'
 import CustomerIndex from '@escalated-dev/escalated/pages/Customer/Index.vue'
 ```
 
-Peer dependencies: `vue` ^3.3.0, `@inertiajs/vue3` ^1.0.0 || ^2.0.0
+Peer dependencies: `vue` ^3.3.0, `@inertiajs/vue3` ^1.0.0 || ^2.0.0 || ^3.0.0
+
+## Contributing
+
+The development tools require Node **22.22.2+ on the 22.x line**, **24.15.0+
+on the 24.x line**, or **26+**. Use `nvm use` to select the version in `.nvmrc`.
+These requirements apply when working on this repository; the published Vue
+and Inertia peer dependencies are listed above.
+
+```bash
+npm ci
+npm test
+npm run lint
+npm run format:check
+npm run pages:check
+npm run build-storybook
+npm audit
+```
+
+Commit `package-lock.json` with dependency updates. CI installs that exact graph
+with `npm ci`, checks dependency engines and peer requirements, and runs the test
+suite on Node 22.22.2, 24.15.0, and 26. Storybook's production build and the full
+dependency audit also run before merging.
 
 ## Backend settings capabilities
 
