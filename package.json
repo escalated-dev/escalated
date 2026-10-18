@@ -46,6 +46,7 @@
     },
     "scripts": {
         "test": "vitest run",
+        "test:inertia": "node scripts/verify-inertia-flash.mjs",
         "lint": "eslint src/ --max-warnings 0",
         "lint:fix": "eslint src/ --fix",
         "format": "prettier --write src/",
