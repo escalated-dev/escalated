@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-10-18
+
 ### Added
 - **Embed the widget on other sites.** A standalone bundle
   (`dist/widget/escalated-widget.js`, exported as
@@ -26,6 +28,11 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   state instead of toggling a CSS class that the next render removed.
 - The widget starts on the first tab it can show, instead of an empty panel
   when the knowledge base is off.
+- Mention suggestions ignore stale searches, IME composition and key events
+  another control already handled are respected, queued socket events after a
+  literal unsubscribe are dropped, chat typing indicators are throttled per
+  session, and report exports show errors instead of downloading a failed
+  response (#195).
 
 ## [0.12.0] - 2026-10-08
 
