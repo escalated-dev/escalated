@@ -378,8 +378,13 @@ to the page's own origin.
 
 Backends that omit these capabilities retain their existing form contract. Hosts
 must ship these forms before requiring verification in their backend. This does
-not implement verification in the other backend packages, release the separate
-web-widget plugin, or configure cross-origin CORS/CSRF policy.
+not implement verification in the other backend packages or release the separate
+web-widget plugin.
+
+The widget can also be embedded on other sites, as a launcher or an on-page
+support form, with host parameters (department, prefill, metadata) and a
+JavaScript API. Backends opt in with an origin allow list, CORS and a CSRF
+exemption for those origins. See [Embedding the widget](docs/embedding-the-widget.md).
 
 Backends with account isolation can share `escalated.broadcasting.channel_prefix`
 through Inertia, for example `escalated.tenants.<opaque-account-namespace>`.
