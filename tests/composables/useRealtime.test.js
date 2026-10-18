@@ -130,7 +130,9 @@ describe('useRealtime', () => {
             api.listen('my-channel', '.my-event', cb);
 
             expect(window.Echo.private).toHaveBeenCalledWith('my-channel');
-            expect(mockChannel.listen).toHaveBeenCalledWith('.my-event', cb);
+            expect(mockChannel.listen).toHaveBeenCalledWith('.my-event', expect.any(Function));
+            mockChannel.listen.mock.calls[0][1]('payload');
+            expect(cb).toHaveBeenCalledWith('payload');
             wrapper.unmount();
         });
     });
@@ -236,7 +238,7 @@ describe('useRealtime', () => {
 
             wrapper.unmount();
 
-            expect(mockChannel.stopListening).toHaveBeenCalledWith('.test-event', handler);
+            expect(mockChannel.stopListening).toHaveBeenCalledWith('.test-event', mockChannel.listen.mock.calls[0][1]);
             expect(window.Echo.leave).toHaveBeenCalledWith('test-channel');
         });
 
@@ -247,7 +249,7 @@ describe('useRealtime', () => {
 
             unsub();
 
-            expect(mockChannel.stopListening).toHaveBeenCalledWith('.test-event', handler);
+            expect(mockChannel.stopListening).toHaveBeenCalledWith('.test-event', mockChannel.listen.mock.calls[0][1]);
             expect(window.Echo.leave).toHaveBeenCalledWith('test-channel');
             wrapper.unmount();
         });
@@ -294,5 +296,28 @@ describe('tenant subscription lifecycle', () => {
         second.wrapper.unmount();
         expect(window.Echo.leave).toHaveBeenCalledExactlyOnceWith('escalated.tickets.42');
         delete window.Echo;
+    });
+});
+
+describe('literal subscription lifecycle', () => {
+    it.each(['unsubscribe', 'unmount'])('ignores queued events after %s', (action) => {
+        const previous = window.Echo;
+        const channel = createMockChannel();
+        window.Echo = { private: vi.fn(() => channel), leaveChannel: vi.fn() };
+        const { wrapper, api } = mountWithRealtime();
+        try {
+            const handler = vi.fn();
+            const stop = api.listen('custom', '.updated', handler);
+            const queued = channel.listen.mock.calls[0][1];
+            queued('before');
+            if (action === 'unmount') wrapper.unmount();
+            else stop();
+            queued('after');
+            expect(handler).toHaveBeenCalledExactlyOnceWith('before');
+            expect(channel.stopListening).toHaveBeenCalledWith('.updated', queued);
+        } finally {
+            if (action !== 'unmount') wrapper.unmount();
+            window.Echo = previous;
+        }
     });
 });

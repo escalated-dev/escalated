@@ -68,11 +68,12 @@ export function useChat(options = {}) {
      * @param {string|number} sessionId
      * @returns {Promise<void>}
      */
-    let lastTypingSent = 0;
+    const lastTypingSent = new Map();
     async function sendTyping(sessionId) {
         const now = Date.now();
-        if (now - lastTypingSent < 3000) return;
-        lastTypingSent = now;
+        const key = String(sessionId);
+        if (lastTypingSent.has(key) && now - lastTypingSent.get(key) < 3000) return;
+        lastTypingSent.set(key, now);
         try {
             await apiRequest('POST', `${widgetPath}/chat/${sessionId}/typing`);
         } catch {

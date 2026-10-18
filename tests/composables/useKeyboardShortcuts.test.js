@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { useKeyboardShortcuts } from '../../src/composables/useKeyboardShortcuts.js';
@@ -21,7 +21,7 @@ function mountWithShortcuts(shortcuts, options = {}) {
  * Helper: dispatch a keydown event on the document.
  */
 function pressKey(key, extras = {}) {
-    const event = new KeyboardEvent('keydown', {
+    const event = new window.KeyboardEvent('keydown', {
         key,
         bubbles: true,
         cancelable: true,
@@ -39,6 +39,23 @@ describe('useKeyboardShortcuts', () => {
             wrapper.unmount();
             wrapper = null;
         }
+    });
+
+    it.each([{ isComposing: true }, { keyCode: 229 }])('ignores IME composition %o', (extras) => {
+        const handler = vi.fn();
+        wrapper = mountWithShortcuts({ r: handler });
+        const event = pressKey('r', extras);
+        expect(handler).not.toHaveBeenCalled();
+        expect(event.defaultPrevented).toBe(false);
+    });
+
+    it('respects events already handled by another control', () => {
+        const handler = vi.fn();
+        wrapper = mountWithShortcuts({ r: handler });
+        const event = new window.KeyboardEvent('keydown', { key: 'r', cancelable: true });
+        event.preventDefault();
+        document.dispatchEvent(event);
+        expect(handler).not.toHaveBeenCalled();
     });
 
     // ----------------------------------------------------------------
@@ -85,7 +102,7 @@ describe('useKeyboardShortcuts', () => {
 
             pressKey('r');
 
-            expect(handler).toHaveBeenCalledWith(expect.any(KeyboardEvent));
+            expect(handler).toHaveBeenCalledWith(expect.any(window.KeyboardEvent));
         });
 
         it('calls different handlers for different keys', () => {
@@ -124,7 +141,7 @@ describe('useKeyboardShortcuts', () => {
             const handler = vi.fn();
             wrapper = mountWithShortcuts({ r: handler });
 
-            const event = new KeyboardEvent('keydown', {
+            const event = new window.KeyboardEvent('keydown', {
                 key: 'r',
                 bubbles: true,
                 cancelable: true,
@@ -148,7 +165,7 @@ describe('useKeyboardShortcuts', () => {
             document.body.appendChild(input);
             input.focus();
 
-            const event = new KeyboardEvent('keydown', {
+            const event = new window.KeyboardEvent('keydown', {
                 key: 'r',
                 bubbles: true,
                 cancelable: true,
@@ -167,7 +184,7 @@ describe('useKeyboardShortcuts', () => {
             const textarea = document.createElement('textarea');
             document.body.appendChild(textarea);
 
-            const event = new KeyboardEvent('keydown', {
+            const event = new window.KeyboardEvent('keydown', {
                 key: 'r',
                 bubbles: true,
                 cancelable: true,
@@ -186,7 +203,7 @@ describe('useKeyboardShortcuts', () => {
             const select = document.createElement('select');
             document.body.appendChild(select);
 
-            const event = new KeyboardEvent('keydown', {
+            const event = new window.KeyboardEvent('keydown', {
                 key: 'r',
                 bubbles: true,
                 cancelable: true,
@@ -206,7 +223,7 @@ describe('useKeyboardShortcuts', () => {
             div.contentEditable = 'true';
             document.body.appendChild(div);
 
-            const event = new KeyboardEvent('keydown', {
+            const event = new window.KeyboardEvent('keydown', {
                 key: 'r',
                 bubbles: true,
                 cancelable: true,
