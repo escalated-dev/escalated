@@ -57,8 +57,10 @@ export function useMentions(options = {}) {
     function debouncedFetch(searchQuery) {
         clearTimer();
         const version = ++requestVersion;
-        suggestions.value = [];
-        loading.value = false;
+        // Keep the current list on screen while the next search is pending,
+        // so the dropdown stays open and Enter/Tab still pick a mention.
+        // requestVersion already discards any older response.
+        loading.value = true;
 
         if (searchQuery.length < 1) {
             fetchSuggestions('', version);

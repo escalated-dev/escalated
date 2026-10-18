@@ -57,6 +57,27 @@ describe('useMentions', () => {
         expect(vm.isActive).toBe(true);
     });
 
+    it('keeps the current suggestions visible while the next keystroke is debounced', async () => {
+        vi.useFakeTimers();
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async () => ({ ok: true, json: async () => [{ id: 1, name: 'Alice' }] })),
+        );
+        const wrapper = mount(TestComponent);
+        const vm = wrapper.vm;
+        vm.onTextChange({ selectionStart: 1 }, '@');
+        await vi.runAllTimersAsync();
+        expect(vm.suggestions).toEqual([{ id: 1, name: 'Alice' }]);
+
+        vm.onTextChange({ selectionStart: 2 }, '@A');
+
+        expect(vm.suggestions).toEqual([{ id: 1, name: 'Alice' }]);
+        expect(vm.loading).toBe(true);
+        await vi.runAllTimersAsync();
+        expect(vm.loading).toBe(false);
+        vi.unstubAllGlobals();
+    });
+
     it('does not activate for @ in middle of word', async () => {
         const wrapper = mount(TestComponent);
         const vm = wrapper.vm;
