@@ -2,7 +2,8 @@
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import TwoFactorSetup from '../../../components/TwoFactorSetup.vue';
 import { router, usePage } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { readFlash } from '../../../utils/flash';
 
 defineProps({
     enabled: { type: Boolean, default: false },
@@ -11,17 +12,28 @@ defineProps({
 
 const page = usePage();
 const showSetup = ref(false);
-const setupData = computed(() => page.props.flash?.two_factor_setup);
-const confirmedData = computed(() => page.props.flash?.two_factor_confirmed);
+const startingSetup = ref(false);
+const flash = computed(() => readFlash(page));
+const setupData = computed(() => flash.value.two_factor_setup);
+const confirmedData = computed(() => flash.value.two_factor_confirmed);
+const copyError = ref('');
+
+watch(setupData, (data) => (showSetup.value = Boolean(data)), { immediate: true });
+watch(confirmedData, () => (copyError.value = ''));
 
 function startSetup() {
+    if (startingSetup.value) return;
+    startingSetup.value = true;
     router.post(
         route('escalated.admin.two-factor.setup'),
         {},
         {
             preserveScroll: true,
             onSuccess: () => {
-                showSetup.value = true;
+                showSetup.value = Boolean(setupData.value);
+            },
+            onFinish: () => {
+                startingSetup.value = false;
             },
         },
     );
@@ -46,6 +58,18 @@ function disable() {
                 preserveScroll: true,
             },
         );
+    }
+}
+
+async function copyRecoveryCodes() {
+    const codes = confirmedData.value?.recovery_codes;
+    if (!codes?.length) return;
+    copyError.value = '';
+    try {
+        if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+        await navigator.clipboard.writeText(codes.join('\n'));
+    } catch {
+        copyError.value = 'Could not copy recovery codes. Select and copy the codes below.';
     }
 }
 </script>
@@ -75,7 +99,7 @@ function disable() {
                             Disable 2FA
                         </button>
                     </div>
-                    <div v-else-if="!showSetup && !setupData">
+                    <div v-else-if="!showSetup">
                         <span
                             class="mb-3 inline-flex items-center rounded-full bg-neutral-700/50 px-3 py-1 text-xs font-medium text-[var(--esc-panel-text-tertiary)]"
                         >
@@ -84,6 +108,8 @@ function disable() {
                         <div class="mt-3">
                             <button
                                 type="button"
+                                :disabled="startingSetup"
+                                :aria-busy="startingSetup"
                                 class="rounded-lg bg-gradient-to-r from-[var(--esc-panel-accent)] to-[var(--esc-panel-accent-secondary)] px-5 py-2 text-sm font-medium text-white shadow-lg shadow-[var(--esc-panel-bg)]/20 transition-all hover:from-[var(--esc-panel-accent-hover)] hover:to-[var(--esc-panel-accent-secondary-hover)]"
                                 @click="startSetup"
                             >
@@ -96,7 +122,7 @@ function disable() {
 
             <!-- Setup Wizard -->
             <div
-                v-if="setupData && !enabled"
+                v-if="showSetup && setupData && !enabled"
                 class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
             >
                 <TwoFactorSetup :qr-uri="setupData.qr_uri" @confirm="confirmCode" @cancel="showSetup = false" />
@@ -116,11 +142,12 @@ function disable() {
                     <button
                         type="button"
                         class="rounded-lg border border-[var(--esc-panel-border)] px-4 py-2 text-sm text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-surface-alt)]"
-                        @click="navigator.clipboard?.writeText(confirmedData.recovery_codes.join('\n'))"
+                        @click="copyRecoveryCodes"
                     >
                         Copy Codes
                     </button>
                 </div>
+                <p v-if="copyError" role="alert" class="mt-3 text-sm text-rose-400">{{ copyError }}</p>
                 <div class="mt-4 grid gap-2 md:grid-cols-2">
                     <code
                         v-for="code in confirmedData.recovery_codes"

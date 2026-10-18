@@ -4,6 +4,7 @@ dist/
 *.log
 storybook-static/
 screenshot-results/
+test-results/inertia-flash/
 # Demo-recording intermediates (the produced GIF is committed to .github/profile/)
 recordings/
 .github/profile/demo_frame_*.png
