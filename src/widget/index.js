@@ -1,56 +1,102 @@
-import { createApp, h } from 'vue';
+import { createApp, h, ref } from 'vue';
 import EscalatedWidget from './EscalatedWidget.vue';
+import { normalizeTab, readEmbedConfig } from './embed.js';
 
-(function () {
-    const scriptTag = document.currentScript || document.querySelector('script[data-escalated-widget]');
-    const globalConfig = window.EscalatedWidget || {};
-
-    const config = {
-        baseUrl: scriptTag?.getAttribute('data-base-url') || globalConfig.baseUrl || '',
-        // Host-framework-specific path prefix. Every plugin except the NestJS
-        // reference mounts at /support/widget; NestJS mounts at
-        // /escalated/widget. Set via data-widget-path on NestJS backends.
-        widgetPath: scriptTag?.getAttribute('data-widget-path') || globalConfig.widgetPath || '/support/widget',
-        color: scriptTag?.getAttribute('data-color') || globalConfig.color || '#4F46E5',
-        position: scriptTag?.getAttribute('data-position') || globalConfig.position || 'bottom-right',
-    };
+/**
+ * Mounts one widget into its own shadow root so the host page's CSS cannot
+ * reach it. Launcher mode floats a button on the page; inline mode renders
+ * the panel inside `target` (an element or selector), e.g. as the support
+ * form on a contact page. Returns the instance's control API.
+ */
+export function mountEscalatedWidget(options = {}) {
+    const config = { ...readEmbedConfig(null, {}), ...options };
+    if (options.prefill) config.prefill = { ...readEmbedConfig(null, {}).prefill, ...options.prefill };
+    const inline = config.mode === 'inline';
+    const target = typeof config.target === 'string' ? document.querySelector(config.target) : config.target;
+    if (inline && !target) {
+        console.warn('[Escalated] Inline widget target not found:', config.target);
+        return null;
+    }
 
     const host = document.createElement('div');
-    host.id = 'escalated-widget-host';
-    document.body.appendChild(host);
+    host.className = inline ? 'escalated-widget-inline' : '';
+    if (!inline) host.id = 'escalated-widget-host';
+    (inline ? target : document.body).appendChild(host);
 
     const shadow = host.attachShadow({ mode: 'open' });
-
+    const styleEl = document.createElement('style');
+    styleEl.textContent = getWidgetStyles() + (globalThis.__ESCALATED_WIDGET_CSS__ || '');
+    shadow.appendChild(styleEl);
     const mountEl = document.createElement('div');
     mountEl.id = 'escalated-widget-root';
     shadow.appendChild(mountEl);
 
-    const styleEl = document.createElement('style');
-    styleEl.textContent = getWidgetStyles();
-    shadow.appendChild(styleEl);
-
+    const widget = ref(null);
     const app = createApp({
-        render() {
-            return h(EscalatedWidget, {
+        render: () =>
+            h(EscalatedWidget, {
+                ref: widget,
                 baseUrl: config.baseUrl,
                 widgetPath: config.widgetPath,
                 initialColor: config.color,
                 initialPosition: config.position,
-            });
-        },
+                mode: config.mode,
+                tabs: config.tabs,
+                defaultTab: config.defaultTab,
+                department: config.department,
+                lockDepartment: config.lockDepartment,
+                prefill: config.prefill,
+                title: config.title,
+                greeting: config.greeting,
+                openOnLoad: config.openOnLoad,
+                hideLauncher: config.hideLauncher,
+                metadata: config.metadata,
+                metadataProvider: config.metadataProvider,
+            }),
     });
-
     app.mount(mountEl);
 
-    window.EscalatedWidget = Object.assign(window.EscalatedWidget || {}, {
-        open() {
-            mountEl.querySelector('[data-widget-panel]')?.classList.add('esc-open');
+    return {
+        open: (tab) => widget.value?.open(normalizeTab(tab)),
+        close: () => widget.value?.close(),
+        toggle: () => widget.value?.toggle(),
+        identify: (person) => widget.value?.identify(person),
+        setMetadata: (metadata, opts) => widget.value?.setMetadata(metadata, opts),
+        setDepartment: (id, opts) => widget.value?.setDepartment(id, opts),
+        destroy() {
+            app.unmount();
+            host.remove();
         },
-        close() {
-            mountEl.querySelector('[data-widget-panel]')?.classList.remove('esc-open');
-        },
+    };
+}
+
+function boot() {
+    const existing = window.EscalatedWidget;
+    // Loading the script twice must not mount a second launcher.
+    if (existing && existing.__escalatedLoaded) return;
+
+    const scriptTag = document.currentScript || document.querySelector('script[data-escalated-widget]');
+    const config = readEmbedConfig(scriptTag, existing || {});
+    const instance = mountEscalatedWidget(config);
+
+    window.EscalatedWidget = Object.assign(existing && typeof existing === 'object' ? existing : {}, {
+        __escalatedLoaded: true,
+        open: (tab) => instance?.open(tab),
+        close: () => instance?.close(),
+        toggle: () => instance?.toggle(),
+        identify: (person) => instance?.identify(person),
+        setMetadata: (metadata, opts) => instance?.setMetadata(metadata, opts),
+        setDepartment: (id, opts) => instance?.setDepartment(id, opts),
+        destroy: () => instance?.destroy(),
+        mount: (options) => mountEscalatedWidget({ ...config, ...options }),
     });
-})();
+    window.dispatchEvent(new window.CustomEvent('escalated:widget-ready', { detail: window.EscalatedWidget }));
+}
+
+if (typeof window !== 'undefined' && !globalThis.__ESCALATED_WIDGET_NO_AUTOBOOT__) {
+    if (document.body) boot();
+    else document.addEventListener('DOMContentLoaded', boot, { once: true });
+}
 
 function getWidgetStyles() {
     return `
@@ -250,5 +296,19 @@ function getWidgetStyles() {
     border-radius: 50%; animation: esc-spin 0.6s linear infinite; margin: 24px auto;
 }
 @keyframes esc-spin { to { transform: rotate(360deg); } }
+.esc-w-panel.esc-w-inline {
+    position: relative; inset: auto; z-index: auto; width: 100%; max-width: none;
+    height: auto; min-height: 420px; max-height: none;
+    transform: none; opacity: 1; pointer-events: auto; transition: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e5e7eb;
+}
+.esc-w-panel.esc-w-inline .esc-w-body { overflow: visible; }
+.esc-w-panel.esc-w-inline .esc-w-chat-messages { max-height: 360px; }
+@media (max-width: 440px) {
+    .esc-w-panel.esc-w-inline {
+        width: 100%; height: auto; max-height: none; border-radius: 12px;
+        bottom: auto !important; right: auto !important; left: auto !important;
+    }
+}
     `;
 }
