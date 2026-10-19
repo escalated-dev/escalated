@@ -55,7 +55,8 @@ const visibleTabs = computed(() => {
         help: kbEnabled.value,
         contact: true,
         chat: chatAvailable.value,
-        status: true,
+        // Backends without verified guest lookup turn the status check off.
+        status: widgetConfig.value?.status_lookup_enabled !== false,
     };
     const wanted = props.tabs?.length ? props.tabs : ['help', 'contact', 'chat', 'status'];
     return wanted.filter((tab) => available[tab]);

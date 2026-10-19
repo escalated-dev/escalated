@@ -133,6 +133,10 @@ A backend that supports embedding:
 - handles every other request exactly as before;
 - returns `accepts_metadata: true` from `/config` when it stores host
   parameters.
+- returns `status_lookup_enabled: false` from `/config` when it does not offer
+  verified guest lookup (`/verification`, `/lookup`, Bearer
+  `/tickets/{reference}`). The widget then hides the status tab; a backend must
+  never grant access to a ticket from a claimed email address alone.
 
 The Laravel backend implements this from 1.9.4; see its
 `docs/embedding-the-widget.md`.
