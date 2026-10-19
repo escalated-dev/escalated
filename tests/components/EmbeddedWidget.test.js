@@ -88,6 +88,18 @@ describe('embedded widget', () => {
         expect(wrapper.find('form textarea').exists()).toBe(true);
     });
 
+    it('hides the status check when the backend turns status lookup off', async () => {
+        await setup({}, { status_lookup_enabled: false });
+
+        expect(tabLabels()).toEqual(['Help', 'Contact', 'Chat']);
+    });
+
+    it('keeps the status check when the backend does not say', async () => {
+        await setup();
+
+        expect(tabLabels()).toContain('Check Status');
+    });
+
     it('starts on the requested tab', async () => {
         await setup({ defaultTab: 'status' });
 

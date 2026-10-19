@@ -4,6 +4,11 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- The widget hides its **Check Status** tab when `/config` returns
+  `status_lookup_enabled: false`, for backends that do not offer verified
+  guest lookup. Backends that omit the flag keep the tab.
+
 ## [0.12.1] - 2026-10-18
 
 ### Added
