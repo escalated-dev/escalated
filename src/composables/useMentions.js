@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 
 /**
  * Composable that detects `@` typed in a text input/textarea,
@@ -18,6 +18,10 @@ export function useMentions(options = {}) {
     const query = ref('');
     const mentionStart = ref(null); // cursor position where `@` was typed
     const loading = ref(false);
+    // The query the visible suggestions were fetched for. While it differs
+    // from `query`, the list on screen is stale (a newer search is pending).
+    const suggestionsQuery = ref(null);
+    const pending = computed(() => isActive.value && suggestionsQuery.value !== query.value);
 
     let timer = null;
     let requestVersion = 0;
@@ -58,7 +62,8 @@ export function useMentions(options = {}) {
         clearTimer();
         const version = ++requestVersion;
         // Keep the current list on screen while the next search is pending,
-        // so the dropdown stays open and Enter/Tab still pick a mention.
+        // so the dropdown stays open. `pending` marks it stale, so Enter/Tab
+        // wait for the fresh results instead of picking an old match.
         // requestVersion already discards any older response.
         loading.value = true;
 
@@ -85,9 +90,15 @@ export function useMentions(options = {}) {
                 },
             });
             const results = response.ok ? await response.json() : [];
-            if (version === requestVersion) suggestions.value = results;
+            if (version === requestVersion) {
+                suggestions.value = results;
+                suggestionsQuery.value = searchQuery;
+            }
         } catch {
-            if (version === requestVersion) suggestions.value = [];
+            if (version === requestVersion) {
+                suggestions.value = [];
+                suggestionsQuery.value = searchQuery;
+            }
         } finally {
             if (version === requestVersion) loading.value = false;
         }
@@ -120,6 +131,7 @@ export function useMentions(options = {}) {
         loading.value = false;
         isActive.value = false;
         suggestions.value = [];
+        suggestionsQuery.value = null;
         query.value = '';
         mentionStart.value = null;
         clearTimer();
@@ -132,6 +144,7 @@ export function useMentions(options = {}) {
         isActive,
         query,
         loading,
+        pending,
         onTextChange,
         insertMention,
         close,

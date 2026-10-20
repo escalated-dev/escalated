@@ -78,6 +78,34 @@ describe('useMentions', () => {
         vi.unstubAllGlobals();
     });
 
+    it('marks the shown suggestions pending until results for the current query arrive', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async (url) => ({
+                ok: true,
+                json: async () => (url.endsWith('q=') ? [{ id: 1, name: 'Aaron' }] : [{ id: 2, name: 'Alice' }]),
+            })),
+        );
+        const wrapper = mount(TestComponent);
+        const vm = wrapper.vm;
+        vm.onTextChange({ selectionStart: 1 }, '@');
+        expect(vm.pending).toBe(true);
+        await vi.runAllTimersAsync();
+        expect(vm.pending).toBe(false);
+
+        vm.onTextChange({ selectionStart: 6 }, '@alice');
+        expect(vm.suggestions).toEqual([{ id: 1, name: 'Aaron' }]);
+        expect(vm.pending).toBe(true);
+
+        await vi.runAllTimersAsync();
+        expect(vm.suggestions).toEqual([{ id: 2, name: 'Alice' }]);
+        expect(vm.pending).toBe(false);
+
+        vm.close();
+        expect(vm.pending).toBe(false);
+        vi.unstubAllGlobals();
+    });
+
     it('does not activate for @ in middle of word', async () => {
         const wrapper = mount(TestComponent);
         const vm = wrapper.vm;

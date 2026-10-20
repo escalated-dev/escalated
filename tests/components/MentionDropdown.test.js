@@ -114,6 +114,19 @@ describe('MentionDropdown', () => {
             expect(wrapper.emitted('select')[0][0]).toEqual(agents[0]);
         });
 
+        it.each(['Enter', 'Tab'])('swallows %s without selecting while the suggestions are stale', (key) => {
+            const wrapper = mountDropdown({ pending: true, loading: true });
+            let prevented = false;
+
+            const handled = wrapper.vm.onKeydown({ key, preventDefault: () => (prevented = true) });
+
+            expect(handled).toBe(true);
+            expect(prevented).toBe(true);
+            expect(wrapper.emitted('select')).toBeFalsy();
+            // The stale list stays on screen while the new search runs.
+            expect(wrapper.findAll('button[role="option"]')).toHaveLength(3);
+        });
+
         it('emits close on Escape', () => {
             const wrapper = mountDropdown();
             const vm = wrapper.vm;

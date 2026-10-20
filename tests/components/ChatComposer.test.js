@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { computed } from 'vue';
 import ChatComposer from '../../src/components/ChatComposer.vue';
@@ -47,6 +47,49 @@ describe('ChatComposer', () => {
             await textarea.trigger('keydown', { key: 'Enter', shiftKey: false });
 
             expect(wrapper.emitted('send')).toBeFalsy();
+        });
+    });
+
+    describe('mentions', () => {
+        afterEach(() => {
+            vi.unstubAllGlobals();
+            vi.useRealTimers();
+        });
+
+        async function typeInto(textarea, value) {
+            textarea.element.value = value;
+            textarea.element.setSelectionRange(value.length, value.length);
+            await textarea.trigger('input');
+        }
+
+        it('neither sends nor picks a stale agent on Enter while a newer search is pending', async () => {
+            vi.useFakeTimers();
+            vi.stubGlobal(
+                'fetch',
+                vi.fn(async (url) => ({
+                    ok: true,
+                    json: async () => (url.endsWith('q=') ? [{ id: 1, name: 'Aaron' }] : [{ id: 2, name: 'Alice' }]),
+                })),
+            );
+            const wrapper = mountComposer();
+            const textarea = wrapper.find('textarea');
+
+            await typeInto(textarea, '@');
+            await vi.runAllTimersAsync();
+            await typeInto(textarea, '@alice please look');
+            await textarea.trigger('keydown', { key: 'Enter', shiftKey: false });
+
+            expect(wrapper.emitted('send')).toBeFalsy();
+            expect(textarea.element.value).toBe('@alice please look');
+            // The dropdown stays up with the previous list while searching.
+            expect(wrapper.find('[role="listbox"]').exists()).toBe(true);
+            expect(wrapper.text()).toContain('Aaron');
+
+            await vi.runAllTimersAsync();
+            await textarea.trigger('keydown', { key: 'Enter', shiftKey: false });
+
+            expect(wrapper.emitted('send')).toBeFalsy();
+            expect(textarea.element.value).toBe('@{Alice} ');
         });
     });
 
