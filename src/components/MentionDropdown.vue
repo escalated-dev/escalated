@@ -5,6 +5,8 @@ const props = defineProps({
     suggestions: { type: Array, default: () => [] },
     visible: { type: Boolean, default: false },
     loading: { type: Boolean, default: false },
+    // True while the shown suggestions belong to an older query.
+    pending: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['select', 'close']);
@@ -54,6 +56,12 @@ function onKeydown(e) {
     }
 
     if (e.key === 'Enter' || e.key === 'Tab') {
+        // The list is stale: don't pick an agent for an older query, and
+        // don't let the key fall through to sending the message either.
+        if (props.pending) {
+            e.preventDefault();
+            return true;
+        }
         if (props.suggestions.length > 0) {
             e.preventDefault();
             emit('select', props.suggestions[activeIndex.value]);

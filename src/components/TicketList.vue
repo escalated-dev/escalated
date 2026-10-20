@@ -439,7 +439,7 @@ const colCount = computed(() => {
                             type="checkbox"
                             :checked="allSelected"
                             aria-label="Select all tickets"
-                            class="h-4 w-4 rounded border-gray-300 text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]"
+                            class="h-4 w-4 rounded border-gray-300 text-[var(--esc-panel-accent,#3b82f6)] focus:ring-[var(--esc-panel-accent,#3b82f6)]"
                             @change="toggleAll"
                         />
                     </th>
@@ -490,7 +490,7 @@ const colCount = computed(() => {
                                     <input
                                         type="checkbox"
                                         :checked="isColumnActive(col.key)"
-                                        class="h-3.5 w-3.5 rounded border-gray-300 text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]"
+                                        class="h-3.5 w-3.5 rounded border-gray-300 text-[var(--esc-panel-accent,#3b82f6)] focus:ring-[var(--esc-panel-accent,#3b82f6)]"
                                         @change="toggleColumn(col.key)"
                                     />
                                     {{ col.label }}
@@ -506,7 +506,9 @@ const colCount = computed(() => {
                     :key="ticket.id"
                     :class="[
                         'group',
-                        navigable && focusedIndex === index ? 'bg-[var(--esc-panel-active)]' : 'hover:bg-gray-50',
+                        navigable && focusedIndex === index
+                            ? 'bg-[var(--esc-panel-active,#eff6ff)]'
+                            : 'hover:bg-gray-50',
                     ]"
                 >
                     <td v-if="selectable" class="w-10 px-3 py-3">
@@ -514,7 +516,7 @@ const colCount = computed(() => {
                             type="checkbox"
                             :checked="selectedIds.includes(ticket.id)"
                             aria-label="Select ticket"
-                            class="h-4 w-4 rounded border-gray-300 text-[var(--esc-panel-accent)] focus:ring-[var(--esc-panel-accent)]"
+                            class="h-4 w-4 rounded border-gray-300 text-[var(--esc-panel-accent,#3b82f6)] focus:ring-[var(--esc-panel-accent,#3b82f6)]"
                             @change="toggleOne(ticket.id)"
                         />
                     </td>
@@ -530,7 +532,7 @@ const colCount = computed(() => {
                             ></span>
                             <Link
                                 :href="route(`${routePrefix}.show`, ticket.reference)"
-                                class="text-[var(--esc-panel-accent)] hover:text-[var(--esc-panel-accent-hover)]"
+                                class="text-[var(--esc-panel-accent,#3b82f6)] hover:text-[var(--esc-panel-accent-hover,#2563eb)]"
                             >
                                 {{ ticket.reference }}
                             </Link>

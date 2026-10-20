@@ -201,7 +201,7 @@ async function findTickets() {
             </form>
 
             <form
-                v-if="lookup_url"
+                v-if="lookup_url && verification_url"
                 class="mt-8 space-y-4 rounded-lg border border-gray-200 bg-white p-6"
                 @submit.prevent="findTickets"
             >

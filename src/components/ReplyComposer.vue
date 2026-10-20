@@ -31,6 +31,7 @@ const {
     suggestions,
     isActive: mentionActive,
     loading: mentionLoading,
+    pending: mentionPending,
     onTextChange,
     insertMention,
     close: closeMentions,
@@ -194,6 +195,7 @@ const buttonLabel = computed(() => {
                 :suggestions="suggestions"
                 :visible="mentionActive"
                 :loading="mentionLoading"
+                :pending="mentionPending"
                 class="bottom-0 left-0 translate-y-full"
                 @select="handleMentionSelect"
                 @close="closeMentions"
@@ -289,6 +291,7 @@ const buttonLabel = computed(() => {
                 :suggestions="suggestions"
                 :visible="mentionActive"
                 :loading="mentionLoading"
+                :pending="mentionPending"
                 class="bottom-0 left-0 translate-y-full"
                 @select="handleMentionSelect"
                 @close="closeMentions"
