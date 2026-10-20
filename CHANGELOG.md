@@ -4,6 +4,21 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.3] - 2026-10-20
+
+### Fixed
+- The widget kept none of its script settings when `embed.js` was placed in
+  the page `<head>`: it read `document.currentScript` only after
+  `DOMContentLoaded`, when it is already `null`, so requests went to the
+  wrong site. The script element is now captured while the script runs, with
+  `script[src*="/widget/embed.js"]` as a fallback (#207).
+- Pressing Enter or Tab while a mention search was still pending could insert
+  an agent from the previous, stale result list. Keys are now held until the
+  results for the current query arrive (#207).
+- Ticket list accent colours fall back to the light preset when the host sets
+  no `theme.panel`, and `Guest/Create` only offers the lookup form when both
+  `lookup_url` and `verification_url` are present (#207).
+
 ## [0.12.2] - 2026-10-19
 
 ### Added
