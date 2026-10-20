@@ -51,10 +51,10 @@ function selectTab(tab) {
                 activeTab === tab.key
                     ? escDark
                         ? 'text-cyan-400 focus-visible:ring-cyan-500/40'
-                        : 'text-[var(--esc-panel-accent)] focus-visible:ring-[var(--esc-panel-accent)]'
+                        : 'text-[var(--esc-panel-accent,#3b82f6)] focus-visible:ring-[var(--esc-panel-accent,#3b82f6)]'
                     : escDark
                       ? 'text-neutral-500 hover:text-neutral-300 focus-visible:ring-cyan-500/40'
-                      : 'text-gray-500 hover:text-gray-700 focus-visible:ring-[var(--esc-panel-accent)]',
+                      : 'text-gray-500 hover:text-gray-700 focus-visible:ring-[var(--esc-panel-accent,#3b82f6)]',
             ]"
             @click="selectTab(tab)"
         >
@@ -63,7 +63,7 @@ function selectTab(tab) {
                 v-if="activeTab === tab.key"
                 :class="[
                     'absolute bottom-0 left-0 right-0 h-0.5 rounded-t',
-                    escDark ? 'bg-cyan-400' : 'bg-[var(--esc-panel-accent)]',
+                    escDark ? 'bg-cyan-400' : 'bg-[var(--esc-panel-accent,#3b82f6)]',
                 ]"
             ></span>
         </button>

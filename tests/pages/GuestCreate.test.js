@@ -82,6 +82,14 @@ describe('verified browser guest form', () => {
         expect(form.find('input[autocomplete="one-time-code"]').exists()).toBe(false);
     });
 
+    it('hides the lookup form when the backend sends no verification_url', () => {
+        // The lookup needs a verification code, so without the endpoint it
+        // would post to "null".
+        setup({ verification_url: null });
+        expect(wrapper.findAll('form')).toHaveLength(1);
+        expect(wrapper.find('input[autocomplete="one-time-code"]').exists()).toBe(false);
+    });
+
     it('discards private lookup results when the tenant changes during the request', async () => {
         setup();
         const form = wrapper.findAll('form')[1];
