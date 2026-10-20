@@ -13,6 +13,9 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+    delete document.body;
+    delete document.currentScript;
+    document.head.querySelectorAll('script').forEach((el) => el.remove());
     document.body.innerHTML = '';
     delete window.EscalatedWidget;
     delete globalThis.__ESCALATED_WIDGET_NO_AUTOBOOT__;
@@ -24,6 +27,22 @@ function addScript(attributes) {
     el.setAttribute('data-escalated-widget', '');
     for (const [name, value] of Object.entries(attributes)) el.setAttribute(name, value);
     document.body.appendChild(el);
+}
+
+/**
+ * Imports the loader the way a browser runs a <script> in <head>: during
+ * evaluation `currentScript` is the tag and there is no body yet; by
+ * DOMContentLoaded `currentScript` is null again.
+ */
+async function importFromHead(scriptEl) {
+    const body = document.body;
+    Object.defineProperty(document, 'body', { configurable: true, get: () => null });
+    Object.defineProperty(document, 'currentScript', { configurable: true, get: () => scriptEl });
+    await import('../../src/widget/index.js');
+    Object.defineProperty(document, 'currentScript', { configurable: true, get: () => null });
+    Object.defineProperty(document, 'body', { configurable: true, get: () => body });
+    document.dispatchEvent(new window.Event('DOMContentLoaded'));
+    await flushPromises();
 }
 
 const shadowOf = (selector) => document.querySelector(selector)?.shadowRoot;
@@ -82,6 +101,28 @@ describe('widget loader', () => {
         await flushPromises();
 
         expect(document.querySelectorAll('#escalated-widget-host')).toHaveLength(1);
+    });
+
+    it('keeps the script config when embed.js loads in <head>', async () => {
+        // No data-escalated-widget and a src the fallback selector can't
+        // match: only the tag captured during evaluation carries the config.
+        // (innerHTML so the test DOM doesn't try to fetch the src.)
+        document.head.innerHTML =
+            '<script src="https://cdn.example.com/escalated/widget.js" data-base-url="https://help.example.com" data-title="Head Help"></script>';
+        const el = document.head.querySelector('script');
+
+        await importFromHead(el);
+
+        expect(fetch).toHaveBeenCalledWith('https://help.example.com/support/widget/config', expect.anything());
+        expect(shadowOf('#escalated-widget-host').querySelector('.esc-w-header h2').textContent).toBe('Head Help');
+    });
+
+    it('finds the backend-served embed.js by its src when currentScript is unavailable', async () => {
+        document.head.innerHTML = '<script src="https://help.example.com/support/widget/embed.js"></script>';
+
+        await importFromHead(null);
+
+        expect(fetch).toHaveBeenCalledWith('https://help.example.com/support/widget/config', expect.anything());
     });
 
     it('mounts extra instances on demand and removes them again', async () => {

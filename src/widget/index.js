@@ -70,12 +70,25 @@ export function mountEscalatedWidget(options = {}) {
     };
 }
 
-function boot() {
+// `document.currentScript` is only set while this script is first evaluated.
+// When embed.js sits in <head>, boot() runs later on DOMContentLoaded, where
+// it is null, so capture the tag now and hand it to boot().
+const loaderScript = typeof document !== 'undefined' ? document.currentScript : null;
+
+function findLoaderScript(captured) {
+    if (captured) return captured;
+    return (
+        document.querySelector('script[data-escalated-widget]') ||
+        document.querySelector('script[src*="/widget/embed.js"]')
+    );
+}
+
+function boot(captured = loaderScript) {
     const existing = window.EscalatedWidget;
     // Loading the script twice must not mount a second launcher.
     if (existing && existing.__escalatedLoaded) return;
 
-    const scriptTag = document.currentScript || document.querySelector('script[data-escalated-widget]');
+    const scriptTag = findLoaderScript(captured);
     const config = readEmbedConfig(scriptTag, existing || {});
     const instance = mountEscalatedWidget(config);
 
@@ -95,7 +108,7 @@ function boot() {
 
 if (typeof window !== 'undefined' && !globalThis.__ESCALATED_WIDGET_NO_AUTOBOOT__) {
     if (document.body) boot();
-    else document.addEventListener('DOMContentLoaded', boot, { once: true });
+    else document.addEventListener('DOMContentLoaded', () => boot(), { once: true });
 }
 
 function getWidgetStyles() {
