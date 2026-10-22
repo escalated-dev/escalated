@@ -80,7 +80,9 @@ function transferTo(type, id) {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
             },
-            body: JSON.stringify({ type, id }),
+            // The backends' transfer endpoint reads agent_id / department_id
+            // (escalated-laravel ChatController::transfer).
+            body: JSON.stringify(type === 'agent' ? { agent_id: id } : { department_id: id }),
         }).catch(() => {});
     }
     showTransfer.value = false;
