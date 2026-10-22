@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.5] - 2026-10-22
+
 ### Added
 - `Admin/Users/Index` accepts an optional `notice` string prop. When a backend
   sends it (escalated-nestjs does when the host has not configured a user-list
