@@ -2,14 +2,24 @@
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 
-const props = defineProps({ department: { type: Object, default: null } });
+const props = defineProps({
+    department: { type: Object, default: null },
+    // Backends that let a department name its business schedule pass the list.
+    // Without it the form neither shows nor sends `business_schedule_id`.
+    schedules: { type: Array, default: null },
+});
 
-const form = useForm({
+const fields = {
     name: props.department?.name || '',
     slug: props.department?.slug || '',
     description: props.department?.description || '',
     is_active: props.department?.is_active ?? true,
-});
+};
+if (props.schedules) {
+    fields.business_schedule_id = props.department?.business_schedule_id ?? null;
+}
+
+const form = useForm(fields);
 
 function submit() {
     if (props.department) {
@@ -52,6 +62,28 @@ function submit() {
                     rows="3"
                     class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                 ></textarea>
+            </div>
+            <div v-if="schedules">
+                <label for="business-schedule" class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                    >Business hours schedule</label
+                >
+                <select
+                    id="business-schedule"
+                    v-model="form.business_schedule_id"
+                    class="mt-1 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                >
+                    <option :value="null">Use the default</option>
+                    <option v-for="schedule in schedules" :key="schedule.id" :value="schedule.id">
+                        {{ schedule.name }}
+                    </option>
+                </select>
+                <p class="mt-1 text-xs text-[var(--esc-panel-text-tertiary)]">
+                    Business-hours SLA deadlines for this department's tickets count in this schedule unless the policy
+                    names its own.
+                </p>
+                <div v-if="form.errors.business_schedule_id" class="mt-1 text-sm text-rose-400">
+                    {{ form.errors.business_schedule_id }}
+                </div>
             </div>
             <label class="flex items-center gap-2">
                 <input

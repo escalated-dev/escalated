@@ -4,6 +4,15 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- **Business hours schedule** select on `Admin/SlaPolicies/Form` and
+  `Admin/Departments/Form`. Shown only when the backend passes a `schedules`
+  prop (`[{ id, name }]`); options are "Use the default" (`null`) and each
+  schedule, posted as `business_schedule_id`. Business-hours SLA deadlines use
+  the policy's schedule, else the ticket department's, else the default one.
+  Pages rendered without `schedules` look and post exactly as before, so a
+  backend without schedules never receives the field.
+
 ## [0.12.3] - 2026-10-20
 
 ### Fixed
