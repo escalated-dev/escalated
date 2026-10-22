@@ -184,7 +184,8 @@
         },
         "Escalated/Admin/Departments/Form": {
             "props": [
-                "department"
+                "department",
+                "schedules"
             ],
             "required": []
         },
@@ -641,7 +642,8 @@
         "Escalated/Admin/SlaPolicies/Form": {
             "props": [
                 "policy",
-                "priorities"
+                "priorities",
+                "schedules"
             ],
             "required": []
         },
