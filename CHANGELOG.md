@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.4] - 2026-10-22
+
 ### Added
 - **Business hours schedule** select on `Admin/SlaPolicies/Form` and
   `Admin/Departments/Form`. Shown only when the backend passes a `schedules`
