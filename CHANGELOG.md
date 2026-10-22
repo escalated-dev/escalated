@@ -12,6 +12,16 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   the policy's schedule, else the ticket department's, else the default one.
   Pages rendered without `schedules` look and post exactly as before, so a
   backend without schedules never receives the field.
+- `Admin/Webhooks/Form` supports backends that no longer send a webhook's
+  signing secret. When the `webhook` prop has `has_secret`, the secret field
+  starts blank, says "A secret is set. Leave blank to keep it." and offers
+  **Remove secret**, which posts `clear_secret: true` (with **Keep secret** to
+  undo). The form then always posts `clear_secret`. Backends that still send
+  `secret` see no change: the field is filled in, posted back as it is, and
+  `clear_secret` is not sent.
+- `Admin/Settings/SsoSettings` says when a JWT shared secret or OAuth client
+  secret is stored (the backend sends it as a mask such as `********`). Leaving
+  the field as it is posts the mask back, which keeps the stored secret.
 
 ## [0.12.3] - 2026-10-20
 
