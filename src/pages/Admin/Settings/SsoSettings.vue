@@ -4,6 +4,12 @@ import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({ settings: Object });
 
+// Backends send a stored SSO secret as a mask (`********`). Posting the mask
+// back keeps the stored value; anything else replaces it.
+const isMaskedSecret = (value) => typeof value === 'string' && /^\*{3,}$/.test(value);
+const jwtSecretSet = isMaskedSecret(props.settings.sso_jwt_secret);
+const oauthSecretSet = isMaskedSecret(props.settings.sso_oauth_client_secret);
+
 const form = useForm({
     sso_provider: props.settings.sso_provider ?? 'none',
     sso_entity_id: props.settings.sso_entity_id ?? '',
@@ -180,8 +186,16 @@ function submit() {
                         <input
                             v-model="form.sso_jwt_secret"
                             type="password"
+                            autocomplete="new-password"
                             class="mt-2 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                         />
+                        <p
+                            v-if="jwtSecretSet"
+                            data-testid="sso-jwt-secret-set"
+                            class="mt-1 text-xs text-[var(--esc-panel-text-muted)]"
+                        >
+                            A secret is set. Leave it as it is to keep it, or enter a new one to replace it.
+                        </p>
                         <div v-if="form.errors.sso_jwt_secret" class="mt-1 text-sm text-rose-400">
                             {{ form.errors.sso_jwt_secret }}
                         </div>
@@ -302,8 +316,16 @@ function submit() {
                             <input
                                 v-model="form.sso_oauth_client_secret"
                                 type="password"
+                                autocomplete="new-password"
                                 class="mt-2 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 text-sm text-[var(--esc-panel-text-secondary)] focus:border-[var(--esc-panel-border-input)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
                             />
+                            <p
+                                v-if="oauthSecretSet"
+                                data-testid="sso-oauth-secret-set"
+                                class="mt-1 text-xs text-[var(--esc-panel-text-muted)]"
+                            >
+                                A secret is set. Leave it as it is to keep it, or enter a new one to replace it.
+                            </p>
                         </div>
                     </div>
                 </div>
