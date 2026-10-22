@@ -4,6 +4,19 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- **Live chat transfer did nothing.** `Agent/TicketShow` never gave
+  `ChatActionBar` a transfer endpoint, so picking a department in the Transfer
+  menu posted nothing on any backend. It now passes
+  `route('escalated.admin.chat.transfer', ticket.chat_session_id)` (the name
+  escalated-laravel serves it under). If the host's `route()` helper does not
+  know that name (it throws, or a shim returns `'#'`), the bar gets no endpoint
+  and behaves as before.
+- `ChatActionBar` now posts the transfer body backends read,
+  `{"agent_id": id}` or `{"department_id": id}`, instead of `{"type", "id"}`
+  (which escalated-laravel rejected with 422). The `transfer` event still
+  carries `{type, id}`.
+
 ## [0.12.5] - 2026-10-22
 
 ### Added
