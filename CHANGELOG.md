@@ -4,6 +4,13 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- `Admin/Users/Index` accepts an optional `notice` string prop. When a backend
+  sends it (escalated-nestjs does when the host has not configured a user-list
+  hook), the page shows it as an informational message above the table, in
+  place of "No users found.". The text is server-provided and shown as given
+  (escaped, not translated). Pages rendered without `notice` are unchanged.
+
 ## [0.12.4] - 2026-10-22
 
 ### Added

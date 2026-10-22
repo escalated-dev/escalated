@@ -7,6 +7,9 @@ const props = defineProps({
     users: Object,
     filters: { type: Object, default: () => ({}) },
     currentUserId: { type: [Number, String], default: null },
+    // Sent by a backend that cannot list the host app's users yet (e.g. no
+    // user-list hook configured). Server-worded; shown as given, not translated.
+    notice: { type: String, default: null },
 });
 
 const search = ref(props.filters?.search ?? '');
@@ -42,6 +45,27 @@ function isSelf(user) {
             </form>
         </div>
 
+        <div
+            v-if="notice"
+            role="status"
+            class="mb-4 flex items-start gap-3 rounded-lg border border-blue-500/20 bg-blue-500/10 px-4 py-2.5 text-sm text-blue-300"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="mt-0.5 h-5 w-5 shrink-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+            >
+                <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clip-rule="evenodd"
+                />
+            </svg>
+            <p>{{ notice }}</p>
+        </div>
+
         <div class="esc-table-scroll rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]">
             <table class="min-w-full divide-y divide-[var(--esc-panel-border)]">
                 <thead>
@@ -69,7 +93,7 @@ function isSelf(user) {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[var(--esc-panel-border)]">
-                    <tr v-if="!users?.data?.length">
+                    <tr v-if="!users?.data?.length && !notice">
                         <td colspan="4" class="px-4 py-12 text-center text-sm text-[var(--esc-panel-text-muted)]">
                             No users found.
                         </td>
