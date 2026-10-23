@@ -88,3 +88,34 @@ describe('Agent/TicketShow chat transfer', () => {
         expect(wrapper.findComponent(ChatActionBar).props('transferEndpoint')).toBe('');
     });
 });
+
+/**
+ * End Chat had the same gap: TicketShow passed no end endpoint, so the bar's
+ * End Chat posted nothing. It now passes `escalated.admin.chat.end`.
+ */
+describe('Agent/TicketShow chat end', () => {
+    it('passes the chat end route for the live session to ChatActionBar', () => {
+        const route = vi.fn((name, params) => `/${name}/${params ?? ''}`);
+        const wrapper = mountPage(route);
+
+        expect(wrapper.findComponent(ChatActionBar).props('endEndpoint')).toBe('/escalated.admin.chat.end/42');
+        expect(route).toHaveBeenCalledWith('escalated.admin.chat.end', 42);
+    });
+
+    it('leaves the end endpoint empty when the host has no such route', () => {
+        const route = vi.fn((name, params) => {
+            if (name === 'escalated.admin.chat.end') throw new Error(`no route ${name}`);
+            return `/${name}/${params ?? ''}`;
+        });
+        const wrapper = mountPage(route);
+
+        expect(wrapper.findComponent(ChatActionBar).props('endEndpoint')).toBe('');
+    });
+
+    it("treats a shim's '#' placeholder for the end route as no endpoint", () => {
+        const route = vi.fn((name, params) => (name === 'escalated.admin.chat.end' ? '#' : `/${name}/${params}`));
+        const wrapper = mountPage(route);
+
+        expect(wrapper.findComponent(ChatActionBar).props('endEndpoint')).toBe('');
+    });
+});

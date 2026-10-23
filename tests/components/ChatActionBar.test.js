@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import ChatActionBar from '../../src/components/ChatActionBar.vue';
 
 /**
@@ -69,5 +69,67 @@ describe('ChatActionBar transfer', () => {
 
         expect(fetchMock).not.toHaveBeenCalled();
         expect(wrapper.emitted('transfer')[0][0]).toEqual({ type: 'department', id: 5 });
+    });
+});
+
+/**
+ * End Chat posts to the backend's agent end-chat endpoint
+ * (escalated-laravel `escalated.admin.chat.end`, which takes no fields). The
+ * bar sends an empty JSON object so JSON-parsing backends get a valid body,
+ * and emits `end-chat` only after the request settles, so a page that reloads
+ * on the event sees the ended session.
+ */
+async function confirmEnd(wrapper) {
+    const end = wrapper.findAll('button').find((b) => b.text() === 'End Chat' || b.text() === 'chat.end_chat');
+    await end.trigger('click');
+    const confirm = wrapper.findAll('button').find((b) => b.text() === 'Confirm' || b.text() === 'form.confirm');
+    await confirm.trigger('click');
+}
+
+describe('ChatActionBar end chat', () => {
+    it('posts an empty JSON body to the end endpoint', async () => {
+        const wrapper = mountBar({ endEndpoint: '/support/admin/chat/7/end' });
+        await confirmEnd(wrapper);
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        const [url, init] = fetchMock.mock.calls[0];
+        expect(url).toBe('/support/admin/chat/7/end');
+        expect(init.method).toBe('POST');
+        expect(init.headers['Content-Type']).toBe('application/json');
+        expect(JSON.parse(init.body)).toEqual({});
+        expect(wrapper.emitted('end-chat')[0][0]).toBe(7);
+    });
+
+    it('emits end-chat only after the end request settles', async () => {
+        let settle;
+        fetchMock.mockImplementation(() => new Promise((resolve) => (settle = resolve)));
+        const wrapper = mountBar({ endEndpoint: '/support/admin/chat/7/end' });
+        await confirmEnd(wrapper);
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(wrapper.emitted('end-chat')).toBeUndefined();
+
+        settle({ ok: true });
+        await flushPromises();
+        expect(wrapper.emitted('end-chat')[0][0]).toBe(7);
+    });
+
+    it('still emits end-chat when the request fails', async () => {
+        fetchMock.mockImplementation(() => Promise.reject(new Error('offline')));
+        const wrapper = mountBar({ endEndpoint: '/support/admin/chat/7/end' });
+        await confirmEnd(wrapper);
+        await flushPromises();
+
+        expect(wrapper.emitted('end-chat')[0][0]).toBe(7);
+    });
+
+    it('emits end-chat and posts nothing without an endpoint', async () => {
+        const wrapper = mountBar({ endEndpoint: '' });
+        await confirmEnd(wrapper);
+        await flushPromises();
+
+        expect(fetchMock).not.toHaveBeenCalled();
+        expect(wrapper.emitted('end-chat')[0][0]).toBe(7);
     });
 });
