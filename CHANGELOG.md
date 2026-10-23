@@ -16,6 +16,15 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `{"agent_id": id}` or `{"department_id": id}`, instead of `{"type", "id"}`
   (which escalated-laravel rejected with 422). The `transfer` event still
   carries `{type, id}`.
+- **Live chat End Chat did nothing on the server.** `Agent/TicketShow` never
+  gave `ChatActionBar` an end endpoint either, so confirming End Chat only
+  reloaded the page and the session stayed live. It now passes
+  `route('escalated.admin.chat.end', ticket.chat_session_id)`, with the same
+  fallback (no endpoint, behaves as before) when the host does not know the
+  name. The bar posts an empty JSON object (`{}`), since the endpoint takes no
+  fields, and now emits `end-chat` after the request settles instead of before
+  it, so a parent that reloads on the event sees the ended session. Listeners
+  still receive the session id.
 
 ## [0.12.5] - 2026-10-22
 

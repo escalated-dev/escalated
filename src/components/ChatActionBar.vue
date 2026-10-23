@@ -50,7 +50,6 @@ onUnmounted(() => {
 });
 
 async function confirmEndChat() {
-    emit('end-chat', props.sessionId);
     if (props.endEndpoint) {
         try {
             await fetch(props.endEndpoint, {
@@ -61,12 +60,19 @@ async function confirmEndChat() {
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
                 },
+                // The end endpoint takes no fields (escalated-laravel
+                // ChatController::end); send an empty object so backends that
+                // parse the JSON body get a valid one.
+                body: JSON.stringify({}),
             });
         } catch {
             // handled by caller
         }
     }
     showEndConfirm.value = false;
+    // Emit after the request settles so a parent that reloads on this event
+    // sees the ended session rather than racing the POST.
+    emit('end-chat', props.sessionId);
 }
 
 function transferTo(type, id) {

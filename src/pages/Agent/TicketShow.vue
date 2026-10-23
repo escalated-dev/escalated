@@ -162,19 +162,23 @@ function onChatSend(payload) {
     });
 }
 
-// Chat transfer posts to the backend's `escalated.admin.chat.transfer` route
-// (escalated-laravel's name). A host whose route() helper has no such name
-// either throws or (the non-Laravel shims) returns '#'; either way the bar gets
-// no endpoint and the transfer menu only emits, rather than breaking the page.
-const chatTransferEndpoint = computed(() => {
+// The chat action bar posts to the backend's `escalated.admin.chat.transfer`
+// and `escalated.admin.chat.end` routes (escalated-laravel's names). A host
+// whose route() helper has no such name either throws or (the non-Laravel
+// shims) returns '#'; either way the bar gets no endpoint for that action and
+// only emits, rather than breaking the page.
+function chatSessionRoute(name) {
     if (!props.ticket.chat_session_id) return '';
     try {
-        const url = route('escalated.admin.chat.transfer', props.ticket.chat_session_id);
+        const url = route(name, props.ticket.chat_session_id);
         return typeof url === 'string' && url !== '#' ? url : '';
     } catch {
         return '';
     }
-});
+}
+
+const chatTransferEndpoint = computed(() => chatSessionRoute('escalated.admin.chat.transfer'));
+const chatEndEndpoint = computed(() => chatSessionRoute('escalated.admin.chat.end'));
 
 function onEndChat() {
     router.reload({ preserveScroll: true });
@@ -369,6 +373,7 @@ onUnmounted(() => {
                     }"
                     :agents="[]"
                     :departments="departments"
+                    :end-endpoint="chatEndEndpoint"
                     :transfer-endpoint="chatTransferEndpoint"
                     @end-chat="onEndChat"
                 />
