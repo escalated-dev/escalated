@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.6] - 2026-10-22
+
 ### Fixed
 - **Live chat transfer did nothing.** `Agent/TicketShow` never gave
   `ChatActionBar` a transfer endpoint, so picking a department in the Transfer
