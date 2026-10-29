@@ -31,6 +31,13 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
     (escalated-laravel does from the release after 2026-10-29).
 - `pages.json` lists the new optional props.
 
+### Security
+- Dev dependency `happy-dom` bumped to 21.0.4 (GHSA-834v-8h66-3h79). Test-only; not shipped in the package.
+- The packaged-consumer contract check (`npm run test:inertia`) tolerates
+  GHSA-gcqx-w48m-w2h4 (deepmerge, no patched release) for the Inertia 1
+  adapter only: it comes from `@inertiajs/core` 1.x, not from this package.
+  Any other advisory still fails the check.
+
 ## [0.12.6] - 2026-10-22
 
 ### Fixed
