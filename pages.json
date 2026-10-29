@@ -613,6 +613,7 @@
         },
         "Escalated/Admin/Settings/SsoSettings": {
             "props": [
+                "endpoints",
                 "settings"
             ],
             "required": []
@@ -620,7 +621,8 @@
         "Escalated/Admin/Settings/TwoFactor": {
             "props": [
                 "enabled",
-                "pending"
+                "pending",
+                "required"
             ],
             "required": []
         },
@@ -703,6 +705,7 @@
                 "currentUserId",
                 "filters",
                 "notice",
+                "roles",
                 "users"
             ],
             "required": []
