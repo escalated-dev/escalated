@@ -4,6 +4,33 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- **Configurable access features** (ADR `2026-10-29-configurable-access-features`;
+  escalated-laravel #271, #273, #274).
+  - The admin nav hides **Roles** when the shared prop
+    `escalated.features.roles_permissions` is `false` (the switch is off and the
+    Roles screens answer 404). When it is `true`, Roles also needs the
+    `role.view` permission. Backends that do not send the flag keep the link.
+  - `Admin/Users/Index` takes an optional `roles` prop (`[{id, name, slug}]`,
+    sent only while roles & permissions is on) and reads each user row's
+    `roles` (slugs). It then shows a Roles column with a checkbox per role;
+    changing one saves the user's whole set with
+    `PUT route('escalated.admin.users.roles', user.id)` and
+    `{"role_ids": [...]}`. Without the prop the page is unchanged.
+  - `Admin/Settings/SsoSettings` takes an optional read-only `endpoints` prop
+    (`login`, `sp_entity_id`, `metadata`, `acs`, `oauth_redirect`,
+    `jwt_callback`) and shows each URL the backend sends in an
+    "Identity Provider Endpoints" card, so the admin can register the app with
+    the IdP. Without the prop there is no card.
+  - `Admin/Settings/TwoFactor` takes an optional `required` prop. Every staff
+    user sees whether two-factor is required for all staff; an admin with
+    `settings.manage` gets a switch that posts
+    `{"two_factor_required": true|false}` to
+    `route('escalated.admin.settings.update')`. Without the prop there is no
+    card. The backend's settings route must accept that single key on its own
+    (escalated-laravel does from the release after 2026-10-29).
+- `pages.json` lists the new optional props.
+
 ## [0.12.6] - 2026-10-22
 
 ### Fixed

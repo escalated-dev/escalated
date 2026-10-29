@@ -4,10 +4,14 @@ import TwoFactorSetup from '../../../components/TwoFactorSetup.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import { readFlash } from '../../../utils/flash';
+import { usePermissions } from '../../../composables/usePermissions';
 
-defineProps({
+const props = defineProps({
     enabled: { type: Boolean, default: false },
     pending: { type: Boolean, default: false },
+    // Whether every staff user must enrol (the `two_factor_required` setting).
+    // A backend that does not send it gets no toggle.
+    required: { type: Boolean, default: null },
 });
 
 const page = usePage();
@@ -17,6 +21,32 @@ const flash = computed(() => readFlash(page));
 const setupData = computed(() => flash.value.two_factor_setup);
 const confirmedData = computed(() => flash.value.two_factor_confirmed);
 const copyError = ref('');
+const { hasPermission } = usePermissions();
+const savingRequired = ref(false);
+
+// Saving the setting needs the admin settings route, so only admins who may
+// manage settings see the switch. Everyone else just sees whether it is on.
+const canChangeRequired = computed(
+    () =>
+        typeof props.required === 'boolean' &&
+        page.props.escalated?.is_admin === true &&
+        hasPermission('settings.manage'),
+);
+
+function toggleRequired() {
+    if (savingRequired.value) return;
+    savingRequired.value = true;
+    router.post(
+        route('escalated.admin.settings.update'),
+        { two_factor_required: !props.required },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                savingRequired.value = false;
+            },
+        },
+    );
+}
 
 watch(setupData, (data) => (showSetup.value = Boolean(data)), { immediate: true });
 watch(confirmedData, () => (copyError.value = ''));
@@ -117,6 +147,46 @@ async function copyRecoveryCodes() {
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Require for all staff -->
+            <div
+                v-if="required !== null"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 id="two-factor-required-label" class="text-sm font-semibold text-[var(--esc-panel-text)]">
+                            Require for all staff
+                        </h3>
+                        <p class="mt-2 text-sm text-[var(--esc-panel-text-tertiary)]">
+                            <template v-if="required">
+                                Two-factor authentication is required for all staff. Anyone who has not enrolled is sent
+                                here before they can use anything else.
+                            </template>
+                            <template v-else>
+                                Staff may choose whether to enrol. Turn this on to make every staff member enrol before
+                                they can use anything else.
+                            </template>
+                        </p>
+                    </div>
+                    <button
+                        v-if="canChangeRequired"
+                        type="button"
+                        role="switch"
+                        :aria-checked="required ? 'true' : 'false'"
+                        aria-labelledby="two-factor-required-label"
+                        :disabled="savingRequired"
+                        class="inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        :class="required ? 'bg-indigo-600' : 'bg-gray-300'"
+                        @click="toggleRequired"
+                    >
+                        <span
+                            class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+                            :class="required ? 'translate-x-6' : 'translate-x-1'"
+                        />
+                    </button>
                 </div>
             </div>
 

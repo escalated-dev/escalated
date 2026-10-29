@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 
@@ -10,7 +10,13 @@ const props = defineProps({
     // Sent by a backend that cannot list the host app's users yet (e.g. no
     // user-list hook configured). Server-worded; shown as given, not translated.
     notice: { type: String, default: null },
+    // Escalated roles ([{id, name, slug}]), sent only while roles &
+    // permissions is switched on. Each user row then carries `roles` (slugs).
+    roles: { type: Array, default: null },
 });
+
+const showRoles = computed(() => Array.isArray(props.roles));
+const columnCount = computed(() => (showRoles.value ? 5 : 4));
 
 const search = ref(props.filters?.search ?? '');
 
@@ -25,6 +31,18 @@ function applySearch() {
 function toggleRole(user, role) {
     const value = role === 'admin' ? !user.is_admin : !user.is_agent;
     router.patch(route('escalated.admin.users.role', user.id), { role, value }, { preserveScroll: true });
+}
+
+function hasRole(user, role) {
+    return Array.isArray(user.roles) && user.roles.includes(role.slug);
+}
+
+// The backend replaces the user's roles with exactly this set.
+function setRole(user, role, checked) {
+    const roleIds = props.roles
+        .filter((candidate) => (candidate.id === role.id ? checked : hasRole(user, candidate)))
+        .map((candidate) => candidate.id);
+    router.put(route('escalated.admin.users.roles', user.id), { role_ids: roleIds }, { preserveScroll: true });
 }
 
 function isSelf(user) {
@@ -90,11 +108,20 @@ function isSelf(user) {
                         >
                             Agent
                         </th>
+                        <th
+                            v-if="showRoles"
+                            class="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-[var(--esc-panel-text-muted)]"
+                        >
+                            Roles
+                        </th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[var(--esc-panel-border)]">
                     <tr v-if="!users?.data?.length && !notice">
-                        <td colspan="4" class="px-4 py-12 text-center text-sm text-[var(--esc-panel-text-muted)]">
+                        <td
+                            :colspan="columnCount"
+                            class="px-4 py-12 text-center text-sm text-[var(--esc-panel-text-muted)]"
+                        >
                             No users found.
                         </td>
                     </tr>
@@ -138,6 +165,24 @@ function isSelf(user) {
                                     :class="user.is_agent ? 'translate-x-6' : 'translate-x-1'"
                                 />
                             </button>
+                        </td>
+                        <td v-if="showRoles" class="px-4 py-3">
+                            <div class="flex flex-wrap gap-x-4 gap-y-1">
+                                <label
+                                    v-for="role in roles"
+                                    :key="role.id"
+                                    class="inline-flex items-center gap-1.5 text-sm text-[var(--esc-panel-text)]"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        :checked="hasRole(user, role)"
+                                        :aria-label="`${role.name}: ${user.name || user.email}`"
+                                        class="rounded border-[var(--esc-panel-border-input)]"
+                                        @change="setRole(user, role, $event.target.checked)"
+                                    />
+                                    {{ role.name }}
+                                </label>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

@@ -1,8 +1,29 @@
 <script setup>
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
+import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
-const props = defineProps({ settings: Object });
+const props = defineProps({
+    settings: Object,
+    // Read-only URLs the admin gives the identity provider:
+    // {login, sp_entity_id, metadata, acs, oauth_redirect, jwt_callback}.
+    endpoints: { type: Object, default: null },
+});
+
+const endpointLabels = [
+    ['login', 'Sign-in URL', 'Send users here to start single sign-on.'],
+    ['sp_entity_id', 'SP entity ID', 'SAML: the audience / service provider entity ID.'],
+    ['metadata', 'SP metadata URL', 'SAML: service provider metadata XML.'],
+    ['acs', 'Assertion Consumer Service (ACS) URL', 'SAML: where the identity provider posts the response.'],
+    ['oauth_redirect', 'OAuth redirect URI', 'OAuth 2.0 / OIDC: register this as the redirect URI.'],
+    ['jwt_callback', 'JWT callback URL', 'JWT: where the identity provider sends the token.'],
+];
+
+const endpointRows = computed(() =>
+    endpointLabels
+        .filter(([key]) => typeof props.endpoints?.[key] === 'string' && props.endpoints[key] !== '')
+        .map(([key, label, hint]) => ({ key, label, hint, value: props.endpoints[key] })),
+);
 
 // Backends send a stored SSO secret as a mask (`********`). Posting the mask
 // back keeps the stored value; anything else replaces it.
@@ -70,6 +91,36 @@ function submit() {
                             <option value="jwt">JWT</option>
                             <option value="oauth">OAuth 2.0 / OIDC</option>
                         </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endpoints for the identity provider -->
+            <div
+                v-if="endpointRows.length"
+                data-testid="sso-endpoints"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+            >
+                <h3 class="text-sm font-semibold text-[var(--esc-panel-text)]">Identity Provider Endpoints</h3>
+                <p class="mb-5 mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">
+                    Give these URLs to your identity provider when you register this application.
+                </p>
+                <div class="space-y-4">
+                    <div v-for="row in endpointRows" :key="row.key">
+                        <label
+                            :for="`sso-endpoint-${row.key}`"
+                            class="block text-sm font-medium text-[var(--esc-panel-text-secondary)]"
+                            >{{ row.label }}</label
+                        >
+                        <p class="mt-0.5 text-xs text-[var(--esc-panel-text-muted)]">{{ row.hint }}</p>
+                        <input
+                            :id="`sso-endpoint-${row.key}`"
+                            :value="row.value"
+                            type="text"
+                            readonly
+                            class="mt-2 w-full rounded-lg border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface-alt)] px-3 py-2 font-mono text-xs text-[var(--esc-panel-text-secondary)] focus:outline-none focus:ring-1 focus:ring-[var(--esc-panel-border-input)]"
+                            @focus="$event.target.select()"
+                        />
                     </div>
                 </div>
             </div>

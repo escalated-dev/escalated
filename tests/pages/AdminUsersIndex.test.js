@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { router } from '@inertiajs/vue3';
 import UsersIndex from '../../src/pages/Admin/Users/Index.vue';
 
 /**
@@ -10,13 +11,13 @@ import UsersIndex from '../../src/pages/Admin/Users/Index.vue';
  * server already worded, so it is rendered as given, never translated.
  */
 vi.mock('@inertiajs/vue3', () => ({
-    router: { get: vi.fn(), patch: vi.fn() },
+    router: { get: vi.fn(), patch: vi.fn(), put: vi.fn() },
     usePage: vi.fn(() => ({ props: {} })),
 }));
 
 vi.stubGlobal(
     'route',
-    vi.fn((name) => `/${name}`),
+    vi.fn((name, param) => (param === undefined ? `/${name}` : `/${name}/${param}`)),
 );
 
 const mountOptions = {
@@ -76,5 +77,74 @@ describe('Admin/Users/Index', () => {
 
         expect(wrapper.find('[role="status"]').exists()).toBe(false);
         expect(wrapper.text()).toContain('No users found.');
+    });
+});
+
+/**
+ * Roles & permissions (ADR 2026-10-29). While the switch is on, the backend
+ * sends `roles` ([{id, name, slug}]) and each user row's `roles` (slugs). The
+ * page shows a picker per user that saves the whole set with
+ * `PUT escalated.admin.users.roles` and `{role_ids: [...]}`. Without the
+ * `roles` prop (switch off, or a backend without roles) there is no picker.
+ */
+describe('Admin/Users/Index roles picker', () => {
+    const roles = [
+        { id: 1, name: 'Admin', slug: 'admin' },
+        { id: 2, name: 'Agent', slug: 'agent' },
+        { id: 3, name: 'Light Agent', slug: 'light_agent' },
+    ];
+    const ada = { id: 7, name: 'Ada', email: 'ada@example.com', is_admin: false, is_agent: true, roles: ['agent'] };
+
+    beforeEach(() => router.put.mockClear());
+
+    function mountWithRoles(user = ada) {
+        return mount(UsersIndex, { props: { users: { data: [user] }, roles }, ...mountOptions });
+    }
+
+    function checkbox(wrapper, roleName) {
+        return wrapper.find(`input[type="checkbox"][aria-label="${roleName}: Ada"]`);
+    }
+
+    it('shows no picker without the roles prop', () => {
+        const wrapper = mount(UsersIndex, { props: { users: { data: [ada] } }, ...mountOptions });
+
+        expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('Roles');
+    });
+
+    it('checks the roles the user holds', () => {
+        const wrapper = mountWithRoles();
+
+        expect(wrapper.text()).toContain('Roles');
+        expect(checkbox(wrapper, 'Agent').element.checked).toBe(true);
+        expect(checkbox(wrapper, 'Admin').element.checked).toBe(false);
+        expect(checkbox(wrapper, 'Light Agent').element.checked).toBe(false);
+    });
+
+    it('adds a role by saving the full set of role ids', async () => {
+        const wrapper = mountWithRoles();
+
+        await checkbox(wrapper, 'Admin').setValue(true);
+
+        expect(router.put).toHaveBeenCalledOnce();
+        const [url, payload] = router.put.mock.calls[0];
+        expect(url).toBe('/escalated.admin.users.roles/7');
+        expect(payload).toEqual({ role_ids: [1, 2] });
+    });
+
+    it('removes a role, down to an empty set', async () => {
+        const wrapper = mountWithRoles();
+
+        await checkbox(wrapper, 'Agent').setValue(false);
+
+        expect(router.put.mock.calls[0][1]).toEqual({ role_ids: [] });
+    });
+
+    it('treats a row without roles as holding none', async () => {
+        const wrapper = mountWithRoles({ ...ada, roles: undefined });
+
+        expect(checkbox(wrapper, 'Agent').element.checked).toBe(false);
+        await checkbox(wrapper, 'Light Agent').setValue(true);
+        expect(router.put.mock.calls[0][1]).toEqual({ role_ids: [3] });
     });
 });
