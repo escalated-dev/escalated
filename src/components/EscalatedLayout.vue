@@ -2,6 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import { usePage, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
+import PluginBadge from './PluginBadge.vue';
 import { usePermissions } from '../composables/usePermissions';
 import { useI18n } from '../composables/useI18n';
 import { watchScrollAffordance } from '../utils/scrollAffordance';
@@ -223,7 +224,7 @@ const adminLinks = computed(() => {
         label: item.label,
         icon: item.icon,
         position: item.position || 100,
-        badge: item.badge || null,
+        badge: item.badge ?? null,
         submenu: item.submenu || [],
     }));
 
@@ -402,12 +403,7 @@ onBeforeUnmount(() => {
                         <path stroke-linecap="round" stroke-linejoin="round" :d="link.icon" />
                     </svg>
                     {{ link.label }}
-                    <span
-                        v-if="link.badge"
-                        class="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--esc-panel-accent)]/20 px-1.5 text-[10px] font-semibold text-[var(--esc-panel-accent)]"
-                    >
-                        {{ link.badge }}
-                    </span>
+                    <PluginBadge :value="link.badge" />
                 </Link>
             </nav>
 

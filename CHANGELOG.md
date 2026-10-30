@@ -5,6 +5,12 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 ## [Unreleased]
 
 ### Added
+- **Plugin widget badges** (plugin contract, "Badges"). The agent dashboard
+  shows `escalated.plugins.dashboardWidgets[].badge` (a number or a string)
+  next to the widget's title; a widget without a title shows the badge alone,
+  labelled with its component for screen readers. `null`, a missing key, an
+  empty string and `0` show nothing. Plugin menu items' `badge` in the admin
+  nav uses the same rules, through the new exported `PluginBadge` component.
 - **Configurable access features** (ADR `2026-10-29-configurable-access-features`;
   escalated-laravel #271, #273, #274).
   - The admin nav hides **Roles** when the shared prop
