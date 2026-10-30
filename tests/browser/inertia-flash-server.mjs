@@ -171,8 +171,10 @@ export async function startFlashServer({ root, consumer, cacheDir, major }) {
             response.writeHead(200, { 'Content-Type': 'text/html' });
             response.end(html);
         } catch (error) {
+            // Keep the stack in the test log, not in the response body.
+            console.error(error);
             response.writeHead(500, { 'Content-Type': 'text/plain' });
-            response.end(error.stack);
+            response.end('Internal Server Error');
         }
     });
     await new Promise((resolve, reject) => {
