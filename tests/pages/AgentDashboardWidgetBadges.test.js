@@ -17,6 +17,12 @@ const widgets = [
     { id: 'crm.Untitled', component: 'Untitled', plugin: 'crm', position: 6, badge: 3 },
 ];
 
+// The widgets' own components live in the host app; render nothing for them.
+vi.mock('vue', async (importOriginal) => ({
+    ...(await importOriginal()),
+    defineAsyncComponent: () => ({ render: () => null }),
+}));
+
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: { escalated: { prefix: 'support' } } }),
     Link: { props: ['href'], template: '<a :href="href"><slot /></a>' },
