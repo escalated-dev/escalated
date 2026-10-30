@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.7] - 2026-10-30
+
 ### Added
 - **Plugin widget badges** (plugin contract, "Badges"). The agent dashboard
   shows `escalated.plugins.dashboardWidgets[].badge` (a number or a string)
