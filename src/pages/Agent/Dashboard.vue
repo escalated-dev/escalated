@@ -6,8 +6,10 @@ import StatsCard from '../../components/StatsCard.vue';
 import StatusBadge from '../../components/StatusBadge.vue';
 import PriorityBadge from '../../components/PriorityBadge.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
+import PluginBadge from '../../components/PluginBadge.vue';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { timeAgo, slaClass } from '../../utils/formatting';
+import { hasPluginBadge } from '../../utils/pluginBadge';
 
 const props = defineProps({
     stats: Object,
@@ -289,6 +291,7 @@ const loadWidgetComponent = (plugin, component) => {
             <div
                 v-for="widget in dashboardWidgets"
                 :key="widget.id"
+                :data-plugin-widget="widget.id"
                 :class="[
                     'rounded-xl border p-5',
                     escDark ? 'border-white/[0.06] bg-neutral-900/60' : 'border-gray-200 bg-white',
@@ -297,10 +300,17 @@ const loadWidgetComponent = (plugin, component) => {
             >
                 <h3
                     v-if="widget.title"
-                    :class="['mb-3 text-sm font-semibold', escDark ? 'text-neutral-200' : 'text-gray-900']"
+                    :class="[
+                        'mb-3 flex items-center gap-2 text-sm font-semibold',
+                        escDark ? 'text-neutral-200' : 'text-gray-900',
+                    ]"
                 >
                     {{ widget.title }}
+                    <PluginBadge :value="widget.badge" />
                 </h3>
+                <div v-else-if="hasPluginBadge(widget.badge)" class="mb-3 flex">
+                    <PluginBadge :value="widget.badge" :label="widget.component" />
+                </div>
                 <component :is="loadWidgetComponent(widget.plugin, widget.component)" v-bind="widget.data || {}" />
             </div>
         </div>

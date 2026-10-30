@@ -38,6 +38,7 @@ export { default as MacroDropdown } from './components/MacroDropdown.vue';
 export { default as MentionDropdown } from './components/MentionDropdown.vue';
 export { default as PermissionMatrix } from './components/PermissionMatrix.vue';
 export { default as PinnedNotes } from './components/PinnedNotes.vue';
+export { default as PluginBadge } from './components/PluginBadge.vue';
 export { default as PluginSlot } from './components/PluginSlot.vue';
 export { default as PresenceIndicator } from './components/PresenceIndicator.vue';
 export { default as PriorityBadge } from './components/PriorityBadge.vue';
