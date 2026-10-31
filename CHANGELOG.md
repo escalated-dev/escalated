@@ -4,6 +4,22 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Security
+- Dev dependencies only; nothing here ships in the package (its one runtime
+  dependency is `@escalated-dev/locale`).
+  - `npm audit fix` moves `follow-redirects` to 1.16.2 (GHSA-mrwp-f3q8-3g9p)
+    and `joi` to 18.3.1 (GHSA-4528-x5fx-h6hg).
+  - `eslint` 10.14, `eslint-plugin-vue` 10.12, `eslint-plugin-storybook` and
+    Storybook 10.6.5, `@vue/test-utils` 2.5.1: the latest releases of the
+    packages that pull in `minimatch` and `glob`.
+  - Even those latest releases still ask for `minimatch` ^10 and `glob` ^13,
+    so npm `overrides` pin `minimatch` ^11.0.3 (GHSA-g3hv-75wg-m249) and
+    `glob` ^14.0.3 (GHSA-3g3m-2fjr-6pw4). Their consumers (`eslint`,
+    `@eslint/config-array`, `@typescript-eslint/typescript-estree`,
+    `editorconfig`, `js-beautify`) only use `Minimatch#match`, `minimatch()`,
+    `escape()`, `globSync()` and `hasMagic()`, which the new majors keep.
+    Drop the overrides once those packages depend on the patched majors.
+
 ## [0.12.7] - 2026-10-30
 
 ### Added
