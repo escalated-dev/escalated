@@ -4,6 +4,7 @@ import { nextTick } from 'vue';
 import TicketShow from '../../src/pages/Agent/TicketShow.vue';
 import PluginSlot from '../../src/components/PluginSlot.vue';
 import { forgetInbox, rememberInbox } from '../../src/utils/agentQueues';
+import { clearToasts, useAgentToasts } from '../../src/composables/useAgentToasts';
 
 const usePage = vi.fn();
 const router = { post: vi.fn(), reload: vi.fn(), visit: vi.fn(), get: vi.fn() };
@@ -118,6 +119,7 @@ function mountPage(props = {}, escalated = {}) {
 }
 
 beforeEach(() => {
+    clearToasts();
     forgetInbox();
     window.localStorage.clear();
     Object.values(router).forEach((fn) => fn.mockReset());
@@ -434,3 +436,46 @@ describe('Agent/TicketShow on a phone', () => {
         );
     });
 });
+
+describe('Agent/TicketShow feedback', () => {
+    const { toasts } = useAgentToasts();
+    const messages = () => toasts.value.map((t) => [t.tone, t.message]);
+    const lastOptions = () => router.post.mock.calls.at(-1)[2];
+
+    it('confirms a status change with a toast when the backend sends no flash', async () => {
+        mountPage();
+        await wrapper.get('[data-testid="esc-status"]').trigger('click');
+        const resolved = wrapper.findAll('[role="menuitemradio"]').find((b) => b.text().startsWith('Resolved'));
+        await resolved.trigger('click');
+        lastOptions().onSuccess({ props: {} });
+        expect(messages()).toEqual([['success', 'Status set to Resolved']]);
+    });
+
+    it('leaves the confirmation to the backend flash when there is one', () => {
+        mountPage();
+        press('a');
+        lastOptions().onSuccess({ props: { flash: { success: 'Ticket assigned.' } } });
+        expect(messages()).toEqual([]);
+    });
+
+    it('says what failed when an action is rejected', () => {
+        mountPage();
+        press('a');
+        lastOptions().onError({ agent_id: 'This agent cannot take more tickets.' });
+        expect(messages()).toEqual([['error', 'This agent cannot take more tickets.']]);
+        lastOptions().onError({});
+        expect(messages().at(-1)).toEqual(['error', 'That did not go through. Try again.']);
+    });
+
+    it('confirms a copied link and shows a check on the button', async () => {
+        Object.defineProperty(window.navigator, 'clipboard', {
+            value: { writeText: vi.fn(() => Promise.resolve()) },
+            configurable: true,
+        });
+        mountPage();
+        await wrapper.get('[data-testid="esc-copy-link"]').trigger('click');
+        expect(messages()).toEqual([['success', 'Link copied']]);
+        expect(wrapper.get('[data-testid="esc-copy-link"]').attributes('aria-label')).toBe('Link copied');
+    });
+});
+
