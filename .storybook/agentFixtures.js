@@ -172,3 +172,78 @@ export const ticketsPage = {
     total: 24,
     links: [],
 };
+
+export const ticketDetail = {
+    ...sampleTickets[0],
+    channel: 'email',
+    assigned_to: null,
+    assignee: null,
+    department: { id: 2, name: 'Billing' },
+    ticket_type: 'problem',
+    requester: { name: 'Sarah Chen', email: 'sarah@northwind.io' },
+    requester_ticket_count: 4,
+    created_at: minutesAgo(12),
+    first_response_due_at: minutesAhead(25),
+    resolution_due_at: minutesAhead(60 * 26),
+    tags: [{ id: 1, name: 'Billing', color: '#f59e0b' }],
+    attachments: [{ id: 9, original_filename: 'error-export.png', size: 331776, url: '#' }],
+    replies: [
+        {
+            id: 3,
+            body: "Hi Sarah,\n\nThanks for the details. I've identified the issue and am restarting the export service now. I'll let you know as soon as it's complete.",
+            author: { name: 'Mike Agent' },
+            created_at: minutesAgo(0.5),
+            is_internal_note: false,
+        },
+        {
+            id: 2,
+            body: 'Looks like the export job is timing out. Checking the queue and recent deploys.',
+            author: { name: 'Mike Agent' },
+            created_at: minutesAgo(8),
+            is_internal_note: true,
+        },
+    ],
+    activities: [
+        {
+            id: 2,
+            type: 'priority_changed',
+            causer: { name: 'Mike Agent' },
+            properties: { to: 'high' },
+            created_at: minutesAgo(10),
+        },
+        {
+            id: 1,
+            type: 'tag_added',
+            causer: { name: 'Mike Agent' },
+            properties: { tag: 'Billing' },
+            created_at: minutesAgo(11),
+        },
+    ],
+    related_tickets: [
+        { reference: 'ESC-0981', subject: 'CSV export missing columns', status: 'resolved' },
+        { reference: 'ESC-0912', subject: 'Invite a second admin', status: 'closed' },
+    ],
+    links_as_parent: [
+        { link_type: 'related', child_ticket: { reference: 'ESC-1039', subject: 'Webhook notifications delayed' } },
+    ],
+};
+
+export const allTags = [
+    { id: 1, name: 'Billing', color: '#f59e0b' },
+    { id: 2, name: 'Export', color: '#3b82f6' },
+    { id: 3, name: 'Bug', color: '#ef4444' },
+];
+
+export const cannedResponses = [
+    { id: 1, title: 'Greeting', body: 'Hi there,\n\n' },
+    { id: 2, title: 'Closing', body: '\n\nLet me know if there is anything else.' },
+];
+
+export const rememberedInbox = {
+    url: '/support/agent/tickets?assigned_to=7',
+    title: 'My inbox',
+    subtitle: '24 tickets assigned to you',
+    filters: { assigned_to: '7' },
+    tickets: ticketsPage,
+    stats: inboxProp.stats,
+};

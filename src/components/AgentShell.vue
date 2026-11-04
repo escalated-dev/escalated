@@ -8,6 +8,7 @@ import { watchScrollAffordance } from '../utils/scrollAffordance';
 import {
     activeQueueKey,
     normalisePrefix,
+    recallInbox,
     ticketsUrl,
     ticketUrl,
     viewIcon,
@@ -89,6 +90,11 @@ const onTicketPages = computed(() => path.value.startsWith(`${prefix.value}/agen
 // queue its list came from.
 const activeKey = computed(() => {
     if (!onTicketPages.value) return null;
+    // A single ticket's URL says nothing about the queue: use the backend's
+    // queue prop, else the queue of the list it was opened from.
+    if (path.value !== `${prefix.value}/agent/tickets` && !page.props.queue?.key) {
+        return recallInbox()?.queueKey ?? null;
+    }
     return activeQueueKey({
         url: currentUrl.value,
         userId: userId.value,

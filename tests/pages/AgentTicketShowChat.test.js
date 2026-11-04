@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { shallowMount, config } from '@vue/test-utils';
+import { mount, config } from '@vue/test-utils';
 import TicketShow from '../../src/pages/Agent/TicketShow.vue';
 import ChatActionBar from '../../src/components/ChatActionBar.vue';
 
@@ -42,9 +42,21 @@ const ticket = {
 
 function mountPage(routeImpl) {
     vi.stubGlobal('route', routeImpl);
-    return shallowMount(TicketShow, {
+    // The bar now sits in TicketDetailPane's header, so the page is mounted
+    // for real with the layout and the heavier children stubbed.
+    return mount(TicketShow, {
         props: { ticket, departments: [{ id: 5, name: 'Billing' }], tags: [], cannedResponses: [] },
-        global: { mocks: { route: routeImpl } },
+        global: {
+            mocks: { route: routeImpl },
+            stubs: {
+                EscalatedLayout: { template: '<div><slot /></div>' },
+                ChatActionBar: true,
+                ChatThread: true,
+                ChatComposer: true,
+                PresenceIndicator: true,
+                KnowledgePanel: true,
+            },
+        },
     });
 }
 

@@ -66,3 +66,27 @@ All optional; each one only adds to the row when present.
 
 The **New ticket** button appears only when the host has a route named
 `escalated.agent.tickets.create`.
+
+## The ticket page
+
+`Escalated/Agent/TicketShow` takes the same optional `inbox` (for the rail)
+and `queue` (it names the "Back to" link and marks the rail). On a wide screen
+the list the agent opened the ticket from stays beside it; that list is kept
+in the browser from the last inbox visit, so it needs nothing from the
+backend. Opened directly, the ticket fills the pane.
+
+Actions are offered only when the host has the route: status, priority,
+tags (`escalated.agent.tickets.tags`, posting `tag_ids`), assign, follow,
+macros, pin, and snooze (`escalated.agent.tickets.snooze`, posting
+`snoozed_until`). Merge is offered to admins through the admin merge routes.
+"Send and set waiting on customer" and "Send and resolve" post the reply and
+then `{ status }` to the status route.
+
+Ticket fields the page reads beyond the existing ones, all optional:
+
+| Field | Shows |
+|---|---|
+| `custom_fields` (`[{ label, value }]` or `{ label: value }`) | Rows in the Details tab |
+| `requester_tickets` (falls back to `related_tickets`) | Recent tickets in the Customer tab |
+| `links_as_parent[].child_ticket`, `links_as_child[].parent_ticket`, `merged_tickets`, `merged_into` | Linked tickets in the Related tab |
+| `attachments[].size` | The file size on attachment cards |
