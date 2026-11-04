@@ -5,14 +5,22 @@ on:
     branches: [main]
     paths:
       - 'scripts/generate-demo.js'
-      - 'src/components/AdminDashboard.stories.js'
+      - 'src/pages/Agent/DemoFlow.stories.js'
+      - 'src/**/*.vue'
+      - 'src/widget/**'
+      - 'src/plugin.js'
+      - 'src/locales/en.json'
       - '.storybook/**'
       - '.github/workflows/demo.yml'
   pull_request:
     branches: [main]
     paths:
       - 'scripts/generate-demo.js'
-      - 'src/components/AdminDashboard.stories.js'
+      - 'src/pages/Agent/DemoFlow.stories.js'
+      - 'src/**/*.vue'
+      - 'src/widget/**'
+      - 'src/plugin.js'
+      - 'src/locales/en.json'
       - '.storybook/**'
       - '.github/workflows/demo.yml'
   workflow_dispatch:
@@ -57,7 +65,7 @@ jobs:
 
       - name: Start Storybook server
         run: |
-          npx http-server storybook-static -p 6006 -s &
+          npx --yes http-server storybook-static -p 6006 -s &
           echo "STORYBOOK_PID=$!" >> "$GITHUB_ENV"
           for i in $(seq 1 30); do
             if curl -sf http://localhost:6006 -o /dev/null; then
@@ -96,7 +104,8 @@ jobs:
             exit 1
           fi
           if [ "$SIZE" -gt 5242880 ]; then
-            echo "::warning::Generated GIF exceeds 5MB target ($SIZE bytes); consider lowering fps or scale in scripts/generate-demo.js"
+            echo "::error::Generated GIF exceeds the 5MB target ($SIZE bytes); lower GIF_FPS or GIF_WIDTH in scripts/generate-demo.js"
+            exit 1
           fi
 
       - name: Upload GIF artifact

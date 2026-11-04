@@ -37,10 +37,10 @@ const stories = [
     // Full-page composites
     { id: 'pages-admindashboard--full-dashboard', name: 'AdminDashboard-Full', fullPage: true },
     { id: 'pages-admindashboard--full-dashboard-light', name: 'AdminDashboard-Light', fullPage: true },
-    { id: 'pages-admindashboard--agent-panel', name: 'AgentPanel-Full', fullPage: true },
-    { id: 'pages-admindashboard--agent-panel-light', name: 'AgentPanel-Light', fullPage: true },
-    { id: 'pages-admindashboard--ticket-detail-view', name: 'TicketDetailView-Full', fullPage: true },
-    { id: 'pages-admindashboard--ticket-list-view', name: 'TicketListView-Full', fullPage: true },
+    { id: 'agent-pages-inbox--dark', name: 'AgentInbox-Dark', fullPage: true },
+    { id: 'agent-pages-inbox--light', name: 'AgentInbox-Light', fullPage: true },
+    { id: 'agent-pages-ticket--dark', name: 'AgentTicket-Dark', fullPage: true },
+    { id: 'agent-pages-ticket--light', name: 'AgentTicket-Light', fullPage: true },
 ];
 
 /**
@@ -78,7 +78,7 @@ for (const story of stories) {
 
 // ----------------------------------------------------------------
 // README hero screenshots → docs/assets/ (referenced by README.md)
-// Full-page captures of the admin dashboard and agent panel stories.
+// Full-page captures of the admin dashboard and the agent panel pages.
 // ----------------------------------------------------------------
 
 test('README hero: Admin Dashboard (escalated_admin_1)', async ({ page }) => {
@@ -111,47 +111,22 @@ test('README hero: Admin Dashboard Light (escalated_admin_3)', async ({ page }) 
     });
 });
 
-test('README hero: Agent Panel (escalated_admin_2)', async ({ page }) => {
-    await openStory(page, 'pages-admindashboard--agent-panel');
-    await page.evaluate(() => {
-        document.body.style.background = 'transparent';
-        document.documentElement.style.background = 'transparent';
-        const root = document.querySelector('#storybook-root');
-        if (root?.firstElementChild) root.firstElementChild.style.background = 'transparent';
-    });
-    await page.screenshot({
-        path: 'docs/assets/escalated_admin_2.png',
-        animations: 'disabled',
-        omitBackground: true,
-    });
+// The agent shots come from the real agent pages (Agent/Pages/* stories), which
+// fill the viewport themselves.
+async function agentShot(page, storyId, path) {
+    await openStory(page, storyId);
+    await page.locator('[data-testid="esc-queue-row"]').first().waitFor({ state: 'visible' });
+    await page.screenshot({ path, animations: 'disabled' });
+}
+
+test('README hero: Agent inbox (escalated_ticket_list)', async ({ page }) => {
+    await agentShot(page, 'agent-pages-inbox--dark', 'docs/assets/escalated_ticket_list.png');
 });
 
-test('README hero: Ticket List View (escalated_ticket_list)', async ({ page }) => {
-    await openStory(page, 'pages-admindashboard--ticket-list-view');
-    await page.evaluate(() => {
-        document.body.style.background = 'transparent';
-        document.documentElement.style.background = 'transparent';
-        const root = document.querySelector('#storybook-root');
-        if (root?.firstElementChild) root.firstElementChild.style.background = 'transparent';
-    });
-    await page.screenshot({
-        path: 'docs/assets/escalated_ticket_list.png',
-        animations: 'disabled',
-        omitBackground: true,
-    });
+test('README hero: Agent ticket, light (escalated_admin_2)', async ({ page }) => {
+    await agentShot(page, 'agent-pages-ticket--light', 'docs/assets/escalated_admin_2.png');
 });
 
-test('README hero: Ticket Detail View (escalated_ticket_view)', async ({ page }) => {
-    await openStory(page, 'pages-admindashboard--ticket-detail-view');
-    await page.evaluate(() => {
-        document.body.style.background = 'transparent';
-        document.documentElement.style.background = 'transparent';
-        const root = document.querySelector('#storybook-root');
-        if (root?.firstElementChild) root.firstElementChild.style.background = 'transparent';
-    });
-    await page.screenshot({
-        path: 'docs/assets/escalated_ticket_view.png',
-        animations: 'disabled',
-        omitBackground: true,
-    });
+test('README hero: Agent ticket (escalated_ticket_view)', async ({ page }) => {
+    await agentShot(page, 'agent-pages-ticket--dark', 'docs/assets/escalated_ticket_view.png');
 });

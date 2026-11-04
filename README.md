@@ -43,7 +43,7 @@ Escalated is an embeddable support ticket system with SLA tracking, escalation r
 **You don't install this package directly.** Start with the backend package for your framework — it handles everything including pulling in these frontend assets.
 
 <p align="center">
-  <img src=".github/profile/demo.gif" alt="Escalated demo: filing a ticket and replying from the agent inbox" width="800" />
+  <img src=".github/profile/demo.gif" alt="Escalated demo in dark mode: a customer files a ticket from the support widget, then an agent opens it from the inbox, assigns it, replies and sets the status" width="800" />
 </p>
 
 ## Features
@@ -217,18 +217,18 @@ All the Vue 3 + Inertia.js components that power the Escalated UI. These are ide
 </p>
 
 <p align="center">
-  <strong>Ticket Queue</strong><br/>
-  <img src="docs/assets/escalated_ticket_list.png" alt="Escalated Ticket Queue — agent ticket list with filters, search, bulk actions, and SLA indicators" width="800" />
+  <strong>Agent Inbox</strong><br/>
+  <img src="docs/assets/escalated_ticket_list.png" alt="Escalated agent inbox in dark mode: queue rail with saved views and counts, stat strip, and the ticket list beside an empty detail pane" width="800" />
 </p>
 
 <p align="center">
-  <strong>Agent Panel</strong><br/>
-  <img src="docs/assets/escalated_admin_2.png" alt="Escalated Agent Panel — top navigation, stats, and assigned ticket queue" width="800" />
+  <strong>Agent Panel (Light)</strong><br/>
+  <img src="docs/assets/escalated_admin_2.png" alt="Escalated agent panel in light mode: a ticket open beside the inbox list" width="800" />
 </p>
 
 <p align="center">
-  <strong>Ticket Detail View</strong><br/>
-  <img src="docs/assets/escalated_ticket_view.png" alt="Escalated Ticket Detail View — conversation thread, reply composer, and ticket sidebar with SLA timer" width="800" />
+  <strong>Ticket View</strong><br/>
+  <img src="docs/assets/escalated_ticket_view.png" alt="Escalated ticket view in dark mode: inbox list beside the ticket with status, priority, tags, conversation, and the reply composer" width="800" />
 </p>
 
 ### Pages

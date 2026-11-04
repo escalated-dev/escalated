@@ -21,14 +21,26 @@ export function usePage() {
 
 const noop = () => {};
 
+// A story that plays out a flow (the README demo) answers router calls itself;
+// every other story leaves this unset and navigation stays a no-op.
+let routerHandler = null;
+
+export function setRouterHandler(handler) {
+    routerHandler = handler;
+}
+
+function dispatch(method, url, data, options) {
+    if (routerHandler) routerHandler({ method, url, data: data || {}, options: options || {} });
+}
+
 export const router = {
-    visit: noop,
-    get: noop,
-    post: noop,
-    put: noop,
-    patch: noop,
-    delete: noop,
-    reload: noop,
+    visit: (url, options) => dispatch(options?.method || 'get', url, options?.data, options),
+    get: (url, data, options) => dispatch('get', url, data, options),
+    post: (url, data, options) => dispatch('post', url, data, options),
+    put: (url, data, options) => dispatch('put', url, data, options),
+    patch: (url, data, options) => dispatch('patch', url, data, options),
+    delete: (url, options) => dispatch('delete', url, options?.data, options),
+    reload: (options) => dispatch('reload', page.url, null, options),
     on: () => noop,
 };
 
