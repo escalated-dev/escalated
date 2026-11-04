@@ -6,10 +6,12 @@ import PluginBadge from './PluginBadge.vue';
 import { usePermissions } from '../composables/usePermissions';
 import { useI18n } from '../composables/useI18n';
 import { watchScrollAffordance } from '../utils/scrollAffordance';
-import ActiveChatsPanel from './ActiveChatsPanel.vue';
+import AgentShell from './AgentShell.vue';
 
 defineProps({
     title: { type: String, default: 'Support' },
+    /** Agent pages with their own panes (inbox, ticket) fill the content area edge to edge. */
+    fullBleed: { type: Boolean, default: false },
 });
 
 const page = usePage();
@@ -36,9 +38,6 @@ const newslettersEnabled = computed(() => page.props.escalated?.features?.newsle
 // the flag yet keeps the link as before.
 const rolesFlag = computed(() => page.props.escalated?.features?.roles_permissions);
 const kbPublic = computed(() => page.props.escalated?.knowledge_base_public !== false);
-const chatEnabled = computed(() => page.props.escalated?.chat_enabled === true);
-const activeChats = computed(() => page.props.escalated?.active_chats || []);
-const agentId = computed(() => page.props.auth?.user?.id);
 
 provide('esc-dark', isDark);
 
@@ -230,21 +229,6 @@ const adminLinks = computed(() => {
 
     return [...coreLinks, ...pluginLinks].sort((a, b) => (a.position || 100) - (b.position || 100));
 });
-
-const agentLinks = computed(() => [
-    {
-        href: `${prefix.value}/agent`,
-        label: 'Dashboard',
-        // Every agent URL starts with this one; only the dashboard itself is it.
-        exact: true,
-        icon: 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
-    },
-    {
-        href: `${prefix.value}/agent/tickets`,
-        label: 'Tickets',
-        icon: 'M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z',
-    },
-]);
 
 const userName = computed(() => page.props.auth?.user?.name || 'User');
 const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
@@ -506,213 +490,10 @@ onBeforeUnmount(() => {
         </div>
     </div>
 
-    <!-- MODE 2: Agent — top-nav layout; the links fold behind a menu button below lg -->
-    <div
-        v-else-if="isAgentSection"
-        class="min-h-screen bg-[var(--esc-panel-bg)]"
-        :style="{ colorScheme: panelConfig.mode === 'light' ? 'light' : 'dark' }"
-    >
-        <!-- Top nav -->
-        <nav
-            aria-label="Agent navigation"
-            class="sticky top-0 z-30 border-b border-[var(--esc-panel-border)] bg-[var(--esc-panel-header-bg,var(--esc-panel-sidebar-bg))] backdrop-blur-xl"
-        >
-            <div class="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-                <!-- Left: branding -->
-                <div class="flex min-w-0 items-center gap-3">
-                    <div
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--esc-panel-logo-tile-bg,var(--esc-panel-border-input))] text-[var(--esc-panel-logo-tile-fg,var(--esc-panel-text))]"
-                        data-testid="esc-logo-tile"
-                    >
-                        <img
-                            v-if="typeof panelConfig.logo === 'string'"
-                            :src="panelConfig.logo"
-                            class="h-4 w-4"
-                            alt="Escalated logo"
-                        />
-                        <component :is="panelConfig.logo" v-else-if="panelConfig.logo" class="h-4 w-4" />
-                        <svg
-                            v-else
-                            class="h-4 w-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke-width="2.5"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <defs>
-                                <linearGradient id="esc-rainbow-agent" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#f97316" />
-                                    <stop offset="30%" stop-color="#eab308" />
-                                    <stop offset="50%" stop-color="#22c55e" />
-                                    <stop offset="70%" stop-color="#3b82f6" />
-                                    <stop offset="100%" stop-color="#8b5cf6" />
-                                </linearGradient>
-                            </defs>
-                            <g transform="translate(12,12) scale(1.35) translate(-12,-12)">
-                                <polyline points="17 11 12 6 7 11" stroke="url(#esc-rainbow-agent)" />
-                                <polyline points="17 18 12 13 7 18" stroke="url(#esc-rainbow-agent)" />
-                            </g>
-                        </svg>
-                    </div>
-                    <span
-                        class="truncate text-sm font-bold tracking-wide text-[var(--esc-panel-header-text,var(--esc-panel-text))]"
-                        >{{ panelConfig.appName }}</span
-                    >
-                </div>
-
-                <!-- Center: nav links (lg and up) -->
-                <div class="hidden items-center gap-1 lg:flex">
-                    <Link
-                        v-for="link in agentLinks"
-                        :key="link.href"
-                        :href="link.href"
-                        :aria-current="isActive(link.href, link.exact) ? 'page' : undefined"
-                        :class="[
-                            'flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-1.5 text-[13px] font-medium transition-all',
-                            isActive(link.href, link.exact)
-                                ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-active-text,var(--esc-panel-text))]'
-                                : 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
-                        ]"
-                    >
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" :d="link.icon" />
-                        </svg>
-                        {{ link.label }}
-                    </Link>
-                </div>
-
-                <!-- Right: user + links (lg and up) -->
-                <div class="hidden items-center gap-3 lg:flex">
-                    <Link
-                        v-if="isAdmin"
-                        :href="`${prefix}/admin/reports`"
-                        class="whitespace-nowrap text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
-                    >
-                        Admin
-                    </Link>
-                    <Link
-                        :href="prefix"
-                        class="whitespace-nowrap text-[13px] text-[var(--esc-panel-text-muted)] transition-colors hover:text-[var(--esc-panel-text)]"
-                    >
-                        Back to App
-                    </Link>
-                    <div class="ml-1 h-5 w-px bg-[var(--esc-panel-active)]"></div>
-                    <div class="flex items-center gap-2">
-                        <div
-                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-tertiary)]"
-                        >
-                            {{ userInitial }}
-                        </div>
-                        <span class="max-w-[12rem] truncate text-[13px] text-[var(--esc-panel-text-tertiary)]">{{
-                            userName
-                        }}</span>
-                    </div>
-                </div>
-
-                <!-- Menu button (below lg) -->
-                <button
-                    type="button"
-                    class="-mr-2 rounded-lg p-2 text-[var(--esc-panel-header-text,var(--esc-panel-text))] hover:bg-[var(--esc-panel-hover)] lg:hidden"
-                    aria-controls="esc-agent-menu"
-                    :aria-expanded="navOpen ? 'true' : 'false'"
-                    :aria-label="navOpen ? 'Close navigation' : 'Open navigation'"
-                    data-testid="esc-nav-toggle"
-                    @click="toggleNav"
-                >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path v-if="navOpen" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        <path
-                            v-else
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                        />
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Collapsed menu (below lg) -->
-            <div
-                v-if="navOpen"
-                id="esc-agent-menu"
-                class="space-y-1 border-t border-[var(--esc-panel-border)] px-4 py-3 lg:hidden"
-                data-testid="esc-agent-menu"
-            >
-                <Link
-                    v-for="link in agentLinks"
-                    :key="link.href"
-                    :href="link.href"
-                    :aria-current="isActive(link.href, link.exact) ? 'page' : undefined"
-                    :class="[
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',
-                        isActive(link.href, link.exact)
-                            ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-active-text,var(--esc-panel-text))]'
-                            : 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]',
-                    ]"
-                    @click="closeNav"
-                >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" :d="link.icon" />
-                    </svg>
-                    {{ link.label }}
-                </Link>
-                <div class="my-2 h-px bg-[var(--esc-panel-border)]"></div>
-                <Link
-                    v-if="isAdmin"
-                    :href="`${prefix}/admin/reports`"
-                    class="block rounded-lg px-3 py-2 text-sm text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
-                    @click="closeNav"
-                >
-                    Admin
-                </Link>
-                <Link
-                    :href="prefix"
-                    class="block rounded-lg px-3 py-2 text-sm text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
-                    @click="closeNav"
-                >
-                    Back to App
-                </Link>
-                <div class="flex items-center gap-2 px-3 py-2">
-                    <div
-                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-tertiary)]"
-                    >
-                        {{ userInitial }}
-                    </div>
-                    <span class="truncate text-sm text-[var(--esc-panel-text-tertiary)]">{{ userName }}</span>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Page content -->
-        <main ref="contentRoot" class="mx-auto min-w-0 max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <slot />
-        </main>
-
-        <!-- Powered by -->
-        <footer v-if="showPoweredBy" class="border-t border-[var(--esc-panel-border)] py-3 text-center">
-            <a
-                href="https://escalated.dev"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 text-[11px] text-[var(--esc-panel-text-muted)] opacity-60 transition-opacity hover:opacity-100"
-            >
-                <img
-                    :src="
-                        isDark
-                            ? 'https://escalated.dev/brand/logo-icon-dark.svg'
-                            : 'https://escalated.dev/brand/logo-icon-white.svg'
-                    "
-                    alt=""
-                    class="h-3.5 w-3.5"
-                />
-                Powered by Escalated
-            </a>
-        </footer>
-
-        <!-- Active Chats Panel (agent layout only, when chat enabled) -->
-        <ActiveChatsPanel v-if="chatEnabled && agentId" :chats="activeChats" :agent-id="agentId" />
-    </div>
+    <!-- MODE 2: Agent: rail + top bar shell, the same family as admin -->
+    <AgentShell v-else-if="isAgentSection" :title="title" :full-bleed="fullBleed">
+        <slot />
+    </AgentShell>
 
     <!-- MODE 3: Customer pages — use host app layout if provided -->
     <component :is="hostLayout" v-else-if="hostLayout">

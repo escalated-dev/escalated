@@ -117,6 +117,16 @@ const panelDarkDefaults = {
     accentSecondaryHover: '#a78bfa',
     hover: 'rgba(255,255,255,0.03)',
     active: 'rgba(255,255,255,0.08)',
+    noteBg: 'rgba(245,158,11,0.07)',
+    noteBorder: 'rgba(245,158,11,0.28)',
+    noteText: '#fbbf24',
+    priorityLow: '#a3a3a3',
+    priorityMedium: '#eab308',
+    priorityHigh: '#fb923c',
+    priorityUrgent: '#f87171',
+    slaOk: '#34d399',
+    slaWarn: '#fbbf24',
+    slaBreach: '#f87171',
 };
 
 const panelLightDefaults = {
@@ -137,6 +147,16 @@ const panelLightDefaults = {
     accentSecondaryHover: '#818cf8',
     hover: 'rgba(0,0,0,0.02)',
     active: '#eff6ff',
+    noteBg: '#fffbeb',
+    noteBorder: '#fcd34d',
+    noteText: '#92400e',
+    priorityLow: '#6b7280',
+    priorityMedium: '#ca8a04',
+    priorityHigh: '#ea580c',
+    priorityUrgent: '#dc2626',
+    slaOk: '#047857',
+    slaWarn: '#b45309',
+    slaBreach: '#dc2626',
 };
 
 const panelTokenMap = {
@@ -157,6 +177,22 @@ const panelTokenMap = {
     accentSecondaryHover: '--esc-panel-accent-secondary-hover',
     hover: '--esc-panel-hover',
     active: '--esc-panel-active',
+    // Semantic tokens for the agent panel (internal notes, the selected list
+    // row, the primary button, priority dots and SLA markers).
+    noteBg: '--esc-panel-note-bg',
+    noteBorder: '--esc-panel-note-border',
+    noteText: '--esc-panel-note-text',
+    selectedBg: '--esc-panel-selected-bg',
+    selectedBorder: '--esc-panel-selected-border',
+    primaryBg: '--esc-panel-primary-bg',
+    primaryText: '--esc-panel-primary-text',
+    priorityLow: '--esc-priority-low',
+    priorityMedium: '--esc-priority-medium',
+    priorityHigh: '--esc-priority-high',
+    priorityUrgent: '--esc-priority-urgent',
+    slaOk: '--esc-sla-ok',
+    slaWarn: '--esc-sla-warn',
+    slaBreach: '--esc-sla-breach',
 };
 
 // Optional panel hooks. The layout reads each through a CSS fallback to the
@@ -171,18 +207,66 @@ const panelOptionalTokenMap = {
     logoTileFg: '--esc-panel-logo-tile-fg', // currentColor inside the logo tile (falls back to text)
 };
 
-function applyPanelTheme(panelConfig) {
-    const defaults = panelConfig.mode === 'light' ? panelLightDefaults : panelDarkDefaults;
+// Relative luminance of a #rgb / #rrggbb colour, or null for anything else.
+function luminance(color) {
+    const hex = String(color).trim().replace('#', '');
+    const full = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex;
+    if (!/^[0-9a-f]{6}$/i.test(full)) return null;
+    const channel = (i) => {
+        const v = parseInt(full.slice(i, i + 2), 16) / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+}
+
+// Black or white, whichever reads better on the given background.
+function readableOn(color) {
+    const l = luminance(color);
+    if (l === null) return '#ffffff';
+    return (l + 0.05) / 0.05 > 1.05 / (l + 0.05) ? '#000000' : '#ffffff';
+}
+
+/**
+ * Resolve the full set of panel tokens (CSS custom property -> value) for a
+ * panel config. Tokens derived from the accent (selected row, primary button)
+ * follow an accent override unless the host sets them itself.
+ */
+function resolvePanelTokens(panelConfig = {}) {
+    const light = panelConfig.mode === 'light';
+    const defaults = light ? panelLightDefaults : panelDarkDefaults;
     const overrides = {};
     for (const key of Object.keys(panelTokenMap)) {
-        if (panelConfig[key] !== undefined) {
+        if (panelConfig[key] !== undefined && panelConfig[key] !== null) {
             overrides[key] = panelConfig[key];
         }
     }
     const merged = { ...defaults, ...overrides };
+    // Light mode buttons sit on white, where the darker hover shade of the
+    // accent is the one that holds white text at AA.
+    const primaryBg = overrides.primaryBg ?? (light ? merged.accentHover : merged.accent);
+    const derived = {
+        selectedBg: `color-mix(in srgb, ${merged.accent} ${light ? 8 : 10}%, transparent)`,
+        selectedBorder: merged.accent,
+        primaryBg,
+        primaryText: readableOn(primaryBg),
+    };
+    // Anything the host set itself (including a derived token) wins.
+    const resolved = { ...derived, ...merged };
+    return Object.fromEntries(Object.entries(panelTokenMap).map(([key, cssVar]) => [cssVar, resolved[key]]));
+}
+
+/**
+ * The panel tokens for a mode, as a map of CSS custom property to value.
+ * Storybook and tests use it to theme a subtree without the plugin.
+ */
+export function panelThemeTokens(mode = 'dark', overrides = {}) {
+    return resolvePanelTokens({ ...overrides, mode });
+}
+
+function applyPanelTheme(panelConfig) {
     const style = document.documentElement.style;
-    for (const [key, cssVar] of Object.entries(panelTokenMap)) {
-        style.setProperty(cssVar, merged[key]);
+    for (const [cssVar, value] of Object.entries(resolvePanelTokens(panelConfig))) {
+        style.setProperty(cssVar, value);
     }
     for (const [key, cssVar] of Object.entries(panelOptionalTokenMap)) {
         if (panelConfig[key] !== undefined && panelConfig[key] !== null) {

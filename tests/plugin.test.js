@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createApp } from 'vue';
-import { EscalatedPlugin } from '../src/plugin.js';
+import { EscalatedPlugin, panelThemeTokens } from '../src/plugin.js';
 
 /**
  * Helper: create a fresh Vue app, install the plugin, and return the app.
@@ -299,6 +299,20 @@ describe('Panel theming', () => {
         '--esc-panel-header-text',
         '--esc-panel-logo-tile-bg',
         '--esc-panel-logo-tile-fg',
+        '--esc-panel-note-bg',
+        '--esc-panel-note-border',
+        '--esc-panel-note-text',
+        '--esc-panel-selected-bg',
+        '--esc-panel-selected-border',
+        '--esc-panel-primary-bg',
+        '--esc-panel-primary-text',
+        '--esc-priority-low',
+        '--esc-priority-medium',
+        '--esc-priority-high',
+        '--esc-priority-urgent',
+        '--esc-sla-ok',
+        '--esc-sla-warn',
+        '--esc-sla-breach',
     ];
 
     beforeEach(() => {
@@ -399,5 +413,64 @@ describe('Panel theming', () => {
             'escalated-panel',
             expect.objectContaining({ appName: 'Escalated', logo: null, mode: 'dark' }),
         );
+    });
+    // The agent panel reads these instead of hard-coded neutral/amber/rose
+    // classes, so a host theme reaches internal notes, the selected row,
+    // priority dots and SLA markers too.
+    describe('semantic tokens', () => {
+        const semantic = [
+            '--esc-panel-note-bg',
+            '--esc-panel-note-border',
+            '--esc-panel-note-text',
+            '--esc-panel-selected-bg',
+            '--esc-panel-selected-border',
+            '--esc-panel-primary-bg',
+            '--esc-panel-primary-text',
+            '--esc-priority-low',
+            '--esc-priority-medium',
+            '--esc-priority-high',
+            '--esc-priority-urgent',
+            '--esc-sla-ok',
+            '--esc-sla-warn',
+            '--esc-sla-breach',
+        ];
+
+        it.each(['dark', 'light'])('sets every semantic token in %s mode', (mode) => {
+            installPlugin({ theme: { panel: { mode } } });
+            const style = document.documentElement.style;
+            for (const prop of semantic) {
+                expect(style.getPropertyValue(prop), prop).not.toBe('');
+            }
+        });
+
+        it('uses different note and priority colours for dark and light', () => {
+            const dark = panelThemeTokens('dark');
+            const light = panelThemeTokens('light');
+            expect(dark['--esc-panel-note-text']).not.toBe(light['--esc-panel-note-text']);
+            expect(dark['--esc-priority-urgent']).not.toBe(light['--esc-priority-urgent']);
+        });
+
+        it('derives the selected row from the accent, so an accent override carries over', () => {
+            installPlugin({ theme: { panel: { accent: '#e94560' } } });
+            const style = document.documentElement.style;
+            expect(style.getPropertyValue('--esc-panel-selected-border')).toBe('#e94560');
+            expect(style.getPropertyValue('--esc-panel-selected-bg')).toContain('#e94560');
+        });
+
+        it('picks a readable text colour for the primary button', () => {
+            // Cyan on the dark default is too light for white text.
+            expect(panelThemeTokens('dark')['--esc-panel-primary-text']).toBe('#000000');
+            expect(panelThemeTokens('light')['--esc-panel-primary-text']).toBe('#ffffff');
+            installPlugin({ theme: { panel: { accent: '#1e1b4b' } } });
+            expect(document.documentElement.style.getPropertyValue('--esc-panel-primary-text')).toBe('#ffffff');
+        });
+
+        it('lets a host override a semantic token', () => {
+            installPlugin({ theme: { panel: { noteBg: '#332200', priorityUrgent: '#ff0000', slaBreach: '#ff1111' } } });
+            const style = document.documentElement.style;
+            expect(style.getPropertyValue('--esc-panel-note-bg')).toBe('#332200');
+            expect(style.getPropertyValue('--esc-priority-urgent')).toBe('#ff0000');
+            expect(style.getPropertyValue('--esc-sla-breach')).toBe('#ff1111');
+        });
     });
 });
