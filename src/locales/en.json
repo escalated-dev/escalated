@@ -1006,7 +1006,9 @@
             "add_note": "Add note",
             "more_send": "More send options",
             "send_pending": "Send and set waiting on customer",
-            "send_resolve": "Send and resolve"
+            "send_resolve": "Send and resolve",
+            "send_failed": "Not sent. Check your connection and try again; your text is still here.",
+            "sending": "Sending"
         },
         "ticket": {
             "macros": "Macros",
@@ -1068,6 +1070,23 @@
             "back_to": "Back to :queue",
             "filter_tags": "Filter tags",
             "no_tags_match": "No tags match."
+        },
+        "toast": {
+            "dismiss": "Dismiss",
+            "failed": "That did not go through. Try again.",
+            "status": "Status set to :status",
+            "priority": "Priority set to :priority",
+            "tags": "Tags updated",
+            "assigned": "Assigned to you",
+            "followed": "Following this ticket",
+            "unfollowed": "No longer following this ticket",
+            "macro": "Applied :name",
+            "action": ":name done",
+            "snoozed": "Ticket snoozed",
+            "pinned": "Note pinned",
+            "unpinned": "Note unpinned",
+            "reply_sent": "Reply sent",
+            "note_added": "Internal note added"
         }
     }
 }

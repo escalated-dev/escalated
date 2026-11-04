@@ -6,6 +6,7 @@ import AgentShell from '../../src/components/AgentShell.vue';
 import { registerAgentCommands } from '../../src/composables/useAgentCommands';
 import { forgetInbox, rememberInbox } from '../../src/utils/agentQueues';
 import { resetAgentStatus } from '../../src/composables/useAgentStatus';
+import { clearToasts, toast } from '../../src/composables/useAgentToasts';
 
 const usePage = vi.fn();
 const visit = vi.fn();
@@ -53,6 +54,7 @@ function mountLayout(url, props, escalated) {
 beforeEach(() => {
     window.localStorage.clear();
     resetAgentStatus();
+    clearToasts();
     usePage.mockReset();
     visit.mockReset();
     reload.mockReset();
@@ -314,3 +316,25 @@ describe('AgentShell below lg', () => {
         expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-lg:-translate-x-full');
     });
 });
+
+describe('AgentShell toasts', () => {
+    const toasts = () => wrapper.findAll('[data-testid="esc-toast"]').map((el) => [el.attributes('data-tone'), el.text()]);
+
+    it('shows the flash message the backend sends', () => {
+        mountLayout('/support/agent/tickets', { flash: { success: 'Reply added.' } });
+        expect(toasts()).toEqual([['success', 'Reply added.']]);
+    });
+
+    it('shows a flash error as an error that stays', () => {
+        mountLayout('/support/agent/tickets', { flash: { error: 'You cannot do that.' } });
+        expect(toasts()).toEqual([['error', 'You cannot do that.']]);
+    });
+
+    it('shows toasts raised by the page', async () => {
+        mountLayout('/support/agent/tickets');
+        toast('Link copied');
+        await nextTick();
+        expect(toasts()).toEqual([['success', 'Link copied']]);
+    });
+});
+

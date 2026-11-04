@@ -5,6 +5,8 @@ import { useI18n } from '../composables/useI18n';
 import { useKeyboardShortcuts } from '../composables/useKeyboardShortcuts';
 import { agentCommands } from '../composables/useAgentCommands';
 import { AGENT_STATUSES, useAgentStatus } from '../composables/useAgentStatus';
+import { toast } from '../composables/useAgentToasts';
+import { readFlash } from '../utils/flash';
 import { watchScrollAffordance } from '../utils/scrollAffordance';
 import {
     activeQueueKey,
@@ -16,6 +18,7 @@ import {
     workspaceQueues,
 } from '../utils/agentQueues';
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
+import AgentToasts from './AgentToasts.vue';
 import CommandPalette from './CommandPalette.vue';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
@@ -243,6 +246,18 @@ const currentStatus = computed(() => ({
 function setStatus(item) {
     setAgentStatus(item.key);
 }
+
+// --- Flash messages ------------------------------------------------------------
+// Each Inertia visit brings a new props object; a flash on it becomes a toast.
+watch(
+    () => [page.props, page.flash],
+    () => {
+        const flash = readFlash(page);
+        if (flash.success || flash.message) toast(flash.success || flash.message, 'success');
+        if (flash.error) toast(flash.error, 'error');
+    },
+    { immediate: true },
+);
 
 function navItemClass(active) {
     return [
@@ -601,5 +616,6 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
             @saved="onViewSaved"
         />
         <ActiveChatsPanel v-if="chatEnabled && userId" :chats="activeChats" :agent-id="userId" />
+        <AgentToasts />
     </div>
 </template>
