@@ -933,6 +933,50 @@
             "resolve": "Resolve",
             "open": "Open ticket",
             "select": "Select"
+        },
+        "time": {
+            "just_now": "Just now",
+            "minutes_ago": ":countm ago",
+            "hours_ago": ":counth ago",
+            "days_ago": ":countd ago"
+        },
+        "sla": {
+            "breached": "SLA breached",
+            "minutes_left": ":countm left"
+        },
+        "inbox": {
+            "title_mine": "My inbox",
+            "title_unassigned": "Unassigned",
+            "title_all": "All tickets",
+            "title_live": "Live chats",
+            "title_tickets": "Tickets",
+            "subtitle_mine_one": "1 ticket assigned to you",
+            "subtitle_mine_other": ":count tickets assigned to you",
+            "subtitle_unassigned_one": "1 ticket waiting for an owner",
+            "subtitle_unassigned_other": ":count tickets waiting for an owner",
+            "subtitle_one": "1 ticket",
+            "subtitle_other": ":count tickets",
+            "stats": {
+                "open": "Open",
+                "urgent": "Urgent",
+                "sla_at_risk": "SLA at risk",
+                "resolved_today": "Resolved today"
+            },
+            "new_ticket": "New ticket",
+            "search": "Search tickets",
+            "search_placeholder": "Search tickets",
+            "filters": "Filters",
+            "tickets": "Tickets",
+            "select_ticket": "Select :reference",
+            "requester_online": "Requester is online",
+            "empty": "No tickets in this queue.",
+            "pagination": "Pages",
+            "page_of": "Page :current of :last",
+            "previous": "Previous",
+            "next": "Next",
+            "select_a_ticket": "Select a ticket",
+            "select_hint": "Use j and k to move through the list and Enter to open a ticket.",
+            "shortcut_help": "All keyboard shortcuts"
         }
     }
 }

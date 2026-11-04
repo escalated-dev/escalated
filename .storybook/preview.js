@@ -1,6 +1,7 @@
 import { computed } from 'vue';
 import './tailwind.css';
 import './storybook.css';
+import { setup } from '@storybook/vue3-vite';
 import { panelThemeTokens } from '../src/plugin.js';
 
 // The agent pages build URLs with the host's Ziggy-style route() helper.
@@ -13,6 +14,11 @@ if (typeof window !== 'undefined' && typeof window.route !== 'function') {
         return [path, ...list].join('/');
     };
 }
+
+// Templates call route() as a global property, as Ziggy registers it.
+setup((app) => {
+    app.config.globalProperties.route = (...args) => window.route(...args);
+});
 
 const panelDarkDefaults = {
     '--esc-panel-bg': '#000000',
