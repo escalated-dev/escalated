@@ -14,7 +14,6 @@ import ChatActionBar from './ChatActionBar.vue';
 import ChatComposer from './ChatComposer.vue';
 import ChatThread from './ChatThread.vue';
 import Composer from './Composer.vue';
-import KnowledgePanel from './KnowledgePanel.vue';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
 import PluginSlot from './PluginSlot.vue';
@@ -50,6 +49,8 @@ const props = defineProps({
     routes: { type: Object, default: () => ({}) },
     /** `{ active, messages, typingUser, sendEndpoint, typingEndpoint, endEndpoint, transferEndpoint }` */
     chat: { type: Object, default: () => ({ active: false }) },
+    /** Where the knowledge base lives; empty when it is off. */
+    knowledgeBaseUrl: { type: String, default: '' },
 });
 
 const emit = defineEmits(['chat-send', 'end-chat']);
@@ -1062,9 +1063,19 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                 <p v-else class="mt-1.5 text-[13px] text-[var(--esc-panel-text-tertiary)]">
                     {{ t('agent_panel.ticket.no_links') }}
                 </p>
-                <div class="mt-5">
-                    <KnowledgePanel :ticket-reference="ticket.reference" />
-                </div>
+                <template v-if="knowledgeBaseUrl">
+                    <h3 class="mt-5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
+                        {{ t('agent_panel.ticket.knowledge_base') }}
+                    </h3>
+                    <Link
+                        :href="knowledgeBaseUrl"
+                        class="-mx-1.5 mt-1.5 flex items-center gap-2 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        data-testid="esc-kb-link"
+                    >
+                        <PanelIcon name="book" class="h-4 w-4 shrink-0 text-[var(--esc-panel-text-tertiary)]" />
+                        {{ t('agent_panel.ticket.search_knowledge_base') }}
+                    </Link>
+                </template>
                 <h3 class="mt-5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
                     {{ t('agent_panel.ticket.activity') }}
                 </h3>

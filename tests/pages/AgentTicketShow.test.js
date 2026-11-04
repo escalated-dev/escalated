@@ -515,3 +515,19 @@ describe('Agent/TicketShow while another ticket loads', () => {
     });
 });
 
+describe('Agent/TicketShow related tab', () => {
+    it('links to the knowledge base instead of showing made-up article suggestions', async () => {
+        mountPage();
+        await wrapper.get('#esc-tab-related').trigger('click');
+        expect(wrapper.findComponent({ name: 'KnowledgePanel' }).exists()).toBe(false);
+        const link = wrapper.get('[data-testid="esc-kb-link"]');
+        expect(link.attributes('href')).toBe('/support/kb');
+    });
+
+    it('leaves the link out when the knowledge base is off', async () => {
+        mountPage({}, { knowledge_base_enabled: false });
+        await wrapper.get('#esc-tab-related').trigger('click');
+        expect(wrapper.find('[data-testid="esc-kb-link"]').exists()).toBe(false);
+    });
+});
+

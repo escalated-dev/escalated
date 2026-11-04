@@ -1083,7 +1083,9 @@
             "back_to": "Back to :queue",
             "filter_tags": "Filter tags",
             "no_tags_match": "No tags match.",
-            "loading": "Loading ticket"
+            "loading": "Loading ticket",
+            "knowledge_base": "Knowledge base",
+            "search_knowledge_base": "Search the knowledge base"
         },
         "toast": {
             "dismiss": "Dismiss",
