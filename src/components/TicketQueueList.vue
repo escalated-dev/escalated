@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import {
+    absoluteTime,
     initials,
     isLive,
     isUnread,
@@ -447,9 +448,12 @@ const pagination = computed(() => {
                                 :title="t('agent_panel.inbox.requester_online')"
                                 data-testid="esc-queue-live"
                             ></span>
-                            <span class="ml-auto shrink-0 tabular-nums">{{
-                                relativeTime(lastActivity(ticket), t, now)
-                            }}</span>
+                            <time
+                                class="ml-auto shrink-0 tabular-nums"
+                                :datetime="lastActivity(ticket)"
+                                :title="absoluteTime(lastActivity(ticket))"
+                                >{{ relativeTime(lastActivity(ticket), t, now) }}</time
+                            >
                         </div>
                         <Link
                             :ref="(el) => (rowLinks[index] = el)"
