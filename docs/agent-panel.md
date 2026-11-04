@@ -149,6 +149,20 @@ Ticket fields the page reads beyond the existing ones, all optional:
 | `activities[].type`, `.properties` (`new_status`, `new_priority`, `agent_id`, `new_department_id`, `tag`), `.causer.name` | System events and the ticket history |
 | `attachments[].size` | The file size on attachment chips |
 
+### The composer
+
+Idle and empty, the composer is one line under the Reply / Internal note
+tabs. Focus, a draft, attached files or an open menu open it up: the text box
+grows with the text (up to 40% of the window, then scrolls) and the toolbar
+appears. A public reply names its recipient (`ticket.requester.name`, with
+the email in the tooltip); an internal note turns the whole composer amber
+and says only agents can see it. `Ctrl Enter` (`⌘ Enter` on a Mac) sends,
+`Ctrl Shift Enter` sends and resolves, and Escape leaves an empty box. Files
+can be attached with the paperclip, dropped on the composer or pasted. Drafts
+are kept per ticket and mode in the browser (`escalated-draft:<reference>:<mode>`)
+and can be discarded after a confirmation. `Composer` takes an optional
+`recipient` (`{ name, email }`).
+
 ## The agent's own status
 
 The rail footer and the top bar show the signed-in agent with a status dot

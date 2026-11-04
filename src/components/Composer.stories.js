@@ -1,3 +1,4 @@
+import { userEvent, within } from 'storybook/test';
 import Composer from './Composer.vue';
 import { AgentFrame, cannedResponses } from '../../.storybook/agentFixtures.js';
 
@@ -14,6 +15,7 @@ function render(mode, extra = {}) {
         statusAction: '#',
         cannedResponses,
         draftKey: '',
+        recipient: { name: 'Sarah Chen', email: 'sarah@northwind.io' },
         ...extra,
     };
     return () => ({
@@ -34,3 +36,14 @@ export const Light = { render: render('light') };
 export const InternalNoteDark = { render: render('dark', { mode: 'note' }) };
 export const InternalNoteLight = { render: render('light', { mode: 'note' }) };
 export const LightAgent = { render: render('dark', { notesOnly: true }) };
+
+/** In use: focused, with the toolbar, the recipient and the draft controls. */
+const inUse = async ({ canvasElement }) => {
+    const input = within(canvasElement).getByTestId('esc-composer-input');
+    await userEvent.click(input);
+    await userEvent.type(input, 'Hi Sarah, the export is running again.');
+};
+
+export const InUseDark = { render: render('dark'), play: inUse };
+export const InUseLight = { render: render('light'), play: inUse };
+export const InternalNoteInUse = { render: render('light', { mode: 'note' }), play: inUse };

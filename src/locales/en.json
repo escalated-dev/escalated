@@ -1032,7 +1032,10 @@
             "send_pending": "Send and set waiting on customer",
             "send_resolve": "Send and resolve",
             "send_failed": "Not sent. Check your connection and try again; your text is still here.",
-            "sending": "Sending"
+            "sending": "Sending",
+            "to": "To :name",
+            "discard": "Discard draft",
+            "discard_confirm": "Discard this draft? It cannot be recovered."
         },
         "ticket": {
             "macros": "Macros",
