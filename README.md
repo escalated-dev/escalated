@@ -43,7 +43,7 @@ Escalated is an embeddable support ticket system with SLA tracking, escalation r
 **You don't install this package directly.** Start with the backend package for your framework — it handles everything including pulling in these frontend assets.
 
 <p align="center">
-  <img src=".github/profile/demo.gif" alt="Escalated demo in dark mode: a customer files a ticket from the support widget, then an agent opens it from the inbox, assigns it, replies and sets the status" width="800" />
+  <img src=".github/profile/demo.gif" alt="Escalated demo: on Pinecone, a made-up notes app, a customer files a ticket from the support widget themed in the app's green, then, in the dark agent panel, an agent opens it from the inbox, assigns it, replies and sets the status" width="800" />
 </p>
 
 ## Features
