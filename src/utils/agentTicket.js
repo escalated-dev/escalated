@@ -63,17 +63,20 @@ export function slaState(ticket, now = Date.now()) {
 
 /** One line of plain text from a message body (which may be HTML). */
 export function preview(text) {
-    return String(text || '')
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&#39;|&apos;/g, "'")
-        .replace(/&quot;/g, '"')
-        .replace(/\s+/g, ' ')
-        .replace(/\s+([.,!?;:])/g, '$1')
-        .trim();
+    return (
+        String(text || '')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&#39;|&apos;/g, "'")
+            .replace(/&quot;/g, '"')
+            // Last, so "&amp;lt;" stays "&lt;" rather than becoming "<".
+            .replace(/&amp;/g, '&')
+            .replace(/\s+/g, ' ')
+            .replace(/\s+([.,!?;:])/g, '$1')
+            .trim()
+    );
 }
 
 export function latestPreview(ticket) {

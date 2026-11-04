@@ -141,6 +141,13 @@ describe('Agent/TicketIndex without the new props', () => {
         expect(rows()[2].text()).toContain('MG');
     });
 
+    it('decodes entities in the preview once', () => {
+        mountPage('/support/agent/tickets', {
+            tickets: { data: [{ ...tickets.data[0], description: '<p>Use &amp;lt;b&amp;gt; &amp; more</p>' }] },
+        });
+        expect(rows()[0].text()).toContain('Use &lt;b&gt; & more');
+    });
+
     it('marks unread rows, online requesters, priority and SLA breaches', () => {
         mountPage('/support/agent/tickets');
         expect(rows()[0].attributes('data-unread')).toBe('true');
