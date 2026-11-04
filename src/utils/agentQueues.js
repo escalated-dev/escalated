@@ -152,3 +152,25 @@ export function forgetInbox() {
         // nothing to clear
     }
 }
+
+/**
+ * Title and subline for the list column: "My inbox" / "24 tickets assigned
+ * to you". The backend's `queue.title` wins; otherwise the queue key names it.
+ */
+export function queueHeading({ key, queue = null, views = [], total = null, t }) {
+    const view = String(key || '').startsWith('view:') ? (views || []).find((v) => `view:${v.id}` === key) : null;
+    const named = {
+        mine: 'agent_panel.inbox.title_mine',
+        unassigned: 'agent_panel.inbox.title_unassigned',
+        all: 'agent_panel.inbox.title_all',
+        live: 'agent_panel.inbox.title_live',
+    };
+    const title = queue?.title || view?.name || (named[key] ? t(named[key]) : t('agent_panel.inbox.title_tickets'));
+    if (typeof total !== 'number') return { title, subtitle: '' };
+    const form = total === 1 ? 'one' : 'other';
+    const sub = {
+        mine: `agent_panel.inbox.subtitle_mine_${form}`,
+        unassigned: `agent_panel.inbox.subtitle_unassigned_${form}`,
+    }[key];
+    return { title, subtitle: t(sub || `agent_panel.inbox.subtitle_${form}`, { count: total }) };
+}

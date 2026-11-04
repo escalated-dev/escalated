@@ -5,6 +5,15 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 ## [Unreleased]
 
 ### Changed
+- **Agent inbox split view.** `Agent/TicketIndex` is a list column (queue
+  title and count, stat strip, search, a filter popover holding the existing
+  `TicketFilters`, and dense rows with initials, reference, subject, preview,
+  age, priority and SLA markers) beside a detail pane that says "Select a
+  ticket" until one is opened. `j`/`k` move, `x` selects (the bulk bar is
+  unchanged), `Enter` opens, `/` searches; arrow keys move between rows.
+  Quick filters move to the queues in the rail. New optional props `inbox`
+  and `queue` are documented in `docs/agent-panel.md`; a backend that sends
+  neither gets the same list without counts, views or stats.
 - **Agent panel shell.** Pages under `/agent` now use a rail and top bar in the
   same family as the admin panel instead of the old top navigation. The rail
   lists the workspace queues (Inbox, Unassigned, All tickets), saved views and

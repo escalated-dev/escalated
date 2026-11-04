@@ -40,7 +40,7 @@ app.use(EscalatedPlugin, {
 | Option | CSS custom property | What it colours |
 |---|---|---|
 | `bg` | `--esc-panel-bg` | Page background |
-| `sidebarBg` | `--esc-panel-sidebar-bg` | Admin sidebar; agent top nav unless `headerBg` is set |
+| `sidebarBg` | `--esc-panel-sidebar-bg` | Admin sidebar and agent rail |
 | `topbarBg` | `--esc-panel-topbar-bg` | Admin top bar unless `headerBg` is set |
 | `surface` / `surfaceAlt` | `--esc-panel-surface`, `--esc-panel-surface-alt` | Cards, tables, inputs |
 | `border` / `borderInput` | `--esc-panel-border`, `--esc-panel-border-input` | Dividers, input borders; the logo tile unless `logoTileBg` is set |
@@ -50,6 +50,19 @@ app.use(EscalatedPlugin, {
 | `hover` | `--esc-panel-hover` | Hover backgrounds |
 | `active` | `--esc-panel-active` | **Current nav item** background |
 
+### Semantic tokens (agent panel)
+
+Set in both modes and overridable like the tokens above. The agent inbox and
+ticket view read these instead of fixed colours.
+
+| Option | CSS custom property | What it colours |
+|---|---|---|
+| `noteBg`, `noteBorder`, `noteText` | `--esc-panel-note-bg`, `--esc-panel-note-border`, `--esc-panel-note-text` | Internal notes and the composer's Internal note mode |
+| `selectedBg`, `selectedBorder` | `--esc-panel-selected-bg`, `--esc-panel-selected-border` | The open ticket's row in the list. Derived from `accent` unless set |
+| `primaryBg`, `primaryText` | `--esc-panel-primary-bg`, `--esc-panel-primary-text` | The Send button. `accent` (dark) or `accentHover` (light), with black or white text, whichever reads better |
+| `priorityLow`, `priorityMedium`, `priorityHigh`, `priorityUrgent` | `--esc-priority-low`, `-medium`, `-high`, `-urgent` | Priority dots and the Urgent label |
+| `slaOk`, `slaWarn`, `slaBreach` | `--esc-sla-ok`, `--esc-sla-warn`, `--esc-sla-breach` | SLA markers, the online dot |
+
 ### Optional hooks
 
 These have no default of their own. Unset, each falls back to the token it
@@ -58,7 +71,7 @@ replaced, so the panels look exactly as they did before the hook existed.
 | Option | CSS custom property | Falls back to | What it colours |
 |---|---|---|---|
 | `activeText` | `--esc-panel-active-text` | `text` | Current nav item text and icon |
-| `headerBg` | `--esc-panel-header-bg` | `topbarBg` (admin), `sidebarBg` (agent) | Admin top bar, agent top nav |
+| `headerBg` | `--esc-panel-header-bg` | `topbarBg` (admin), `bg` (agent) | Admin top bar, agent top bar |
 | `headerText` | `--esc-panel-header-text` | `text` | Page title, app name and menu button in that bar |
 | `logoTileBg` | `--esc-panel-logo-tile-bg` | `borderInput` | The square behind the logo |
 | `logoTileFg` | `--esc-panel-logo-tile-fg` | `text` | `currentColor` inside the logo tile, for an SVG component logo |
@@ -84,8 +97,8 @@ Below Tailwind's `lg` breakpoint (1024px):
 - the admin sidebar becomes a drawer, opened by the menu button in the top
   bar and closed by its backdrop, its close button, <kbd>Escape</kbd>, or
   following a link;
-- the agent top nav folds its links, the Admin and Back to App links, and the
-  user into a menu under a menu button.
+- the agent rail becomes a drawer in the same way, and the inbox shows the
+  list alone; opening a ticket shows the ticket alone.
 
 Tables in the panels sit inside an `.esc-table-scroll` container that scrolls
 sideways instead of widening the page. A shadow appears on any edge with more

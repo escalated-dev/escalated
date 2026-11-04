@@ -773,6 +773,8 @@
             "props": [
                 "departments",
                 "filters",
+                "inbox",
+                "queue",
                 "tags",
                 "tickets"
             ],
