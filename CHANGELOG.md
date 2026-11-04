@@ -10,6 +10,38 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   are a shade darker so they hold WCAG AA (4.5:1) on hovered, active and
   selected rows and on the urgent tint. Hosts that set these tokens keep
   their own values.
+- **Agent inbox rows.** Hovering a row kept the initials circle but showed the
+  browser's native checkbox (a black square in dark mode); on the ticket page,
+  where rows are not selectable, the avatar vanished. Rows now keep the circle
+  and show a token-styled checkbox only where rows can be selected. The first
+  `j`/`k` lands on the current row instead of skipping it, and each age shows
+  the full date and time on hover.
+- **Queues while searching.** Searching, filtering, clicking a stat tile or
+  paging inside a queue keeps its title and its highlight in the rail.
+- **Agent panel focus and contrast.** Placeholders use the tertiary token
+  (AA in both modes); the composer shows focus on its border; every control on
+  the agent pages has the accent focus ring.
+- **Popovers.** The tag picker is a filterable menu with tag colours that
+  closes on Escape or a click outside. The filter popover drops its second
+  search box and the "Save as View" button nothing listened to, and closes
+  the same way. `TicketFilters` gains `showSearch` and `showSaveView` props,
+  both defaulting to `true`.
+- **Keyboard help.** `KeyboardShortcutHelp` is translated, uses the panel
+  tokens without a blurred backdrop, takes focus and closes on Escape, and
+  lists the keys each page binds (new `withList` and `agent` props; admin
+  pages no longer list the agent-only `g` sequences).
+- **Layout.** The list column is 340px from lg and 420px from xl, so the
+  ticket keeps a usable width at 1024px. On a phone the section tabs stay on
+  one line and the ticket header scrolls away with the thread while the
+  composer stays docked.
+
+### Added
+- **Agent status.** The rail footer and a top-bar avatar show the agent's
+  status (Online, Away, Offline) with a dot and a menu, whether or not live
+  chat is on. It reads the shared `escalated.agent_status` (or
+  `escalated.chat_status`), then the browser's last choice, and posts changes
+  to `escalated.admin.chat.status` when the host has that route. See
+  `docs/agent-panel.md`.
 
 ### Changed
 - **Agent ticket view.** `Agent/TicketShow` keeps the inbox list beside the
