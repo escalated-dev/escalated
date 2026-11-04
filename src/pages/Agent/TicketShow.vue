@@ -195,6 +195,36 @@ const listTickets = computed(() => remembered.value?.tickets || null);
 const backHref = computed(() => remembered.value?.url || ticketsUrl(prefix.value));
 const backLabel = computed(() => props.queue?.title || remembered.value?.title || t('agent_panel.nav.tickets'));
 
+// --- Switching tickets ----------------------------------------------------------
+// Opening another ticket keeps this page and swaps its props, which can take
+// a moment; the pane shows a skeleton meanwhile rather than the old ticket.
+const switching = ref(false);
+const currentTicketPath = computed(() => {
+    const url = routeOr('escalated.agent.tickets.show', props.ticket.reference) || '';
+    return url.split('?')[0];
+});
+const ticketPathPrefix = computed(() => currentTicketPath.value.replace(/[^/]*$/, ''));
+const stopRouterListeners = [];
+if (typeof router.on === 'function') {
+    stopRouterListeners.push(
+        router.on('start', (event) => {
+            const visit = event?.detail?.visit;
+            const url = visit?.url;
+            const path = typeof url === 'string' ? url.split('?')[0] : url?.pathname || '';
+            const isGet = String(visit?.method || 'get').toLowerCase() === 'get';
+            const otherTicket =
+                ticketPathPrefix.value && path.startsWith(ticketPathPrefix.value) && path !== currentTicketPath.value;
+            if (isGet && otherTicket && !path.slice(ticketPathPrefix.value.length).includes('/')) {
+                switching.value = true;
+            }
+        }),
+        router.on('finish', () => {
+            switching.value = false;
+        }),
+    );
+}
+onUnmounted(() => stopRouterListeners.forEach((stop) => typeof stop === 'function' && stop()));
+
 // Keyboard shortcuts
 useKeyboardShortcuts({
     r: () => paneRef.value?.focusReply(),
@@ -372,7 +402,28 @@ onUnmounted(() => {
                 </Link>
                 <!-- Plugin: ticket show header slot -->
                 <PluginSlot slot="ticket.show.header" :components="getPageComponents('ticket.show', 'header')" />
-                <div class="min-h-0 flex-1">
+                <div
+                    v-if="switching"
+                    class="min-h-0 flex-1 animate-pulse px-4 pt-4 sm:px-6"
+                    aria-busy="true"
+                    :aria-label="t('agent_panel.ticket.loading')"
+                    data-testid="esc-detail-skeleton"
+                >
+                    <div class="h-3 w-20 rounded bg-[var(--esc-panel-active)]"></div>
+                    <div class="mt-3 h-5 w-2/3 rounded bg-[var(--esc-panel-active)]"></div>
+                    <div class="mt-4 flex gap-2">
+                        <div class="h-7 w-20 rounded-full bg-[var(--esc-panel-active)]"></div>
+                        <div class="h-7 w-20 rounded-[var(--esc-radius,6px)] bg-[var(--esc-panel-active)]"></div>
+                        <div class="h-7 w-24 rounded-full bg-[var(--esc-panel-active)]"></div>
+                    </div>
+                    <div class="mt-5 h-px bg-[var(--esc-panel-border)]"></div>
+                    <div
+                        v-for="n in 3"
+                        :key="n"
+                        class="mt-4 h-20 rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border)]"
+                    ></div>
+                </div>
+                <div v-show="!switching" class="min-h-0 flex-1">
                     <TicketDetailPane
                         ref="paneRef"
                         :ticket="ticket"

@@ -16,6 +16,7 @@ vi.mock('@inertiajs/vue3', () => ({
         reload: (...a) => router.reload(...a),
         visit: (...a) => router.visit(...a),
         get: (...a) => router.get(...a),
+        on: (...a) => (router.on ? router.on(...a) : () => {}),
     },
     useForm: (data) => ({ ...data, post: vi.fn(), processing: false, errors: {} }),
     Link: { props: ['href'], template: '<a :href="href"><slot /></a>' },
@@ -476,6 +477,41 @@ describe('Agent/TicketShow feedback', () => {
         await wrapper.get('[data-testid="esc-copy-link"]').trigger('click');
         expect(messages()).toEqual([['success', 'Link copied']]);
         expect(wrapper.get('[data-testid="esc-copy-link"]').attributes('aria-label')).toBe('Link copied');
+    });
+});
+
+describe('Agent/TicketShow while another ticket loads', () => {
+    let listeners;
+    beforeEach(() => {
+        listeners = {};
+        router.on = vi.fn((event, cb) => {
+            listeners[event] = cb;
+            return () => {};
+        });
+    });
+    afterEach(() => {
+        delete router.on;
+    });
+    const visit = (path) => ({ detail: { visit: { url: new URL(`http://x${path}`), method: 'get' } } });
+
+    it('shows a skeleton in the pane until the next ticket arrives', async () => {
+        mountPage();
+        listeners.start(visit('/escalated.agent.tickets.show/ESC-1041'));
+        await nextTick();
+        const skeleton = wrapper.get('[data-testid="esc-detail-skeleton"]');
+        expect(skeleton.attributes('aria-busy')).toBe('true');
+        expect(wrapper.get('[data-testid="esc-detail-pane"]').isVisible()).toBe(false);
+        listeners.finish({ detail: { visit: {} } });
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-detail-skeleton"]').exists()).toBe(false);
+    });
+
+    it('does not blank the ticket for a reload of the same ticket or another page', async () => {
+        mountPage();
+        listeners.start(visit('/escalated.agent.tickets.show/ESC-1042'));
+        listeners.start(visit('/support/agent'));
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-detail-skeleton"]').exists()).toBe(false);
     });
 });
 
