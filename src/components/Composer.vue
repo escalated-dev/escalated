@@ -3,6 +3,8 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { useMentions } from '../composables/useMentions';
+import { toast } from '../composables/useAgentToasts';
+import { readFlash } from '../utils/flash';
 import MentionDropdown from './MentionDropdown.vue';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
@@ -265,6 +267,11 @@ const sendMenuItems = computed(() => [
 ]);
 const showSendMenu = computed(() => !isNote.value && !!props.statusAction);
 const canSend = computed(() => !!body.value.trim() && !submitting.value);
+const sendError = ref('');
+
+watch(body, () => {
+    sendError.value = '';
+});
 
 function submit(thenStatus = null) {
     if (!canSend.value) return;
@@ -276,7 +283,11 @@ function submit(thenStatus = null) {
 
     router.post(action, payload, {
         preserveScroll: true,
-        onSuccess: () => {
+        onSuccess: (result) => {
+            const flash = readFlash(result);
+            if (!flash.success && !flash.message && !flash.error) {
+                toast(mode === 'note' ? t('agent_panel.toast.note_added') : t('agent_panel.toast.reply_sent'));
+            }
             body.value = '';
             files.value = [];
             clearDraft(mode);
@@ -284,6 +295,10 @@ function submit(thenStatus = null) {
             if (thenStatus && props.statusAction) {
                 router.post(props.statusAction, { status: thenStatus }, { preserveScroll: true });
             }
+        },
+        onError: (errors) => {
+            const first = Object.values(errors || {}).flat()[0];
+            sendError.value = typeof first === 'string' && first ? first : t('agent_panel.composer.send_failed');
         },
         onFinish: () => {
             submitting.value = false;
@@ -389,6 +404,16 @@ const toolButton =
                 @close="closeMentions"
             />
         </div>
+
+        <p
+            v-if="sendError"
+            role="alert"
+            class="flex items-start gap-1.5 px-3 pb-2 text-[13px] text-[var(--esc-sla-breach)]"
+            data-testid="esc-composer-error"
+        >
+            <PanelIcon name="warning" class="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{{ sendError }}</span>
+        </p>
 
         <!-- Attachments -->
         <ul v-if="files.length" class="flex flex-wrap gap-1.5 px-3 pb-2" data-testid="esc-composer-files">
@@ -535,11 +560,18 @@ const toolButton =
                             ? 'border border-[var(--esc-panel-note-border)] bg-[var(--esc-panel-note-bg)] text-[var(--esc-panel-note-text)]'
                             : 'bg-[var(--esc-panel-primary-bg)] text-[var(--esc-panel-primary-text)] hover:opacity-90',
                     ]"
+                    :aria-busy="submitting ? 'true' : undefined"
                     data-testid="esc-composer-send"
                     @click="submit()"
                 >
-                    <PanelIcon :name="isNote ? 'lock' : 'send'" class="h-4 w-4" />
-                    {{ isNote ? t('agent_panel.composer.add_note') : t('agent_panel.composer.send') }}
+                    <PanelIcon :name="isNote ? 'lock' : 'send'" :class="['h-4 w-4', submitting ? 'animate-pulse' : '']" />
+                    {{
+                        submitting
+                            ? t('agent_panel.composer.sending')
+                            : isNote
+                              ? t('agent_panel.composer.add_note')
+                              : t('agent_panel.composer.send')
+                    }}
                 </button>
                 <template v-if="showSendMenu">
                     <button

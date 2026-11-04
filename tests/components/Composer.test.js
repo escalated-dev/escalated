@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Composer from '../../src/components/Composer.vue';
+import { clearToasts, useAgentToasts } from '../../src/composables/useAgentToasts';
 
 const post = vi.fn();
 
@@ -41,6 +42,7 @@ function mountComposer(props = {}) {
 }
 
 beforeEach(() => {
+    clearToasts();
     post.mockReset();
     window.localStorage.clear();
 });
@@ -199,4 +201,42 @@ describe('Composer', () => {
         const box = wrapper.get('[data-testid="esc-composer"]');
         expect(box.classes()).toContain('focus-within:border-[var(--esc-panel-note-text)]');
     });
+
+    it('confirms a sent reply when the backend sends no flash', async () => {
+        post.mockImplementation((url, data, options) => {
+            options.onSuccess({ props: {} });
+            options.onFinish?.();
+        });
+        mountComposer();
+        await input().setValue('Done.');
+        await wrapper.get('[data-testid="esc-composer-send"]').trigger('click');
+        expect(useAgentToasts().toasts.value.map((t) => t.message)).toEqual(['Reply sent']);
+    });
+
+    it('keeps the text and says why when the send is rejected', async () => {
+        post.mockImplementation((url, data, options) => {
+            options.onError({ body: 'The body may not be greater than 10000 characters.' });
+            options.onFinish?.();
+        });
+        mountComposer();
+        await input().setValue('Too long');
+        await wrapper.get('[data-testid="esc-composer-send"]').trigger('click');
+        const error = wrapper.get('[data-testid="esc-composer-error"]');
+        expect(error.attributes('role')).toBe('alert');
+        expect(error.text()).toContain('The body may not be greater than 10000 characters.');
+        expect(input().element.value).toBe('Too long');
+        await input().setValue('Shorter');
+        expect(wrapper.find('[data-testid="esc-composer-error"]').exists()).toBe(false);
+    });
+
+    it('shows that it is sending', async () => {
+        post.mockImplementation(() => {});
+        mountComposer();
+        await input().setValue('Hello');
+        await wrapper.get('[data-testid="esc-composer-send"]').trigger('click');
+        const send = wrapper.get('[data-testid="esc-composer-send"]');
+        expect(send.attributes('aria-busy')).toBe('true');
+        expect(send.text()).toContain('Sending');
+    });
 });
+
