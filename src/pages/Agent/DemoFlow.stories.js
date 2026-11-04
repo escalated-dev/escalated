@@ -33,65 +33,148 @@ export default {
 const INBOX_URL = '/support/agent/tickets?unassigned=1';
 const QUEUE = { key: 'unassigned', title: 'Unassigned' };
 const NEW_REFERENCE = 'ESC-1043';
-const customer = { name: 'Alex Rivera', email: 'alex@acme.co' };
+const customer = { name: 'Alex Rivera', email: 'alex@pinecone.example' };
 
 const json = (body, status = 200) =>
     new window.Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
+// Pinecone, the made-up notes app the demo opens on. Inline styles keep the
+// fake host page independent of the package's Tailwind build.
+const BRAND = '#2f6f4f';
+const INK = '#1d2521';
+const MUTED = '#646b66';
+const LINE = '#e6e2d9';
+
+// A flat pine cone: overlapping scales in one colour, separated by a stroke in
+// the sidebar colour.
+const PINECONE_MARK = `
+    <svg width="22" height="28" viewBox="3.6 0 16.8 21.8" aria-hidden="true" style="display:block;">
+        <rect x="11.1" y="0.4" width="1.8" height="3" rx="0.9" fill="${BRAND}" />
+        <g fill="${BRAND}" stroke="#f4f2ec" stroke-width="1.2" stroke-linejoin="round">
+            <path d="M12 2.60c2.59 0 3.6 1.43 3.6 2.60c0 1.98-1.98 2.88-3.6 3.60c-1.62-0.72-3.6-1.62-3.6-3.60c0-1.17 1.01-2.60 3.6-2.60z" />
+            <path d="M8.6 6.60c2.59 0 3.6 1.43 3.6 2.60c0 1.98-1.98 2.88-3.6 3.60c-1.62-0.72-3.6-1.62-3.6-3.60c0-1.17 1.01-2.60 3.6-2.60z" />
+            <path d="M15.4 6.60c2.59 0 3.6 1.43 3.6 2.60c0 1.98-1.98 2.88-3.6 3.60c-1.62-0.72-3.6-1.62-3.6-3.60c0-1.17 1.01-2.60 3.6-2.60z" />
+            <path d="M8.6 10.80c2.59 0 3.6 1.43 3.6 2.60c0 1.98-1.98 2.88-3.6 3.60c-1.62-0.72-3.6-1.62-3.6-3.60c0-1.17 1.01-2.60 3.6-2.60z" />
+            <path d="M15.4 10.80c2.59 0 3.6 1.43 3.6 2.60c0 1.98-1.98 2.88-3.6 3.60c-1.62-0.72-3.6-1.62-3.6-3.60c0-1.17 1.01-2.60 3.6-2.60z" />
+            <path d="M12 14.80c2.59 0 3.6 1.43 3.6 2.60c0 1.98-1.98 2.88-3.6 3.60c-1.62-0.72-3.6-1.62-3.6-3.60c0-1.17 1.01-2.60 3.6-2.60z" />
+        </g>
+    </svg>`;
+
 const CustomerSite = {
     name: 'DemoCustomerSite',
     template: `
-        <div class="demo-site" style="min-height:100vh;background:#0b0d12;color:#e5e7eb;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-            <header style="height:56px;display:flex;align-items:center;gap:28px;padding:0 32px;border-bottom:1px solid rgba(255,255,255,0.07);">
-                <div style="display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;color:#fff;">
-                    <span style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#6366f1,#22d3ee);display:inline-block;"></span>
-                    Acme Analytics
+        <div class="demo-site" style="min-height:100vh;display:flex;background:#fbfaf7;color:${INK};font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;">
+            <aside style="width:216px;flex-shrink:0;background:#f4f2ec;border-right:1px solid ${LINE};display:flex;flex-direction:column;">
+                <div style="height:56px;display:flex;align-items:center;gap:9px;padding:0 18px;font-size:16px;font-weight:600;letter-spacing:-0.01em;">
+                    ${PINECONE_MARK}
+                    Pinecone
                 </div>
-                <nav style="display:flex;gap:20px;font-size:13px;color:#9ca3af;">
-                    <span>Dashboards</span><span>Reports</span><span style="color:#fff;">Team</span><span>Billing</span>
+                <div style="margin:4px 12px 14px;padding:7px 10px;border:1px solid ${LINE};border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-weight:500;">Rivera Lab</span>
+                    <span style="color:${MUTED};font-size:11px;">5 members</span>
+                </div>
+                <nav v-for="group in nav" :key="group.title" style="padding:0 12px 14px;">
+                    <div style="padding:0 8px 6px;font-size:11px;font-weight:600;color:${MUTED};text-transform:uppercase;letter-spacing:0.04em;">{{ group.title }}</div>
+                    <div v-for="item in group.items" :key="item.label"
+                        :style="item.active ? 'background:#e3ece6;color:${BRAND};font-weight:600;' : 'color:#3b433e;'"
+                        style="display:flex;justify-content:space-between;padding:6px 8px;border-radius:5px;">
+                        <span>{{ item.label }}</span>
+                        <span v-if="item.count" style="color:${MUTED};font-size:12px;font-weight:400;">{{ item.count }}</span>
+                    </div>
                 </nav>
-                <span style="margin-left:auto;font-size:13px;color:#9ca3af;">Alex Rivera</span>
-            </header>
-            <main style="max-width:760px;padding:40px 32px;">
-                <h1 style="font-size:22px;font-weight:600;color:#fff;margin:0;">Team members</h1>
-                <p style="margin:6px 0 24px;font-size:14px;color:#9ca3af;">Invite colleagues to view and edit your dashboards.</p>
-                <div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden;">
-                    <div v-for="m in members" :key="m.email" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid rgba(255,255,255,0.06);font-size:14px;">
-                        <span style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">{{ m.initials }}</span>
-                        <div style="flex:1;">
-                            <div style="color:#fff;">{{ m.name }}</div>
-                            <div style="font-size:12px;color:#9ca3af;">{{ m.email }}</div>
-                        </div>
-                        <span :style="m.badgeStyle" style="font-size:12px;padding:3px 10px;border-radius:999px;">{{ m.state }}</span>
+                <div style="margin-top:auto;padding:12px 18px;border-top:1px solid ${LINE};display:flex;align-items:center;gap:10px;">
+                    <span style="width:28px;height:28px;border-radius:50%;background:${BRAND};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">AR</span>
+                    <div style="line-height:1.3;">
+                        <div style="font-weight:500;">Alex Rivera</div>
+                        <div style="font-size:11px;color:${MUTED};">alex@pinecone.example</div>
                     </div>
                 </div>
-                <p style="margin-top:14px;font-size:13px;color:#f87171;">Invites sent to jordan@acme.co keep showing as expired.</p>
-            </main>
+            </aside>
+            <div style="flex:1;min-width:0;">
+                <header style="height:56px;display:flex;align-items:center;padding:0 32px;border-bottom:1px solid ${LINE};background:#fff;">
+                    <span style="color:${MUTED};">Settings</span>
+                    <span style="color:#b5b9b4;margin:0 8px;">/</span>
+                    <span style="font-weight:500;">Members</span>
+                    <span style="margin-left:auto;width:220px;padding:6px 10px;border:1px solid ${LINE};border-radius:6px;color:#8b918c;background:#fbfaf7;">Search notes</span>
+                </header>
+                <main style="max-width:600px;padding:28px 32px;">
+                    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;">
+                        <div>
+                            <h1 style="font-size:20px;font-weight:600;margin:0;letter-spacing:-0.01em;">Members</h1>
+                            <p style="margin:4px 0 0;color:${MUTED};">People in Rivera Lab can read and edit shared notes.</p>
+                        </div>
+                        <span style="flex-shrink:0;padding:7px 12px;border-radius:6px;background:${BRAND};color:#fff;font-weight:600;">Invite people</span>
+                    </div>
+                    <div style="margin-top:20px;border:1px solid ${LINE};border-radius:8px;background:#fff;overflow:hidden;">
+                        <div style="display:grid;grid-template-columns:1fr 84px 120px;padding:8px 16px;background:#f7f5f0;border-bottom:1px solid ${LINE};font-size:11px;font-weight:600;color:${MUTED};text-transform:uppercase;letter-spacing:0.04em;">
+                            <span>Name</span><span>Role</span><span>Status</span>
+                        </div>
+                        <div v-for="(m, i) in members" :key="m.email"
+                            :style="i ? 'border-top:1px solid #efece5;' : ''"
+                            style="display:grid;grid-template-columns:1fr 84px 120px;align-items:center;padding:10px 16px;">
+                            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                                <span style="width:30px;height:30px;flex-shrink:0;border-radius:50%;background:#ebe8e0;color:#3b433e;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">{{ m.initials }}</span>
+                                <div style="line-height:1.35;min-width:0;">
+                                    <div style="font-weight:500;">{{ m.name }}</div>
+                                    <div style="font-size:12px;color:${MUTED};">{{ m.email }}</div>
+                                </div>
+                            </div>
+                            <span style="color:#3b433e;">{{ m.role }}</span>
+                            <span>
+                                <span v-if="m.expired" style="display:inline-block;padding:2px 8px;border-radius:4px;background:#fbe9e5;color:#9f3524;font-size:12px;font-weight:500;">Invite expired</span>
+                                <span v-else style="color:${MUTED};">{{ m.seen }}</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;padding:10px 14px;border:1px solid #efcfc8;border-radius:8px;background:#fdf6f4;color:#7c2d20;display:flex;justify-content:space-between;gap:12px;">
+                        <span>Jordan's invite expired the moment it was opened. Resent 3 times.</span>
+                        <span style="color:${BRAND};font-weight:600;flex-shrink:0;">Resend invite</span>
+                    </div>
+                    <h2 style="margin:28px 0 10px;font-size:14px;font-weight:600;">Invite settings</h2>
+                    <div style="border:1px solid ${LINE};border-radius:8px;background:#fff;">
+                        <div v-for="(row, i) in inviteSettings" :key="row.label"
+                            :style="i ? 'border-top:1px solid #efece5;' : ''"
+                            style="display:flex;justify-content:space-between;gap:16px;padding:10px 16px;">
+                            <span style="color:${MUTED};">{{ row.label }}</span>
+                            <span style="font-weight:500;">{{ row.value }}</span>
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
     `,
     data: () => ({
+        nav: [
+            {
+                title: 'Notes',
+                items: [
+                    { label: 'All notes', count: 128 },
+                    { label: 'Shared with me', count: 14 },
+                    { label: 'Templates' },
+                    { label: 'Trash' },
+                ],
+            },
+            {
+                title: 'Settings',
+                items: [
+                    { label: 'Workspace' },
+                    { label: 'Members', active: true },
+                    { label: 'Billing' },
+                    { label: 'Integrations' },
+                ],
+            },
+        ],
+        inviteSettings: [
+            { label: 'Invite links expire after', value: '7 days' },
+            { label: 'Who can invite', value: 'Owners and editors' },
+            { label: 'Default role for new members', value: 'Editor' },
+        ],
         members: [
-            {
-                name: 'Alex Rivera',
-                email: 'alex@acme.co',
-                initials: 'AR',
-                state: 'Owner',
-                badgeStyle: 'background:rgba(99,102,241,0.18);color:#c7d2fe;',
-            },
-            {
-                name: 'Sam Okafor',
-                email: 'sam@acme.co',
-                initials: 'SO',
-                state: 'Editor',
-                badgeStyle: 'background:rgba(255,255,255,0.07);color:#d1d5db;',
-            },
-            {
-                name: 'Jordan Lee',
-                email: 'jordan@acme.co',
-                initials: 'JL',
-                state: 'Invite expired',
-                badgeStyle: 'background:rgba(248,113,113,0.15);color:#fca5a5;',
-            },
+            { name: 'Alex Rivera', email: 'alex@pinecone.example', initials: 'AR', role: 'Owner', seen: 'Active now' },
+            { name: 'Sam Okafor', email: 'sam@pinecone.example', initials: 'SO', role: 'Editor', seen: '2 hours ago' },
+            { name: 'Priya Nair', email: 'priya@pinecone.example', initials: 'PN', role: 'Editor', seen: 'Yesterday' },
+            { name: 'Jordan Lee', email: 'jordan@pinecone.example', initials: 'JL', role: 'Editor', expired: true },
+            { name: 'Mei Tanaka', email: 'mei@pinecone.example', initials: 'MT', role: 'Viewer', seen: '3 days ago' },
         ],
     }),
 };
@@ -151,8 +234,8 @@ export const Flow = {
                 const path = match[1];
                 if (path === '/config') {
                     return json({
-                        color: '#6366f1',
-                        greeting: 'Hi Alex! How can we help?',
+                        color: '#2f6f4f',
+                        greeting: 'Hi Alex, how can we help?',
                         kb_enabled: false,
                         status_lookup_enabled: false,
                         departments: [],
@@ -236,8 +319,8 @@ export const Flow = {
                 widget = mountEscalatedWidget({
                     baseUrl: '',
                     widgetPath: '/support/widget',
-                    color: '#6366f1',
-                    title: 'Acme Support',
+                    color: '#2f6f4f',
+                    title: 'Pinecone Help',
                     tabs: ['contact'],
                     prefill: customer,
                 });
