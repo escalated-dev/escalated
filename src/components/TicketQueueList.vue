@@ -331,7 +331,7 @@ const pagination = computed(() => {
                     v-model="search"
                     type="search"
                     :placeholder="t('agent_panel.inbox.search_placeholder')"
-                    class="h-8 w-full rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-transparent pl-8 pr-2 text-[13px] text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-accent)] focus:outline-none"
+                    class="h-8 w-full rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-transparent pl-8 pr-2 text-[13px] text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-tertiary)] focus:border-[var(--esc-panel-accent)] focus:outline-none"
                     data-testid="esc-queue-search"
                     @input="onSearchInput"
                     @keydown="onSearchKeydown"

@@ -371,7 +371,7 @@ const toolButton =
                 :placeholder="
                     isNote ? t('agent_panel.composer.note_placeholder') : t('agent_panel.composer.placeholder')
                 "
-                class="block max-h-60 min-h-[76px] w-full resize-y bg-transparent px-3 py-2.5 text-[14px] leading-5 text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-muted)] focus:outline-none"
+                class="block max-h-60 min-h-[76px] w-full resize-y bg-transparent px-3 py-2.5 text-[14px] leading-5 text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-tertiary)] focus:outline-none"
                 data-testid="esc-composer-input"
                 @input="onInput"
                 @keydown="onKeydown"

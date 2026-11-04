@@ -162,7 +162,7 @@ const activeId = computed(() => (items.value[activeIndex.value] ? `esc-palette-i
                     :aria-activedescendant="activeId"
                     :aria-label="t('agent_panel.palette.label')"
                     :placeholder="t('agent_panel.palette.placeholder')"
-                    class="h-12 w-full bg-transparent text-[14px] text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-muted)] outline-none"
+                    class="h-12 w-full bg-transparent text-[14px] text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-tertiary)] outline-none"
                     @keydown="onKeydown"
                 />
                 <kbd
