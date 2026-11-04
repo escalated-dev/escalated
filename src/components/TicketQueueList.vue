@@ -386,26 +386,45 @@ const pagination = computed(() => {
                     :data-unread="isUnread(ticket) ? 'true' : undefined"
                     data-testid="esc-queue-row"
                 >
-                    <!-- Avatar, or a checkbox while selecting -->
-                    <div class="relative z-10 mt-0.5 h-8 w-8 shrink-0">
+                    <!-- Avatar; its initials make way for a checkbox on hover and while selecting -->
+                    <div
+                        class="relative z-10 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)]"
+                        data-testid="esc-queue-avatar"
+                    >
                         <span
-                            v-if="!selecting"
-                            class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[12px] font-semibold text-[var(--esc-panel-text-secondary)] transition-opacity group-hover:opacity-0"
+                            :class="[
+                                'text-[12px] font-semibold text-[var(--esc-panel-text-secondary)] transition-opacity',
+                                selectable && selecting ? 'opacity-0' : '',
+                                selectable ? 'group-hover:opacity-0' : '',
+                            ]"
                             aria-hidden="true"
                             >{{ initials(requesterName(ticket)) }}</span
                         >
-                        <input
-                            v-if="selectable"
-                            type="checkbox"
-                            :checked="selectedIds.includes(ticket.id)"
-                            :aria-label="t('agent_panel.inbox.select_ticket', { reference: ticket.reference })"
-                            :class="[
-                                'absolute inset-0 m-auto h-4 w-4 cursor-pointer rounded border-[var(--esc-panel-border-input)] accent-[var(--esc-panel-accent)] focus:opacity-100',
-                                selecting ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-                            ]"
-                            data-testid="esc-queue-row-select"
-                            @change="toggleOne(ticket.id)"
-                        />
+                        <template v-if="selectable">
+                            <input
+                                type="checkbox"
+                                :checked="selectedIds.includes(ticket.id)"
+                                :aria-label="t('agent_panel.inbox.select_ticket', { reference: ticket.reference })"
+                                :class="[
+                                    'peer absolute inset-0 m-auto h-4 w-4 cursor-pointer appearance-none rounded-[4px] border border-[var(--esc-panel-text-tertiary)] bg-[var(--esc-panel-bg)] transition-opacity checked:border-[var(--esc-panel-accent)] checked:bg-[var(--esc-panel-accent)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--esc-panel-bg)]',
+                                    selecting ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+                                ]"
+                                data-testid="esc-queue-row-select"
+                                @change="toggleOne(ticket.id)"
+                            />
+                            <svg
+                                class="pointer-events-none absolute inset-0 m-auto hidden h-3 w-3 text-[var(--esc-panel-primary-text,#fff)] peer-checked:block"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M3.5 8.5l3 3 6-7" />
+                            </svg>
+                        </template>
                     </div>
 
                     <div class="min-w-0 flex-1">
