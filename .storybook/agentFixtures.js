@@ -254,3 +254,61 @@ export const rememberedInbox = {
     tickets: ticketsPage,
     stats: inboxProp.stats,
 };
+
+// Edge cases for the QA stories: very long text, many rows, nothing at all.
+const LONG_SUBJECT =
+    'Customers on the legacy enterprise plan cannot download the quarterly usage export because the signed URL expires before the file finishes generating';
+
+export const longTicket = {
+    ...ticketDetail,
+    reference: 'ESC-104299',
+    subject: LONG_SUBJECT,
+    requester: {
+        name: 'Maximiliana Alexandrovna Konstantinopoulou-Vanderbilt',
+        email: 'maximiliana.konstantinopoulou-vanderbilt@a-very-long-company-domain-name.example.com',
+    },
+    tags: [
+        { id: 1, name: 'Billing', color: '#f59e0b' },
+        { id: 2, name: 'Export', color: '#3b82f6' },
+        { id: 3, name: 'Enterprise customers on the legacy plan', color: '#ef4444' },
+        { id: 4, name: 'Needs engineering', color: '#8b5cf6' },
+    ],
+    attachments: [
+        {
+            id: 9,
+            original_filename: 'quarterly-usage-export-2026-Q3-enterprise-legacy-plan-failed-download-screenshot.png',
+            size: 2831776,
+            url: '#',
+        },
+    ],
+    replies: [
+        {
+            id: 4,
+            body: 'https://dashboard.example.com/exports/quarterly/2026-Q3/enterprise/legacy/download?signature=abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz',
+            author: { name: 'Maximiliana Alexandrovna Konstantinopoulou-Vanderbilt' },
+            created_at: minutesAgo(3),
+            is_internal_note: false,
+        },
+        ...ticketDetail.replies,
+    ],
+};
+
+export const longTicketsPage = {
+    ...ticketsPage,
+    data: [
+        {
+            ...sampleTickets[0],
+            reference: 'ESC-104299',
+            subject: LONG_SUBJECT,
+            requester: longTicket.requester,
+        },
+        ...Array.from({ length: 59 }, (_, i) => ({
+            ...sampleTickets[(i % 6) + 1],
+            id: 2000 + i,
+            reference: `ESC-${2000 + i}`,
+        })),
+    ],
+    total: 60,
+};
+
+export const emptyTicketsPage = { data: [], current_page: 1, last_page: 1, total: 0 };
