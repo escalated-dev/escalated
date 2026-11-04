@@ -36,6 +36,16 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   composer stays docked.
 
 ### Added
+- **Rail links match their counts.** When the backend sends `inbox.counts`
+  (open tickets), Inbox, Unassigned and All tickets open their lists with
+  `open=1`, and views open as `view=<id>` (plus `open=1` unless the view names
+  a status). The list says "open" in its subline and offers "Include resolved"
+  / "Open only"; "Clear filters" returns to the queue as the rail opens it.
+- **Feedback.** Toasts for the backend flash and for ticket actions without
+  one, inline send errors and a Sending state in the composer, a skeleton
+  while the next ticket loads, a dimmed busy list while a search loads, a
+  filtered-empty state with Clear filters, an unread dot, and a check on
+  Copy link.
 - **Agent status.** The rail footer and a top-bar avatar show the agent's
   status (Online, Away, Offline) with a dot and a menu, whether or not live
   chat is on. It reads the shared `escalated.agent_status` (or

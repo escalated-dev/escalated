@@ -4,6 +4,8 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
+import { readFlash } from '../utils/flash';
+import { toast } from '../composables/useAgentToasts';
 import { highlightMentions } from '../utils/mentionHighlight';
 import { initials, isLive, priorityColor, relativeTime, requesterName } from '../utils/agentTicket';
 import { ticketUrl } from '../utils/agentQueues';
@@ -12,7 +14,6 @@ import ChatActionBar from './ChatActionBar.vue';
 import ChatComposer from './ChatComposer.vue';
 import ChatThread from './ChatThread.vue';
 import Composer from './Composer.vue';
-import KnowledgePanel from './KnowledgePanel.vue';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
 import PluginSlot from './PluginSlot.vue';
@@ -48,6 +49,8 @@ const props = defineProps({
     routes: { type: Object, default: () => ({}) },
     /** `{ active, messages, typingUser, sendEndpoint, typingEndpoint, endEndpoint, transferEndpoint }` */
     chat: { type: Object, default: () => ({ active: false }) },
+    /** Where the knowledge base lives; empty when it is off. */
+    knowledgeBaseUrl: { type: String, default: '' },
 });
 
 const emit = defineEmits(['chat-send', 'end-chat']);
@@ -121,17 +124,36 @@ const priorityItems = computed(() =>
     })),
 );
 
-function post(url, data = {}) {
+/**
+ * Post an action. A flash from the backend confirms it through the shell;
+ * without one, `done` is shown. A rejection shows the first error the
+ * backend gave, or a generic one.
+ */
+function post(url, data = {}, done = '') {
     if (!url) return;
-    router.post(url, data, { preserveScroll: true });
+    router.post(url, data, {
+        preserveScroll: true,
+        onSuccess: (result) => {
+            const flash = readFlash(result);
+            if (done && !flash.success && !flash.message && !flash.error) toast(done);
+        },
+        onError: (errors) => {
+            const first = Object.values(errors || {}).flat()[0];
+            toast(typeof first === 'string' && first ? first : t('agent_panel.toast.failed'), 'error');
+        },
+    });
 }
 
 function setStatus(item) {
-    if (item.key !== props.ticket.status) post(props.routes.status, { status: item.key });
+    if (item.key !== props.ticket.status) {
+        post(props.routes.status, { status: item.key }, t('agent_panel.toast.status', { status: item.label }));
+    }
 }
 
 function setPriority(item) {
-    if (item.key !== props.ticket.priority) post(props.routes.priority, { priority: item.key });
+    if (item.key !== props.ticket.priority) {
+        post(props.routes.priority, { priority: item.key }, t('agent_panel.toast.priority', { priority: item.label }));
+    }
 }
 
 const canEditStatus = computed(() => !props.notesOnly && !!props.routes.status);
@@ -150,7 +172,7 @@ const pickerTags = computed(() =>
 );
 
 function updateTags(ids) {
-    post(props.routes.tags, { tag_ids: ids });
+    post(props.routes.tags, { tag_ids: ids }, t('agent_panel.toast.tags'));
 }
 
 function removeTag(id) {
@@ -166,15 +188,26 @@ const canAssignToMe = computed(
 );
 
 function assignToMe() {
-    if (canAssignToMe.value) post(props.routes.assign, { agent_id: props.currentUserId });
+    if (canAssignToMe.value)
+        post(props.routes.assign, { agent_id: props.currentUserId }, t('agent_panel.toast.assigned'));
 }
 
 function resolve() {
-    if (canEditStatus.value && props.ticket.status !== 'resolved') post(props.routes.status, { status: 'resolved' });
+    if (canEditStatus.value && props.ticket.status !== 'resolved') {
+        post(
+            props.routes.status,
+            { status: 'resolved' },
+            t('agent_panel.toast.status', { status: statusLabel('resolved') }),
+        );
+    }
 }
 
 function toggleFollow() {
-    post(props.routes.follow);
+    post(
+        props.routes.follow,
+        {},
+        props.isFollowing ? t('agent_panel.toast.unfollowed') : t('agent_panel.toast.followed'),
+    );
 }
 
 const copied = ref(false);
@@ -184,6 +217,7 @@ function copyLink() {
     const url = typeof window !== 'undefined' ? new URL(path, window.location.origin).toString() : path;
     window.navigator?.clipboard?.writeText(url)?.catch?.(() => {});
     copied.value = true;
+    toast(t('agent_panel.ticket.link_copied'));
     clearTimeout(copiedTimer);
     copiedTimer = setTimeout(() => (copied.value = false), 2000);
 }
@@ -218,16 +252,21 @@ const moreItems = computed(() => {
 });
 
 function onMore(item) {
-    if (item.macro) post(props.routes.macro, { macro_id: item.macro.id });
+    if (item.macro)
+        post(props.routes.macro, { macro_id: item.macro.id }, t('agent_panel.toast.macro', { name: item.macro.name }));
     else if (item.action) {
         if (item.action.confirmation && typeof window !== 'undefined' && !window.confirm(item.action.confirmation)) {
             return;
         }
-        post(item.action.url);
+        post(item.action.url, {}, t('agent_panel.toast.action', { name: item.action.label }));
     } else if (item.key === 'merge') mergeOpen.value = true;
     else if (item.key.startsWith('snooze:')) {
         const hours = Number(item.key.split(':')[1]);
-        post(props.routes.snooze, { snoozed_until: new Date(Date.now() + hours * 3600000).toISOString() });
+        post(
+            props.routes.snooze,
+            { snoozed_until: new Date(Date.now() + hours * 3600000).toISOString() },
+            t('agent_panel.toast.snoozed'),
+        );
     } else if (item.key === 'copy') copyLink();
 }
 
@@ -312,7 +351,11 @@ function fullDate(date) {
 
 function togglePin(reply) {
     if (!props.routes.pin) return;
-    post(props.routes.pin(reply.id));
+    post(
+        props.routes.pin(reply.id),
+        {},
+        reply.is_pinned ? t('agent_panel.toast.unpinned') : t('agent_panel.toast.pinned'),
+    );
 }
 
 const threadEnd = ref(null);
@@ -444,16 +487,16 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                 <button
                     type="button"
                     class="flex h-6 w-6 items-center justify-center rounded text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
-                    :aria-label="t('agent_panel.ticket.copy_link')"
-                    :title="t('agent_panel.ticket.copy_link')"
+                    :aria-label="copied ? t('agent_panel.ticket.link_copied') : t('agent_panel.ticket.copy_link')"
+                    :title="copied ? t('agent_panel.ticket.link_copied') : t('agent_panel.ticket.copy_link')"
                     data-testid="esc-copy-link"
                     @click="copyLink"
                 >
-                    <PanelIcon name="link" class="h-3.5 w-3.5" />
+                    <PanelIcon
+                        :name="copied ? 'check' : 'link'"
+                        :class="['h-3.5 w-3.5', copied ? 'text-[var(--esc-sla-ok)]' : '']"
+                    />
                 </button>
-                <span v-if="copied" class="text-[12px] text-[var(--esc-panel-text-tertiary)]" role="status">{{
-                    t('agent_panel.ticket.link_copied')
-                }}</span>
                 <div class="ml-auto flex items-center gap-1">
                     <PresenceIndicator
                         :ticket-reference="ticket.reference"
@@ -1034,9 +1077,19 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                 <p v-else class="mt-1.5 text-[13px] text-[var(--esc-panel-text-tertiary)]">
                     {{ t('agent_panel.ticket.no_links') }}
                 </p>
-                <div class="mt-5">
-                    <KnowledgePanel :ticket-reference="ticket.reference" />
-                </div>
+                <template v-if="knowledgeBaseUrl">
+                    <h3 class="mt-5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
+                        {{ t('agent_panel.ticket.knowledge_base') }}
+                    </h3>
+                    <Link
+                        :href="knowledgeBaseUrl"
+                        class="-mx-1.5 mt-1.5 flex items-center gap-2 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        data-testid="esc-kb-link"
+                    >
+                        <PanelIcon name="book" class="h-4 w-4 shrink-0 text-[var(--esc-panel-text-tertiary)]" />
+                        {{ t('agent_panel.ticket.search_knowledge_base') }}
+                    </Link>
+                </template>
                 <h3 class="mt-5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
                     {{ t('agent_panel.ticket.activity') }}
                 </h3>

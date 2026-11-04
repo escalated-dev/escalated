@@ -19,9 +19,18 @@ stat strip, and names the queue from the URL.
 ```
 
 - `counts` labels the rail's Inbox (assigned to the current agent),
-  Unassigned and All tickets. A missing key shows no number.
+  Unassigned and All tickets. A missing key shows no number. The counts are
+  of open (unresolved, unsnoozed) tickets, so when `counts` is sent the rail
+  links add `open=1`: Inbox opens `assigned_to=<me>&open=1`, Unassigned
+  `unassigned=1&open=1`, All tickets `open=1`. The list then shows the same
+  tickets the number counts, says "open" in its subline, and offers
+  "Include resolved" to drop the filter (and "Open only" to restore it).
+  Without `counts` the links carry no `open` filter, as before.
 - `views` are listed under Views in the rail, each linking to the ticket list
-  with its `filters` as query parameters. Sending the key (even `[]`) also
+  as `view=<id>`, which the backend expands to the view's `filters`. The link
+  adds `open=1` unless the view's filters name a `status` or `open`, matching
+  how its count is taken. A `view=<id>` URL selects that view in the rail and
+  titles the list with its name. Sending the key (even `[]`) also
   shows the "+" that saves the current filters as a view. The built-in views
   get their own icon when their `id` is `urgent`, `sla_at_risk`,
   `waiting_on_me`, `waiting_on_customer` or `recently_updated`; the backend

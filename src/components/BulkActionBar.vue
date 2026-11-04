@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
+import { useI18n } from '../composables/useI18n';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -7,7 +8,11 @@ const props = defineProps({
     bulkRoute: { type: String, required: true },
     agents: { type: Array, default: () => [] },
     departments: { type: Array, default: () => [] },
+    /** Sit at the bottom of the nearest positioned container instead of the viewport. */
+    contained: { type: Boolean, default: false },
 });
+
+const { t } = useI18n();
 
 const emit = defineEmits(['clear']);
 const escDark = inject(
@@ -18,6 +23,11 @@ const processing = ref(false);
 
 function performAction(action, value) {
     if (!props.selectedIds.length || processing.value) return;
+    if (action === 'delete' && typeof window !== 'undefined') {
+        const count = props.selectedIds.length;
+        const message = t(count === 1 ? 'bulk.confirm_delete_one' : 'bulk.confirm_delete_other', { count });
+        if (!window.confirm(message)) return;
+    }
     processing.value = true;
     router.post(
         props.bulkRoute,
@@ -70,18 +80,20 @@ const selectClass = computed(() =>
         <div
             v-if="selectedIds.length > 0"
             :class="[
-                'fixed bottom-0 left-0 right-0 z-50 border-t px-6 py-3',
+                contained ? 'absolute' : 'fixed',
+                'bottom-0 left-0 right-0 z-50 border-t px-6 py-3',
                 escDark
-                    ? 'border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface-alt)]/95 backdrop-blur-xl'
-                    : 'border-gray-200 bg-white/95 backdrop-blur-xl shadow-lg',
+                    ? 'border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)]'
+                    : 'border-gray-200 bg-white shadow-lg',
             ]"
+            data-testid="esc-bulk-bar"
         >
             <div class="mx-auto flex max-w-7xl items-center gap-4">
                 <span
                     :class="['text-sm font-semibold', escDark ? 'text-[var(--esc-panel-text)]' : 'text-gray-900']"
                     aria-live="polite"
                 >
-                    {{ selectedIds.length }} ticket{{ selectedIds.length !== 1 ? 's' : '' }} selected
+                    {{ t('bulk.tickets_selected', { count: selectedIds.length }) }}
                 </span>
 
                 <select
@@ -93,7 +105,7 @@ const selectClass = computed(() =>
                         $event.target.value = '';
                     "
                 >
-                    <option value="">Status...</option>
+                    <option value="">{{ t('bulk.status_placeholder') }}</option>
                     <option v-for="o in statusOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
                 </select>
 
@@ -106,7 +118,7 @@ const selectClass = computed(() =>
                         $event.target.value = '';
                     "
                 >
-                    <option value="">Priority...</option>
+                    <option value="">{{ t('bulk.priority_placeholder') }}</option>
                     <option v-for="o in priorityOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
                 </select>
 
@@ -119,7 +131,7 @@ const selectClass = computed(() =>
                         $event.target.value = '';
                     "
                 >
-                    <option value="">Assign to...</option>
+                    <option value="">{{ t('bulk.assign_placeholder') }}</option>
                     <option v-for="a in agents" :key="a.id" :value="a.id">{{ a.name }}</option>
                 </select>
 
@@ -132,7 +144,7 @@ const selectClass = computed(() =>
                         $event.target.value = '';
                     "
                 >
-                    <option value="">Department...</option>
+                    <option value="">{{ t('bulk.department_placeholder') }}</option>
                     <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
                 </select>
 
@@ -146,7 +158,7 @@ const selectClass = computed(() =>
                     :disabled="processing"
                     @click="performAction('delete', null)"
                 >
-                    Delete
+                    {{ t('bulk.delete') }}
                 </button>
 
                 <button
@@ -158,7 +170,7 @@ const selectClass = computed(() =>
                     ]"
                     @click="emit('clear')"
                 >
-                    Deselect All
+                    {{ t('bulk.deselect_all') }}
                 </button>
             </div>
         </div>

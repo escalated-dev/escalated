@@ -5,17 +5,22 @@ import { useI18n } from '../composables/useI18n';
 import { useKeyboardShortcuts } from '../composables/useKeyboardShortcuts';
 import { agentCommands } from '../composables/useAgentCommands';
 import { AGENT_STATUSES, useAgentStatus } from '../composables/useAgentStatus';
+import { toast } from '../composables/useAgentToasts';
+import { readFlash } from '../utils/flash';
 import { watchScrollAffordance } from '../utils/scrollAffordance';
 import {
     activeQueueKey,
     normalisePrefix,
+    queueLinkFilters,
     recallInbox,
     ticketsUrl,
     ticketUrl,
     viewIcon,
+    viewLinkFilters,
     workspaceQueues,
 } from '../utils/agentQueues';
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
+import AgentToasts from './AgentToasts.vue';
 import CommandPalette from './CommandPalette.vue';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
@@ -56,6 +61,8 @@ const inbox = computed(() => page.props.inbox || null);
 const counts = computed(() => inbox.value?.counts || {});
 const views = computed(() => (Array.isArray(inbox.value?.views) ? inbox.value.views : []));
 const canSaveViews = computed(() => Array.isArray(inbox.value?.views));
+// A backend that sends counts counts open tickets; the links then open those.
+const countsOpen = computed(() => !!inbox.value?.counts);
 
 const currentUrl = computed(() => page.url || '');
 const path = computed(() => currentUrl.value.split(/[?#]/)[0]);
@@ -70,7 +77,7 @@ const queues = computed(() =>
     workspaceQueues(userId.value).map((queue) => ({
         ...queue,
         label: queueLabels.value[queue.key],
-        href: ticketsUrl(prefix.value, queue.filters),
+        href: ticketsUrl(prefix.value, queueLinkFilters(queue.filters, countsOpen.value)),
         count: counts.value[queue.key],
     })),
 );
@@ -81,7 +88,7 @@ const viewLinks = computed(() =>
         label: view.name,
         icon: viewIcon(view),
         count: view.count,
-        href: ticketsUrl(prefix.value, view.filters || {}),
+        href: ticketsUrl(prefix.value, view.id !== undefined ? viewLinkFilters(view) : view.filters || {}),
     })),
 );
 
@@ -243,6 +250,18 @@ const currentStatus = computed(() => ({
 function setStatus(item) {
     setAgentStatus(item.key);
 }
+
+// --- Flash messages ------------------------------------------------------------
+// Each Inertia visit brings a new props object; a flash on it becomes a toast.
+watch(
+    () => [page.props, page.flash],
+    () => {
+        const flash = readFlash(page);
+        if (flash.success || flash.message) toast(flash.success || flash.message, 'success');
+        if (flash.error) toast(flash.error, 'error');
+    },
+    { immediate: true },
+);
 
 function navItemClass(active) {
     return [
@@ -601,5 +620,6 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
             @saved="onViewSaved"
         />
         <ActiveChatsPanel v-if="chatEnabled && userId" :chats="activeChats" :agent-id="userId" />
+        <AgentToasts />
     </div>
 </template>

@@ -4,6 +4,7 @@ import { nextTick } from 'vue';
 import TicketShow from '../../src/pages/Agent/TicketShow.vue';
 import PluginSlot from '../../src/components/PluginSlot.vue';
 import { forgetInbox, rememberInbox } from '../../src/utils/agentQueues';
+import { clearToasts, useAgentToasts } from '../../src/composables/useAgentToasts';
 
 const usePage = vi.fn();
 const router = { post: vi.fn(), reload: vi.fn(), visit: vi.fn(), get: vi.fn() };
@@ -15,6 +16,7 @@ vi.mock('@inertiajs/vue3', () => ({
         reload: (...a) => router.reload(...a),
         visit: (...a) => router.visit(...a),
         get: (...a) => router.get(...a),
+        on: (...a) => (router.on ? router.on(...a) : () => {}),
     },
     useForm: (data) => ({ ...data, post: vi.fn(), processing: false, errors: {} }),
     Link: { props: ['href'], template: '<a :href="href"><slot /></a>' },
@@ -118,6 +120,7 @@ function mountPage(props = {}, escalated = {}) {
 }
 
 beforeEach(() => {
+    clearToasts();
     forgetInbox();
     window.localStorage.clear();
     Object.values(router).forEach((fn) => fn.mockReset());
@@ -432,5 +435,98 @@ describe('Agent/TicketShow on a phone', () => {
         expect(wrapper.get('[data-testid="esc-composer-dock"]').classes()).toEqual(
             expect.arrayContaining(['max-sm:sticky', 'max-sm:bottom-0']),
         );
+    });
+});
+
+describe('Agent/TicketShow feedback', () => {
+    const { toasts } = useAgentToasts();
+    const messages = () => toasts.value.map((t) => [t.tone, t.message]);
+    const lastOptions = () => router.post.mock.calls.at(-1)[2];
+
+    it('confirms a status change with a toast when the backend sends no flash', async () => {
+        mountPage();
+        await wrapper.get('[data-testid="esc-status"]').trigger('click');
+        const resolved = wrapper.findAll('[role="menuitemradio"]').find((b) => b.text().startsWith('Resolved'));
+        await resolved.trigger('click');
+        lastOptions().onSuccess({ props: {} });
+        expect(messages()).toEqual([['success', 'Status set to Resolved']]);
+    });
+
+    it('leaves the confirmation to the backend flash when there is one', () => {
+        mountPage();
+        press('a');
+        lastOptions().onSuccess({ props: { flash: { success: 'Ticket assigned.' } } });
+        expect(messages()).toEqual([]);
+    });
+
+    it('says what failed when an action is rejected', () => {
+        mountPage();
+        press('a');
+        lastOptions().onError({ agent_id: 'This agent cannot take more tickets.' });
+        expect(messages()).toEqual([['error', 'This agent cannot take more tickets.']]);
+        lastOptions().onError({});
+        expect(messages().at(-1)).toEqual(['error', 'That did not go through. Try again.']);
+    });
+
+    it('confirms a copied link and shows a check on the button', async () => {
+        Object.defineProperty(window.navigator, 'clipboard', {
+            value: { writeText: vi.fn(() => Promise.resolve()) },
+            configurable: true,
+        });
+        mountPage();
+        await wrapper.get('[data-testid="esc-copy-link"]').trigger('click');
+        expect(messages()).toEqual([['success', 'Link copied']]);
+        expect(wrapper.get('[data-testid="esc-copy-link"]').attributes('aria-label')).toBe('Link copied');
+    });
+});
+
+describe('Agent/TicketShow while another ticket loads', () => {
+    let listeners;
+    beforeEach(() => {
+        listeners = {};
+        router.on = vi.fn((event, cb) => {
+            listeners[event] = cb;
+            return () => {};
+        });
+    });
+    afterEach(() => {
+        delete router.on;
+    });
+    const visit = (path) => ({ detail: { visit: { url: new URL(`http://x${path}`), method: 'get' } } });
+
+    it('shows a skeleton in the pane until the next ticket arrives', async () => {
+        mountPage();
+        listeners.start(visit('/escalated.agent.tickets.show/ESC-1041'));
+        await nextTick();
+        const skeleton = wrapper.get('[data-testid="esc-detail-skeleton"]');
+        expect(skeleton.attributes('aria-busy')).toBe('true');
+        expect(wrapper.get('[data-testid="esc-detail-pane"]').isVisible()).toBe(false);
+        listeners.finish({ detail: { visit: {} } });
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-detail-skeleton"]').exists()).toBe(false);
+    });
+
+    it('does not blank the ticket for a reload of the same ticket or another page', async () => {
+        mountPage();
+        listeners.start(visit('/escalated.agent.tickets.show/ESC-1042'));
+        listeners.start(visit('/support/agent'));
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-detail-skeleton"]').exists()).toBe(false);
+    });
+});
+
+describe('Agent/TicketShow related tab', () => {
+    it('links to the knowledge base instead of showing made-up article suggestions', async () => {
+        mountPage();
+        await wrapper.get('#esc-tab-related').trigger('click');
+        expect(wrapper.findComponent({ name: 'KnowledgePanel' }).exists()).toBe(false);
+        const link = wrapper.get('[data-testid="esc-kb-link"]');
+        expect(link.attributes('href')).toBe('/support/kb');
+    });
+
+    it('leaves the link out when the knowledge base is off', async () => {
+        mountPage({}, { knowledge_base_enabled: false });
+        await wrapper.get('#esc-tab-related').trigger('click');
+        expect(wrapper.find('[data-testid="esc-kb-link"]').exists()).toBe(false);
     });
 });

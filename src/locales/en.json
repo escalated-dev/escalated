@@ -91,7 +91,9 @@
         "assign_placeholder": "Assign to...",
         "department_placeholder": "Department...",
         "delete": "Delete",
-        "deselect_all": "Deselect All"
+        "deselect_all": "Deselect All",
+        "confirm_delete_one": "Delete 1 ticket? This cannot be undone.",
+        "confirm_delete_other": "Delete :count tickets? This cannot be undone."
     },
     "filter": {
         "search_tickets": "Search tickets...",
@@ -983,7 +985,18 @@
             "next": "Next",
             "select_a_ticket": "Select a ticket",
             "select_hint": "Use j and k to move through the list and Enter to open a ticket.",
-            "shortcut_help": "All keyboard shortcuts"
+            "shortcut_help": "All keyboard shortcuts",
+            "no_matches": "No tickets match your search or filters.",
+            "clear_filters": "Clear filters",
+            "unread": "Unread",
+            "include_resolved": "Include resolved",
+            "open_only": "Open only",
+            "subtitle_open_mine_one": "1 open ticket assigned to you",
+            "subtitle_open_mine_other": ":count open tickets assigned to you",
+            "subtitle_open_unassigned_one": "1 open ticket waiting for an owner",
+            "subtitle_open_unassigned_other": ":count open tickets waiting for an owner",
+            "subtitle_open_one": "1 open ticket",
+            "subtitle_open_other": ":count open tickets"
         },
         "composer": {
             "label": "Compose",
@@ -1006,7 +1019,9 @@
             "add_note": "Add note",
             "more_send": "More send options",
             "send_pending": "Send and set waiting on customer",
-            "send_resolve": "Send and resolve"
+            "send_resolve": "Send and resolve",
+            "send_failed": "Not sent. Check your connection and try again; your text is still here.",
+            "sending": "Sending"
         },
         "ticket": {
             "macros": "Macros",
@@ -1067,7 +1082,27 @@
             },
             "back_to": "Back to :queue",
             "filter_tags": "Filter tags",
-            "no_tags_match": "No tags match."
+            "no_tags_match": "No tags match.",
+            "loading": "Loading ticket",
+            "knowledge_base": "Knowledge base",
+            "search_knowledge_base": "Search the knowledge base"
+        },
+        "toast": {
+            "dismiss": "Dismiss",
+            "failed": "That did not go through. Try again.",
+            "status": "Status set to :status",
+            "priority": "Priority set to :priority",
+            "tags": "Tags updated",
+            "assigned": "Assigned to you",
+            "followed": "Following this ticket",
+            "unfollowed": "No longer following this ticket",
+            "macro": "Applied :name",
+            "action": ":name done",
+            "snoozed": "Ticket snoozed",
+            "pinned": "Note pinned",
+            "unpinned": "Note unpinned",
+            "reply_sent": "Reply sent",
+            "note_added": "Internal note added"
         }
     }
 }

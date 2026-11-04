@@ -1,4 +1,6 @@
+import { userEvent, within } from 'storybook/test';
 import TicketShow from './TicketShow.vue';
+import { toast } from '../../composables/useAgentToasts';
 import { forgetInbox, rememberInbox } from '../../utils/agentQueues';
 import {
     AgentFrame,
@@ -60,4 +62,49 @@ export const LongContent = {
 };
 export const LongContentLight = {
     render: render('light', { ticket: longTicket, list: { ...rememberedInbox, tickets: longTicketsPage } }),
+};
+
+export const StatusMenuOpen = {
+    render: render('dark'),
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByTestId('esc-status'));
+    },
+};
+
+export const TagPickerOpen = {
+    render: render('light'),
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByTestId('esc-add-tag'));
+    },
+};
+
+export const OverflowMenuOpen = {
+    render: render('light'),
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByTestId('esc-ticket-more'));
+    },
+};
+
+export const ShortcutHelp = {
+    render: render('dark'),
+    play: async () => {
+        await userEvent.keyboard('?');
+    },
+};
+
+/** A confirmation and an error toast, as after an action. */
+export const Toasts = {
+    render: render('dark'),
+    play: async () => {
+        toast('Status set to Resolved');
+        toast('That did not go through. Try again.', 'error');
+    },
+};
+
+export const ToastsLight = {
+    render: render('light'),
+    play: async () => {
+        toast('Link copied');
+        toast('This agent cannot take more tickets.', 'error');
+    },
 };

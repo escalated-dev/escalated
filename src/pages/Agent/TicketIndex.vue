@@ -10,7 +10,16 @@ import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { useRealtime } from '../../composables/useRealtime';
 import { useI18n } from '../../composables/useI18n';
-import { activeQueueKey, normalisePrefix, queueHeading, rememberInbox, ticketsUrl } from '../../utils/agentQueues';
+import {
+    activeQueueKey,
+    normalisePrefix,
+    queueHeading,
+    queueLinkFilters,
+    rememberInbox,
+    ticketsUrl,
+    viewLinkFilters,
+    workspaceQueues,
+} from '../../utils/agentQueues';
 
 const props = defineProps({
     tickets: Object,
@@ -63,12 +72,30 @@ const queueKey = computed(() =>
     }),
 );
 
+// A backend that sends counts counts open tickets and accepts `open=1`.
+const countsOpen = computed(() => !!props.inbox?.counts);
+const openOnly = computed(() => ['1', 1, true, 'true'].includes(props.filters?.open));
+
+// The queue's own filters, as its rail link opens it: "Clear filters" goes
+// back to these.
+const baseFilters = computed(() => {
+    const key = queueKey.value;
+    if (key === 'live') return { live_chat: 1 };
+    if (String(key || '').startsWith('view:')) {
+        const view = (props.inbox?.views || []).find((v) => `view:${v.id}` === key);
+        return view ? viewLinkFilters(view) : { view: key.slice(5) };
+    }
+    const queue = workspaceQueues(page.props.auth?.user?.id).find((q) => q.key === key);
+    return queueLinkFilters(queue?.filters || {}, countsOpen.value);
+});
+
 const heading = computed(() =>
     queueHeading({
         key: queueKey.value,
         queue: props.queue,
         views: props.inbox?.views || [],
         total: typeof ticketPage.value.total === 'number' ? ticketPage.value.total : ticketPage.value.data?.length,
+        open: openOnly.value,
         t,
     }),
 );
@@ -131,7 +158,7 @@ onMounted(() => {
 
 <template>
     <EscalatedLayout :title="heading.title" full-bleed>
-        <div class="flex h-full min-h-0">
+        <div class="relative flex h-full min-h-0">
             <!-- List column -->
             <section
                 class="flex min-h-0 w-full flex-col border-r border-[var(--esc-panel-border)] lg:w-[340px] lg:shrink-0 xl:w-[420px]"
@@ -155,6 +182,8 @@ onMounted(() => {
                         :index-url="indexUrl"
                         :prefix="prefix"
                         :new-ticket-url="newTicketUrl"
+                        :base-filters="baseFilters"
+                        :open-toggle="countsOpen"
                     />
                 </div>
                 <PluginSlot slot="ticket.list.footer" :components="getPageComponents('ticket.list', 'footer')" />
@@ -182,13 +211,14 @@ onMounted(() => {
                     </button>
                 </div>
             </section>
+            <BulkActionBar
+                contained
+                :selected-ids="selectedIds"
+                :bulk-route="route('escalated.agent.tickets.bulk')"
+                :departments="departments"
+                @clear="selectedIds = []"
+            />
         </div>
-        <BulkActionBar
-            :selected-ids="selectedIds"
-            :bulk-route="route('escalated.agent.tickets.bulk')"
-            :departments="departments"
-            @clear="selectedIds = []"
-        />
         <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" agent />
     </EscalatedLayout>
 </template>
