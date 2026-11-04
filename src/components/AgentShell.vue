@@ -568,7 +568,10 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                 role="main"
                 :class="['min-h-0 min-w-0 flex-1', fullBleed ? 'overflow-hidden' : 'overflow-y-auto p-4 sm:p-6']"
             >
-                <slot />
+                <slot v-if="fullBleed" />
+                <div v-else class="mx-auto max-w-7xl">
+                    <slot />
+                </div>
             </main>
         </div>
 

@@ -77,10 +77,19 @@ watch(items, () => {
     activeIndex.value = 0;
 });
 
+// Focus goes back where it was when the palette closes.
+let returnFocus = null;
+
 watch(
     () => props.open,
     async (open) => {
-        if (!open) return;
+        if (!open) {
+            const target = returnFocus;
+            returnFocus = null;
+            if (target && typeof target.focus === 'function' && target.isConnected) target.focus();
+            return;
+        }
+        returnFocus = typeof document !== 'undefined' ? document.activeElement : null;
         query.value = '';
         activeIndex.value = 0;
         await nextTick();
