@@ -17,7 +17,7 @@ import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
 import PluginSlot from './PluginSlot.vue';
 import PresenceIndicator from './PresenceIndicator.vue';
-import TagSelect from './TagSelect.vue';
+import TagPicker from './TagPicker.vue';
 import TicketMergeDialog from './TicketMergeDialog.vue';
 import TicketSubjects from './TicketSubjects.vue';
 
@@ -140,6 +140,14 @@ const canEditTags = computed(() => !props.notesOnly && !!props.routes.tags);
 
 const ticketTags = computed(() => props.ticket.tags || []);
 const tagIds = computed(() => ticketTags.value.map((tag) => tag.id));
+
+// The ticket's own tags carry colours the tag list may not.
+const pickerTags = computed(() =>
+    props.tags.map((tag) => ({
+        ...tag,
+        color: tag.color || ticketTags.value.find((own) => own.id === tag.id)?.color || null,
+    })),
+);
 
 function updateTags(ids) {
     post(props.routes.tags, { tag_ids: ids });
@@ -579,19 +587,19 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                         type="button"
                         class="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--esc-panel-border-input)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         :aria-label="t('agent_panel.ticket.add_tag')"
+                        aria-haspopup="menu"
                         :aria-expanded="tagsOpen ? 'true' : 'false'"
                         data-testid="esc-add-tag"
                         @click="tagsOpen = !tagsOpen"
                     >
                         <PanelIcon name="plus" class="h-3.5 w-3.5" />
                     </button>
-                    <div
-                        v-if="tagsOpen"
-                        class="absolute left-0 top-full z-40 mt-1 w-64 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-sidebar-bg)] p-2 shadow-lg"
-                        @keydown.esc="tagsOpen = false"
-                    >
-                        <TagSelect :tags="tags" :model-value="tagIds" @update:model-value="updateTags" />
-                    </div>
+                    <TagPicker
+                        v-model:open="tagsOpen"
+                        :tags="pickerTags"
+                        :model-value="tagIds"
+                        @update:model-value="updateTags"
+                    />
                 </div>
 
                 <div class="ml-auto flex items-center gap-2">

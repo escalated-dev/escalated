@@ -1064,7 +1064,9 @@
                 "related": "Related",
                 "duplicate": "Duplicate"
             },
-            "back_to": "Back to :queue"
+            "back_to": "Back to :queue",
+            "filter_tags": "Filter tags",
+            "no_tags_match": "No tags match."
         }
     }
 }

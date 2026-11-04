@@ -350,3 +350,47 @@ describe('Agent/TicketShow live chat', () => {
         expect(wrapper.find('[data-testid="esc-composer"]').exists()).toBe(false);
     });
 });
+
+describe('Agent/TicketShow tag picker', () => {
+    async function openPicker() {
+        mountPage();
+        await wrapper.get('[data-testid="esc-add-tag"]').trigger('click');
+        await nextTick();
+        return wrapper.get('[data-testid="esc-tag-picker"]');
+    }
+
+    it('opens with the filter focused and every tag as a checkable item', async () => {
+        const picker = await openPicker();
+        expect(document.activeElement).toBe(picker.get('input').element);
+        const items = picker.findAll('[role="menuitemcheckbox"]');
+        expect(items.map((i) => i.text().replace('✓', ''))).toEqual(['Billing', 'Export', 'Bug']);
+        expect(items.map((i) => i.attributes('aria-checked'))).toEqual(['true', 'true', 'false']);
+    });
+
+    it('filters as the agent types and toggles a tag through the tags endpoint', async () => {
+        const picker = await openPicker();
+        await picker.get('input').setValue('bu');
+        const items = picker.findAll('[role="menuitemcheckbox"]');
+        expect(items.map((i) => i.text())).toEqual(['Bug']);
+        await items[0].trigger('click');
+        expect(router.post).toHaveBeenCalledWith(
+            '/escalated.agent.tickets.tags/ESC-1042',
+            { tag_ids: [1, 2, 3] },
+            expect.any(Object),
+        );
+    });
+
+    it('closes on a click outside', async () => {
+        await openPicker();
+        document.body.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true }));
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-tag-picker"]').exists()).toBe(false);
+    });
+
+    it('closes on Escape and returns focus to the add button', async () => {
+        const picker = await openPicker();
+        await picker.get('input').trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('[data-testid="esc-tag-picker"]').exists()).toBe(false);
+        expect(document.activeElement).toBe(wrapper.get('[data-testid="esc-add-tag"]').element);
+    });
+});
