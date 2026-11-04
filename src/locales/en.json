@@ -921,7 +921,8 @@
             "group_tickets": "Tickets",
             "group_navigation": "Go to",
             "group_actions": "Actions",
-            "no_results": "No matching commands"
+            "no_results": "No matching commands",
+            "group_ticket": "This ticket"
         },
         "keys": {
             "search": "Search",
@@ -942,7 +943,11 @@
         },
         "sla": {
             "breached": "SLA breached",
-            "minutes_left": ":countm left"
+            "minutes_left": ":countm left",
+            "overdue": "Overdue",
+            "due_minutes": "Due in :countm",
+            "due_hours": "Due in :counth",
+            "due_days": "Due in :countd"
         },
         "inbox": {
             "title_mine": "My inbox",
@@ -977,6 +982,88 @@
             "select_a_ticket": "Select a ticket",
             "select_hint": "Use j and k to move through the list and Enter to open a ticket.",
             "shortcut_help": "All keyboard shortcuts"
+        },
+        "composer": {
+            "label": "Compose",
+            "reply": "Reply",
+            "internal_note": "Internal note",
+            "note_cue": "Only agents can see internal notes",
+            "placeholder": "Type your reply...",
+            "note_placeholder": "Write an internal note. Use @ to mention a teammate.",
+            "link_text": "link text",
+            "canned": "Canned responses",
+            "emoji": "Emoji",
+            "bold": "Bold",
+            "italic": "Italic",
+            "link": "Link",
+            "list": "Bulleted list",
+            "attach": "Attach files",
+            "remove_file": "Remove :name",
+            "draft_saved": "Draft saved",
+            "send": "Send",
+            "add_note": "Add note",
+            "more_send": "More send options",
+            "send_pending": "Send and set waiting on customer",
+            "send_resolve": "Send and resolve"
+        },
+        "ticket": {
+            "macros": "Macros",
+            "actions": "Actions",
+            "ticket": "Ticket",
+            "merge": "Merge into another ticket",
+            "snooze_hour": "Snooze for an hour",
+            "snooze_day": "Snooze until tomorrow",
+            "copy_link": "Copy link",
+            "link_copied": "Link copied",
+            "more": "More actions",
+            "follow": "Follow",
+            "unfollow": "Unfollow",
+            "follow_toggle": "Follow or unfollow",
+            "change_status": "Change status",
+            "change_priority": "Change priority",
+            "no_priority": "No priority",
+            "remove_tag": "Remove tag :name",
+            "add_tag": "Add tag",
+            "unassigned": "Unassigned",
+            "assign_to_me": "Assign to me",
+            "resolve": "Resolve",
+            "sections": "Ticket sections",
+            "tabs": {
+                "conversation": "Conversation",
+                "details": "Details",
+                "customer": "Customer",
+                "related": "Related"
+            },
+            "pinned_note": "Pinned note",
+            "internal_note": "Internal note",
+            "download": "Download :name",
+            "none": "None",
+            "yes": "Yes",
+            "no": "No",
+            "type": "Type",
+            "channel": "Channel",
+            "first_response": "First response",
+            "resolution": "Resolution",
+            "followers": "Followers",
+            "tags": "Tags",
+            "satisfaction": "Satisfaction",
+            "email": "Email",
+            "tickets": "Tickets",
+            "page": "Page",
+            "recent_tickets": "Recent tickets",
+            "no_recent_tickets": "No other tickets from this customer.",
+            "linked_tickets": "Linked tickets",
+            "no_links": "No linked tickets.",
+            "activity": "Activity",
+            "relation": {
+                "child": "Child",
+                "parent": "Parent",
+                "merged": "Merged",
+                "merged_into": "Merged into",
+                "related": "Related",
+                "duplicate": "Duplicate"
+            },
+            "back_to": "Back to :queue"
         }
     }
 }

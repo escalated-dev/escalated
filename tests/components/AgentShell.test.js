@@ -4,6 +4,7 @@ import { nextTick } from 'vue';
 import EscalatedLayout from '../../src/components/EscalatedLayout.vue';
 import AgentShell from '../../src/components/AgentShell.vue';
 import { registerAgentCommands } from '../../src/composables/useAgentCommands';
+import { forgetInbox, rememberInbox } from '../../src/utils/agentQueues';
 
 const usePage = vi.fn();
 const visit = vi.fn();
@@ -132,6 +133,17 @@ describe('AgentShell rail', () => {
     it('prefers the queue prop over the URL', () => {
         mountLayout('/support/agent/tickets/ESC-1', { inbox, queue: { key: 'mine', title: 'My inbox' } });
         expect(wrapper.get('a[aria-current="page"][href*="assigned_to"]').text()).toContain('Inbox');
+    });
+
+    it('on a ticket page, marks the queue its list came from, and nothing without one', () => {
+        forgetInbox();
+        mountLayout('/support/agent/tickets/ESC-1', { inbox });
+        expect(wrapper.find('[data-testid="esc-rail-queues"] a[aria-current="page"]').exists()).toBe(false);
+        wrapper.unmount();
+        rememberInbox({ url: '/support/agent/tickets?unassigned=1', queueKey: 'unassigned', tickets: { data: [] } });
+        mountLayout('/support/agent/tickets/ESC-1', { inbox });
+        expect(wrapper.get('[data-testid="esc-rail-queues"] a[aria-current="page"]').text()).toContain('Unassigned');
+        forgetInbox();
     });
 
     it('lists saved views with counts and links them to their filters', () => {

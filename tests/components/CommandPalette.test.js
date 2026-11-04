@@ -83,6 +83,19 @@ describe('CommandPalette', () => {
         expect(wrapper.emitted('update:open')[0]).toEqual([false]);
     });
 
+    it('returns focus to where it was when it closes', async () => {
+        const button = document.createElement('button');
+        document.body.appendChild(button);
+        button.focus();
+        wrapper = mount(CommandPalette, { props: { open: false }, attachTo: document.body });
+        await wrapper.setProps({ open: true });
+        await new Promise((r) => setTimeout(r));
+        expect(document.activeElement).toBe(wrapper.get('input').element);
+        await wrapper.setProps({ open: false });
+        expect(document.activeElement).toBe(button);
+        button.remove();
+    });
+
     it('says so when nothing matches', async () => {
         mountPalette([{ id: 'a', label: 'Inbox' }]);
         await wrapper.get('input').setValue('zzz');

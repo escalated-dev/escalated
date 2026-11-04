@@ -786,8 +786,10 @@
                 "customActions",
                 "departments",
                 "followers_count",
+                "inbox",
                 "is_following",
                 "macros",
+                "queue",
                 "tags",
                 "ticket"
             ],

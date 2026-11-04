@@ -5,6 +5,25 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 ## [Unreleased]
 
 ### Changed
+- **Agent ticket view.** `Agent/TicketShow` keeps the inbox list beside the
+  ticket on wide screens and shows the ticket in a new `TicketDetailPane`: the
+  reference with a copy-link button, the subject, an overflow menu (macros,
+  custom actions, merge, snooze, copy link) and a follow star; status and
+  priority menus, tag chips with remove and add (the tags endpoint), and the
+  assignee with a plain "Assign to me". Tabs: Conversation (oldest first,
+  pinned notes on top, internal notes tinted with a lock, attachments as file
+  cards), Details (a dense definition list of today's sidebar content),
+  Customer (profile, recent tickets, the context panel data and its plugin
+  slot) and Related (linked tickets, knowledge base, activity). The new
+  `Composer` sits at the bottom: Reply / Internal note, attach, canned
+  responses, emoji, bold, italic, link and list, a split Send with "Send and
+  set waiting on customer" and "Send and resolve", Ctrl/Cmd Enter, and drafts
+  saved per ticket and mode in localStorage. Live chats show the chat thread,
+  chat composer and chat action bar instead; light agents get internal notes
+  only. Shortcuts: `r`, `n`, `s`, `p`, `f`, `a` (assign to me), `e`
+  (resolve), and the page's actions in the command palette. The optional
+  `inbox` and `queue` props are accepted here too. `ReplyComposer` and
+  `TicketSidebar` are unchanged and still exported.
 - **Agent inbox split view.** `Agent/TicketIndex` is a list column (queue
   title and count, stat strip, search, a filter popover holding the existing
   `TicketFilters`, and dense rows with initials, reference, subject, preview,
