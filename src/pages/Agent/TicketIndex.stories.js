@@ -1,3 +1,4 @@
+import { userEvent, within } from 'storybook/test';
 import TicketIndex from './TicketIndex.vue';
 import {
     AgentFrame,
@@ -48,4 +49,20 @@ export const NoMatches = {
         filters: { assigned_to: '7', search: 'refund', priority: 'urgent' },
         url: '/support/agent/tickets?assigned_to=7&search=refund&priority=urgent',
     }),
+};
+
+/** j and x from the keyboard: the focused row's ring and a themed checkbox. */
+export const KeyboardSelection = {
+    render: render('dark'),
+    play: async () => {
+        await userEvent.keyboard('jxj');
+    },
+};
+
+/** The filter popover, trimmed to the filters. */
+export const FiltersOpen = {
+    render: render('light'),
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByTestId('esc-queue-filter-toggle'));
+    },
 };

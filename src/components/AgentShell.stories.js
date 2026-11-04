@@ -1,3 +1,4 @@
+import { userEvent, within } from 'storybook/test';
 import AgentShell from './AgentShell.vue';
 import { AgentFrame, agentUser, inboxProp, sharedEscalated } from '../../.storybook/agentFixtures.js';
 
@@ -33,3 +34,18 @@ export const Dark = { render: render('dark', withInbox) };
 export const Light = { render: render('light', withInbox) };
 export const WithoutInboxProp = { render: render('dark', withoutInbox) };
 export const WithoutInboxPropLight = { render: render('light', withoutInbox) };
+
+/** The agent's status menu in the rail footer. */
+export const StatusMenu = {
+    render: render('dark', withoutInbox),
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByTestId('esc-rail-user'));
+    },
+};
+
+export const StatusMenuLight = {
+    render: render('light', withoutInbox),
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByTestId('esc-topbar-user'));
+    },
+};
