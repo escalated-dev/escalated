@@ -85,21 +85,69 @@ the list the agent opened the ticket from stays beside it; that list is kept
 in the browser from the last inbox visit, so it needs nothing from the
 backend. Opened directly, the ticket fills the pane.
 
-Actions are offered only when the host has the route: status, priority,
-tags (`escalated.agent.tickets.tags`, posting `tag_ids`), assign, follow,
-macros, pin, and snooze (`escalated.agent.tickets.snooze`, posting
-`snoozed_until`). Merge is offered to admins through the admin merge routes.
+The page is a compact header (reference, subject, the frequent actions, then
+status, priority, assignee, department and tags), the conversation in its own
+scroll region with the composer under it, and a customer and details panel.
+The panel sits beside the conversation when the pane is at least 900px wide
+(the conversation keeps 600px) and opens there by default; on a narrower pane
+it opens over the conversation on demand. The header button and `i` toggle
+it; the wide-layout choice is remembered in the browser
+(`escalated-context-panel`), as are collapsed sections
+(`escalated-context-sections`).
+
+The thread shows the customer's messages, agent replies (an accent rule),
+internal notes (amber, with a lock) and, from `ticket.activities`, one-line
+system events (status, priority, assignment, tags, department, snooze and
+SLA). `replied` and `note_added` activities are not repeated as events. A
+reply is the customer's when the backend says so (`is_customer: true` or
+`is_agent: false`), when its `author_type`/`author_id` match the ticket's
+`requester_type`/`requester_id`, or when it has no author (a guest).
+
+### Optional prop: `agents`
+
+```json
+[{ "id": 8, "name": "Ana Lopez" }]
+```
+
+Who the ticket can be assigned to. With it the assignee is a menu (with a
+filter past six agents) posting `agent_id` to the assign route; without it
+the page offers only "Assign to me".
+
+### Actions
+
+Actions are offered only when the host has the route:
+
+| Action | Route | Posts |
+|---|---|---|
+| Status, Resolve, Reopen | `escalated.agent.tickets.status` | `status` (`resolved`; `open` to reopen) |
+| Priority | `escalated.agent.tickets.priority` | `priority` |
+| Assign | `escalated.agent.tickets.assign` | `agent_id` |
+| Department | `escalated.agent.tickets.department` | `department_id` (needs `departments`) |
+| Tags | `escalated.agent.tickets.tags` | `tag_ids` |
+| Snooze | `escalated.agent.tickets.snooze`, else `escalated.admin.tickets.snooze` for admins | `snoozed_until` (ISO 8601) |
+| Unsnooze | `escalated.agent.tickets.unsnooze`, else the admin route for admins | nothing |
+| Follow, macros, pin | as before | |
+
+Snooze offers 1 hour, 4 hours, tomorrow 9:00, next Monday 9:00 (local time)
+and a date picker; a ticket whose `snoozed_until` is in the future says so in
+the header. Merge is offered to admins through the admin merge routes.
 "Send and set waiting on customer" and "Send and resolve" post the reply and
-then `{ status }` to the status route.
+then `{ status }` to the status route. Previous and next ticket (`Shift K` /
+`Shift J`) walk the list the ticket was opened from.
 
 Ticket fields the page reads beyond the existing ones, all optional:
 
 | Field | Shows |
 |---|---|
-| `custom_fields` (`[{ label, value }]` or `{ label: value }`) | Rows in the Details tab |
-| `requester_tickets` (falls back to `related_tickets`) | Recent tickets in the Customer tab |
-| `links_as_parent[].child_ticket`, `links_as_child[].parent_ticket`, `merged_tickets`, `merged_into` | Linked tickets in the Related tab |
-| `attachments[].size` | The file size on attachment cards |
+| `requester_tickets` (`[{ id, reference, subject, status, created_at, updated_at }]`) | Previous conversations in the customer panel. `related_tickets` is not used for this: it holds linked tickets. |
+| `requester.organization` (`{ name }` or a string), `organization`, `requester.company` | The customer's organization |
+| `requester_ticket_count` | "N tickets in total" |
+| `custom_fields` (`[{ label, value }]` or `{ label: value }`) | Details; fields without a value are left out |
+| `links_as_parent[].child_ticket`, `links_as_child[].parent_ticket`, `merged_tickets`, `merged_into` | Related tickets |
+| `snoozed_until` | "Snoozed until ..." in the header, and Unsnooze |
+| `requester_type`, `requester_id`, `replies[].author_type`, `replies[].author_id` | Who wrote each message |
+| `activities[].type`, `.properties` (`new_status`, `new_priority`, `agent_id`, `new_department_id`, `tag`), `.causer.name` | System events and the ticket history |
+| `attachments[].size` | The file size on attachment chips |
 
 ## The agent's own status
 

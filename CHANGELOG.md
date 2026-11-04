@@ -5,6 +5,10 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 ## [Unreleased]
 
 ### Fixed
+- **Customer history.** The customer tab listed `related_tickets` (a
+  ticket's linked tickets on escalated-laravel) as the customer's recent
+  tickets. The panel reads only `requester_tickets`.
+- The composer's hidden file input has an accessible name.
 - **Light panel contrast.** The light theme's tertiary text (`#646b78`), urgent
   priority (`#b31b1b`), SLA breach (`#b91c1c`) and SLA warning (`#a34807`)
   are a shade darker so they hold WCAG AA (4.5:1) on hovered, active and
@@ -36,6 +40,16 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   composer stays docked.
 
 ### Added
+- **Ticket actions in the agent panel:** Resolve and Reopen buttons; a
+  Snooze menu (1 hour, 4 hours, tomorrow, next Monday, or a date and time,
+  and Unsnooze) using `escalated.agent.tickets.snooze`/`unsnooze`, or the
+  admin routes for admins; reassigning to any agent in the new optional
+  `agents` prop on `Escalated/Agent/TicketShow` (`[{ id, name }]`, declared in
+  `pages.json`); changing the department; previous and next ticket from the
+  list (`Shift K` / `Shift J`); Ticket history in the overflow menu; `z` opens
+  Snooze. Tag chips carry a tag icon in the tag's colour.
+- `PanelMenu` takes item `icon`s, an optional `filterPlaceholder` (a filter
+  box beside the menu) and a default slot for a footer.
 - **Rail links match their counts.** When the backend sends `inbox.counts`
   (open tickets), Inbox, Unassigned and All tickets open their lists with
   `open=1`, and views open as `view=<id>` (plus `open=1` unless the view names
@@ -54,6 +68,22 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `docs/agent-panel.md`.
 
 ### Changed
+- **Agent ticket workspace.** The ticket header is 103px instead of 163px
+  (283px with a long subject): the reference shares a row with the actions,
+  the subject gets the full width (two lines at most), and status, priority,
+  assignee, department and tags sit on one row of quiet controls. The
+  conversation is the only main view and scrolls on its own under a fixed
+  header, with the composer below it; messages are no longer cards. Customer
+  messages, agent replies (accent rule), internal notes (amber, lock) and
+  system events (from `ticket.activities`) are told apart, text keeps a
+  760px measure, and attachments are compact file chips.
+- **The Details, Customer and Related tabs became a customer and details
+  panel** beside the conversation (from a 900px pane, so 1920px screens show
+  it by default) or over it on demand (`i`, or the header button): customer,
+  organization when sent, previous conversations, details and filled-in
+  custom fields, related tickets, the knowledge base link and the ticket
+  history, in collapsible sections. Plugin slots `ticket.show.sidebar` and
+  `ticket.show.context-panel` render inside it.
 - **Denser agent inbox.** Rows are 69px instead of 87px and name the
   requester on the first line beside the age; the reference moves next to the
   latest message preview. The four KPI tiles become a single row of filter

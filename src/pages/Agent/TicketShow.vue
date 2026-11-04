@@ -28,6 +28,8 @@ const props = defineProps({
     inbox: { type: Object, default: null },
     /** Optional. `{ key, title }`: the queue the agent opened this ticket from. */
     queue: { type: Object, default: null },
+    /** Optional. `[{ id, name }]`: who the ticket can be assigned to. Without it only "Assign to me" is offered. */
+    agents: { type: Array, default: null },
 });
 
 const page = usePage();
@@ -54,6 +56,13 @@ function routeOr(name, params) {
     }
 }
 
+function adminFallback(action, reference) {
+    return (
+        routeOr(`escalated.agent.tickets.${action}`, reference) ||
+        (page.props.escalated?.is_admin ? routeOr(`escalated.admin.tickets.${action}`, reference) : '')
+    );
+}
+
 const routes = computed(() => {
     const reference = props.ticket.reference;
     return {
@@ -63,9 +72,13 @@ const routes = computed(() => {
         priority: routeOr('escalated.agent.tickets.priority', reference),
         tags: routeOr('escalated.agent.tickets.tags', reference),
         assign: routeOr('escalated.agent.tickets.assign', reference),
+        department: routeOr('escalated.agent.tickets.department', reference),
         follow: routeOr('escalated.agent.tickets.follow', reference),
         macro: routeOr('escalated.agent.tickets.macro', reference),
-        snooze: routeOr('escalated.agent.tickets.snooze', reference),
+        // Agents snooze through the agent route; a host with only the admin
+        // routes still lets its admins snooze from here.
+        snooze: adminFallback('snooze', reference),
+        unsnooze: adminFallback('unsnooze', reference),
         merge: page.props.escalated?.is_admin ? routeOr('escalated.admin.tickets.merge', reference) : '',
         pin: routeOr('escalated.agent.tickets.pin', [reference, 0])
             ? (replyId) => routeOr('escalated.agent.tickets.pin', [reference, replyId])
@@ -193,6 +206,13 @@ watch(
 );
 const listTickets = computed(() => remembered.value?.tickets || null);
 const backHref = computed(() => remembered.value?.url || ticketsUrl(prefix.value));
+// The tickets either side of this one in that list, for previous / next.
+const adjacent = computed(() => {
+    const rows = listTickets.value?.data || [];
+    const index = rows.findIndex((row) => row.reference === props.ticket.reference);
+    if (index < 0) return {};
+    return { previous: rows[index - 1] || null, next: rows[index + 1] || null };
+});
 const backLabel = computed(() => props.queue?.title || remembered.value?.title || t('agent_panel.nav.tickets'));
 
 // --- Switching tickets ----------------------------------------------------------
@@ -234,6 +254,10 @@ useKeyboardShortcuts({
     f: () => paneRef.value?.toggleFollow(),
     a: () => paneRef.value?.assignToMe(),
     e: () => paneRef.value?.resolve(),
+    z: () => paneRef.value?.openSnooze(),
+    i: () => paneRef.value?.toggleContext(),
+    J: () => paneRef.value?.nextTicket(),
+    K: () => paneRef.value?.previousTicket(),
     j: () => listRef.value?.moveDown(),
     k: () => listRef.value?.moveUp(),
     Enter: () => listRef.value?.openFocused(),
@@ -305,6 +329,31 @@ useAgentCommands(() => {
                 run: () => paneRef.value?.openPriority(),
             },
         );
+    }
+    commands.push({
+        id: 'ticket-context',
+        label: t('agent_panel.ticket.context'),
+        icon: 'sidebarRight',
+        group,
+        hint: 'i',
+        run: () => paneRef.value?.toggleContext(),
+    });
+    commands.push({
+        id: 'ticket-history',
+        label: t('agent_panel.ticket.history'),
+        icon: 'clock',
+        group,
+        run: () => paneRef.value?.openHistory(),
+    });
+    if (adjacent.value.next) {
+        commands.push({
+            id: 'ticket-next',
+            label: t('agent_panel.ticket.next_ticket'),
+            icon: 'chevronDown',
+            group,
+            hint: 'J',
+            run: () => paneRef.value?.nextTicket(),
+        });
     }
     commands.push({
         id: 'ticket-follow',
@@ -432,6 +481,8 @@ onUnmounted(() => {
                         :canned-responses="cannedResponses || []"
                         :macros="macros"
                         :custom-actions="customActions"
+                        :agents="agents || []"
+                        :adjacent="adjacent"
                         :is-following="is_following"
                         :followers-count="followers_count"
                         :notes-only="isLightAgent"

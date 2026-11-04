@@ -245,40 +245,6 @@ describe('Agent/TicketShow without the new props', () => {
         expect(card.get('a').attributes('href')).toBe('/files/9');
     });
 
-    it('shows details, customer and related tabs', async () => {
-        mountPage();
-        const tab = (name) => wrapper.findAll('[role="tab"]').find((b) => b.text() === name);
-        await tab('Details').trigger('click');
-        const details = wrapper.get('[data-testid="esc-details"]').text();
-        expect(details).toContain('Billing');
-        expect(details).toContain('Problem');
-
-        await tab('Customer').trigger('click');
-        expect(wrapper.get('[data-testid="esc-customer"]').text()).toContain('sarah@northwind.io');
-        expect(wrapper.text()).toContain('Old export issue');
-
-        await tab('Related').trigger('click');
-        expect(wrapper.get('[data-testid="esc-links"]').text()).toContain('ESC-1001');
-    });
-
-    it('moves between tabs with the arrow keys', async () => {
-        mountPage();
-        await wrapper.get('[role="tablist"][aria-label="Ticket sections"]').trigger('keydown', { key: 'ArrowRight' });
-        expect(wrapper.findAll('[role="tab"][aria-selected="true"]').map((t) => t.text())).toContain('Details');
-    });
-
-    it('keeps the plugin slots', async () => {
-        mountPage();
-        let slots = wrapper.findAllComponents(PluginSlot).map((s) => s.props('slot'));
-        expect(slots).toEqual(expect.arrayContaining(['ticket.show.header', 'ticket.show.actions']));
-        await wrapper
-            .findAll('[role="tab"]')
-            .find((b) => b.text() === 'Details')
-            .trigger('click');
-        slots = wrapper.findAllComponents(PluginSlot).map((s) => s.props('slot'));
-        expect(slots).toContain('ticket.show.sidebar');
-    });
-
     it('offers macros and custom actions in the overflow menu', async () => {
         mountPage({
             macros: [{ id: 4, name: 'Escalate to tier 2' }],
@@ -398,46 +364,6 @@ describe('Agent/TicketShow tag picker', () => {
     });
 });
 
-describe('Agent/TicketShow focus rings', () => {
-    function unringed(root) {
-        return [...root.querySelectorAll('a, button, [tabindex="0"]')]
-            .filter((el) => !el.closest('[role="menu"]'))
-            .filter((el) => !/focus-visible:(ring|after:ring)/.test(el.className))
-            .map((el) => (el.getAttribute('aria-label') || el.textContent).trim().replace(/\s+/g, ' '));
-    }
-
-    it('gives every control on the page a visible keyboard focus ring', async () => {
-        rememberInbox({
-            url: '/support/agent/tickets',
-            title: 'My inbox',
-            tickets: {
-                data: [{ id: 1042, reference: 'ESC-1042', subject: 'Unable to export CSV' }],
-                current_page: 1,
-                last_page: 2,
-                next_page_url: '/support/agent/tickets?page=2',
-            },
-        });
-        mountPage({}, { is_admin: true });
-        expect(unringed(wrapper.element)).toEqual([]);
-        for (const name of ['customer', 'related']) {
-            await wrapper.get(`#esc-tab-${name}`).trigger('click');
-            expect(unringed(wrapper.element)).toEqual([]);
-        }
-    });
-});
-
-describe('Agent/TicketShow on a phone', () => {
-    it('scrolls the header away with the thread and keeps the composer docked', () => {
-        mountPage();
-        const pane = wrapper.get('[data-testid="esc-detail-pane"]');
-        expect(pane.classes()).toContain('max-sm:overflow-y-auto');
-        expect(wrapper.get('[data-testid="esc-tabpanel"]').classes()).toContain('max-sm:overflow-visible');
-        expect(wrapper.get('[data-testid="esc-composer-dock"]').classes()).toEqual(
-            expect.arrayContaining(['max-sm:sticky', 'max-sm:bottom-0']),
-        );
-    });
-});
-
 describe('Agent/TicketShow feedback', () => {
     const { toasts } = useAgentToasts();
     const messages = () => toasts.value.map((t) => [t.tone, t.message]);
@@ -515,18 +441,499 @@ describe('Agent/TicketShow while another ticket loads', () => {
     });
 });
 
-describe('Agent/TicketShow related tab', () => {
-    it('links to the knowledge base instead of showing made-up article suggestions', async () => {
+describe('Agent/TicketShow workspace layout', () => {
+    it('keeps the header to the reference, a two-line subject, the actions and one row of properties', () => {
         mountPage();
-        await wrapper.get('#esc-tab-related').trigger('click');
-        expect(wrapper.findComponent({ name: 'KnowledgePanel' }).exists()).toBe(false);
-        const link = wrapper.get('[data-testid="esc-kb-link"]');
-        expect(link.attributes('href')).toBe('/support/kb');
+        const header = wrapper.get('[data-testid="esc-ticket-header"]');
+        expect(header.get('[data-testid="esc-subject"]').classes()).toEqual(
+            expect.arrayContaining(['text-[15px]', 'line-clamp-2']),
+        );
+        expect(header.get('[data-testid="esc-subject"]').attributes('title')).toBe(
+            'Unable to export CSV reports from dashboard',
+        );
+        expect(header.find('[data-testid="esc-ticket-actions"]').exists()).toBe(true);
+        expect(header.find('[data-testid="esc-ticket-properties"]').exists()).toBe(true);
+        // The conversation is the only main view: no section tabs.
+        expect(wrapper.find('[role="tablist"][aria-label="Ticket sections"]').exists()).toBe(false);
     });
 
-    it('leaves the link out when the knowledge base is off', async () => {
-        mountPage({}, { knowledge_base_enabled: false });
-        await wrapper.get('#esc-tab-related').trigger('click');
-        expect(wrapper.find('[data-testid="esc-kb-link"]').exists()).toBe(false);
+    it('scrolls the conversation on its own, with the composer below it and outside it', () => {
+        mountPage();
+        const conversation = wrapper.get('[data-testid="esc-conversation"]');
+        expect(conversation.classes()).toEqual(expect.arrayContaining(['overflow-y-auto', 'min-h-0', 'flex-1']));
+        expect(conversation.find('[data-testid="esc-composer"]').exists()).toBe(false);
+        expect(wrapper.get('[data-testid="esc-composer-dock"]').classes()).toContain('shrink-0');
+        expect(wrapper.get('[data-testid="esc-detail-pane"]').classes()).not.toContain('max-sm:overflow-y-auto');
+    });
+
+    it('keeps message text to a readable measure', () => {
+        mountPage();
+        const column = wrapper.get('[data-testid="esc-conversation"] > div');
+        expect(column.classes()).toEqual(expect.arrayContaining(['max-w-[760px]', 'mx-auto']));
+    });
+});
+
+describe('Agent/TicketShow messages', () => {
+    it('tells customer messages, agent replies, internal notes and system events apart', () => {
+        mountPage({
+            ticket: makeTicket({
+                requester_type: 'App\\Models\\User',
+                requester_id: 50,
+                replies: [
+                    {
+                        id: 4,
+                        body: 'Thanks, any news?',
+                        author_type: 'App\\Models\\User',
+                        author_id: 50,
+                        author: { id: 50, name: 'Sarah Chen' },
+                        created_at: minutesAgo(5),
+                    },
+                    {
+                        id: 3,
+                        body: 'Restarting the export service now.',
+                        author_type: 'App\\Models\\User',
+                        author_id: 7,
+                        author: { id: 7, name: 'Mike Agent' },
+                        created_at: minutesAgo(10),
+                    },
+                    {
+                        id: 2,
+                        body: 'Looks like the export job is timing out.',
+                        author: { id: 7, name: 'Mike Agent' },
+                        author_type: 'App\\Models\\User',
+                        author_id: 7,
+                        created_at: minutesAgo(20),
+                        is_internal_note: true,
+                    },
+                ],
+                activities: [
+                    {
+                        id: 1,
+                        type: 'status_changed',
+                        properties: { old_status: 'open', new_status: 'in_progress' },
+                        causer: { name: 'Mike Agent' },
+                        created_at: minutesAgo(30),
+                    },
+                    { id: 2, type: 'replied', causer: { name: 'Mike Agent' }, created_at: minutesAgo(10) },
+                ],
+            }),
+        });
+        const kinds = wrapper
+            .findAll('[data-testid="esc-message"], [data-testid="esc-event"]')
+            .map((el) => el.attributes('data-kind'));
+        expect(kinds).toEqual(['customer', 'event', 'note', 'agent', 'customer']);
+        const event = wrapper.get('[data-testid="esc-event"]');
+        expect(event.text()).toContain('Mike Agent changed the status to In Progress');
+        // Replies and notes are messages already; their activities are not repeated as events.
+        expect(wrapper.findAll('[data-testid="esc-event"]')).toHaveLength(1);
+        const customer = wrapper.findAll('[data-testid="esc-message"]')[0];
+        expect(customer.text()).toContain('Customer');
+        const note = wrapper.get('[data-kind="note"]');
+        expect(note.text()).toContain('Internal note');
+        expect(note.classes()).toContain('bg-[var(--esc-panel-note-bg)]');
+    });
+
+    it('treats a guest reply with no author as the customer', () => {
+        mountPage({
+            ticket: makeTicket({
+                replies: [{ id: 5, body: 'Still broken', author: { name: 'Guest' }, created_at: minutesAgo(2) }],
+            }),
+        });
+        expect(wrapper.findAll('[data-testid="esc-message"]').at(-1).attributes('data-kind')).toBe('customer');
+    });
+
+    it('shows attachments as compact file chips with a labelled download link', () => {
+        mountPage();
+        const chip = wrapper.get('[data-testid="esc-attachment"]');
+        expect(chip.classes()).toContain('h-9');
+        const link = chip.get('a');
+        expect(link.attributes('aria-label')).toBe('Download error-export.png');
+        expect(link.attributes('title')).toBe('Download error-export.png');
+    });
+});
+
+describe('Agent/TicketShow actions', () => {
+    it('resolves from the header and reopens a resolved ticket', async () => {
+        mountPage();
+        await wrapper.get('[data-testid="esc-resolve"]').trigger('click');
+        expect(router.post).toHaveBeenLastCalledWith(
+            '/escalated.agent.tickets.status/ESC-1042',
+            { status: 'resolved' },
+            expect.any(Object),
+        );
+        wrapper.unmount();
+        mountPage({ ticket: makeTicket({ status: 'resolved' }) });
+        expect(wrapper.find('[data-testid="esc-resolve"]').exists()).toBe(false);
+        await wrapper.get('[data-testid="esc-reopen"]').trigger('click');
+        expect(router.post).toHaveBeenLastCalledWith(
+            '/escalated.agent.tickets.status/ESC-1042',
+            { status: 'open' },
+            expect.any(Object),
+        );
+    });
+
+    it('snoozes from a menu of presets, through the agent route', async () => {
+        mountPage();
+        await wrapper.get('[data-testid="esc-snooze"]').trigger('click');
+        const items = wrapper.findAll('[role="menu"][aria-label="Snooze"] [role="menuitem"]');
+        expect(
+            items.map((i) =>
+                i
+                    .text()
+                    .split(/\s{2,}|\n/)[0]
+                    .trim(),
+            ),
+        ).toEqual(expect.arrayContaining(['In 1 hour', 'In 4 hours']));
+        const before = Date.now();
+        await items[0].trigger('click');
+        const [url, data] = router.post.mock.calls.at(-1);
+        expect(url).toBe('/escalated.agent.tickets.snooze/ESC-1042');
+        const until = new Date(data.snoozed_until).getTime();
+        expect(until - before).toBeGreaterThanOrEqual(3600000 - 1000);
+        expect(until - before).toBeLessThan(3600000 + 60000);
+    });
+
+    it('snoozes until a date and time the agent picks', async () => {
+        mountPage();
+        await wrapper.get('[data-testid="esc-snooze"]').trigger('click');
+        const form = wrapper.get('[data-testid="esc-snooze-custom"]');
+        const later = new Date(Date.now() + 3 * 86400000);
+        later.setSeconds(0, 0);
+        const pad = (n) => String(n).padStart(2, '0');
+        const value = `${later.getFullYear()}-${pad(later.getMonth() + 1)}-${pad(later.getDate())}T${pad(later.getHours())}:${pad(later.getMinutes())}`;
+        await form.get('input[type="datetime-local"]').setValue(value);
+        await form.trigger('submit');
+        const [url, data] = router.post.mock.calls.at(-1);
+        expect(url).toBe('/escalated.agent.tickets.snooze/ESC-1042');
+        expect(new Date(data.snoozed_until).getTime()).toBe(later.getTime());
+    });
+
+    it('says a ticket is snoozed and offers to unsnooze it', async () => {
+        const until = new Date(Date.now() + 86400000).toISOString();
+        mountPage({ ticket: makeTicket({ snoozed_until: until }) });
+        expect(wrapper.get('[data-testid="esc-snoozed"]').text()).toContain('Snoozed until');
+        await wrapper.get('[data-testid="esc-snooze"]').trigger('click');
+        await wrapper
+            .findAll('[role="menuitem"]')
+            .find((i) => i.text() === 'Unsnooze')
+            .trigger('click');
+        expect(router.post).toHaveBeenLastCalledWith(
+            '/escalated.agent.tickets.unsnooze/ESC-1042',
+            {},
+            expect.any(Object),
+        );
+    });
+
+    it('falls back to the admin snooze route for admins, and offers no snooze without a route', () => {
+        const only = (names) =>
+            vi.fn((name, params) => {
+                if (name.includes('snooze') && !names.includes(name)) throw new Error('no route');
+                const list = Array.isArray(params) ? params : [params];
+                return `/${name}/${list.join('/')}`;
+            });
+        const adminOnly = only(['escalated.admin.tickets.snooze', 'escalated.admin.tickets.unsnooze']);
+        pageAt({ is_admin: true });
+        vi.stubGlobal('route', adminOnly);
+        wrapper = mount(TicketShow, {
+            props: { ticket: makeTicket(), departments: [], tags: [], cannedResponses: [] },
+            global: { mocks: { route: adminOnly }, stubs: { PresenceIndicator: true } },
+            attachTo: document.body,
+        });
+        expect(wrapper.find('[data-testid="esc-snooze"]').exists()).toBe(true);
+        wrapper.unmount();
+
+        pageAt({ is_admin: false });
+        vi.stubGlobal('route', adminOnly);
+        wrapper = mount(TicketShow, {
+            props: { ticket: makeTicket(), departments: [], tags: [], cannedResponses: [] },
+            global: { mocks: { route: adminOnly }, stubs: { PresenceIndicator: true } },
+            attachTo: document.body,
+        });
+        expect(wrapper.find('[data-testid="esc-snooze"]').exists()).toBe(false);
+    });
+
+    it('reassigns to any agent the backend lists, with a filter for long lists', async () => {
+        const agents = [
+            { id: 7, name: 'Mike Agent' },
+            { id: 8, name: 'Ana Lopez' },
+            { id: 9, name: 'Tom Baker' },
+            { id: 10, name: 'Priya Patel' },
+            { id: 11, name: 'Lena Fischer' },
+            { id: 12, name: 'Noah Kim' },
+            { id: 13, name: 'Ola Berg' },
+        ];
+        mountPage({ agents });
+        await wrapper.get('[data-testid="esc-assignee"]').trigger('click');
+        // The filter box sits beside the menu: a menu holds only its items.
+        const filter = wrapper.get('[data-testid="esc-menu-filter"]');
+        expect(document.activeElement).toBe(filter.element);
+        expect(filter.element.closest('[role="menu"]')).toBeNull();
+        await filter.setValue('ana');
+        const menu = wrapper.get('[role="menu"][aria-label="Change assignee"]');
+        const items = menu.findAll('[role="menuitemradio"]');
+        expect(items.map((i) => i.text())).toEqual(['Ana Lopez']);
+        await items[0].trigger('click');
+        expect(router.post).toHaveBeenLastCalledWith(
+            '/escalated.agent.tickets.assign/ESC-1042',
+            { agent_id: 8 },
+            expect.any(Object),
+        );
+    });
+
+    it('keeps the assignee as plain text when the backend sends no agents', () => {
+        mountPage();
+        expect(wrapper.get('[data-testid="esc-assignee"]').element.tagName).toBe('SPAN');
+        expect(wrapper.find('[data-testid="esc-assign-me"]').exists()).toBe(true);
+    });
+
+    it('moves the ticket to another department', async () => {
+        mountPage({
+            departments: [
+                { id: 2, name: 'Billing' },
+                { id: 3, name: 'Technical' },
+            ],
+        });
+        await wrapper.get('[data-testid="esc-department"]').trigger('click');
+        await wrapper
+            .findAll('[role="menuitemradio"]')
+            .find((i) => i.text() === 'Technical')
+            .trigger('click');
+        expect(router.post).toHaveBeenLastCalledWith(
+            '/escalated.agent.tickets.department/ESC-1042',
+            { department_id: 3 },
+            expect.any(Object),
+        );
+    });
+
+    it('marks each tag with a tag icon in its colour', () => {
+        mountPage();
+        const icon = wrapper.findAll('[data-testid="esc-tag"]')[0].get('svg');
+        expect(icon.attributes('aria-hidden')).toBe('true');
+        expect(icon.attributes('style')).toContain('color');
+    });
+
+    it('labels every icon-only header action and gives it a tooltip', () => {
+        mountPage({ macros: [{ id: 4, name: 'Escalate' }] }, { is_admin: true });
+        const actions = wrapper.get('[data-testid="esc-ticket-actions"]');
+        for (const button of actions.findAll('button')) {
+            if (button.text().trim()) continue;
+            expect(button.attributes('aria-label')).toBeTruthy();
+            expect(button.attributes('title')).toBeTruthy();
+        }
+    });
+});
+
+describe('Agent/TicketShow next and previous ticket', () => {
+    function remember() {
+        rememberInbox({
+            url: '/support/agent/tickets?assigned_to=7',
+            title: 'My inbox',
+            tickets: {
+                data: [
+                    { id: 1043, reference: 'ESC-1043', subject: 'Before' },
+                    { id: 1042, reference: 'ESC-1042', subject: 'Unable to export CSV' },
+                    { id: 1041, reference: 'ESC-1041', subject: 'After' },
+                ],
+            },
+        });
+    }
+
+    it('opens the next and previous ticket of the list, with Shift J and Shift K too', async () => {
+        remember();
+        mountPage();
+        await wrapper.get('[data-testid="esc-next-ticket"]').trigger('click');
+        expect(router.visit).toHaveBeenLastCalledWith('/escalated.agent.tickets.show/ESC-1041', expect.any(Object));
+        await wrapper.get('[data-testid="esc-previous-ticket"]').trigger('click');
+        expect(router.visit).toHaveBeenLastCalledWith('/escalated.agent.tickets.show/ESC-1043', expect.any(Object));
+        press('J');
+        expect(router.visit).toHaveBeenLastCalledWith('/escalated.agent.tickets.show/ESC-1041', expect.any(Object));
+        press('K');
+        expect(router.visit).toHaveBeenLastCalledWith('/escalated.agent.tickets.show/ESC-1043', expect.any(Object));
+    });
+
+    it('disables the button at the end of the list and hides both without a list', () => {
+        rememberInbox({
+            url: '/support/agent/tickets',
+            title: 'All tickets',
+            tickets: { data: [{ id: 1042, reference: 'ESC-1042', subject: 'Only one' }] },
+        });
+        mountPage();
+        expect(wrapper.get('[data-testid="esc-next-ticket"]').attributes('disabled')).toBeDefined();
+        wrapper.unmount();
+        forgetInbox();
+        mountPage();
+        expect(wrapper.find('[data-testid="esc-next-ticket"]').exists()).toBe(false);
+    });
+});
+
+describe('Agent/TicketShow customer and details panel', () => {
+    async function openPanel(props = {}, escalated = {}) {
+        mountPage(props, escalated);
+        await wrapper.get('[data-testid="esc-context-toggle"]').trigger('click');
+        return wrapper.get('[data-testid="esc-context-panel"]');
+    }
+
+    it('is closed on a narrow pane and opens over the conversation on demand', async () => {
+        mountPage();
+        expect(wrapper.find('[data-testid="esc-context-panel"]').exists()).toBe(false);
+        const toggle = wrapper.get('[data-testid="esc-context-toggle"]');
+        expect(toggle.attributes('aria-expanded')).toBe('false');
+        await toggle.trigger('click');
+        const panel = wrapper.get('[data-testid="esc-context-panel"]');
+        expect(panel.attributes('data-overlay')).toBe('true');
+        expect(toggle.attributes('aria-expanded')).toBe('true');
+        await panel.trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('[data-testid="esc-context-panel"]').exists()).toBe(false);
+        expect(document.activeElement).toBe(wrapper.get('[data-testid="esc-context-toggle"]').element);
+    });
+
+    it('toggles with i', async () => {
+        mountPage();
+        press('i');
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-context-panel"]').exists()).toBe(true);
+        press('i');
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-context-panel"]').exists()).toBe(false);
+    });
+
+    it('shows the customer, their organization when sent, and their other conversations', async () => {
+        const panel = await openPanel({
+            ticket: makeTicket({
+                requester: { name: 'Sarah Chen', email: 'sarah@northwind.io', organization: { name: 'Northwind' } },
+                requester_tickets: [
+                    { id: 900, reference: 'ESC-0900', subject: 'Invoice question', status: 'resolved' },
+                    { id: 950, reference: 'ESC-0950', subject: 'Export slow', status: 'open' },
+                ],
+            }),
+        });
+        const customer = panel.get('[data-testid="esc-customer"]');
+        expect(customer.text()).toContain('Sarah Chen');
+        expect(customer.text()).toContain('4 tickets in total');
+        expect(panel.get('a[href="mailto:sarah@northwind.io"]').text()).toBe('sarah@northwind.io');
+        expect(panel.get('[data-testid="esc-customer-org"]').text()).toContain('Northwind');
+        const others = panel.get('[data-testid="esc-customer-tickets"]');
+        expect(others.findAll('a').map((a) => a.attributes('href'))).toEqual([
+            '/escalated.agent.tickets.show/ESC-0900',
+            '/escalated.agent.tickets.show/ESC-0950',
+        ]);
+    });
+
+    it("never presents linked tickets as the customer's history", async () => {
+        const panel = await openPanel();
+        expect(panel.find('[data-testid="esc-customer-tickets"]').exists()).toBe(false);
+        expect(panel.get('[data-testid="esc-context-conversations"]').text()).toContain(
+            'No other conversations with this customer.',
+        );
+        expect(panel.find('[data-testid="esc-customer-org"]').exists()).toBe(false);
+    });
+
+    it('lists details and filled-in custom fields, without repeating the header', async () => {
+        const panel = await openPanel({
+            ticket: makeTicket({
+                custom_fields: [
+                    { label: 'Plan', value: 'Enterprise' },
+                    { label: 'Order number', value: '' },
+                ],
+            }),
+        });
+        const details = panel.get('[data-testid="esc-details"]').text();
+        expect(details).toContain('Problem');
+        expect(details).not.toContain('Department');
+        expect(details).toContain('Enterprise');
+        expect(details).not.toContain('Order number');
+        expect(details).not.toContain('High');
+    });
+
+    it('lists linked tickets and the knowledge base link under Related', async () => {
+        const panel = await openPanel();
+        expect(panel.get('[data-testid="esc-links"]').text()).toContain('ESC-1001');
+        expect(panel.get('[data-testid="esc-kb-link"]').attributes('href')).toBe('/support/kb');
+        expect(wrapper.findComponent({ name: 'KnowledgePanel' }).exists()).toBe(false);
+        wrapper.unmount();
+        const without = await openPanel({}, { knowledge_base_enabled: false });
+        expect(without.find('[data-testid="esc-kb-link"]').exists()).toBe(false);
+    });
+
+    it('opens the ticket history from the overflow menu', async () => {
+        mountPage({
+            ticket: makeTicket({
+                activities: [
+                    {
+                        id: 1,
+                        type: 'priority_changed',
+                        properties: { new_priority: 'high' },
+                        causer: { name: 'Mike Agent' },
+                        created_at: minutesAgo(30),
+                    },
+                ],
+            }),
+        });
+        await wrapper.get('[data-testid="esc-ticket-more"]').trigger('click');
+        await wrapper
+            .findAll('[role="menuitem"]')
+            .find((i) => i.text() === 'Ticket history')
+            .trigger('click');
+        await nextTick();
+        await nextTick();
+        const history = wrapper.get('[data-testid="esc-history"]');
+        expect(history.isVisible()).toBe(true);
+        expect(history.text()).toContain('Mike Agent changed the priority to High');
+    });
+
+    it('remembers collapsed sections', async () => {
+        const panel = await openPanel();
+        const header = panel.get('[data-testid="esc-context-details"] button');
+        expect(header.attributes('aria-expanded')).toBe('true');
+        await header.trigger('click');
+        expect(header.attributes('aria-expanded')).toBe('false');
+        expect(JSON.parse(window.localStorage.getItem('escalated-context-sections')).details).toBe(false);
+    });
+
+    it('keeps the plugin slots', async () => {
+        mountPage();
+        let slots = wrapper.findAllComponents(PluginSlot).map((s) => s.props('slot'));
+        expect(slots).toEqual(expect.arrayContaining(['ticket.show.header', 'ticket.show.actions']));
+        await wrapper.get('[data-testid="esc-context-toggle"]').trigger('click');
+        slots = wrapper.findAllComponents(PluginSlot).map((s) => s.props('slot'));
+        expect(slots).toEqual(expect.arrayContaining(['ticket.show.sidebar', 'ticket.show.context-panel']));
+    });
+});
+
+describe('Agent/TicketShow focus rings', () => {
+    function unringed(root) {
+        return [...root.querySelectorAll('a, button, [tabindex="0"]')]
+            .filter((el) => !el.closest('[role="menu"]'))
+            .filter((el) => !/focus-visible:(ring|after:ring)/.test(el.className))
+            .map((el) => (el.getAttribute('aria-label') || el.textContent).trim().replace(/\s+/g, ' '));
+    }
+
+    it('gives every control on the page a visible keyboard focus ring, panel included', async () => {
+        rememberInbox({
+            url: '/support/agent/tickets',
+            title: 'My inbox',
+            tickets: {
+                data: [
+                    { id: 1042, reference: 'ESC-1042', subject: 'Unable to export CSV' },
+                    { id: 1041, reference: 'ESC-1041', subject: 'Next one' },
+                ],
+                current_page: 1,
+                last_page: 2,
+                next_page_url: '/support/agent/tickets?page=2',
+            },
+        });
+        mountPage(
+            {
+                agents: [{ id: 8, name: 'Ana Lopez' }],
+                departments: [{ id: 2, name: 'Billing' }],
+                ticket: makeTicket({
+                    requester_tickets: [{ id: 900, reference: 'ESC-0900', subject: 'Old', status: 'open' }],
+                }),
+            },
+            { is_admin: true },
+        );
+        expect(unringed(wrapper.element)).toEqual([]);
+        await wrapper.get('[data-testid="esc-context-toggle"]').trigger('click');
+        expect(unringed(wrapper.element)).toEqual([]);
     });
 });

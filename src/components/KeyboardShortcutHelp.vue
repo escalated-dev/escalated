@@ -41,6 +41,8 @@ const shortcutGroups = computed(() => {
             { keys: ['f'], description: t('keyboard.follow_unfollow') },
             { keys: ['a'], description: t('agent_panel.keys.assign_me') },
             { keys: ['e'], description: t('agent_panel.keys.resolve') },
+            { keys: ['z'], description: t('agent_panel.keys.snooze') },
+            { keys: ['i'], description: t('agent_panel.keys.context') },
         ],
     };
     const global = {
@@ -58,7 +60,14 @@ const shortcutGroups = computed(() => {
     }
     if (props.context === 'detail') {
         // In the detail view the list keys skip "select", which the list beside a ticket does not offer.
-        const listKeys = { ...list, shortcuts: list.shortcuts.filter((s) => s.keys[0] !== 'x') };
+        const listKeys = {
+            ...list,
+            shortcuts: [
+                ...list.shortcuts.filter((s) => s.keys[0] !== 'x'),
+                { keys: ['Shift', 'J'], description: t('agent_panel.keys.next_ticket') },
+                { keys: ['Shift', 'K'], description: t('agent_panel.keys.previous_ticket') },
+            ],
+        };
         return props.withList ? [detail, listKeys, global] : [detail, global];
     }
     return [list, global];

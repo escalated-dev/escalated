@@ -185,10 +185,44 @@ export const ticketDetail = {
     channel: 'email',
     assigned_to: null,
     assignee: null,
+    department_id: 2,
     department: { id: 2, name: 'Billing' },
     ticket_type: 'problem',
-    requester: { name: 'Sarah Chen', email: 'sarah@northwind.io' },
+    requester_type: 'user',
+    requester_id: 50,
+    requester: { id: 50, name: 'Sarah Chen', email: 'sarah@northwind.io' },
     requester_ticket_count: 4,
+    requester_tickets: [
+        {
+            id: 1018,
+            reference: 'ESC-1018',
+            subject: 'Scheduled export arrives empty on Mondays',
+            status: 'waiting_on_customer',
+            created_at: minutesAgo(60 * 50),
+            updated_at: minutesAgo(60 * 30),
+        },
+        {
+            id: 981,
+            reference: 'ESC-0981',
+            subject: 'CSV export missing columns',
+            status: 'resolved',
+            created_at: minutesAgo(60 * 24 * 12),
+            updated_at: minutesAgo(60 * 24 * 11),
+        },
+        {
+            id: 912,
+            reference: 'ESC-0912',
+            subject: 'Invite a second admin',
+            status: 'closed',
+            created_at: minutesAgo(60 * 24 * 40),
+            updated_at: minutesAgo(60 * 24 * 39),
+        },
+    ],
+    custom_fields: [
+        { label: 'Plan', value: 'Business' },
+        { label: 'Account ID', value: 'NW-2231' },
+        { label: 'Browser', value: null },
+    ],
     created_at: minutesAgo(12),
     first_response_due_at: minutesAhead(25),
     resolution_due_at: minutesAhead(60 * 26),
@@ -198,14 +232,18 @@ export const ticketDetail = {
         {
             id: 3,
             body: "Hi Sarah,\n\nThanks for the details. I've identified the issue and am restarting the export service now. I'll let you know as soon as it's complete.",
-            author: { name: 'Mike Agent' },
+            author: { id: 7, name: 'Mike Agent' },
+            author_type: 'user',
+            author_id: 7,
             created_at: minutesAgo(0.5),
             is_internal_note: false,
         },
         {
             id: 2,
             body: 'Looks like the export job is timing out. Checking the queue and recent deploys.',
-            author: { name: 'Mike Agent' },
+            author: { id: 7, name: 'Mike Agent' },
+            author_type: 'user',
+            author_id: 7,
             created_at: minutesAgo(8),
             is_internal_note: true,
         },
@@ -215,7 +253,7 @@ export const ticketDetail = {
             id: 2,
             type: 'priority_changed',
             causer: { name: 'Mike Agent' },
-            properties: { to: 'high' },
+            properties: { old_priority: 'medium', new_priority: 'high' },
             created_at: minutesAgo(10),
         },
         {
@@ -224,6 +262,12 @@ export const ticketDetail = {
             causer: { name: 'Mike Agent' },
             properties: { tag: 'Billing' },
             created_at: minutesAgo(11),
+        },
+        {
+            id: 3,
+            type: 'replied',
+            causer: { name: 'Mike Agent' },
+            created_at: minutesAgo(0.5),
         },
     ],
     related_tickets: [
@@ -234,6 +278,19 @@ export const ticketDetail = {
         { link_type: 'related', child_ticket: { reference: 'ESC-1039', subject: 'Webhook notifications delayed' } },
     ],
 };
+
+export const agentsProp = [
+    { id: 7, name: 'Mike Agent' },
+    { id: 8, name: 'Ana Lopez' },
+    { id: 9, name: 'Tom Baker' },
+    { id: 10, name: 'Priya Patel' },
+];
+
+export const departmentsProp = [
+    { id: 2, name: 'Billing' },
+    { id: 3, name: 'Technical' },
+    { id: 4, name: 'Sales' },
+];
 
 export const allTags = [
     { id: 1, name: 'Billing', color: '#f59e0b' },
