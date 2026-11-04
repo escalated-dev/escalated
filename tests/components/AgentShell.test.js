@@ -242,6 +242,13 @@ describe('AgentShell top bar', () => {
         expect(sections[0].attributes('aria-current')).toBe('page');
     });
 
+    it('keeps each section label on one line and lets the tabs scroll on a phone', () => {
+        mountLayout('/support/agent/tickets');
+        const nav = wrapper.get('nav[aria-label="Sections"]');
+        expect(nav.classes()).toEqual(expect.arrayContaining(['min-w-0', 'overflow-x-auto']));
+        for (const a of nav.findAll('a')) expect(a.classes()).toContain('whitespace-nowrap');
+    });
+
     it('drops the knowledge base when it is off', () => {
         mountLayout('/support/agent', {}, { knowledge_base_enabled: false });
         const sections = wrapper.findAll('nav[aria-label="Sections"] a');

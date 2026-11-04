@@ -511,14 +511,17 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                 >
                     <PanelIcon name="menu" class="h-5 w-5" />
                 </button>
-                <nav :aria-label="t('agent_panel.nav.sections')" class="flex h-full items-stretch gap-1">
+                <nav
+                    :aria-label="t('agent_panel.nav.sections')"
+                    class="flex h-full min-w-0 items-stretch gap-1 overflow-x-auto [scrollbar-width:none]"
+                >
                     <Link
                         v-for="section in sections"
                         :key="section.key"
                         :href="section.href"
                         :aria-current="section.active ? 'page' : undefined"
                         :class="[
-                            'relative flex items-center px-2.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
+                            'relative flex shrink-0 items-center whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
                             section.active
                                 ? 'text-[var(--esc-panel-header-text,var(--esc-panel-text))] after:absolute after:inset-x-2.5 after:bottom-0 after:h-0.5 after:bg-[var(--esc-panel-accent)]'
                                 : 'text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)]',

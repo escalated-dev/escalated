@@ -6,6 +6,8 @@ import {
     allTags,
     cannedResponses,
     inboxProp,
+    longTicket,
+    longTicketsPage,
     rememberedInbox,
     sharedEscalated,
     ticketDetail,
@@ -17,7 +19,7 @@ export default {
     parameters: { layout: 'fullscreen' },
 };
 
-function render(mode, { withList = true, escalated = {} } = {}) {
+function render(mode, { withList = true, escalated = {}, ticket = ticketDetail, list = rememberedInbox } = {}) {
     const shared = {
         auth: { user: agentUser },
         escalated: { ...sharedEscalated, ...escalated },
@@ -25,7 +27,7 @@ function render(mode, { withList = true, escalated = {} } = {}) {
         queue: { key: 'mine', title: 'My inbox' },
     };
     const props = {
-        ticket: ticketDetail,
+        ticket,
         departments: [],
         tags: allTags,
         cannedResponses,
@@ -37,7 +39,7 @@ function render(mode, { withList = true, escalated = {} } = {}) {
     return () => ({
         components: { TicketShow, AgentFrame },
         setup() {
-            if (withList) rememberInbox({ ...rememberedInbox, queueKey: 'mine' });
+            if (withList) rememberInbox({ ...list, queueKey: 'mine' });
             else forgetInbox();
             return { mode, shared, props };
         },
@@ -53,3 +55,9 @@ export const Dark = { render: render('dark') };
 export const Light = { render: render('light') };
 export const SinglePane = { render: render('dark', { withList: false }) };
 export const LightAgent = { render: render('light', { escalated: { agent_type: 'light' } }) };
+export const LongContent = {
+    render: render('dark', { ticket: longTicket, list: { ...rememberedInbox, tickets: longTicketsPage } }),
+};
+export const LongContentLight = {
+    render: render('light', { ticket: longTicket, list: { ...rememberedInbox, tickets: longTicketsPage } }),
+};
