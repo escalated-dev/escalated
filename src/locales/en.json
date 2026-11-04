@@ -91,7 +91,9 @@
         "assign_placeholder": "Assign to...",
         "department_placeholder": "Department...",
         "delete": "Delete",
-        "deselect_all": "Deselect All"
+        "deselect_all": "Deselect All",
+        "confirm_delete_one": "Delete 1 ticket? This cannot be undone.",
+        "confirm_delete_other": "Delete :count tickets? This cannot be undone."
     },
     "filter": {
         "search_tickets": "Search tickets...",

@@ -150,7 +150,7 @@ onMounted(() => {
 
 <template>
     <EscalatedLayout :title="heading.title" full-bleed>
-        <div class="flex h-full min-h-0">
+        <div class="relative flex h-full min-h-0">
             <!-- List column -->
             <section
                 class="flex min-h-0 w-full flex-col border-r border-[var(--esc-panel-border)] lg:w-[340px] lg:shrink-0 xl:w-[420px]"
@@ -202,13 +202,14 @@ onMounted(() => {
                     </button>
                 </div>
             </section>
+            <BulkActionBar
+                contained
+                :selected-ids="selectedIds"
+                :bulk-route="route('escalated.agent.tickets.bulk')"
+                :departments="departments"
+                @clear="selectedIds = []"
+            />
         </div>
-        <BulkActionBar
-            :selected-ids="selectedIds"
-            :bulk-route="route('escalated.agent.tickets.bulk')"
-            :departments="departments"
-            @clear="selectedIds = []"
-        />
         <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" agent />
     </EscalatedLayout>
 </template>
