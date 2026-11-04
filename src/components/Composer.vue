@@ -14,6 +14,11 @@ import PanelMenu from './PanelMenu.vue';
  * attachments, canned responses, and a split Send button whose menu sends and
  * then sets the status. Drafts are kept per ticket and mode in localStorage.
  *
+ * Idle and empty it is one line with no toolbar; focus, a draft, files or an
+ * open menu open it up, and the text box grows with the text. A public reply
+ * names its recipient; an internal note is amber. Ctrl/Cmd Enter sends,
+ * Ctrl/Cmd Shift Enter sends and resolves. Files can be dropped or pasted.
+ *
  * It posts `{ body, is_internal_note, attachments }` to `replyAction` or
  * `noteAction`, like ReplyComposer.
  */
@@ -29,6 +34,8 @@ const props = defineProps({
     draftKey: { type: String, default: '' },
     mode: { type: String, default: 'reply' },
     typingEndpoint: { type: String, default: '' },
+    /** `{ name, email }`: who a public reply goes to. */
+    recipient: { type: Object, default: null },
 });
 
 const emit = defineEmits(['update:mode', 'sent']);
@@ -92,6 +99,19 @@ function saveDraft() {
     }
 }
 
+function discard() {
+    if (!hasContent.value) return;
+    const message = t('agent_panel.composer.discard_confirm');
+    const confirmed =
+        typeof window !== 'undefined' && typeof window.confirm === 'function' ? window.confirm(message) : true;
+    if (!confirmed) return;
+    body.value = '';
+    files.value = [];
+    sendError.value = '';
+    clearDraft();
+    nextTick(autosize);
+}
+
 function clearDraft(mode = currentMode.value) {
     const key = storageKey(mode);
     try {
@@ -120,7 +140,65 @@ onBeforeUnmount(() => {
 });
 
 // --- Editing ---------------------------------------------------------------
+const rootRef = ref(null);
 const textareaRef = ref(null);
+const focused = ref(false);
+const dragging = ref(false);
+const hasContent = computed(() => !!body.value.trim() || files.value.length > 0);
+const expanded = computed(
+    () =>
+        focused.value ||
+        hasContent.value ||
+        cannedOpen.value ||
+        emojiOpen.value ||
+        sendMenuOpen.value ||
+        !!sendError.value ||
+        submitting.value,
+);
+
+function onFocusOut(event) {
+    if (!rootRef.value?.contains(event.relatedTarget)) focused.value = false;
+}
+
+// The box grows with the text up to 40% of the window, then scrolls.
+function autosize() {
+    const el = textareaRef.value;
+    if (!el || typeof window === 'undefined') return;
+    el.style.height = 'auto';
+    if (expanded.value && el.scrollHeight) el.style.height = `${el.scrollHeight + 2}px`;
+    else el.style.height = '';
+}
+
+function addFiles(list) {
+    const added = Array.from(list || []).filter((file) => file && typeof file.name === 'string');
+    if (added.length) files.value = [...files.value, ...added];
+    return added.length > 0;
+}
+
+function isFileDrag(event) {
+    return [...(event.dataTransfer?.types || [])].includes('Files');
+}
+
+function onDragOver(event) {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    dragging.value = true;
+}
+
+function onDragLeave(event) {
+    if (!rootRef.value?.contains(event.relatedTarget)) dragging.value = false;
+}
+
+function onDrop(event) {
+    dragging.value = false;
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    addFiles(event.dataTransfer?.files);
+}
+
+function onPaste(event) {
+    if (addFiles(event.clipboardData?.files)) event.preventDefault();
+}
 const fileInputRef = ref(null);
 const files = ref([]);
 const submitting = ref(false);
@@ -140,6 +218,7 @@ let typingTimer = null;
 let lastTypingSent = 0;
 
 function onInput() {
+    autosize();
     if (textareaRef.value) onTextChange(textareaRef.value, body.value);
     draftSaved.value = false;
     clearTimeout(draftTimer);
@@ -166,7 +245,9 @@ function onKeydown(event) {
     if (mentionActive.value && mentionDropdownRef.value?.onKeydown(event)) return;
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
         event.preventDefault();
-        submit();
+        submit(event.shiftKey && showSendMenu.value ? 'resolved' : null);
+    } else if (event.key === 'Escape' && !hasContent.value) {
+        event.target.blur();
     }
 }
 
@@ -244,7 +325,7 @@ function pickFiles() {
 }
 
 function onFiles(event) {
-    files.value = [...files.value, ...Array.from(event.target.files || [])];
+    addFiles(event.target.files);
     event.target.value = '';
 }
 
@@ -261,10 +342,22 @@ function formatSize(bytes) {
 
 // --- Sending -------------------------------------------------------------------
 const sendMenuOpen = ref(false);
+const isMac =
+    typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+const modKey = isMac ? '⌘' : 'Ctrl';
 const sendMenuItems = computed(() => [
     { key: 'waiting_on_customer', label: t('agent_panel.composer.send_pending') },
-    { key: 'resolved', label: t('agent_panel.composer.send_resolve') },
+    { key: 'resolved', label: t('agent_panel.composer.send_resolve'), hint: `${modKey} Shift Enter` },
 ]);
+const sendTitle = computed(
+    () => `${isNote.value ? t('agent_panel.composer.add_note') : t('agent_panel.composer.send')} (${modKey} Enter)`,
+);
+const recipientLabel = computed(() => {
+    const r = props.recipient;
+    if (!r || !(r.name || r.email)) return null;
+    const name = r.name || r.email;
+    return { text: t('agent_panel.composer.to', { name }), title: r.email && r.name ? `${r.name} <${r.email}>` : name };
+});
 const showSendMenu = computed(() => !isNote.value && !!props.statusAction);
 const canSend = computed(() => !!body.value.trim() && !submitting.value);
 const sendError = ref('');
@@ -291,6 +384,7 @@ function submit(thenStatus = null) {
             body.value = '';
             files.value = [];
             clearDraft(mode);
+            nextTick(autosize);
             emit('sent', { mode, status: thenStatus });
             if (thenStatus && props.statusAction) {
                 router.post(props.statusAction, { status: thenStatus }, { preserveScroll: true });
@@ -315,6 +409,8 @@ function focus(mode) {
     nextTick(() => textareaRef.value?.focus());
 }
 
+watch(expanded, () => nextTick(autosize));
+
 defineExpose({ focus, setMode });
 
 const toolButton =
@@ -323,14 +419,23 @@ const toolButton =
 
 <template>
     <div
+        ref="rootRef"
         :class="[
-            'rounded-[var(--esc-radius-lg,8px)] border bg-[var(--esc-panel-surface)] transition-colors',
+            'relative rounded-[var(--esc-radius-lg,8px)] border transition-colors',
             isNote
-                ? 'border-[var(--esc-panel-note-border)] focus-within:border-[var(--esc-panel-note-text)]'
-                : 'border-[var(--esc-panel-border-input)] focus-within:border-[var(--esc-panel-accent)]',
+                ? 'border-[var(--esc-panel-note-border)] bg-[var(--esc-panel-note-bg)] focus-within:border-[var(--esc-panel-note-text)]'
+                : 'border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-surface)] focus-within:border-[var(--esc-panel-accent)]',
+            dragging ? 'border-dashed !border-[var(--esc-panel-accent)]' : '',
         ]"
         :data-mode="currentMode"
+        :data-expanded="expanded ? 'true' : 'false'"
+        :data-dragging="dragging ? 'true' : undefined"
         data-testid="esc-composer"
+        @focusin="focused = true"
+        @focusout="onFocusOut"
+        @dragover="onDragOver"
+        @dragleave="onDragLeave"
+        @drop="onDrop"
     >
         <!-- Tabs -->
         <div
@@ -344,7 +449,7 @@ const toolButton =
                 role="tab"
                 :aria-selected="!isNote ? 'true' : 'false'"
                 :class="[
-                    'relative px-2.5 py-2 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
+                    'relative shrink-0 whitespace-nowrap px-2.5 py-2 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
                     !isNote
                         ? 'text-[var(--esc-panel-text)] after:absolute after:inset-x-2.5 after:-bottom-px after:h-0.5 after:bg-[var(--esc-panel-accent)]'
                         : 'text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)]',
@@ -359,7 +464,7 @@ const toolButton =
                 role="tab"
                 :aria-selected="isNote ? 'true' : 'false'"
                 :class="[
-                    'relative flex items-center gap-1.5 px-2.5 py-2 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
+                    'relative flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-2 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
                     isNote
                         ? 'text-[var(--esc-panel-note-text)] after:absolute after:inset-x-2.5 after:-bottom-px after:h-0.5 after:bg-[var(--esc-panel-note-text)]'
                         : 'text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)]',
@@ -376,22 +481,33 @@ const toolButton =
                 data-testid="esc-composer-note-cue"
                 >{{ t('agent_panel.composer.note_cue') }}</span
             >
+            <span
+                v-else-if="recipientLabel"
+                class="ml-auto min-w-0 truncate pr-1 text-[12px] text-[var(--esc-panel-text-tertiary)]"
+                :title="recipientLabel.title"
+                data-testid="esc-composer-recipient"
+                >{{ recipientLabel.text }}</span
+            >
         </div>
 
         <!-- Body -->
-        <div :class="['relative', isNote ? 'bg-[var(--esc-panel-note-bg)]' : '']">
+        <div class="relative">
             <textarea
                 ref="textareaRef"
                 v-model="body"
-                rows="3"
+                :rows="expanded ? 4 : 1"
                 :aria-label="isNote ? t('agent_panel.composer.internal_note') : t('agent_panel.composer.reply')"
                 :placeholder="
                     isNote ? t('agent_panel.composer.note_placeholder') : t('agent_panel.composer.placeholder')
                 "
-                class="block max-h-60 min-h-[76px] w-full resize-y bg-transparent px-3 py-2.5 text-[14px] leading-5 text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-tertiary)] focus:outline-none"
+                :class="[
+                    'block max-h-[40vh] w-full resize-none overflow-y-auto bg-transparent px-3 text-[14px] leading-5 text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-tertiary)] focus:outline-none',
+                    expanded ? 'min-h-[88px] py-2.5' : 'py-2',
+                ]"
                 data-testid="esc-composer-input"
                 @input="onInput"
                 @keydown="onKeydown"
+                @paste="onPaste"
             ></textarea>
             <MentionDropdown
                 ref="mentionDropdownRef"
@@ -436,8 +552,8 @@ const toolButton =
             </li>
         </ul>
 
-        <!-- Toolbar -->
-        <div class="flex items-center gap-0.5 px-2 pb-2">
+        <!-- Toolbar: shown once the composer is in use -->
+        <div v-show="expanded" class="flex items-center gap-0.5 px-2 pb-2" data-testid="esc-composer-toolbar">
             <input
                 ref="fileInputRef"
                 type="file"
@@ -555,6 +671,17 @@ const toolButton =
                 data-testid="esc-composer-draft"
                 >{{ draftSaved ? t('agent_panel.composer.draft_saved') : '' }}</span
             >
+            <button
+                v-if="hasContent"
+                type="button"
+                :class="[toolButton, 'mr-1']"
+                :aria-label="t('agent_panel.composer.discard')"
+                :title="t('agent_panel.composer.discard')"
+                data-testid="esc-composer-discard"
+                @click="discard"
+            >
+                <PanelIcon name="trash" class="h-4 w-4" />
+            </button>
 
             <!-- Split send -->
             <div class="relative flex">
@@ -569,6 +696,7 @@ const toolButton =
                             : 'bg-[var(--esc-panel-primary-bg)] text-[var(--esc-panel-primary-text)] hover:opacity-90',
                     ]"
                     :aria-busy="submitting ? 'true' : undefined"
+                    :title="sendTitle"
                     data-testid="esc-composer-send"
                     @click="submit()"
                 >

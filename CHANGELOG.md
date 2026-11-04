@@ -68,6 +68,14 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `docs/agent-panel.md`.
 
 ### Changed
+- **A lighter, faster composer.** Idle and empty it is 75px instead of 159px
+  (one line under the tabs); focus, a draft, files or an open menu open it
+  up, and the text box grows with the text up to 40% of the window. Public
+  replies say who they go to; internal notes turn the whole composer amber.
+  `Ctrl/Cmd Shift Enter` sends and resolves, and both shortcuts are shown on
+  the Send button and its menu. Files can be dropped or pasted, and a draft
+  can be discarded after a confirmation. At 1280×720 the conversation gets
+  483px of height instead of 335px.
 - **Agent ticket workspace.** The ticket header is 103px instead of 163px
   (283px with a long subject): the reference shares a row with the actions,
   the subject gets the full width (two lines at most), and status, priority,

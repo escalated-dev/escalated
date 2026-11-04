@@ -1384,6 +1384,10 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                             :canned-responses="cannedResponses"
                             :notes-only="notesOnly"
                             :draft-key="ticket.reference"
+                            :recipient="{
+                                name: ticket.requester?.name || ticket.requester_name || '',
+                                email: ticket.requester?.email || ticket.requester_email || '',
+                            }"
                             :typing-endpoint="routes.typing || ''"
                         />
                     </div>

@@ -101,7 +101,7 @@ describe('Composer', () => {
         mountComposer();
         await input().setValue('Fixed now.');
         await wrapper.get('[data-testid="esc-composer-send-menu"]').trigger('click');
-        const resolve = wrapper.findAll('[role="menuitem"]').find((item) => item.text() === 'Send and resolve');
+        const resolve = wrapper.findAll('[role="menuitem"]').find((item) => item.text().startsWith('Send and resolve'));
         await resolve.trigger('click');
         expect(post.mock.calls[0][0]).toBe('/reply');
         expect(post.mock.calls[1]).toEqual(['/status', { status: 'resolved' }, expect.any(Object)]);
@@ -237,5 +237,127 @@ describe('Composer', () => {
         const send = wrapper.get('[data-testid="esc-composer-send"]');
         expect(send.attributes('aria-busy')).toBe('true');
         expect(send.text()).toContain('Sending');
+    });
+});
+
+describe('Composer when idle and in use', () => {
+    const box = () => wrapper.get('[data-testid="esc-composer"]');
+    const toolbar = () => wrapper.get('[data-testid="esc-composer-toolbar"]');
+
+    it('stays one line with no toolbar while idle, and opens up on focus', async () => {
+        mountComposer();
+        expect(box().attributes('data-expanded')).toBe('false');
+        expect(input().attributes('rows')).toBe('1');
+        expect(toolbar().isVisible()).toBe(false);
+        await box().trigger('focusin');
+        expect(box().attributes('data-expanded')).toBe('true');
+        expect(toolbar().isVisible()).toBe(true);
+        expect(Number(input().attributes('rows'))).toBeGreaterThan(1);
+    });
+
+    it('closes again when focus leaves an empty composer, but stays open over a draft', async () => {
+        mountComposer();
+        await box().trigger('focusin');
+        await box().trigger('focusout', { relatedTarget: document.body });
+        expect(box().attributes('data-expanded')).toBe('false');
+        await input().setValue('Half a reply');
+        await box().trigger('focusout', { relatedTarget: document.body });
+        expect(box().attributes('data-expanded')).toBe('true');
+    });
+
+    it('grows with the text up to 40% of the window, then scrolls', () => {
+        mountComposer();
+        expect(input().classes()).toEqual(expect.arrayContaining(['max-h-[40vh]', 'overflow-y-auto', 'resize-none']));
+    });
+});
+
+describe('Composer recipients and notes', () => {
+    it('says who a public reply goes to', () => {
+        mountComposer({ recipient: { name: 'Sarah Chen', email: 'sarah@northwind.io' } });
+        const to = wrapper.get('[data-testid="esc-composer-recipient"]');
+        expect(to.text()).toBe('To Sarah Chen');
+        expect(to.attributes('title')).toBe('Sarah Chen <sarah@northwind.io>');
+    });
+
+    it('says an internal note is for agents only instead, on an amber composer', async () => {
+        mountComposer({ recipient: { name: 'Sarah Chen', email: 'sarah@northwind.io' }, mode: 'note' });
+        expect(wrapper.find('[data-testid="esc-composer-recipient"]').exists()).toBe(false);
+        expect(wrapper.get('[data-testid="esc-composer-note-cue"]').text()).toBe('Only agents can see internal notes');
+        expect(wrapper.get('[data-testid="esc-composer"]').classes()).toContain('bg-[var(--esc-panel-note-bg)]');
+    });
+});
+
+describe('Composer shortcuts', () => {
+    it('sends and resolves with Ctrl Shift Enter', async () => {
+        post.mockImplementation((url, data, options) => options?.onSuccess?.());
+        mountComposer();
+        await input().setValue('Fixed now.');
+        await input().trigger('keydown', { key: 'Enter', ctrlKey: true, shiftKey: true });
+        expect(post.mock.calls[0][0]).toBe('/reply');
+        expect(post.mock.calls[1]).toEqual(['/status', { status: 'resolved' }, expect.any(Object)]);
+    });
+
+    it('only sends with Ctrl Shift Enter on a note', async () => {
+        post.mockImplementation((url, data, options) => options?.onSuccess?.());
+        mountComposer({ mode: 'note' });
+        await input().setValue('Checked the logs.');
+        await input().trigger('keydown', { key: 'Enter', ctrlKey: true, shiftKey: true });
+        expect(post).toHaveBeenCalledTimes(1);
+        expect(post.mock.calls[0][0]).toBe('/note');
+    });
+
+    it('names the shortcuts on the send button and its menu', async () => {
+        mountComposer();
+        await input().setValue('Hi');
+        expect(wrapper.get('[data-testid="esc-composer-send"]').attributes('title')).toMatch(/Enter/);
+        await wrapper.get('[data-testid="esc-composer-send-menu"]').trigger('click');
+        const resolve = wrapper.findAll('[role="menuitem"]').find((item) => item.text().startsWith('Send and resolve'));
+        expect(resolve.get('kbd').text()).toMatch(/Shift Enter/);
+    });
+});
+
+describe('Composer attachments and drafts', () => {
+    const file = () => new window.File(['x'], 'trace.log', { type: 'text/plain' });
+
+    it('attaches files dropped onto it', async () => {
+        mountComposer();
+        const box = wrapper.get('[data-testid="esc-composer"]');
+        await box.trigger('dragover', { dataTransfer: { types: ['Files'], files: [] } });
+        expect(box.attributes('data-dragging')).toBe('true');
+        await box.trigger('drop', { dataTransfer: { types: ['Files'], files: [file()] } });
+        expect(box.attributes('data-dragging')).toBeUndefined();
+        expect(wrapper.get('[data-testid="esc-composer-files"]').text()).toContain('trace.log');
+    });
+
+    it('attaches files pasted into the text box', async () => {
+        mountComposer();
+        await input().trigger('paste', { clipboardData: { files: [file()] } });
+        expect(wrapper.get('[data-testid="esc-composer-files"]').text()).toContain('trace.log');
+    });
+
+    it('discards a draft only after the agent confirms', async () => {
+        vi.useFakeTimers();
+        const confirm = vi.fn();
+        window.confirm = confirm;
+        mountComposer();
+        await input().setValue('Not ready to send');
+        vi.advanceTimersByTime(600);
+        expect(window.localStorage.getItem('escalated-draft:ESC-1:reply')).toBe('Not ready to send');
+
+        confirm.mockReturnValueOnce(false);
+        await wrapper.get('[data-testid="esc-composer-discard"]').trigger('click');
+        expect(input().element.value).toBe('Not ready to send');
+
+        confirm.mockReturnValueOnce(true);
+        await wrapper.get('[data-testid="esc-composer-discard"]').trigger('click');
+        expect(input().element.value).toBe('');
+        expect(window.localStorage.getItem('escalated-draft:ESC-1:reply')).toBeNull();
+        expect(confirm).toHaveBeenCalledWith('Discard this draft? It cannot be recovered.');
+        delete window.confirm;
+    });
+
+    it('offers no discard when there is nothing to lose', () => {
+        mountComposer();
+        expect(wrapper.find('[data-testid="esc-composer-discard"]').exists()).toBe(false);
     });
 });
