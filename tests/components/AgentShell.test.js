@@ -264,6 +264,24 @@ describe('AgentShell top bar', () => {
         expect(sections[0].attributes('aria-current')).toBe('page');
     });
 
+    it('gives each section a decorative 16px icon before its label', () => {
+        mountLayout('/support/agent/tickets');
+        const sections = wrapper.findAll('nav[aria-label="Sections"] a');
+        const paths = sections.map((a) => {
+            const svg = a.get('svg');
+            expect(svg.attributes('aria-hidden')).toBe('true');
+            expect(svg.classes()).toEqual(expect.arrayContaining(['h-4', 'w-4']));
+            expect(svg.attributes('stroke-width')).toBe('1.5');
+            return svg.get('path').attributes('d');
+        });
+        expect(new Set(paths).size).toBe(3);
+    });
+
+    it('has no notifications bell, since nothing feeds it', () => {
+        mountLayout('/support/agent/tickets');
+        expect(wrapper.find('[aria-label*="otification"]').exists()).toBe(false);
+    });
+
     it('keeps each section label on one line and lets the tabs scroll on a phone', () => {
         mountLayout('/support/agent/tickets');
         const nav = wrapper.get('nav[aria-label="Sections"]');
@@ -319,21 +337,21 @@ describe('AgentShell top bar', () => {
     });
 });
 
-describe('AgentShell below lg', () => {
+describe('AgentShell below xl', () => {
     it('folds the rail into a drawer behind the menu button', async () => {
         mountLayout('/support/agent/tickets');
         const toggle = wrapper.get('[data-testid="esc-nav-toggle"]');
         expect(toggle.attributes('aria-controls')).toBe('esc-agent-rail');
-        expect(toggle.classes()).toContain('lg:hidden');
+        expect(toggle.classes()).toContain('xl:hidden');
         const rail = wrapper.get('[data-testid="esc-agent-rail"]');
         expect(rail.classes()).toEqual(
-            expect.arrayContaining(['max-lg:-translate-x-full', 'max-lg:invisible', 'max-lg:fixed']),
+            expect.arrayContaining(['max-xl:-translate-x-full', 'max-xl:invisible', 'max-xl:fixed']),
         );
 
         await toggle.trigger('click');
-        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-lg:translate-x-0');
+        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-xl:translate-x-0');
         await wrapper.get('[data-testid="esc-nav-backdrop"]').trigger('click');
-        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-lg:-translate-x-full');
+        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-xl:-translate-x-full');
     });
 });
 

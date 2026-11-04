@@ -55,10 +55,15 @@ const rows = computed(() => props.tickets?.data || []);
 
 // --- Stat strip ------------------------------------------------------------
 const STAT_TILES = [
-    { key: 'open', filters: { status: 'open' } },
-    { key: 'urgent', filters: { priority: 'urgent' }, tone: 'var(--esc-priority-urgent)' },
-    { key: 'sla_at_risk', filters: { sla_at_risk: 1 }, tone: 'var(--esc-sla-warn)' },
-    { key: 'resolved_today', filters: { status: 'resolved', resolved_today: 1 } },
+    { key: 'open', icon: 'inbox', filters: { status: 'open' } },
+    { key: 'urgent', icon: 'fire', filters: { priority: 'urgent' }, tone: 'var(--esc-priority-urgent)' },
+    { key: 'sla_at_risk', icon: 'clock', filters: { sla_at_risk: 1 }, tone: 'var(--esc-sla-warn)' },
+    {
+        key: 'resolved_today',
+        icon: 'check',
+        filters: { status: 'resolved', resolved_today: 1 },
+        tone: 'var(--esc-sla-ok)',
+    },
 ];
 
 const statTiles = computed(() => {
@@ -67,6 +72,7 @@ const statTiles = computed(() => {
         ...tile,
         value: props.stats[tile.key],
         label: t(`agent_panel.inbox.stats.${tile.key}`),
+        short: t(`agent_panel.inbox.stats_short.${tile.key}`),
         active: Object.entries(tile.filters).every(([k, v]) => String(props.filters?.[k] ?? '') === String(v)),
     }));
 });
@@ -340,19 +346,19 @@ const pagination = computed(() => {
 
 <template>
     <div class="flex h-full min-h-0 flex-col" :aria-busy="loading ? 'true' : undefined" data-testid="esc-queue-list">
-        <!-- Header -->
-        <div class="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
+        <!-- Header: the queue, a short subline and New ticket -->
+        <div class="flex items-start justify-between gap-3 px-4 pb-2 pt-3">
             <div class="min-w-0">
-                <h2 class="truncate text-[18px] font-semibold leading-6 text-[var(--esc-panel-text)]">{{ title }}</h2>
+                <h2 class="truncate text-[15px] font-semibold leading-5 text-[var(--esc-panel-text)]">{{ title }}</h2>
                 <p
                     v-if="subtitle || openToggle"
-                    class="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[13px] text-[var(--esc-panel-text-tertiary)]"
+                    class="flex items-baseline gap-x-2 text-[12px] leading-4 text-[var(--esc-panel-text-tertiary)]"
                 >
-                    <span v-if="subtitle">{{ subtitle }}</span>
+                    <span v-if="subtitle" class="min-w-0 truncate" :title="subtitle">{{ subtitle }}</span>
                     <button
                         v-if="openToggle"
                         type="button"
-                        class="rounded text-[12px] text-[var(--esc-panel-text-tertiary)] underline decoration-[var(--esc-panel-border-input)] underline-offset-2 hover:text-[var(--esc-panel-text)] hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        class="shrink-0 whitespace-nowrap rounded text-[12px] text-[var(--esc-panel-text-tertiary)] underline decoration-[var(--esc-panel-border-input)] underline-offset-2 hover:text-[var(--esc-panel-text)] hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         data-testid="esc-queue-open-toggle"
                         @click="toggleOpen"
                     >
@@ -363,17 +369,21 @@ const pagination = computed(() => {
             <Link
                 v-if="newTicketUrl"
                 :href="newTicketUrl"
-                class="flex h-8 shrink-0 items-center gap-1.5 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2.5 text-[13px] font-medium text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                :aria-label="t('agent_panel.inbox.new_ticket')"
+                :title="t('agent_panel.inbox.new_ticket')"
+                data-testid="esc-queue-new-ticket"
             >
                 <PanelIcon name="plus" class="h-4 w-4" />
-                {{ t('agent_panel.inbox.new_ticket') }}
             </Link>
         </div>
 
-        <!-- Stat strip -->
+        <!-- Summary: what needs attention in this queue; each count filters the list -->
         <div
             v-if="statTiles.length"
-            class="mx-4 mb-3 flex divide-x divide-[var(--esc-panel-border)] overflow-hidden rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border)]"
+            role="group"
+            :aria-label="t('agent_panel.inbox.summary')"
+            class="flex flex-wrap items-center px-2 pb-2"
             data-testid="esc-stat-strip"
         >
             <button
@@ -381,30 +391,28 @@ const pagination = computed(() => {
                 :key="tile.key"
                 type="button"
                 :aria-pressed="tile.active ? 'true' : 'false'"
+                :aria-label="`${tile.value} ${tile.label}`"
+                :title="tile.label"
                 :class="[
-                    'min-w-0 flex-auto px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
-                    tile.active ? 'bg-[var(--esc-panel-active)]' : 'hover:bg-[var(--esc-panel-hover)]',
+                    'flex h-7 items-center gap-[3px] whitespace-nowrap rounded-[var(--esc-radius,6px)] px-1 text-[12px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]',
+                    tile.active
+                        ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]'
+                        : 'text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]',
                 ]"
                 @click="toggleStat(tile)"
             >
-                <span class="block text-[18px] font-semibold leading-6 tabular-nums text-[var(--esc-panel-text)]">{{
-                    tile.value
-                }}</span>
-                <span
-                    class="flex items-center gap-1.5 whitespace-nowrap text-[12px] text-[var(--esc-panel-text-tertiary)]"
-                >
-                    <span
-                        v-if="tile.tone && tile.value > 0"
-                        class="h-1.5 w-1.5 shrink-0 rounded-full"
-                        :style="{ background: tile.tone }"
-                    ></span>
-                    {{ tile.label }}
-                </span>
+                <PanelIcon
+                    :name="tile.icon"
+                    class="h-4 w-4 shrink-0"
+                    :style="tile.tone && tile.value > 0 ? { color: tile.tone } : null"
+                />
+                <span class="font-semibold tabular-nums text-[var(--esc-panel-text)]">{{ tile.value }}</span>
+                {{ tile.short }}
             </button>
         </div>
 
         <!-- Search and filters -->
-        <div class="relative flex gap-2 px-4 pb-3">
+        <div class="relative flex gap-2 px-4 pb-2">
             <label class="relative flex-1">
                 <span class="sr-only">{{ t('agent_panel.inbox.search') }}</span>
                 <PanelIcon
@@ -482,7 +490,7 @@ const pagination = computed(() => {
                     v-for="(ticket, index) in rows"
                     :key="ticket.id ?? ticket.reference"
                     :class="[
-                        'group relative flex gap-3 border-b border-l-2 border-b-[var(--esc-panel-border)] py-3 pl-[14px] pr-4 transition-colors',
+                        'group relative flex gap-2.5 border-b border-l-2 border-b-[var(--esc-panel-border)] py-2 pl-[14px] pr-4 transition-colors',
                         ticket.reference === selectedReference
                             ? 'border-l-[var(--esc-panel-selected-border)] bg-[var(--esc-panel-selected-bg)]'
                             : 'border-l-transparent hover:bg-[var(--esc-panel-hover)]',
@@ -495,18 +503,18 @@ const pagination = computed(() => {
                 >
                     <span
                         v-if="isUnread(ticket)"
-                        class="absolute left-[5px] top-[26px] h-1.5 w-1.5 rounded-full bg-[var(--esc-panel-accent)]"
+                        class="absolute left-[5px] top-[19px] h-1.5 w-1.5 rounded-full bg-[var(--esc-panel-accent)]"
                         data-testid="esc-queue-unread"
                         ><span class="sr-only">{{ t('agent_panel.inbox.unread') }}</span></span
                     >
                     <!-- Avatar; its initials make way for a checkbox on hover and while selecting -->
                     <div
-                        class="relative z-10 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)]"
+                        class="relative z-10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)]"
                         data-testid="esc-queue-avatar"
                     >
                         <span
                             :class="[
-                                'text-[12px] font-semibold text-[var(--esc-panel-text-secondary)] transition-opacity',
+                                'text-[11px] font-semibold text-[var(--esc-panel-text-secondary)] transition-opacity',
                                 selectable && selecting ? 'opacity-0' : '',
                                 selectable ? 'group-hover:opacity-0' : '',
                             ]"
@@ -541,28 +549,40 @@ const pagination = computed(() => {
                     </div>
 
                     <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 text-[12px] text-[var(--esc-panel-text-tertiary)]">
-                            <span class="tabular-nums">{{ ticket.reference }}</span>
+                        <!-- Who and when -->
+                        <div class="flex items-center gap-1.5 text-[12px] leading-4">
+                            <span
+                                :class="[
+                                    'min-w-0 truncate',
+                                    isUnread(ticket)
+                                        ? 'font-semibold text-[var(--esc-panel-text)]'
+                                        : 'font-medium text-[var(--esc-panel-text-secondary)]',
+                                ]"
+                                data-testid="esc-queue-requester"
+                                >{{ requesterName(ticket) || ticket.reference }}</span
+                            >
                             <span
                                 v-if="isLive(ticket)"
-                                class="h-1.5 w-1.5 rounded-full bg-[var(--esc-sla-ok)]"
+                                class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--esc-sla-ok)]"
                                 :title="t('agent_panel.inbox.requester_online')"
                                 data-testid="esc-queue-live"
                             ></span>
                             <time
-                                class="ml-auto shrink-0 tabular-nums"
+                                class="ml-auto shrink-0 tabular-nums text-[var(--esc-panel-text-tertiary)]"
                                 :datetime="lastActivity(ticket)"
                                 :title="absoluteTime(lastActivity(ticket))"
                                 >{{ relativeTime(lastActivity(ticket), t, now) }}</time
                             >
                         </div>
+                        <!-- What -->
                         <Link
                             :ref="(el) => (rowLinks[index] = el)"
                             :href="ticketUrl(prefix, ticket.reference)"
                             :tabindex="focusedIndex === index ? 0 : -1"
                             :aria-current="ticket.reference === selectedReference ? 'true' : undefined"
+                            :title="ticket.subject"
                             :class="[
-                                'mt-0.5 block truncate text-[14px] leading-5 after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--esc-panel-accent)]',
+                                'block truncate text-[14px] leading-5 after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--esc-panel-accent)]',
                                 isUnread(ticket)
                                     ? 'font-semibold text-[var(--esc-panel-text)]'
                                     : 'font-medium text-[var(--esc-panel-text-secondary)]',
@@ -572,13 +592,20 @@ const pagination = computed(() => {
                         >
                             {{ ticket.subject }}
                         </Link>
-                        <div class="mt-0.5 flex items-center gap-3">
-                            <p class="min-w-0 flex-1 truncate text-[13px] text-[var(--esc-panel-text-tertiary)]">
-                                {{ latestPreview(ticket) }}
+                        <!-- Reference, latest message and what needs attention -->
+                        <div class="flex items-center gap-2 text-[12px] leading-4">
+                            <p
+                                class="min-w-0 flex-1 truncate text-[var(--esc-panel-text-tertiary)]"
+                                data-testid="esc-queue-preview"
+                            >
+                                <span class="tabular-nums">{{ ticket.reference }}</span>
+                                <template v-if="latestPreview(ticket)">
+                                    <span aria-hidden="true"> &middot; </span>{{ latestPreview(ticket) }}
+                                </template>
                             </p>
                             <span
                                 v-if="slaLabel(ticket)"
-                                class="flex shrink-0 items-center gap-1 text-[12px] font-medium"
+                                class="flex shrink-0 items-center gap-1 font-medium"
                                 :style="{ color: slaLabel(ticket).tone }"
                                 data-testid="esc-queue-sla"
                             >
@@ -587,7 +614,7 @@ const pagination = computed(() => {
                             </span>
                             <span
                                 v-if="ticket.priority && isUrgent(ticket.priority)"
-                                class="shrink-0 rounded-[4px] px-1.5 py-px text-[12px] font-medium"
+                                class="shrink-0 rounded-[4px] px-1.5 font-medium"
                                 :style="{
                                     color: priorityColor(ticket.priority),
                                     background: `color-mix(in srgb, ${priorityColor(ticket.priority)} 14%, transparent)`,
@@ -597,7 +624,7 @@ const pagination = computed(() => {
                             >
                             <span
                                 v-else-if="ticket.priority"
-                                class="flex shrink-0 items-center gap-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)]"
+                                class="flex shrink-0 items-center gap-1.5 text-[var(--esc-panel-text-tertiary)]"
                                 data-testid="esc-queue-priority"
                             >
                                 <span

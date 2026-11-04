@@ -111,13 +111,13 @@ describe('EscalatedLayout — admin sidebar below lg', () => {
     });
 });
 
-describe('EscalatedLayout — agent rail below lg', () => {
-    it('folds the rail behind a menu button below lg', () => {
+describe('EscalatedLayout — agent rail below xl', () => {
+    it('folds the rail behind a menu button below xl (1280px)', () => {
         mountLayout('/support/agent/tickets');
         const toggle = wrapper.get('[data-testid="esc-nav-toggle"]');
         expect(toggle.attributes('aria-controls')).toBe('esc-agent-rail');
-        expect(toggle.classes()).toContain('lg:hidden');
-        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-lg:-translate-x-full');
+        expect(toggle.classes()).toContain('xl:hidden');
+        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-xl:-translate-x-full');
     });
 
     it('never wraps Back to app', () => {
@@ -131,12 +131,12 @@ describe('EscalatedLayout — agent rail below lg', () => {
         mountLayout('/support/agent/tickets');
         await wrapper.get('[data-testid="esc-nav-toggle"]').trigger('click');
         const rail = wrapper.get('[data-testid="esc-agent-rail"]');
-        expect(rail.classes()).toContain('max-lg:translate-x-0');
+        expect(rail.classes()).toContain('max-xl:translate-x-0');
         const labels = rail.findAll('a').map((a) => a.text().trim());
         expect(labels).toEqual(expect.arrayContaining(['Inbox', 'Unassigned', 'All tickets', 'Admin', 'Back to app']));
 
         await rail.findAll('a')[0].trigger('click');
-        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-lg:-translate-x-full');
+        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-xl:-translate-x-full');
     });
 });
 

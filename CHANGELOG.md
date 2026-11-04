@@ -54,6 +54,18 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `docs/agent-panel.md`.
 
 ### Changed
+- **Denser agent inbox.** Rows are 69px instead of 87px and name the
+  requester on the first line beside the age; the reference moves next to the
+  latest message preview. The four KPI tiles become a single row of filter
+  toggles with icons (fire for Urgent, clock for SLA at risk, check for
+  Resolved today), and the header is one title line with a short subline and
+  a labelled New ticket icon button. At 1280×720 the list shows 7 rows instead
+  of 5 (10 instead of 7 at 1440×900).
+- **The agent rail is a drawer below 1280px** (was 1024px), so on a tablet
+  the list and the ticket get the width. The list column is 360px up to
+  1536px, then 400px. Rail items are 28px tall with tighter section spacing.
+- **Section tabs in the agent top bar have icons** (Tickets, Dashboard,
+  Knowledge base), hidden on phones where the tabs scroll.
 - **Agent ticket view.** `Agent/TicketShow` keeps the inbox list beside the
   ticket on wide screens and shows the ticket in a new `TicketDetailPane`: the
   reference with a copy-link button, the subject, an overflow menu (macros,
