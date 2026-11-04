@@ -1,15 +1,22 @@
 <script setup>
-import { computed, inject, nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { router } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
 import { readFlash } from '../utils/flash';
 import { toast } from '../composables/useAgentToasts';
 import { highlightMentions } from '../utils/mentionHighlight';
-import { initials, isLive, priorityColor, relativeTime, requesterName } from '../utils/agentTicket';
+import {
+    absoluteTime,
+    describeActivity,
+    initials,
+    messageKind,
+    priorityColor,
+    relativeTime,
+    snoozePresets,
+} from '../utils/agentTicket';
 import { ticketUrl } from '../utils/agentQueues';
-import ActivityTimeline from './ActivityTimeline.vue';
 import ChatActionBar from './ChatActionBar.vue';
 import ChatComposer from './ChatComposer.vue';
 import ChatThread from './ChatThread.vue';
@@ -19,14 +26,16 @@ import PanelMenu from './PanelMenu.vue';
 import PluginSlot from './PluginSlot.vue';
 import PresenceIndicator from './PresenceIndicator.vue';
 import TagPicker from './TagPicker.vue';
+import TicketContextPanel from './TicketContextPanel.vue';
 import TicketMergeDialog from './TicketMergeDialog.vue';
-import TicketSubjects from './TicketSubjects.vue';
 
 /**
- * The ticket in the agent panel: header with status, priority, tags and
- * assignee; Conversation, Details, Customer and Related tabs; and the
- * composer pinned to the bottom. Live chats swap the conversation and
- * composer for the chat thread and chat composer.
+ * The ticket in the agent panel: a compact header (reference, subject and the
+ * frequent actions, then status, priority, assignee, department and tags), the
+ * conversation in its own scroll region with the composer under it, and the
+ * customer and details panel beside it (or over it when the pane is narrow).
+ * Live chats swap the conversation and composer for the chat thread and chat
+ * composer.
  *
  * `routes` carries the URLs the page resolved for this ticket; an action
  * whose URL is missing is not offered.
@@ -38,6 +47,8 @@ const props = defineProps({
     cannedResponses: { type: Array, default: () => [] },
     macros: { type: Array, default: () => [] },
     customActions: { type: Array, default: () => [] },
+    /** `[{ id, name }]`: who the ticket can be assigned to. Without it only "Assign to me" is offered. */
+    agents: { type: Array, default: () => [] },
     isFollowing: { type: Boolean, default: false },
     followersCount: { type: Number, default: 0 },
     /** Light agents: internal notes only, no status, priority, macros or assignment. */
@@ -45,8 +56,10 @@ const props = defineProps({
     currentUserId: { type: [Number, String], default: null },
     prefix: { type: String, default: 'support' },
     channelPrefix: { type: String, default: undefined },
-    /** `{ reply, note, status, priority, tags, assign, follow, macro, merge, typing }` */
+    /** `{ reply, note, status, priority, tags, assign, department, follow, macro, merge, snooze, unsnooze, pin, typing }` */
     routes: { type: Object, default: () => ({}) },
+    /** The tickets before and after this one in the list it was opened from: `{ previous, next }`. */
+    adjacent: { type: Object, default: () => ({}) },
     /** `{ active, messages, typingUser, sendEndpoint, typingEndpoint, endEndpoint, transferEndpoint }` */
     chat: { type: Object, default: () => ({ active: false }) },
     /** Where the knowledge base lives; empty when it is off. */
@@ -75,6 +88,7 @@ const STATUS_OPTIONS = [
     'closed',
 ];
 const PRIORITY_OPTIONS = ['low', 'medium', 'high', 'urgent', 'critical'];
+const CLOSED_STATUSES = ['resolved', 'closed'];
 
 function statusColor(status) {
     return (
@@ -99,31 +113,7 @@ function priorityLabel(priority) {
     return label === `priority.${priority}` ? String(priority || '') : label;
 }
 
-// --- Header actions ----------------------------------------------------------
-const statusOpen = ref(false);
-const priorityOpen = ref(false);
-const moreOpen = ref(false);
-const tagsOpen = ref(false);
-const mergeOpen = ref(false);
-
-const statusItems = computed(() =>
-    STATUS_OPTIONS.map((status) => ({
-        key: status,
-        label: statusLabel(status),
-        dot: statusColor(status),
-        checked: props.ticket.status === status,
-    })),
-);
-
-const priorityItems = computed(() =>
-    PRIORITY_OPTIONS.map((priority) => ({
-        key: priority,
-        label: priorityLabel(priority),
-        dot: priorityColor(priority),
-        checked: props.ticket.priority === priority,
-    })),
-);
-
+// --- Posting actions -----------------------------------------------------------
 /**
  * Post an action. A flash from the backend confirms it through the shell;
  * without one, `done` is shown. A rejection shows the first error the
@@ -144,6 +134,31 @@ function post(url, data = {}, done = '') {
     });
 }
 
+// --- Status, priority, resolve -----------------------------------------------
+const statusOpen = ref(false);
+const priorityOpen = ref(false);
+const canEditStatus = computed(() => !props.notesOnly && !!props.routes.status);
+const canEditPriority = computed(() => !props.notesOnly && !!props.routes.priority);
+const isClosed = computed(() => CLOSED_STATUSES.includes(props.ticket.status));
+
+const statusItems = computed(() =>
+    STATUS_OPTIONS.map((status) => ({
+        key: status,
+        label: statusLabel(status),
+        dot: statusColor(status),
+        checked: props.ticket.status === status,
+    })),
+);
+
+const priorityItems = computed(() =>
+    PRIORITY_OPTIONS.map((priority) => ({
+        key: priority,
+        label: priorityLabel(priority),
+        dot: priorityColor(priority),
+        checked: props.ticket.priority === priority,
+    })),
+);
+
 function setStatus(item) {
     if (item.key !== props.ticket.status) {
         post(props.routes.status, { status: item.key }, t('agent_panel.toast.status', { status: item.label }));
@@ -156,10 +171,25 @@ function setPriority(item) {
     }
 }
 
-const canEditStatus = computed(() => !props.notesOnly && !!props.routes.status);
-const canEditPriority = computed(() => !props.notesOnly && !!props.routes.priority);
-const canEditTags = computed(() => !props.notesOnly && !!props.routes.tags);
+function resolve() {
+    if (canEditStatus.value && props.ticket.status !== 'resolved') {
+        post(
+            props.routes.status,
+            { status: 'resolved' },
+            t('agent_panel.toast.status', { status: statusLabel('resolved') }),
+        );
+    }
+}
 
+function reopen() {
+    if (canEditStatus.value && isClosed.value) {
+        post(props.routes.status, { status: 'open' }, t('agent_panel.toast.status', { status: statusLabel('open') }));
+    }
+}
+
+// --- Tags -------------------------------------------------------------------------
+const tagsOpen = ref(false);
+const canEditTags = computed(() => !props.notesOnly && !!props.routes.tags);
 const ticketTags = computed(() => props.ticket.tags || []);
 const tagIds = computed(() => ticketTags.value.map((tag) => tag.id));
 
@@ -179,12 +209,26 @@ function removeTag(id) {
     updateTags(tagIds.value.filter((tagId) => tagId !== id));
 }
 
+// --- Assignee ---------------------------------------------------------------------
+const assigneeOpen = ref(false);
 const assignee = computed(() => props.ticket.assignee || null);
 const assignedToMe = computed(
     () => props.currentUserId != null && String(props.ticket.assigned_to ?? '') === String(props.currentUserId),
 );
-const canAssignToMe = computed(
-    () => !props.notesOnly && !!props.routes.assign && props.currentUserId != null && !assignedToMe.value,
+const canAssign = computed(() => !props.notesOnly && !!props.routes.assign);
+const canAssignToMe = computed(() => canAssign.value && props.currentUserId != null && !assignedToMe.value);
+const canReassign = computed(() => canAssign.value && props.agents.length > 0);
+
+const assigneeItems = computed(() =>
+    props.agents.map((agent) => ({
+        key: `agent:${agent.id}`,
+        label:
+            String(agent.id) === String(props.currentUserId)
+                ? `${agent.name} (${t('agent_panel.ticket.you')})`
+                : agent.name,
+        checked: String(props.ticket.assigned_to ?? '') === String(agent.id),
+        agent,
+    })),
 );
 
 function assignToMe() {
@@ -192,16 +236,37 @@ function assignToMe() {
         post(props.routes.assign, { agent_id: props.currentUserId }, t('agent_panel.toast.assigned'));
 }
 
-function resolve() {
-    if (canEditStatus.value && props.ticket.status !== 'resolved') {
-        post(
-            props.routes.status,
-            { status: 'resolved' },
-            t('agent_panel.toast.status', { status: statusLabel('resolved') }),
-        );
-    }
+function assignTo(item) {
+    const agent = item.agent;
+    if (!agent || item.checked) return;
+    if (String(agent.id) === String(props.currentUserId)) return assignToMe();
+    post(props.routes.assign, { agent_id: agent.id }, t('agent_panel.toast.assigned_to', { name: agent.name }));
 }
 
+// --- Department ---------------------------------------------------------------------
+const departmentOpen = ref(false);
+const canChangeDepartment = computed(
+    () => !props.notesOnly && !!props.routes.department && props.departments.length > 0,
+);
+const departmentItems = computed(() =>
+    props.departments.map((department) => ({
+        key: `department:${department.id}`,
+        label: department.name,
+        checked: String(props.ticket.department_id ?? props.ticket.department?.id ?? '') === String(department.id),
+        department,
+    })),
+);
+
+function setDepartment(item) {
+    if (item.checked) return;
+    post(
+        props.routes.department,
+        { department_id: item.department.id },
+        t('agent_panel.toast.department', { department: item.department.name }),
+    );
+}
+
+// --- Follow and copy link -----------------------------------------------------------
 function toggleFollow() {
     post(
         props.routes.follow,
@@ -223,6 +288,65 @@ function copyLink() {
 }
 onBeforeUnmount(() => clearTimeout(copiedTimer));
 
+// --- Snooze -------------------------------------------------------------------------
+const snoozeOpen = ref(false);
+const snoozeCustom = ref('');
+const canSnooze = computed(() => !props.notesOnly && !!props.routes.snooze);
+const snoozedUntil = computed(() => {
+    const until = props.ticket.snoozed_until;
+    if (!until) return null;
+    const date = new Date(until);
+    return Number.isNaN(date.getTime()) || date.getTime() <= now.value ? null : date;
+});
+
+function shortDate(date) {
+    return date.toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+}
+
+const snoozeItems = computed(() => {
+    const items = [];
+    if (snoozedUntil.value && props.routes.unsnooze) {
+        items.push({ key: 'unsnooze', label: t('agent_panel.ticket.unsnooze'), icon: 'x' });
+    }
+    for (const preset of snoozePresets(new Date(now.value))) {
+        items.push({
+            key: `snooze:${preset.key}`,
+            label: t(`agent_panel.ticket.snooze_${preset.key}`),
+            hint: preset.key.startsWith('in_') ? '' : shortDate(preset.until),
+            until: preset.until,
+        });
+    }
+    return items;
+});
+
+// The earliest the custom picker allows: the next minute, local time.
+const snoozeMin = computed(() => {
+    const d = new Date(now.value + 60000);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+});
+
+function snoozeUntil(date) {
+    post(props.routes.snooze, { snoozed_until: date.toISOString() }, t('agent_panel.toast.snoozed'));
+}
+
+function onSnooze(item) {
+    if (item.key === 'unsnooze') post(props.routes.unsnooze, {}, t('agent_panel.toast.unsnoozed'));
+    else if (item.until) snoozeUntil(item.until);
+}
+
+function submitCustomSnooze() {
+    const date = new Date(snoozeCustom.value);
+    if (!snoozeCustom.value || Number.isNaN(date.getTime()) || date.getTime() <= Date.now()) return;
+    snoozeOpen.value = false;
+    snoozeCustom.value = '';
+    snoozeUntil(date);
+}
+
+// --- Overflow menu --------------------------------------------------------------------
+const moreOpen = ref(false);
+const mergeOpen = ref(false);
+
 const moreItems = computed(() => {
     const items = [];
     if (!props.notesOnly && props.macros.length && props.routes.macro) {
@@ -242,12 +366,9 @@ const moreItems = computed(() => {
         }
     }
     items.push({ key: 'h-ticket', heading: true, label: t('agent_panel.ticket.ticket') });
-    if (props.routes.merge) items.push({ key: 'merge', label: t('agent_panel.ticket.merge') });
-    if (props.routes.snooze) {
-        items.push({ key: 'snooze:1', label: t('agent_panel.ticket.snooze_hour') });
-        items.push({ key: 'snooze:24', label: t('agent_panel.ticket.snooze_day') });
-    }
-    items.push({ key: 'copy', label: t('agent_panel.ticket.copy_link') });
+    items.push({ key: 'history', label: t('agent_panel.ticket.history'), icon: 'clock' });
+    items.push({ key: 'copy', label: t('agent_panel.ticket.copy_link'), icon: 'link' });
+    if (props.routes.merge) items.push({ key: 'merge', label: t('agent_panel.ticket.merge'), icon: 'ticket' });
     return items;
 });
 
@@ -260,43 +381,45 @@ function onMore(item) {
         }
         post(item.action.url, {}, t('agent_panel.toast.action', { name: item.action.label }));
     } else if (item.key === 'merge') mergeOpen.value = true;
-    else if (item.key.startsWith('snooze:')) {
-        const hours = Number(item.key.split(':')[1]);
-        post(
-            props.routes.snooze,
-            { snoozed_until: new Date(Date.now() + hours * 3600000).toISOString() },
-            t('agent_panel.toast.snoozed'),
-        );
-    } else if (item.key === 'copy') copyLink();
+    else if (item.key === 'copy') copyLink();
+    else if (item.key === 'history') openHistory();
 }
 
-// --- Tabs ----------------------------------------------------------------------
-const TABS = ['conversation', 'details', 'customer', 'related'];
-const tab = ref('conversation');
-const tabRefs = ref({});
+// --- Previous and next ticket ---------------------------------------------------------
+const hasAdjacent = computed(() => 'previous' in (props.adjacent || {}) || 'next' in (props.adjacent || {}));
 
-function onTabKeydown(event) {
-    const index = TABS.indexOf(tab.value);
-    let next = null;
-    if (event.key === 'ArrowRight') next = TABS[(index + 1) % TABS.length];
-    else if (event.key === 'ArrowLeft') next = TABS[(index - 1 + TABS.length) % TABS.length];
-    else if (event.key === 'Home') next = TABS[0];
-    else if (event.key === 'End') next = TABS[TABS.length - 1];
-    if (!next) return;
-    event.preventDefault();
-    tab.value = next;
-    nextTick(() => tabRefs.value[next]?.focus());
+function goTo(ticket) {
+    if (ticket?.reference) {
+        router.visit(ticketUrl(props.prefix, ticket.reference), { preserveScroll: true, preserveState: true });
+    }
 }
 
-watch(
-    () => props.ticket.id,
-    () => {
-        tab.value = 'conversation';
-    },
-);
-
-// --- Conversation ------------------------------------------------------------
+// --- Conversation -------------------------------------------------------------------
 const pinnedNotes = computed(() => props.ticket.pinned_notes || []);
+
+function sortTime(item) {
+    const time = new Date(item.created_at).getTime();
+    return Number.isNaN(time) ? 0 : time;
+}
+
+const activityOptions = computed(() => ({
+    agents: props.agents,
+    departments: props.departments,
+    statusLabel,
+    priorityLabel,
+}));
+
+const events = computed(() =>
+    (props.ticket.activities || [])
+        .map((activity) => ({
+            id: `event-${activity.id}`,
+            kind: 'event',
+            type: activity.type,
+            text: describeActivity(activity, t, activityOptions.value),
+            created_at: activity.created_at,
+        }))
+        .filter((event) => event.text),
+);
 
 const thread = computed(() => {
     const items = [];
@@ -304,18 +427,47 @@ const thread = computed(() => {
     if (ticket.description) {
         items.push({
             id: `ticket-${ticket.id}`,
-            author: ticket.requester || { name: requesterName(ticket) },
+            author: ticket.requester || { name: ticket.requester_name },
             body: ticket.description,
             created_at: ticket.created_at,
             attachments: ticket.attachments || [],
             is_internal_note: false,
+            is_description: true,
         });
     }
-    const replies = [...(ticket.replies || [])].sort(
-        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-    );
-    return [...items, ...replies];
+    const messages = [...items, ...(ticket.replies || [])].map((message) => ({
+        ...message,
+        kind: messageKind(message, ticket),
+    }));
+    // Stable: messages and events at the same instant keep their order.
+    return [...messages, ...events.value]
+        .map((item, index) => ({ item, index }))
+        .sort((a, b) => sortTime(a.item) - sortTime(b.item) || a.index - b.index)
+        .map(({ item }) => item);
 });
+
+const history = computed(() =>
+    [...events.value]
+        .sort((a, b) => sortTime(a) - sortTime(b))
+        .map(({ id, text, created_at }) => ({ id, text, created_at })),
+);
+
+const EVENT_ICONS = {
+    status_changed: 'flag',
+    resolved: 'check',
+    closed: 'check',
+    reopened: 'back',
+    assigned: 'user',
+    unassigned: 'user',
+    priority_changed: 'flag',
+    tag_added: 'tag',
+    tag_removed: 'tag',
+    department_changed: 'folder',
+    snoozed: 'clock',
+    unsnoozed: 'clock',
+    sla_breached: 'warning',
+    escalated: 'warning',
+};
 
 function bodyHtml(body) {
     return highlightMentions(sanitizeHtml(body || ''), escDark.value);
@@ -323,6 +475,10 @@ function bodyHtml(body) {
 
 function isPlainText(body) {
     return !/<[a-z][\s\S]*>/i.test(body || '');
+}
+
+function attachmentName(attachment) {
+    return attachment.original_filename || attachment.filename || attachment.name || '';
 }
 
 function attachmentUrl(attachment) {
@@ -345,10 +501,6 @@ function formatSize(bytes) {
     return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
-function fullDate(date) {
-    return date ? new Date(date).toLocaleString() : '';
-}
-
 function togglePin(reply) {
     if (!props.routes.pin) return;
     post(
@@ -358,19 +510,14 @@ function togglePin(reply) {
     );
 }
 
+const scroller = ref(null);
 const threadEnd = ref(null);
-const paneRoot = ref(null);
 
-// Open on the latest message. On a phone the whole pane scrolls (the header
-// scrolls away and the composer sticks to the bottom), so scroll the pane to
-// its end; scrolling the marker into view would leave it behind the composer.
+// Open on the latest message.
 function scrollToLatest() {
-    const root = paneRoot.value;
-    if (root && typeof window !== 'undefined' && window.getComputedStyle(root).overflowY === 'auto') {
-        root.scrollTop = root.scrollHeight;
-        return;
-    }
-    threadEnd.value?.scrollIntoView?.({ block: 'end' });
+    const el = scroller.value;
+    if (el) el.scrollTop = el.scrollHeight;
+    else threadEnd.value?.scrollIntoView?.({ block: 'end' });
 }
 
 watch(
@@ -379,81 +526,113 @@ watch(
     { immediate: true, flush: 'post' },
 );
 
-// --- Details -------------------------------------------------------------------
+// --- SLA ---------------------------------------------------------------------------
 function slaText(due, breached) {
     if (!due && !breached) return null;
-    if (breached) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.breached') };
+    if (breached) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.breached'), urgent: true };
     const minutes = Math.round((new Date(due).getTime() - now.value) / 60000);
-    if (minutes < 0) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.overdue') };
-    const tone = minutes <= 60 ? 'var(--esc-sla-warn)' : 'var(--esc-sla-ok)';
-    if (minutes < 60) return { tone, text: t('agent_panel.sla.due_minutes', { count: minutes }) };
-    if (minutes < 1440) return { tone, text: t('agent_panel.sla.due_hours', { count: Math.round(minutes / 60) }) };
-    return { tone, text: t('agent_panel.sla.due_days', { count: Math.round(minutes / 1440) }) };
+    if (minutes < 0) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.overdue'), urgent: true };
+    const tone = minutes <= 60 ? 'var(--esc-sla-warn)' : 'var(--esc-panel-text-tertiary)';
+    const urgent = minutes <= 60;
+    if (minutes < 60) return { tone, urgent, text: t('agent_panel.sla.due_minutes', { count: minutes }) };
+    if (minutes < 1440)
+        return { tone, urgent, text: t('agent_panel.sla.due_hours', { count: Math.round(minutes / 60) }) };
+    return { tone, urgent, text: t('agent_panel.sla.due_days', { count: Math.round(minutes / 1440) }) };
 }
 
-const customFields = computed(() => {
-    const raw = props.ticket.custom_fields ?? props.ticket.custom_field_values ?? null;
-    if (!raw) return [];
-    if (Array.isArray(raw)) {
-        return raw
-            .map((field) => ({ label: field.label || field.name || field.key, value: field.value }))
-            .filter((field) => field.label);
+const slaItems = computed(() => {
+    const ticket = props.ticket;
+    const items = [];
+    const first = isClosed.value ? null : slaText(ticket.first_response_due_at, ticket.sla_first_response_breached);
+    if (first && !ticket.first_response_at) {
+        items.push({ key: 'first_response', label: t('agent_panel.ticket.first_response'), ...first });
     }
-    return Object.entries(raw).map(([label, value]) => ({ label, value }));
+    const resolution = isClosed.value ? null : slaText(ticket.resolution_due_at, ticket.sla_resolution_breached);
+    if (resolution) items.push({ key: 'resolution', label: t('agent_panel.ticket.resolution'), ...resolution });
+    return items;
 });
 
-function displayValue(value) {
-    if (value === null || value === undefined || value === '') return t('agent_panel.ticket.none');
-    if (Array.isArray(value)) return value.join(', ');
-    if (typeof value === 'boolean') return value ? t('agent_panel.ticket.yes') : t('agent_panel.ticket.no');
-    return String(value);
+// The header shows the SLA that needs attention: breached, or due within the hour.
+const headerSla = computed(() => slaItems.value.find((item) => item.urgent) || null);
+
+// --- Customer and details panel ------------------------------------------------------
+// Beside the conversation when both fit (the conversation keeps at least
+// 600px); otherwise over it, on demand. The agent's choice is remembered for
+// the wide layout.
+const CONTEXT_KEY = 'escalated-context-panel';
+const CONTEXT_WIDTH = 300;
+const MIN_CONVERSATION = 600;
+const paneRoot = ref(null);
+const paneWidth = ref(0);
+const contextOpen = ref(false);
+const contextFocus = ref('');
+const contextToggle = ref(null);
+const contextInline = computed(() => paneWidth.value >= CONTEXT_WIDTH + MIN_CONVERSATION);
+
+function contextPreference() {
+    try {
+        return window.localStorage.getItem(CONTEXT_KEY);
+    } catch {
+        return null;
+    }
 }
 
-function typeLabel(type) {
-    if (!type) return t('agent_panel.ticket.none');
-    return type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ');
+function setContext(open, { remember = true } = {}) {
+    contextOpen.value = open;
+    if (!open) contextFocus.value = '';
+    if (remember && contextInline.value) {
+        try {
+            window.localStorage.setItem(CONTEXT_KEY, open ? 'open' : 'closed');
+        } catch {
+            // storage blocked
+        }
+    }
 }
 
-// --- Customer and related ------------------------------------------------------
-const requester = computed(() => props.ticket.requester || {});
-const recentTickets = computed(() =>
-    (props.ticket.requester_tickets || props.ticket.related_tickets || []).filter(
-        (item) => item?.reference && item.reference !== props.ticket.reference,
-    ),
-);
+function toggleContext() {
+    setContext(!contextOpen.value);
+}
 
-const links = computed(() => {
-    const list = [];
-    for (const link of props.ticket.links_as_parent || []) {
-        const other = link.child_ticket || link.childTicket;
-        if (other) list.push({ relation: link.link_type || link.type || 'child', ticket: other });
-    }
-    for (const link of props.ticket.links_as_child || []) {
-        const other = link.parent_ticket || link.parentTicket;
-        if (other) list.push({ relation: link.link_type || link.type || 'parent', ticket: other });
-    }
-    for (const merged of props.ticket.merged_tickets || []) list.push({ relation: 'merged', ticket: merged });
-    if (props.ticket.merged_into) list.push({ relation: 'merged_into', ticket: props.ticket.merged_into });
-    return list;
+function closeContext() {
+    setContext(false);
+    nextTick(() => contextToggle.value?.focus());
+}
+
+function openHistory() {
+    setContext(true, { remember: false });
+    contextFocus.value = '';
+    nextTick(() => (contextFocus.value = 'history'));
+}
+
+watch(contextInline, (inline, wasInline) => {
+    if (inline && !wasInline) contextOpen.value = contextPreference() !== 'closed';
+    else if (!inline && wasInline) contextOpen.value = false;
 });
 
-function relationLabel(relation) {
-    const label = t(`agent_panel.ticket.relation.${relation}`);
-    return label.startsWith('agent_panel.') ? String(relation).replace(/_/g, ' ') : label;
-}
+let resizeObserver = null;
+onMounted(() => {
+    if (!paneRoot.value) return;
+    paneWidth.value = paneRoot.value.clientWidth || 0;
+    if (contextInline.value) contextOpen.value = contextPreference() !== 'closed';
+    if (typeof window !== 'undefined' && typeof window.ResizeObserver === 'function') {
+        resizeObserver = new window.ResizeObserver(([entry]) => {
+            paneWidth.value = entry.contentRect.width;
+        });
+        resizeObserver.observe(paneRoot.value);
+    }
+});
+onBeforeUnmount(() => resizeObserver?.disconnect());
 
-// --- Composer ------------------------------------------------------------------
+// --- Composer ------------------------------------------------------------------------
 const composerRef = ref(null);
 const composerMode = ref(props.notesOnly ? 'note' : 'reply');
 
 function focusReply() {
     if (props.notesOnly) return focusNote();
-    tab.value = 'conversation';
     composerRef.value?.focus('reply');
 }
 
 function focusNote() {
-    tab.value = 'conversation';
     composerRef.value?.focus('note');
 }
 
@@ -462,42 +641,71 @@ defineExpose({
     focusNote,
     openStatus: () => canEditStatus.value && (statusOpen.value = true),
     openPriority: () => canEditPriority.value && (priorityOpen.value = true),
+    openSnooze: () => canSnooze.value && (snoozeOpen.value = true),
     assignToMe,
     resolve,
     toggleFollow,
     copyLink,
+    toggleContext,
+    openHistory,
+    nextTicket: () => goTo(props.adjacent?.next),
+    previousTicket: () => goTo(props.adjacent?.previous),
 });
 
-const controlClass =
-    'flex h-7 items-center gap-1.5 border px-2.5 text-[13px] text-[var(--esc-panel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]';
-const iconButton =
-    'flex h-8 w-8 items-center justify-center rounded-[var(--esc-radius,6px)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]';
-const dtClass = 'py-1.5 text-[13px] text-[var(--esc-panel-text-tertiary)]';
-const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
+const ring = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]';
+const iconButton = `flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--esc-radius,6px)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent ${ring}`;
+const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6px)] px-2 text-[13px] text-[var(--esc-panel-text-secondary)] ${ring}`;
 </script>
 
 <template>
-    <div ref="paneRoot" class="flex h-full min-h-0 flex-col max-sm:overflow-y-auto" data-testid="esc-detail-pane">
-        <!-- Header -->
-        <header class="shrink-0 px-4 pt-4 sm:px-6">
-            <div class="flex items-center gap-1.5">
-                <span class="text-[13px] tabular-nums text-[var(--esc-panel-text-tertiary)]">{{
-                    ticket.reference
-                }}</span>
-                <button
-                    type="button"
-                    class="flex h-6 w-6 items-center justify-center rounded text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
-                    :aria-label="copied ? t('agent_panel.ticket.link_copied') : t('agent_panel.ticket.copy_link')"
-                    :title="copied ? t('agent_panel.ticket.link_copied') : t('agent_panel.ticket.copy_link')"
-                    data-testid="esc-copy-link"
-                    @click="copyLink"
+    <div ref="paneRoot" class="relative flex h-full min-h-0 flex-col" data-testid="esc-detail-pane">
+        <!-- Header: stays put while the conversation scrolls -->
+        <header
+            class="shrink-0 border-b border-[var(--esc-panel-border)] px-4 pb-2 pt-2.5 sm:px-5"
+            data-testid="esc-ticket-header"
+        >
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex min-w-0 flex-1 items-center gap-1 text-[12px] leading-5 text-[var(--esc-panel-text-tertiary)]"
                 >
-                    <PanelIcon
-                        :name="copied ? 'check' : 'link'"
-                        :class="['h-3.5 w-3.5', copied ? 'text-[var(--esc-sla-ok)]' : '']"
-                    />
-                </button>
-                <div class="ml-auto flex items-center gap-1">
+                    <span class="shrink-0 whitespace-nowrap tabular-nums">{{ ticket.reference }}</span>
+                    <button
+                        type="button"
+                        class="flex h-5 w-5 items-center justify-center rounded text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        :aria-label="copied ? t('agent_panel.ticket.link_copied') : t('agent_panel.ticket.copy_link')"
+                        :title="copied ? t('agent_panel.ticket.link_copied') : t('agent_panel.ticket.copy_link')"
+                        data-testid="esc-copy-link"
+                        @click="copyLink"
+                    >
+                        <PanelIcon
+                            :name="copied ? 'check' : 'link'"
+                            :class="['h-3.5 w-3.5', copied ? 'text-[var(--esc-sla-ok)]' : '']"
+                        />
+                    </button>
+                    <span
+                        v-if="snoozedUntil"
+                        class="ml-1 flex min-w-0 items-center gap-1 truncate text-[var(--esc-panel-text-secondary)]"
+                        :title="absoluteTime(snoozedUntil)"
+                        data-testid="esc-snoozed"
+                    >
+                        <PanelIcon name="clock" class="h-3.5 w-3.5 shrink-0" />
+                        {{ t('agent_panel.ticket.snoozed_until', { date: shortDate(snoozedUntil) }) }}
+                    </span>
+                    <span
+                        v-if="headerSla"
+                        class="ml-1 flex min-w-0 items-center gap-1 font-medium"
+                        :style="{ color: headerSla.tone }"
+                        :title="`${headerSla.label}: ${headerSla.text}`"
+                        data-testid="esc-header-sla"
+                    >
+                        <PanelIcon name="clock" class="h-3.5 w-3.5 shrink-0" />
+                        <span class="sr-only">{{ headerSla.label }}:</span>
+                        <span class="truncate">{{ headerSla.text }}</span>
+                    </span>
+                </div>
+
+                <!-- Frequent actions -->
+                <div class="flex shrink-0 items-center gap-0.5" data-testid="esc-ticket-actions">
                     <PresenceIndicator
                         :ticket-reference="ticket.reference"
                         :ticket-id="ticket.id"
@@ -505,6 +713,98 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                         route-prefix="escalated.agent"
                     />
                     <PluginSlot slot="ticket.show.actions" :components="getPageComponents('ticket.show', 'actions')" />
+                    <button
+                        v-if="canEditStatus && !isClosed"
+                        type="button"
+                        :class="`mr-1 flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 text-[13px] font-medium text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] ${ring}`"
+                        :title="`${t('agent_panel.ticket.resolve')} (e)`"
+                        data-testid="esc-resolve"
+                        @click="resolve"
+                    >
+                        <PanelIcon name="check" class="h-4 w-4" />
+                        <span class="max-md:sr-only">{{ t('agent_panel.ticket.resolve') }}</span>
+                    </button>
+                    <button
+                        v-else-if="canEditStatus && isClosed"
+                        type="button"
+                        :class="`mr-1 flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 text-[13px] font-medium text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] ${ring}`"
+                        :title="t('agent_panel.ticket.reopen')"
+                        data-testid="esc-reopen"
+                        @click="reopen"
+                    >
+                        <PanelIcon name="back" class="h-4 w-4" />
+                        <span class="max-md:sr-only">{{ t('agent_panel.ticket.reopen') }}</span>
+                    </button>
+                    <div v-if="canSnooze" class="relative">
+                        <button
+                            type="button"
+                            :class="[iconButton, snoozedUntil ? 'text-[var(--esc-panel-text)]' : '']"
+                            aria-haspopup="menu"
+                            :aria-expanded="snoozeOpen ? 'true' : 'false'"
+                            :aria-label="t('agent_panel.ticket.snooze')"
+                            :title="`${t('agent_panel.ticket.snooze')} (z)`"
+                            data-testid="esc-snooze"
+                            @click="snoozeOpen = !snoozeOpen"
+                        >
+                            <PanelIcon name="clock" class="h-[18px] w-[18px]" />
+                        </button>
+                        <PanelMenu
+                            v-model:open="snoozeOpen"
+                            :items="snoozeItems"
+                            :label="t('agent_panel.ticket.snooze')"
+                            align="right"
+                            width="w-64"
+                            @select="onSnooze"
+                        >
+                            <form
+                                class="mt-1 border-t border-[var(--esc-panel-border)] px-3 pb-1.5 pt-2"
+                                data-testid="esc-snooze-custom"
+                                @submit.prevent="submitCustomSnooze"
+                            >
+                                <label class="block text-[12px] text-[var(--esc-panel-text-tertiary)]">
+                                    {{ t('agent_panel.ticket.snooze_until') }}
+                                    <input
+                                        v-model="snoozeCustom"
+                                        type="datetime-local"
+                                        :min="snoozeMin"
+                                        class="mt-1 h-7 w-full rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-transparent px-1.5 text-[13px] text-[var(--esc-panel-text)] [color-scheme:inherit] focus:border-[var(--esc-panel-accent)] focus:outline-none"
+                                    />
+                                </label>
+                                <button
+                                    type="submit"
+                                    :disabled="!snoozeCustom"
+                                    :class="`mt-2 h-7 w-full rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] text-[13px] font-medium text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] disabled:cursor-not-allowed disabled:opacity-50 ${ring}`"
+                                >
+                                    {{ t('agent_panel.ticket.snooze_submit') }}
+                                </button>
+                            </form>
+                        </PanelMenu>
+                    </div>
+                    <button
+                        v-if="routes.follow"
+                        type="button"
+                        :class="[iconButton, isFollowing ? 'text-[var(--esc-priority-medium)]' : '']"
+                        :aria-pressed="isFollowing ? 'true' : 'false'"
+                        :aria-label="isFollowing ? t('agent_panel.ticket.unfollow') : t('agent_panel.ticket.follow')"
+                        :title="`${isFollowing ? t('agent_panel.ticket.unfollow') : t('agent_panel.ticket.follow')} (f)`"
+                        data-testid="esc-follow"
+                        @click="toggleFollow"
+                    >
+                        <svg
+                            class="h-[18px] w-[18px]"
+                            viewBox="0 0 24 24"
+                            :fill="isFollowing ? 'currentColor' : 'none'"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            aria-hidden="true"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                :d="'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321 1.004l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-1.004l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z'"
+                            />
+                        </svg>
+                    </button>
                     <div class="relative">
                         <button
                             type="button"
@@ -512,6 +812,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                             aria-haspopup="menu"
                             :aria-expanded="moreOpen ? 'true' : 'false'"
                             :aria-label="t('agent_panel.ticket.more')"
+                            :title="t('agent_panel.ticket.more')"
                             data-testid="esc-ticket-more"
                             @click="moreOpen = !moreOpen"
                         >
@@ -527,52 +828,81 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                         />
                     </div>
                     <button
-                        v-if="routes.follow"
+                        ref="contextToggle"
                         type="button"
-                        :class="[iconButton, isFollowing ? 'text-[var(--esc-priority-medium)]' : '']"
-                        :aria-pressed="isFollowing ? 'true' : 'false'"
-                        :aria-label="isFollowing ? t('agent_panel.ticket.unfollow') : t('agent_panel.ticket.follow')"
-                        :title="isFollowing ? t('agent_panel.ticket.unfollow') : t('agent_panel.ticket.follow')"
-                        data-testid="esc-follow"
-                        @click="toggleFollow"
+                        :class="[
+                            iconButton,
+                            contextOpen ? 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text)]' : '',
+                        ]"
+                        aria-controls="esc-context-panel"
+                        :aria-expanded="contextOpen ? 'true' : 'false'"
+                        :aria-label="
+                            contextOpen ? t('agent_panel.ticket.hide_context') : t('agent_panel.ticket.show_context')
+                        "
+                        :title="`${contextOpen ? t('agent_panel.ticket.hide_context') : t('agent_panel.ticket.show_context')} (i)`"
+                        data-testid="esc-context-toggle"
+                        @click="toggleContext"
                     >
-                        <svg
-                            class="h-[18px] w-[18px]"
-                            viewBox="0 0 24 24"
-                            :fill="isFollowing ? 'currentColor' : 'none'"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321 1.004l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-1.004l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-                            />
-                        </svg>
+                        <PanelIcon name="sidebarRight" class="h-[18px] w-[18px]" />
                     </button>
+                    <template v-if="hasAdjacent">
+                        <span
+                            class="mx-1 h-4 w-px bg-[var(--esc-panel-border)] max-sm:hidden"
+                            aria-hidden="true"
+                        ></span>
+                        <button
+                            type="button"
+                            :class="[iconButton, 'max-sm:hidden']"
+                            :disabled="!adjacent.previous"
+                            :aria-label="t('agent_panel.ticket.previous_ticket')"
+                            :title="`${t('agent_panel.ticket.previous_ticket')} (K)`"
+                            data-testid="esc-previous-ticket"
+                            @click="goTo(adjacent.previous)"
+                        >
+                            <PanelIcon name="chevronUp" class="h-4 w-4" />
+                        </button>
+                        <button
+                            type="button"
+                            :class="[iconButton, 'max-sm:hidden']"
+                            :disabled="!adjacent.next"
+                            :aria-label="t('agent_panel.ticket.next_ticket')"
+                            :title="`${t('agent_panel.ticket.next_ticket')} (J)`"
+                            data-testid="esc-next-ticket"
+                            @click="goTo(adjacent.next)"
+                        >
+                            <PanelIcon name="chevronDown" class="h-4 w-4" />
+                        </button>
+                    </template>
                 </div>
             </div>
 
-            <h2 class="mt-1 text-[18px] font-semibold leading-6 text-[var(--esc-panel-text)]" data-testid="esc-subject">
+            <h2
+                class="mt-0.5 line-clamp-2 break-words text-[15px] font-semibold leading-5 text-[var(--esc-panel-text)]"
+                :title="ticket.subject"
+                data-testid="esc-subject"
+            >
                 {{ ticket.subject }}
             </h2>
 
-            <!-- Controls -->
-            <div class="mt-3 flex flex-wrap items-center gap-2">
+            <!-- Properties -->
+            <div class="mt-1.5 flex flex-wrap items-center gap-1" data-testid="esc-ticket-properties">
                 <div class="relative">
                     <component
                         :is="canEditStatus ? 'button' : 'span'"
                         :type="canEditStatus ? 'button' : undefined"
                         :class="[
-                            controlClass,
-                            'rounded-full border-transparent font-medium text-[var(--esc-panel-text)]',
-                            canEditStatus ? 'hover:brightness-110' : '',
+                            'flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-medium text-[var(--esc-panel-text)]',
+                            canEditStatus ? `hover:brightness-110 ${ring}` : '',
                         ]"
                         :style="{ background: `color-mix(in srgb, ${statusColor(ticket.status)} 16%, transparent)` }"
                         :aria-haspopup="canEditStatus ? 'menu' : undefined"
                         :aria-expanded="canEditStatus ? (statusOpen ? 'true' : 'false') : undefined"
-                        :aria-label="canEditStatus ? t('agent_panel.ticket.change_status') : undefined"
+                        :aria-label="
+                            canEditStatus
+                                ? `${t('agent_panel.ticket.change_status')}: ${statusLabel(ticket.status)}`
+                                : undefined
+                        "
+                        :title="canEditStatus ? `${t('agent_panel.ticket.change_status')} (s)` : undefined"
                         data-testid="esc-status"
                         @click="canEditStatus && (statusOpen = !statusOpen)"
                     >
@@ -593,13 +923,19 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                         :is="canEditPriority ? 'button' : 'span'"
                         :type="canEditPriority ? 'button' : undefined"
                         :class="[
-                            controlClass,
-                            'rounded-[var(--esc-radius,6px)] border-[var(--esc-panel-border-input)]',
-                            canEditPriority ? 'hover:bg-[var(--esc-panel-hover)]' : '',
+                            ghostControl,
+                            canEditPriority
+                                ? 'hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]'
+                                : '',
                         ]"
                         :aria-haspopup="canEditPriority ? 'menu' : undefined"
                         :aria-expanded="canEditPriority ? (priorityOpen ? 'true' : 'false') : undefined"
-                        :aria-label="canEditPriority ? t('agent_panel.ticket.change_priority') : undefined"
+                        :aria-label="
+                            canEditPriority
+                                ? `${t('agent_panel.ticket.change_priority')}: ${ticket.priority ? priorityLabel(ticket.priority) : t('agent_panel.ticket.no_priority')}`
+                                : undefined
+                        "
+                        :title="canEditPriority ? `${t('agent_panel.ticket.change_priority')} (p)` : undefined"
                         data-testid="esc-priority"
                         @click="canEditPriority && (priorityOpen = !priorityOpen)"
                     >
@@ -618,22 +954,117 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                     />
                 </div>
 
+                <!-- Assignee -->
+                <div class="relative">
+                    <component
+                        :is="canReassign ? 'button' : 'span'"
+                        :type="canReassign ? 'button' : undefined"
+                        :class="[
+                            ghostControl,
+                            canReassign ? 'hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]' : '',
+                        ]"
+                        :aria-haspopup="canReassign ? 'menu' : undefined"
+                        :aria-expanded="canReassign ? (assigneeOpen ? 'true' : 'false') : undefined"
+                        :aria-label="
+                            canReassign
+                                ? `${t('agent_panel.ticket.change_assignee')}: ${assignee ? assignee.name : t('agent_panel.ticket.unassigned')}`
+                                : undefined
+                        "
+                        :title="canReassign ? t('agent_panel.ticket.change_assignee') : undefined"
+                        data-testid="esc-assignee"
+                        @click="canReassign && (assigneeOpen = !assigneeOpen)"
+                    >
+                        <span
+                            v-if="assignee"
+                            class="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-secondary)]"
+                            aria-hidden="true"
+                            >{{ initials(assignee.name) }}</span
+                        >
+                        <PanelIcon v-else name="user" class="h-4 w-4 text-[var(--esc-panel-text-tertiary)]" />
+                        {{ assignee ? assignee.name : t('agent_panel.ticket.unassigned') }}
+                        <PanelIcon v-if="canReassign" name="chevronDown" class="h-3.5 w-3.5 opacity-70" />
+                    </component>
+                    <PanelMenu
+                        v-if="canReassign"
+                        v-model:open="assigneeOpen"
+                        :items="assigneeItems"
+                        :label="t('agent_panel.ticket.change_assignee')"
+                        :filter-placeholder="agents.length > 6 ? t('agent_panel.ticket.find_agent') : ''"
+                        :empty-text="t('agent_panel.ticket.no_agents_match')"
+                        width="w-64"
+                        @select="assignTo"
+                    />
+                </div>
+                <button
+                    v-if="canAssignToMe"
+                    type="button"
+                    :class="`h-7 rounded-[var(--esc-radius,6px)] px-2 text-[13px] font-medium text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] ${ring}`"
+                    :title="`${t('agent_panel.ticket.assign_to_me')} (a)`"
+                    data-testid="esc-assign-me"
+                    @click="assignToMe"
+                >
+                    {{ t('agent_panel.ticket.assign_to_me') }}
+                </button>
+
+                <!-- Department -->
+                <div v-if="ticket.department || canChangeDepartment" class="relative">
+                    <component
+                        :is="canChangeDepartment ? 'button' : 'span'"
+                        :type="canChangeDepartment ? 'button' : undefined"
+                        :class="[
+                            ghostControl,
+                            canChangeDepartment
+                                ? 'hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]'
+                                : '',
+                        ]"
+                        :aria-haspopup="canChangeDepartment ? 'menu' : undefined"
+                        :aria-expanded="canChangeDepartment ? (departmentOpen ? 'true' : 'false') : undefined"
+                        :aria-label="
+                            canChangeDepartment
+                                ? `${t('agent_panel.ticket.change_department')}: ${ticket.department?.name || t('agent_panel.ticket.no_department')}`
+                                : undefined
+                        "
+                        :title="
+                            canChangeDepartment ? t('agent_panel.ticket.change_department') : t('ticket.department')
+                        "
+                        data-testid="esc-department"
+                        @click="canChangeDepartment && (departmentOpen = !departmentOpen)"
+                    >
+                        <PanelIcon name="folder" class="h-4 w-4 text-[var(--esc-panel-text-tertiary)]" />
+                        {{ ticket.department?.name || t('agent_panel.ticket.no_department') }}
+                        <PanelIcon v-if="canChangeDepartment" name="chevronDown" class="h-3.5 w-3.5 opacity-70" />
+                    </component>
+                    <PanelMenu
+                        v-if="canChangeDepartment"
+                        v-model:open="departmentOpen"
+                        :items="departmentItems"
+                        :label="t('agent_panel.ticket.change_department')"
+                        @select="setDepartment"
+                    />
+                </div>
+
+                <!-- Tags -->
                 <span
                     v-for="tag in ticketTags"
                     :key="tag.id"
-                    :class="[controlClass, 'rounded-full border-[var(--esc-panel-border-input)] pr-1.5']"
+                    :class="[
+                        'flex h-7 items-center gap-1 rounded-full border border-[var(--esc-panel-border-input)] pl-2 text-[13px] text-[var(--esc-panel-text-secondary)]',
+                        canEditTags ? 'pr-1' : 'pr-2.5',
+                    ]"
                     data-testid="esc-tag"
                 >
-                    <span
-                        class="h-2 w-2 rounded-full"
-                        :style="{ background: tag.color || 'var(--esc-panel-text-muted)' }"
-                    ></span>
-                    {{ tag.name }}
+                    <PanelIcon
+                        name="tag"
+                        class="h-3.5 w-3.5 shrink-0"
+                        :style="{ color: tag.color || 'var(--esc-panel-text-tertiary)' }"
+                    />
+                    <span class="max-w-[10rem] truncate" :title="tag.name">{{ tag.name }}</span>
                     <button
                         v-if="canEditTags"
                         type="button"
-                        class="ml-0.5 rounded-full p-0.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        class="rounded-full p-0.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         :aria-label="t('agent_panel.ticket.remove_tag', { name: tag.name })"
+                        :title="t('agent_panel.ticket.remove_tag', { name: tag.name })"
                         @click="removeTag(tag.id)"
                     >
                         <PanelIcon name="x" class="h-3 w-3" />
@@ -642,8 +1073,9 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                 <div v-if="canEditTags && tags.length" class="relative">
                     <button
                         type="button"
-                        class="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--esc-panel-border-input)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        class="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-[var(--esc-panel-border-input)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         :aria-label="t('agent_panel.ticket.add_tag')"
+                        :title="t('agent_panel.ticket.add_tag')"
                         aria-haspopup="menu"
                         :aria-expanded="tagsOpen ? 'true' : 'false'"
                         data-testid="esc-add-tag"
@@ -658,35 +1090,11 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                         @update:model-value="updateTags"
                     />
                 </div>
-
-                <div class="ml-auto flex items-center gap-2">
-                    <span
-                        class="flex items-center gap-1.5 text-[13px] text-[var(--esc-panel-text-tertiary)]"
-                        data-testid="esc-assignee"
-                    >
-                        <span
-                            v-if="assignee"
-                            class="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[10px] font-semibold text-[var(--esc-panel-text-secondary)]"
-                            aria-hidden="true"
-                            >{{ initials(assignee.name) }}</span
-                        >
-                        {{ assignee ? assignee.name : t('agent_panel.ticket.unassigned') }}
-                    </span>
-                    <button
-                        v-if="canAssignToMe"
-                        type="button"
-                        class="h-7 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2.5 text-[13px] font-medium text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
-                        data-testid="esc-assign-me"
-                        @click="assignToMe"
-                    >
-                        {{ t('agent_panel.ticket.assign_to_me') }}
-                    </button>
-                </div>
             </div>
 
             <ChatActionBar
                 v-if="chat.active"
-                class="mt-3"
+                class="mt-2"
                 :session-id="ticket.chat_session_id"
                 :started-at="ticket.chat_started_at || ticket.created_at"
                 :customer="{
@@ -700,433 +1108,303 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                 :transfer-endpoint="chat.transferEndpoint || ''"
                 @end-chat="emit('end-chat')"
             />
-
-            <!-- Tabs -->
-            <div
-                role="tablist"
-                :aria-label="t('agent_panel.ticket.sections')"
-                class="mt-3 flex gap-1 border-b border-[var(--esc-panel-border)]"
-                @keydown="onTabKeydown"
-            >
-                <button
-                    v-for="name in TABS"
-                    :id="`esc-tab-${name}`"
-                    :key="name"
-                    :ref="(el) => (tabRefs[name] = el)"
-                    type="button"
-                    role="tab"
-                    :aria-selected="tab === name ? 'true' : 'false'"
-                    :aria-controls="`esc-tabpanel-${name}`"
-                    :tabindex="tab === name ? 0 : -1"
-                    :class="[
-                        'relative px-2.5 pb-2.5 pt-1 text-[13px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
-                        tab === name
-                            ? 'text-[var(--esc-panel-text)] after:absolute after:inset-x-2.5 after:-bottom-px after:h-0.5 after:bg-[var(--esc-panel-accent)]'
-                            : 'text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)]',
-                    ]"
-                    @click="tab = name"
-                >
-                    {{ t(`agent_panel.ticket.tabs.${name}`) }}
-                </button>
-            </div>
         </header>
 
-        <!-- Panels -->
-        <div
-            :id="`esc-tabpanel-${tab}`"
-            role="tabpanel"
-            :aria-labelledby="`esc-tab-${tab}`"
-            class="min-h-0 flex-1 overflow-y-auto px-4 py-4 max-sm:flex-none max-sm:overflow-visible sm:px-6"
-            data-testid="esc-tabpanel"
-        >
+        <div class="relative flex min-h-0 flex-1">
             <!-- Conversation -->
-            <template v-if="tab === 'conversation'">
-                <ChatThread
-                    v-if="chat.active"
-                    :messages="chat.messages || []"
-                    :typing-user="chat.typingUser || null"
-                    :current-user-id="currentUserId"
-                />
-                <div v-else class="space-y-3" role="feed" :aria-label="t('agent_panel.ticket.tabs.conversation')">
-                    <section v-if="pinnedNotes.length" class="space-y-2" data-testid="esc-pinned-notes">
-                        <article
-                            v-for="note in pinnedNotes"
-                            :key="`pin-${note.id}`"
-                            class="rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-note-border)] bg-[var(--esc-panel-note-bg)] px-4 py-3"
-                        >
-                            <div class="flex items-center gap-1.5 text-[12px] text-[var(--esc-panel-note-text)]">
-                                <PanelIcon name="lock" class="h-3.5 w-3.5" />
-                                <span class="font-medium">{{ t('agent_panel.ticket.pinned_note') }}</span>
-                                <span>&middot; {{ note.author?.name || t('ticket.unknown') }}</span>
-                                <button
-                                    v-if="routes.pin"
-                                    type="button"
-                                    class="ml-auto rounded px-1.5 py-0.5 hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
-                                    @click="togglePin(note)"
-                                >
-                                    {{ t('reply.unpin') }}
-                                </button>
-                            </div>
-                            <div
-                                :class="[
-                                    'mt-1 text-[14px] leading-5 text-[var(--esc-panel-text)]',
-                                    isPlainText(note.body) ? 'whitespace-pre-line' : '',
-                                ]"
-                                v-html="bodyHtml(note.body)"
-                            ></div>
-                        </article>
-                    </section>
-
-                    <article
-                        v-for="message in thread"
-                        :key="message.id"
-                        :class="[
-                            'flex gap-3 rounded-[var(--esc-radius-lg,8px)] border px-4 py-3',
-                            message.is_internal_note
-                                ? 'border-[var(--esc-panel-note-border)] bg-[var(--esc-panel-note-bg)]'
-                                : 'border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]',
-                        ]"
-                        :data-note="message.is_internal_note ? 'true' : undefined"
-                        data-testid="esc-message"
-                    >
-                        <span
-                            v-if="message.is_internal_note"
-                            class="flex h-8 w-8 shrink-0 items-center justify-center text-[var(--esc-panel-note-text)]"
-                            aria-hidden="true"
-                        >
-                            <PanelIcon name="lock" class="h-[18px] w-[18px]" />
-                        </span>
-                        <span
+            <div class="flex min-w-0 flex-1 flex-col">
+                <div
+                    ref="scroller"
+                    class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+                    data-testid="esc-conversation"
+                >
+                    <div class="mx-auto w-full max-w-[760px] px-4 py-4 sm:px-6">
+                        <ChatThread
+                            v-if="chat.active"
+                            :messages="chat.messages || []"
+                            :typing-user="chat.typingUser || null"
+                            :current-user-id="currentUserId"
+                        />
+                        <div
                             v-else
-                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[12px] font-semibold text-[var(--esc-panel-text-secondary)]"
-                            aria-hidden="true"
-                            >{{ initials(message.author?.name) }}</span
+                            class="space-y-5"
+                            role="feed"
+                            :aria-label="t('agent_panel.ticket.tabs.conversation')"
                         >
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-baseline gap-1.5 text-[13px]">
-                                <template v-if="message.is_internal_note">
-                                    <span class="font-medium text-[var(--esc-panel-note-text)]">{{
-                                        t('agent_panel.ticket.internal_note')
-                                    }}</span>
-                                    <span class="text-[12px] text-[var(--esc-panel-text-tertiary)]"
-                                        >&middot; {{ message.author?.name || t('ticket.unknown') }} &middot;
-                                        <time :datetime="message.created_at" :title="fullDate(message.created_at)">{{
-                                            relativeTime(message.created_at, t, now)
-                                        }}</time></span
-                                    >
-                                    <button
-                                        v-if="routes.pin"
-                                        type="button"
-                                        class="ml-auto rounded px-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
-                                        @click="togglePin(message)"
-                                    >
-                                        {{ message.is_pinned ? t('reply.unpin') : t('reply.pin') }}
-                                    </button>
-                                </template>
-                                <template v-else>
-                                    <span class="font-semibold text-[var(--esc-panel-text)]">{{
-                                        message.author?.name || t('ticket.unknown')
-                                    }}</span>
-                                    <time
-                                        class="ml-auto shrink-0 text-[12px] tabular-nums text-[var(--esc-panel-text-tertiary)]"
-                                        :datetime="message.created_at"
-                                        :title="fullDate(message.created_at)"
-                                        >{{ relativeTime(message.created_at, t, now) }}</time
-                                    >
-                                </template>
-                            </div>
-                            <div
-                                :class="[
-                                    'esc-message-body mt-1 break-words text-[14px] leading-5 text-[var(--esc-panel-text-secondary)]',
-                                    isPlainText(message.body) ? 'whitespace-pre-line' : '',
-                                ]"
-                                v-html="bodyHtml(message.body)"
-                            ></div>
-                            <ul v-if="message.attachments?.length" class="mt-2.5 space-y-1.5">
-                                <li
-                                    v-for="attachment in message.attachments"
-                                    :key="attachment.id"
-                                    class="flex max-w-md items-center gap-3 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-3 py-2"
-                                    data-testid="esc-attachment"
+                            <section v-if="pinnedNotes.length" class="space-y-2" data-testid="esc-pinned-notes">
+                                <article
+                                    v-for="note in pinnedNotes"
+                                    :key="`pin-${note.id}`"
+                                    class="rounded-[var(--esc-radius-lg,8px)] border-l-2 border-[var(--esc-panel-note-border)] bg-[var(--esc-panel-note-bg)] px-3 py-2"
                                 >
-                                    <PanelIcon
-                                        name="document"
-                                        class="h-5 w-5 shrink-0 text-[var(--esc-panel-text-tertiary)]"
-                                    />
-                                    <span class="min-w-0 flex-1">
-                                        <span
-                                            class="block truncate text-[13px] font-medium text-[var(--esc-panel-text)]"
-                                            >{{
-                                                attachment.original_filename || attachment.filename || attachment.name
-                                            }}</span
-                                        >
-                                        <span class="text-[12px] tabular-nums text-[var(--esc-panel-text-tertiary)]">{{
-                                            formatSize(attachment.size)
-                                        }}</span>
-                                    </span>
-                                    <a
-                                        :href="attachmentUrl(attachment)"
-                                        target="_blank"
-                                        rel="noopener"
-                                        :class="iconButton"
-                                        :aria-label="
-                                            t('agent_panel.ticket.download', {
-                                                name: attachment.original_filename || attachment.filename || '',
-                                            })
-                                        "
+                                    <div
+                                        class="flex items-center gap-1.5 text-[12px] text-[var(--esc-panel-note-text)]"
                                     >
-                                        <PanelIcon name="download" class="h-4 w-4" />
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </article>
-                    <p v-if="!thread.length" class="py-8 text-center text-[13px] text-[var(--esc-panel-text-tertiary)]">
-                        {{ t('ticket.no_replies') }}
-                    </p>
-                    <div ref="threadEnd"></div>
-                </div>
-            </template>
+                                        <PanelIcon name="lock" class="h-3.5 w-3.5" />
+                                        <span class="font-medium">{{ t('agent_panel.ticket.pinned_note') }}</span>
+                                        <span>&middot; {{ note.author?.name || t('ticket.unknown') }}</span>
+                                        <button
+                                            v-if="routes.pin"
+                                            type="button"
+                                            class="ml-auto rounded px-1.5 py-0.5 hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                                            @click="togglePin(note)"
+                                        >
+                                            {{ t('reply.unpin') }}
+                                        </button>
+                                    </div>
+                                    <div
+                                        :class="[
+                                            'mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
+                                            isPlainText(note.body) ? 'whitespace-pre-line' : '',
+                                        ]"
+                                        v-html="bodyHtml(note.body)"
+                                    ></div>
+                                </article>
+                            </section>
 
-            <!-- Details -->
-            <template v-else-if="tab === 'details'">
-                <dl class="grid grid-cols-[minmax(7rem,10rem)_1fr] gap-x-4" data-testid="esc-details">
-                    <dt :class="dtClass">{{ t('ticket.status') }}</dt>
-                    <dd :class="ddClass">
-                        <span class="flex items-center gap-1.5">
-                            <span
-                                class="h-2 w-2 rounded-full"
-                                :style="{ background: statusColor(ticket.status) }"
-                            ></span>
-                            {{ statusLabel(ticket.status) }}
-                        </span>
-                    </dd>
-                    <dt :class="dtClass">{{ t('ticket.priority') }}</dt>
-                    <dd :class="ddClass">
-                        <span class="flex items-center gap-1.5">
-                            <span
-                                class="h-2 w-2 rounded-full"
-                                :style="{ background: priorityColor(ticket.priority) }"
-                            ></span>
-                            {{ ticket.priority ? priorityLabel(ticket.priority) : t('agent_panel.ticket.none') }}
-                        </span>
-                    </dd>
-                    <dt :class="dtClass">{{ t('ticket.assignee') }}</dt>
-                    <dd :class="ddClass">{{ assignee?.name || t('agent_panel.ticket.unassigned') }}</dd>
-                    <dt :class="dtClass">{{ t('ticket.department') }}</dt>
-                    <dd :class="ddClass">{{ ticket.department?.name || t('agent_panel.ticket.none') }}</dd>
-                    <dt :class="dtClass">{{ t('agent_panel.ticket.type') }}</dt>
-                    <dd :class="ddClass">{{ typeLabel(ticket.ticket_type) }}</dd>
-                    <template v-if="ticket.channel">
-                        <dt :class="dtClass">{{ t('agent_panel.ticket.channel') }}</dt>
-                        <dd :class="ddClass">{{ typeLabel(ticket.channel) }}</dd>
-                    </template>
-                    <dt :class="dtClass">{{ t('ticket.created') }}</dt>
-                    <dd :class="ddClass">
-                        <time :datetime="ticket.created_at">{{ fullDate(ticket.created_at) }}</time>
-                    </dd>
-                    <template v-if="ticket.first_response_due_at || ticket.sla_first_response_breached">
-                        <dt :class="dtClass">{{ t('agent_panel.ticket.first_response') }}</dt>
-                        <dd
-                            :class="ddClass"
-                            :style="{
-                                color: slaText(ticket.first_response_due_at, ticket.sla_first_response_breached).tone,
-                            }"
-                        >
-                            {{ slaText(ticket.first_response_due_at, ticket.sla_first_response_breached).text }}
-                        </dd>
-                    </template>
-                    <template v-if="ticket.resolution_due_at || ticket.sla_resolution_breached">
-                        <dt :class="dtClass">{{ t('agent_panel.ticket.resolution') }}</dt>
-                        <dd
-                            :class="ddClass"
-                            :style="{ color: slaText(ticket.resolution_due_at, ticket.sla_resolution_breached).tone }"
-                        >
-                            {{ slaText(ticket.resolution_due_at, ticket.sla_resolution_breached).text }}
-                        </dd>
-                    </template>
-                    <dt :class="dtClass">{{ t('agent_panel.ticket.followers') }}</dt>
-                    <dd :class="[ddClass, 'tabular-nums']">{{ followersCount }}</dd>
-                    <dt :class="dtClass">{{ t('agent_panel.ticket.tags') }}</dt>
-                    <dd :class="ddClass">
-                        {{
-                            ticketTags.length
-                                ? ticketTags.map((tag) => tag.name).join(', ')
-                                : t('agent_panel.ticket.none')
-                        }}
-                    </dd>
-                    <template v-if="ticket.satisfaction_rating">
-                        <dt :class="dtClass">{{ t('agent_panel.ticket.satisfaction') }}</dt>
-                        <dd :class="[ddClass, 'tabular-nums']">
-                            {{ ticket.satisfaction_rating.rating }}/5
-                            <span
-                                v-if="ticket.satisfaction_rating.comment"
-                                class="block text-[var(--esc-panel-text-tertiary)]"
-                                >{{ ticket.satisfaction_rating.comment }}</span
+                            <template v-for="item in thread" :key="item.id">
+                                <!-- System event -->
+                                <div
+                                    v-if="item.kind === 'event'"
+                                    class="flex items-center gap-3 text-[12px] leading-4 text-[var(--esc-panel-text-tertiary)]"
+                                    data-testid="esc-event"
+                                    :data-kind="item.kind"
+                                >
+                                    <span class="flex w-7 shrink-0 justify-center" aria-hidden="true">
+                                        <PanelIcon :name="EVENT_ICONS[item.type] || 'clock'" class="h-3.5 w-3.5" />
+                                    </span>
+                                    <p class="min-w-0">
+                                        {{ item.text }}
+                                        <span aria-hidden="true"> &middot; </span>
+                                        <time :datetime="item.created_at" :title="absoluteTime(item.created_at)">{{
+                                            relativeTime(item.created_at, t, now)
+                                        }}</time>
+                                    </p>
+                                </div>
+
+                                <!-- Internal note -->
+                                <article
+                                    v-else-if="item.kind === 'note'"
+                                    class="rounded-[var(--esc-radius-lg,8px)] border-l-2 border-[var(--esc-panel-note-border)] bg-[var(--esc-panel-note-bg)] px-3 py-2.5"
+                                    data-note="true"
+                                    :data-kind="item.kind"
+                                    data-testid="esc-message"
+                                >
+                                    <div class="flex items-center gap-1.5 text-[12px] leading-5">
+                                        <PanelIcon
+                                            name="lock"
+                                            class="h-3.5 w-3.5 shrink-0 text-[var(--esc-panel-note-text)]"
+                                        />
+                                        <span class="font-medium text-[var(--esc-panel-note-text)]">{{
+                                            t('agent_panel.ticket.internal_note')
+                                        }}</span>
+                                        <span class="min-w-0 truncate text-[var(--esc-panel-text-tertiary)]"
+                                            >&middot; {{ item.author?.name || t('ticket.unknown') }} &middot;
+                                            <time :datetime="item.created_at" :title="absoluteTime(item.created_at)">{{
+                                                relativeTime(item.created_at, t, now)
+                                            }}</time></span
+                                        >
+                                        <button
+                                            v-if="routes.pin"
+                                            type="button"
+                                            class="ml-auto shrink-0 rounded px-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                                            @click="togglePin(item)"
+                                        >
+                                            {{ item.is_pinned ? t('reply.unpin') : t('reply.pin') }}
+                                        </button>
+                                    </div>
+                                    <div
+                                        :class="[
+                                            'esc-message-body mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
+                                            isPlainText(item.body) ? 'whitespace-pre-line' : '',
+                                        ]"
+                                        v-html="bodyHtml(item.body)"
+                                    ></div>
+                                    <ul v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-2">
+                                        <li
+                                            v-for="attachment in item.attachments"
+                                            :key="attachment.id"
+                                            class="flex h-9 max-w-[18rem] items-center gap-2 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] pl-2.5 pr-1"
+                                            data-testid="esc-attachment"
+                                        >
+                                            <PanelIcon
+                                                name="document"
+                                                class="h-4 w-4 shrink-0 text-[var(--esc-panel-text-tertiary)]"
+                                            />
+                                            <span
+                                                class="min-w-0 truncate text-[13px] text-[var(--esc-panel-text)]"
+                                                :title="attachmentName(attachment)"
+                                                >{{ attachmentName(attachment) }}</span
+                                            >
+                                            <span
+                                                class="shrink-0 text-[12px] tabular-nums text-[var(--esc-panel-text-tertiary)]"
+                                                >{{ formatSize(attachment.size) }}</span
+                                            >
+                                            <a
+                                                :href="attachmentUrl(attachment)"
+                                                target="_blank"
+                                                rel="noopener"
+                                                :class="iconButton"
+                                                :aria-label="
+                                                    t('agent_panel.ticket.download', {
+                                                        name: attachmentName(attachment),
+                                                    })
+                                                "
+                                                :title="
+                                                    t('agent_panel.ticket.download', {
+                                                        name: attachmentName(attachment),
+                                                    })
+                                                "
+                                            >
+                                                <PanelIcon name="download" class="h-4 w-4" />
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </article>
+
+                                <!-- Customer message or agent reply -->
+                                <article v-else class="flex gap-3" :data-kind="item.kind" data-testid="esc-message">
+                                    <span
+                                        :class="[
+                                            'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
+                                            item.kind === 'agent'
+                                                ? 'bg-[color-mix(in_srgb,var(--esc-panel-accent)_20%,transparent)] text-[var(--esc-panel-text)]'
+                                                : 'bg-[var(--esc-panel-active)] text-[var(--esc-panel-text-secondary)]',
+                                        ]"
+                                        aria-hidden="true"
+                                        >{{ initials(item.author?.name) }}</span
+                                    >
+                                    <div
+                                        :class="[
+                                            'min-w-0 flex-1',
+                                            item.kind === 'agent'
+                                                ? 'border-l-2 border-[color-mix(in_srgb,var(--esc-panel-accent)_45%,transparent)] pl-3'
+                                                : '',
+                                        ]"
+                                    >
+                                        <div class="flex items-baseline gap-1.5 text-[13px] leading-5">
+                                            <span class="min-w-0 truncate font-semibold text-[var(--esc-panel-text)]">{{
+                                                item.author?.name || t('ticket.unknown')
+                                            }}</span>
+                                            <span
+                                                v-if="item.kind === 'customer'"
+                                                class="shrink-0 text-[12px] text-[var(--esc-panel-text-tertiary)]"
+                                                >{{ t('agent_panel.ticket.customer') }}</span
+                                            >
+                                            <time
+                                                class="ml-auto shrink-0 text-[12px] tabular-nums text-[var(--esc-panel-text-tertiary)]"
+                                                :datetime="item.created_at"
+                                                :title="absoluteTime(item.created_at)"
+                                                >{{ relativeTime(item.created_at, t, now) }}</time
+                                            >
+                                        </div>
+                                        <div
+                                            :class="[
+                                                'esc-message-body mt-0.5 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
+                                                isPlainText(item.body) ? 'whitespace-pre-line' : '',
+                                            ]"
+                                            v-html="bodyHtml(item.body)"
+                                        ></div>
+                                        <ul v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-2">
+                                            <li
+                                                v-for="attachment in item.attachments"
+                                                :key="attachment.id"
+                                                class="flex h-9 max-w-[18rem] items-center gap-2 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] pl-2.5 pr-1"
+                                                data-testid="esc-attachment"
+                                            >
+                                                <PanelIcon
+                                                    name="document"
+                                                    class="h-4 w-4 shrink-0 text-[var(--esc-panel-text-tertiary)]"
+                                                />
+                                                <span
+                                                    class="min-w-0 truncate text-[13px] text-[var(--esc-panel-text)]"
+                                                    :title="attachmentName(attachment)"
+                                                    >{{ attachmentName(attachment) }}</span
+                                                >
+                                                <span
+                                                    class="shrink-0 text-[12px] tabular-nums text-[var(--esc-panel-text-tertiary)]"
+                                                    >{{ formatSize(attachment.size) }}</span
+                                                >
+                                                <a
+                                                    :href="attachmentUrl(attachment)"
+                                                    target="_blank"
+                                                    rel="noopener"
+                                                    :class="iconButton"
+                                                    :aria-label="
+                                                        t('agent_panel.ticket.download', {
+                                                            name: attachmentName(attachment),
+                                                        })
+                                                    "
+                                                    :title="
+                                                        t('agent_panel.ticket.download', {
+                                                            name: attachmentName(attachment),
+                                                        })
+                                                    "
+                                                >
+                                                    <PanelIcon name="download" class="h-4 w-4" />
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </article>
+                            </template>
+                            <p
+                                v-if="!thread.length"
+                                class="py-8 text-center text-[13px] text-[var(--esc-panel-text-tertiary)]"
                             >
-                        </dd>
-                    </template>
-                    <template v-for="field in customFields" :key="`cf-${field.label}`">
-                        <dt :class="dtClass">{{ field.label }}</dt>
-                        <dd :class="ddClass">{{ displayValue(field.value) }}</dd>
-                    </template>
-                </dl>
-                <div v-if="ticket.subjects?.length" class="mt-4">
-                    <TicketSubjects :subjects="ticket.subjects" />
-                </div>
-                <div class="mt-4">
-                    <PluginSlot slot="ticket.show.sidebar" :components="getPageComponents('ticket.show', 'sidebar')" />
-                </div>
-            </template>
-
-            <!-- Customer -->
-            <template v-else-if="tab === 'customer'">
-                <div class="flex items-center gap-3" data-testid="esc-customer">
-                    <span
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[14px] font-semibold text-[var(--esc-panel-text-secondary)]"
-                        aria-hidden="true"
-                        >{{ initials(requesterName(ticket)) }}</span
-                    >
-                    <div class="min-w-0">
-                        <p class="flex items-center gap-1.5 text-[14px] font-semibold text-[var(--esc-panel-text)]">
-                            {{ requesterName(ticket) || t('ticket.unknown') }}
-                            <span
-                                v-if="isLive(ticket)"
-                                class="h-1.5 w-1.5 rounded-full bg-[var(--esc-sla-ok)]"
-                                :title="t('agent_panel.inbox.requester_online')"
-                            ></span>
-                        </p>
-                        <p class="truncate text-[13px] text-[var(--esc-panel-text-tertiary)]">
-                            {{ requester.email || ticket.requester_email }}
-                        </p>
+                                {{ t('ticket.no_replies') }}
+                            </p>
+                            <div ref="threadEnd"></div>
+                        </div>
                     </div>
                 </div>
-                <dl class="mt-4 grid grid-cols-[minmax(7rem,10rem)_1fr] gap-x-4">
-                    <dt :class="dtClass">{{ t('agent_panel.ticket.email') }}</dt>
-                    <dd :class="[ddClass, 'truncate']">
-                        {{ requester.email || ticket.requester_email || t('agent_panel.ticket.none') }}
-                    </dd>
-                    <template v-if="typeof ticket.requester_ticket_count === 'number'">
-                        <dt :class="dtClass">{{ t('agent_panel.ticket.tickets') }}</dt>
-                        <dd :class="[ddClass, 'tabular-nums']">{{ ticket.requester_ticket_count }}</dd>
-                    </template>
-                    <template v-if="ticket.chat_metadata?.page_url">
-                        <dt :class="dtClass">{{ t('agent_panel.ticket.page') }}</dt>
-                        <dd :class="[ddClass, 'truncate']">{{ ticket.chat_metadata.page_url }}</dd>
-                    </template>
-                </dl>
-                <h3 class="mt-5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
-                    {{ t('agent_panel.ticket.recent_tickets') }}
-                </h3>
-                <ul v-if="recentTickets.length" class="mt-1.5 divide-y divide-[var(--esc-panel-border)]">
-                    <li v-for="item in recentTickets" :key="item.reference">
-                        <Link
-                            :href="ticketUrl(prefix, item.reference)"
-                            class="-mx-1.5 flex items-center gap-3 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
-                        >
-                            <span class="shrink-0 tabular-nums text-[var(--esc-panel-text-tertiary)]">{{
-                                item.reference
-                            }}</span>
-                            <span class="min-w-0 flex-1 truncate text-[var(--esc-panel-text)]">{{ item.subject }}</span>
-                            <span
-                                v-if="item.status"
-                                class="shrink-0 text-[12px] text-[var(--esc-panel-text-tertiary)]"
-                                >{{ statusLabel(item.status) }}</span
-                            >
-                        </Link>
-                    </li>
-                </ul>
-                <p v-else class="mt-1.5 text-[13px] text-[var(--esc-panel-text-tertiary)]">
-                    {{ t('agent_panel.ticket.no_recent_tickets') }}
-                </p>
-                <div class="mt-4">
-                    <PluginSlot
-                        slot="ticket.show.context-panel"
-                        :components="getPageComponents('ticket.show', 'context-panel')"
-                    />
-                </div>
-            </template>
 
-            <!-- Related -->
-            <template v-else>
-                <h3 class="text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
-                    {{ t('agent_panel.ticket.linked_tickets') }}
-                </h3>
-                <ul
-                    v-if="links.length"
-                    class="mt-1.5 divide-y divide-[var(--esc-panel-border)]"
-                    data-testid="esc-links"
-                >
-                    <li v-for="link in links" :key="`${link.relation}-${link.ticket.reference}`">
-                        <Link
-                            :href="ticketUrl(prefix, link.ticket.reference)"
-                            class="-mx-1.5 flex items-center gap-3 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                <!-- Composer -->
+                <div class="shrink-0 px-4 pb-3 sm:px-6" data-testid="esc-composer-dock">
+                    <div class="mx-auto w-full max-w-[760px]">
+                        <div
+                            v-if="chat.active"
+                            class="overflow-hidden rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)]"
                         >
-                            <span class="w-20 shrink-0 text-[12px] text-[var(--esc-panel-text-tertiary)]">{{
-                                relationLabel(link.relation)
-                            }}</span>
-                            <span class="shrink-0 tabular-nums text-[var(--esc-panel-text-tertiary)]">{{
-                                link.ticket.reference
-                            }}</span>
-                            <span class="min-w-0 flex-1 truncate text-[var(--esc-panel-text)]">{{
-                                link.ticket.subject
-                            }}</span>
-                        </Link>
-                    </li>
-                </ul>
-                <p v-else class="mt-1.5 text-[13px] text-[var(--esc-panel-text-tertiary)]">
-                    {{ t('agent_panel.ticket.no_links') }}
-                </p>
-                <template v-if="knowledgeBaseUrl">
-                    <h3 class="mt-5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
-                        {{ t('agent_panel.ticket.knowledge_base') }}
-                    </h3>
-                    <Link
-                        :href="knowledgeBaseUrl"
-                        class="-mx-1.5 mt-1.5 flex items-center gap-2 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
-                        data-testid="esc-kb-link"
-                    >
-                        <PanelIcon name="book" class="h-4 w-4 shrink-0 text-[var(--esc-panel-text-tertiary)]" />
-                        {{ t('agent_panel.ticket.search_knowledge_base') }}
-                    </Link>
-                </template>
-                <h3 class="mt-5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
-                    {{ t('agent_panel.ticket.activity') }}
-                </h3>
-                <div class="mt-2">
-                    <ActivityTimeline :activities="ticket.activities || []" />
+                            <ChatComposer
+                                :session-id="ticket.chat_session_id"
+                                :send-endpoint="chat.sendEndpoint || ''"
+                                :typing-endpoint="chat.typingEndpoint || ''"
+                                allow-notes
+                                @send="emit('chat-send', $event)"
+                            />
+                        </div>
+                        <Composer
+                            v-else
+                            ref="composerRef"
+                            v-model:mode="composerMode"
+                            :reply-action="routes.reply || ''"
+                            :note-action="routes.note || ''"
+                            :status-action="notesOnly ? '' : routes.status || ''"
+                            :canned-responses="cannedResponses"
+                            :notes-only="notesOnly"
+                            :draft-key="ticket.reference"
+                            :typing-endpoint="routes.typing || ''"
+                        />
+                    </div>
                 </div>
-            </template>
-        </div>
-
-        <!-- Composer -->
-        <div
-            class="shrink-0 px-4 pb-4 max-sm:sticky max-sm:bottom-0 max-sm:bg-[var(--esc-panel-bg)] max-sm:pt-2 sm:px-6"
-            data-testid="esc-composer-dock"
-        >
-            <div
-                v-if="chat.active"
-                class="overflow-hidden rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)]"
-            >
-                <ChatComposer
-                    :session-id="ticket.chat_session_id"
-                    :send-endpoint="chat.sendEndpoint || ''"
-                    :typing-endpoint="chat.typingEndpoint || ''"
-                    allow-notes
-                    @send="emit('chat-send', $event)"
-                />
             </div>
-            <Composer
-                v-else
-                ref="composerRef"
-                v-model:mode="composerMode"
-                :reply-action="routes.reply || ''"
-                :note-action="routes.note || ''"
-                :status-action="notesOnly ? '' : routes.status || ''"
-                :canned-responses="cannedResponses"
-                :notes-only="notesOnly"
-                :draft-key="ticket.reference"
-                :typing-endpoint="routes.typing || ''"
+
+            <!-- Customer and details -->
+            <TicketContextPanel
+                v-if="contextOpen"
+                id="esc-context-panel"
+                :ticket="ticket"
+                :prefix="prefix"
+                :followers-count="followersCount"
+                :knowledge-base-url="knowledgeBaseUrl"
+                :history="history"
+                :sla="slaItems"
+                :overlay="!contextInline"
+                :focus-section="contextFocus"
+                :status-label="statusLabel"
+                :status-color="statusColor"
+                @close="closeContext"
             />
         </div>
 

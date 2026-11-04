@@ -105,3 +105,109 @@ export function absoluteTime(date) {
 export function lastActivity(ticket) {
     return ticket?.last_reply_at || ticket?.updated_at || ticket?.created_at;
 }
+
+/**
+ * Who wrote a message in the thread: `customer` or `agent`. The ticket's
+ * description is the customer's. A reply says so with `is_agent` /
+ * `is_customer` when the backend sends them; otherwise it is the customer's
+ * when its author is the requester (same type and id), or a guest (no author).
+ */
+export function messageKind(message, ticket) {
+    if (message?.is_internal_note) return 'note';
+    if (message?.is_description) return 'customer';
+    if (message?.is_customer === true || message?.is_agent === false) return 'customer';
+    if (message?.is_agent === true) return 'agent';
+    const type = message?.author_type ?? null;
+    const id = message?.author_id ?? message?.user_id ?? null;
+    if (type === null && id === null && !message?.author?.id) return 'customer';
+    if (
+        ticket?.requester_type != null &&
+        type === ticket.requester_type &&
+        String(id ?? message?.author?.id) === String(ticket.requester_id)
+    ) {
+        return 'customer';
+    }
+    return 'agent';
+}
+
+const EVENT_TYPES = new Set([
+    'status_changed',
+    'assigned',
+    'unassigned',
+    'priority_changed',
+    'tag_added',
+    'tag_removed',
+    'department_changed',
+    'escalated',
+    'sla_breached',
+    'reopened',
+    'resolved',
+    'closed',
+    'snoozed',
+    'unsnoozed',
+    'ticket_split',
+]);
+
+/**
+ * A ticket activity as one translated sentence for the thread and the
+ * history, or null for activities the thread already shows as messages
+ * (replies and notes). Reads Escalated's property names (`new_status`,
+ * `new_priority`, `agent_id`, `new_department_id`) and the older `to`,
+ * `agent_name`, `tag` and `department`; ids resolve against `agents` and
+ * `departments` when given.
+ */
+export function describeActivity(activity, t, { agents = [], departments = [], statusLabel, priorityLabel } = {}) {
+    const type = activity?.type;
+    if (!type || type === 'replied' || type === 'note_added') return null;
+    const p = activity.properties || {};
+    const name = activity.causer?.name || t('agent_panel.events.system');
+    const label = (fn, value) => (fn ? fn(value) : String(value || '').replace(/_/g, ' '));
+    if (type === 'status_changed') {
+        const status = p.new_status ?? p.to;
+        return status ? t('agent_panel.events.status_changed', { name, status: label(statusLabel, status) }) : null;
+    }
+    if (type === 'priority_changed') {
+        const priority = p.new_priority ?? p.to;
+        return priority
+            ? t('agent_panel.events.priority_changed', { name, priority: label(priorityLabel, priority) })
+            : null;
+    }
+    if (type === 'assigned') {
+        const agent =
+            p.agent_name || agents.find((a) => p.agent_id != null && String(a.id) === String(p.agent_id))?.name;
+        return agent
+            ? t('agent_panel.events.assigned', { name, agent })
+            : t('agent_panel.events.assigned_plain', { name });
+    }
+    if (type === 'tag_added' || type === 'tag_removed') {
+        const tag = p.tag || p.tag_name;
+        return tag ? t(`agent_panel.events.${type}`, { name, tag }) : null;
+    }
+    if (type === 'department_changed') {
+        const department =
+            p.department ||
+            departments.find((d) => p.new_department_id != null && String(d.id) === String(p.new_department_id))?.name;
+        return department ? t('agent_panel.events.department_changed', { name, department }) : null;
+    }
+    if (EVENT_TYPES.has(type)) return t(`agent_panel.events.${type}`, { name });
+    return t('agent_panel.events.other', { name, type: String(type).replace(/_/g, ' ') });
+}
+
+/** Snooze presets from `now` (local time): an hour, four hours, tomorrow 9:00, next Monday 9:00. */
+export function snoozePresets(now = new Date()) {
+    const at = (date, hours) => {
+        const d = new Date(date);
+        d.setHours(hours, 0, 0, 0);
+        return d;
+    };
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const monday = new Date(now);
+    monday.setDate(monday.getDate() + ((8 - monday.getDay()) % 7 || 7));
+    return [
+        { key: 'in_hour', until: new Date(now.getTime() + 3600000) },
+        { key: 'in_hours', until: new Date(now.getTime() + 4 * 3600000) },
+        { key: 'tomorrow', until: at(tomorrow, 9) },
+        { key: 'next_week', until: at(monday, 9) },
+    ];
+}

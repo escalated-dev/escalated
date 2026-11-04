@@ -438,7 +438,15 @@ const toolButton =
 
         <!-- Toolbar -->
         <div class="flex items-center gap-0.5 px-2 pb-2">
-            <input ref="fileInputRef" type="file" multiple class="sr-only" tabindex="-1" @change="onFiles" />
+            <input
+                ref="fileInputRef"
+                type="file"
+                multiple
+                class="sr-only"
+                tabindex="-1"
+                :aria-label="t('agent_panel.composer.attach')"
+                @change="onFiles"
+            />
             <button
                 type="button"
                 :class="toolButton"

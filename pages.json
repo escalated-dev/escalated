@@ -782,6 +782,7 @@
         },
         "Escalated/Agent/TicketShow": {
             "props": [
+                "agents",
                 "cannedResponses",
                 "customActions",
                 "departments",
