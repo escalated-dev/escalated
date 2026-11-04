@@ -425,6 +425,12 @@ const pagination = computed(() => {
                     :data-unread="isUnread(ticket) ? 'true' : undefined"
                     data-testid="esc-queue-row"
                 >
+                    <span
+                        v-if="isUnread(ticket)"
+                        class="absolute left-[5px] top-[26px] h-1.5 w-1.5 rounded-full bg-[var(--esc-panel-accent)]"
+                        data-testid="esc-queue-unread"
+                        ><span class="sr-only">{{ t('agent_panel.inbox.unread') }}</span></span
+                    >
                     <!-- Avatar; its initials make way for a checkbox on hover and while selecting -->
                     <div
                         class="relative z-10 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)]"

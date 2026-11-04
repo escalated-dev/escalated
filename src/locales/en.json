@@ -983,7 +983,10 @@
             "next": "Next",
             "select_a_ticket": "Select a ticket",
             "select_hint": "Use j and k to move through the list and Enter to open a ticket.",
-            "shortcut_help": "All keyboard shortcuts"
+            "shortcut_help": "All keyboard shortcuts",
+            "no_matches": "No tickets match your search or filters.",
+            "clear_filters": "Clear filters",
+            "unread": "Unread"
         },
         "composer": {
             "label": "Compose",
