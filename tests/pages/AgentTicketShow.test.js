@@ -326,6 +326,8 @@ describe('Agent/TicketShow with the list and queue', () => {
         mountPage({ queue: { key: 'mine', title: 'My inbox' } });
         const list = wrapper.get('[data-testid="esc-show-list"]');
         expect(list.text()).toContain('My inbox');
+        // Narrower at lg so the ticket keeps a usable width at 1024px.
+        expect(list.classes()).toEqual(expect.arrayContaining(['w-[340px]', 'xl:w-[420px]']));
         const selected = list.get('a[aria-current="true"]');
         expect(selected.text()).toBe('Unable to export CSV');
         expect(wrapper.get('[data-testid="esc-back-to-list"]').classes()).toContain('lg:hidden');

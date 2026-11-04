@@ -337,7 +337,7 @@ onUnmounted(() => {
             <!-- The list the agent came from (wide screens) -->
             <section
                 v-if="listTickets"
-                class="flex min-h-0 w-[420px] shrink-0 flex-col border-r border-[var(--esc-panel-border)] max-lg:hidden"
+                class="flex min-h-0 w-[340px] shrink-0 flex-col xl:w-[420px] border-r border-[var(--esc-panel-border)] max-lg:hidden"
                 :aria-label="remembered.title"
                 data-testid="esc-show-list"
             >

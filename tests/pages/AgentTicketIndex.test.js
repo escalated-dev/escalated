@@ -296,4 +296,10 @@ describe('Agent/TicketIndex polish', () => {
         expect(time.attributes('datetime')).toBe(tickets.data[0].updated_at);
         expect(time.attributes('title')).toBe(new Date(tickets.data[0].updated_at).toLocaleString());
     });
+
+    it('narrows the list column at lg so the detail pane keeps its width', () => {
+        mountPage('/support/agent/tickets');
+        const column = wrapper.get('section');
+        expect(column.classes()).toEqual(expect.arrayContaining(['lg:w-[340px]', 'xl:w-[420px]']));
+    });
 });

@@ -134,7 +134,7 @@ onMounted(() => {
         <div class="flex h-full min-h-0">
             <!-- List column -->
             <section
-                class="flex min-h-0 w-full flex-col border-r border-[var(--esc-panel-border)] lg:w-[420px] lg:shrink-0"
+                class="flex min-h-0 w-full flex-col border-r border-[var(--esc-panel-border)] lg:w-[340px] lg:shrink-0 xl:w-[420px]"
                 :aria-label="heading.title"
             >
                 <PluginSlot
