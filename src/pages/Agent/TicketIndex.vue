@@ -14,8 +14,10 @@ import {
     activeQueueKey,
     normalisePrefix,
     queueHeading,
+    queueLinkFilters,
     rememberInbox,
     ticketsUrl,
+    viewLinkFilters,
     workspaceQueues,
 } from '../../utils/agentQueues';
 
@@ -70,16 +72,21 @@ const queueKey = computed(() =>
     }),
 );
 
-// The queue's own filters: "Clear filters" goes back to these.
+// A backend that sends counts counts open tickets and accepts `open=1`.
+const countsOpen = computed(() => !!props.inbox?.counts);
+const openOnly = computed(() => ['1', 1, true, 'true'].includes(props.filters?.open));
+
+// The queue's own filters, as its rail link opens it: "Clear filters" goes
+// back to these.
 const baseFilters = computed(() => {
     const key = queueKey.value;
     if (key === 'live') return { live_chat: 1 };
     if (String(key || '').startsWith('view:')) {
         const view = (props.inbox?.views || []).find((v) => `view:${v.id}` === key);
-        return { ...(view?.filters || {}) };
+        return view ? viewLinkFilters(view) : { view: key.slice(5) };
     }
     const queue = workspaceQueues(page.props.auth?.user?.id).find((q) => q.key === key);
-    return { ...(queue?.filters || {}) };
+    return queueLinkFilters(queue?.filters || {}, countsOpen.value);
 });
 
 const heading = computed(() =>
@@ -88,6 +95,7 @@ const heading = computed(() =>
         queue: props.queue,
         views: props.inbox?.views || [],
         total: typeof ticketPage.value.total === 'number' ? ticketPage.value.total : ticketPage.value.data?.length,
+        open: openOnly.value,
         t,
     }),
 );
@@ -175,6 +183,7 @@ onMounted(() => {
                         :prefix="prefix"
                         :new-ticket-url="newTicketUrl"
                         :base-filters="baseFilters"
+                        :open-toggle="countsOpen"
                     />
                 </div>
                 <PluginSlot slot="ticket.list.footer" :components="getPageComponents('ticket.list', 'footer')" />

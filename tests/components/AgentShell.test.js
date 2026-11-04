@@ -117,9 +117,28 @@ describe('AgentShell rail', () => {
             ['Unassigned', '18'],
             ['All tickets', '142'],
         ]);
-        expect(links[0].attributes('href')).toBe('/support/agent/tickets?assigned_to=7');
-        expect(links[1].attributes('href')).toBe('/support/agent/tickets?unassigned=1');
-        expect(links[2].attributes('href')).toBe('/support/agent/tickets');
+        // The counts are of unresolved tickets, so the links open those lists.
+        expect(links[0].attributes('href')).toBe('/support/agent/tickets?assigned_to=7&open=1');
+        expect(links[1].attributes('href')).toBe('/support/agent/tickets?unassigned=1&open=1');
+        expect(links[2].attributes('href')).toBe('/support/agent/tickets?open=1');
+    });
+
+    it('links the queues without the open filter when the backend sends no counts', () => {
+        mountLayout('/support/agent/tickets');
+        const links = wrapper.findAll('[data-testid="esc-rail-queues"] a');
+        expect(links.map((a) => a.attributes('href'))).toEqual([
+            '/support/agent/tickets?assigned_to=7',
+            '/support/agent/tickets?unassigned=1',
+            '/support/agent/tickets',
+        ]);
+    });
+
+    it('marks a queue current with or without the open filter', () => {
+        mountLayout('/support/agent/tickets?assigned_to=7&open=1', { inbox });
+        expect(wrapper.get('[data-testid="esc-rail-queues"] a[aria-current="page"]').text()).toContain('Inbox');
+        wrapper.unmount();
+        mountLayout('/support/agent/tickets?view=12&open=1', { inbox });
+        expect(wrapper.get('[data-testid="esc-rail-views"] a[aria-current="page"]').text()).toContain('Billing');
     });
 
     it('shows the queues without numbers when there is no inbox prop', () => {
@@ -151,14 +170,15 @@ describe('AgentShell rail', () => {
         forgetInbox();
     });
 
-    it('lists saved views with counts and links them to their filters', () => {
-        mountLayout('/support/agent/tickets?priority=urgent', { inbox });
+    it('lists saved views with counts and links them by id, over open tickets unless the view names a status', () => {
+        mountLayout('/support/agent/tickets?view=urgent', { inbox });
         const views = wrapper.findAll('[data-testid="esc-rail-views"] a');
         expect(views.map((a) => a.findAll('span').map((s) => s.text()))).toEqual([
             ['Urgent', '6'],
             ['Billing escalations', '3'],
         ]);
-        expect(views[1].attributes('href')).toBe('/support/agent/tickets?department_id=4&status=escalated');
+        expect(views[0].attributes('href')).toBe('/support/agent/tickets?view=urgent&open=1');
+        expect(views[1].attributes('href')).toBe('/support/agent/tickets?view=12');
         expect(views[0].attributes('aria-current')).toBe('page');
     });
 

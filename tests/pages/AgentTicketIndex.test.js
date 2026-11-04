@@ -382,3 +382,51 @@ describe('Agent/TicketIndex states', () => {
     });
 });
 
+describe('Agent/TicketIndex open filter', () => {
+    it('says open in the subline and lets the agent include resolved tickets', async () => {
+        mountPage('/support/agent/tickets?assigned_to=7&open=1', { inbox, filters: { assigned_to: '7', open: '1' } });
+        expect(wrapper.text()).toContain('24 open tickets assigned to you');
+        const toggle = wrapper.get('[data-testid="esc-queue-open-toggle"]');
+        expect(toggle.text()).toBe('Include resolved');
+        await toggle.trigger('click');
+        expect(router.get).toHaveBeenLastCalledWith('/support/agent/tickets', { assigned_to: '7' }, expect.any(Object));
+    });
+
+    it('offers to go back to open tickets only', async () => {
+        mountPage('/support/agent/tickets?assigned_to=7', { inbox, filters: { assigned_to: '7' } });
+        expect(wrapper.text()).toContain('24 tickets assigned to you');
+        const toggle = wrapper.get('[data-testid="esc-queue-open-toggle"]');
+        expect(toggle.text()).toBe('Open only');
+        await toggle.trigger('click');
+        expect(router.get).toHaveBeenLastCalledWith(
+            '/support/agent/tickets',
+            { assigned_to: '7', open: 1 },
+            expect.any(Object),
+        );
+    });
+
+    it('has no open toggle when the backend sends no counts', () => {
+        mountPage('/support/agent/tickets?assigned_to=7', { filters: { assigned_to: '7' } });
+        expect(wrapper.find('[data-testid="esc-queue-open-toggle"]').exists()).toBe(false);
+    });
+
+    it('clears search and filters back to the open queue', async () => {
+        mountPage('/support/agent/tickets?assigned_to=7&open=1&search=x', {
+            inbox,
+            tickets: { data: [] },
+            filters: { assigned_to: '7', open: '1', search: 'x' },
+        });
+        await wrapper.get('[data-testid="esc-queue-empty"] button').trigger('click');
+        expect(router.get).toHaveBeenLastCalledWith(
+            '/support/agent/tickets',
+            { assigned_to: 7, open: 1 },
+            expect.any(Object),
+        );
+    });
+
+    it('titles a view opened by id', () => {
+        mountPage('/support/agent/tickets?view=urgent&open=1', { inbox, filters: { view: 'urgent', open: '1' } });
+        expect(wrapper.get('h2').text()).toBe('Urgent');
+    });
+});
+

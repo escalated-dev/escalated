@@ -49,6 +49,26 @@ export function workspaceQueues(userId) {
     ].filter((queue) => queue.filters !== null);
 }
 
+/**
+ * The filters a rail link opens. Backends that send `inbox` counts count
+ * unresolved, unsnoozed tickets (escalated-laravel's `open=1`), so the link
+ * opens that same list; the agent can clear the open filter from the list.
+ */
+export function queueLinkFilters(filters = {}, open = false) {
+    return open ? { ...(filters || {}), open: 1 } : { ...(filters || {}) };
+}
+
+/**
+ * A view opens by id (`view=<id>`, which the backend expands to the view's
+ * filters), over open tickets unless the view names a status or open itself,
+ * matching how its count is taken.
+ */
+export function viewLinkFilters(view) {
+    const filters = view?.filters || {};
+    const own = filters.status !== undefined && filters.status !== '' ? true : !!filters.open;
+    return own ? { view: view.id } : { view: view.id, open: 1 };
+}
+
 const VIEW_ICONS = {
     urgent: 'fire',
     sla_at_risk: 'clock',
@@ -95,6 +115,7 @@ function sameFilters(a = {}, b = {}) {
 export function activeQueueKey({ url, userId, views = [], queue = null }) {
     if (queue?.key) return String(queue.key);
     const params = queryOf(url);
+    if (params.view !== undefined && params.view !== '') return `view:${params.view}`;
     if (params.live_chat && Object.keys(params).length === 1) return 'live';
     for (const view of views || []) {
         if (view?.filters && Object.keys(view.filters).length && sameFilters(view.filters, params)) {
@@ -174,7 +195,7 @@ export function forgetInbox() {
  * Title and subline for the list column: "My inbox" / "24 tickets assigned
  * to you". The backend's `queue.title` wins; otherwise the queue key names it.
  */
-export function queueHeading({ key, queue = null, views = [], total = null, t }) {
+export function queueHeading({ key, queue = null, views = [], total = null, open = false, t }) {
     const view = String(key || '').startsWith('view:') ? (views || []).find((v) => `view:${v.id}` === key) : null;
     const named = {
         mine: 'agent_panel.inbox.title_mine',
@@ -185,9 +206,10 @@ export function queueHeading({ key, queue = null, views = [], total = null, t })
     const title = queue?.title || view?.name || (named[key] ? t(named[key]) : t('agent_panel.inbox.title_tickets'));
     if (typeof total !== 'number') return { title, subtitle: '' };
     const form = total === 1 ? 'one' : 'other';
+    const kind = open ? 'open_' : '';
     const sub = {
-        mine: `agent_panel.inbox.subtitle_mine_${form}`,
-        unassigned: `agent_panel.inbox.subtitle_unassigned_${form}`,
+        mine: `agent_panel.inbox.subtitle_${kind}mine_${form}`,
+        unassigned: `agent_panel.inbox.subtitle_${kind}unassigned_${form}`,
     }[key];
-    return { title, subtitle: t(sub || `agent_panel.inbox.subtitle_${form}`, { count: total }) };
+    return { title, subtitle: t(sub || `agent_panel.inbox.subtitle_${kind}${form}`, { count: total }) };
 }

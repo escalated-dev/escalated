@@ -988,7 +988,15 @@
             "shortcut_help": "All keyboard shortcuts",
             "no_matches": "No tickets match your search or filters.",
             "clear_filters": "Clear filters",
-            "unread": "Unread"
+            "unread": "Unread",
+            "include_resolved": "Include resolved",
+            "open_only": "Open only",
+            "subtitle_open_mine_one": "1 open ticket assigned to you",
+            "subtitle_open_mine_other": ":count open tickets assigned to you",
+            "subtitle_open_unassigned_one": "1 open ticket waiting for an owner",
+            "subtitle_open_unassigned_other": ":count open tickets waiting for an owner",
+            "subtitle_open_one": "1 open ticket",
+            "subtitle_open_other": ":count open tickets"
         },
         "composer": {
             "label": "Compose",

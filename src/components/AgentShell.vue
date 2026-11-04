@@ -11,10 +11,12 @@ import { watchScrollAffordance } from '../utils/scrollAffordance';
 import {
     activeQueueKey,
     normalisePrefix,
+    queueLinkFilters,
     recallInbox,
     ticketsUrl,
     ticketUrl,
     viewIcon,
+    viewLinkFilters,
     workspaceQueues,
 } from '../utils/agentQueues';
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
@@ -59,6 +61,8 @@ const inbox = computed(() => page.props.inbox || null);
 const counts = computed(() => inbox.value?.counts || {});
 const views = computed(() => (Array.isArray(inbox.value?.views) ? inbox.value.views : []));
 const canSaveViews = computed(() => Array.isArray(inbox.value?.views));
+// A backend that sends counts counts open tickets; the links then open those.
+const countsOpen = computed(() => !!inbox.value?.counts);
 
 const currentUrl = computed(() => page.url || '');
 const path = computed(() => currentUrl.value.split(/[?#]/)[0]);
@@ -73,7 +77,7 @@ const queues = computed(() =>
     workspaceQueues(userId.value).map((queue) => ({
         ...queue,
         label: queueLabels.value[queue.key],
-        href: ticketsUrl(prefix.value, queue.filters),
+        href: ticketsUrl(prefix.value, queueLinkFilters(queue.filters, countsOpen.value)),
         count: counts.value[queue.key],
     })),
 );
@@ -84,7 +88,7 @@ const viewLinks = computed(() =>
         label: view.name,
         icon: viewIcon(view),
         count: view.count,
-        href: ticketsUrl(prefix.value, view.filters || {}),
+        href: ticketsUrl(prefix.value, view.id !== undefined ? viewLinkFilters(view) : view.filters || {}),
     })),
 );
 

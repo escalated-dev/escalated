@@ -44,6 +44,8 @@ const props = defineProps({
     newTicketUrl: { type: String, default: '' },
     /** The queue's own filters, which "Clear filters" keeps. */
     baseFilters: { type: Object, default: () => ({}) },
+    /** Offer to switch between open tickets only and all of them (`open=1`). */
+    openToggle: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:selectedIds', 'open']);
@@ -167,6 +169,12 @@ const narrowed = computed(() =>
             String(props.baseFilters?.[key] ?? '') !== String(value),
     ),
 );
+
+const openOnly = computed(() => ['1', 1, true, 'true'].includes(props.filters?.open));
+
+function toggleOpen() {
+    navigate({ ...props.filters, open: openOnly.value ? undefined : 1 });
+}
 
 function clearFilters() {
     search.value = '';
@@ -340,7 +348,21 @@ const pagination = computed(() => {
         <div class="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
             <div class="min-w-0">
                 <h2 class="truncate text-[18px] font-semibold leading-6 text-[var(--esc-panel-text)]">{{ title }}</h2>
-                <p v-if="subtitle" class="mt-0.5 text-[13px] text-[var(--esc-panel-text-tertiary)]">{{ subtitle }}</p>
+                <p
+                    v-if="subtitle || openToggle"
+                    class="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-[13px] text-[var(--esc-panel-text-tertiary)]"
+                >
+                    <span v-if="subtitle">{{ subtitle }}</span>
+                    <button
+                        v-if="openToggle"
+                        type="button"
+                        class="rounded text-[12px] text-[var(--esc-panel-text-tertiary)] underline decoration-[var(--esc-panel-border-input)] underline-offset-2 hover:text-[var(--esc-panel-text)] hover:decoration-current focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        data-testid="esc-queue-open-toggle"
+                        @click="toggleOpen"
+                    >
+                        {{ openOnly ? t('agent_panel.inbox.include_resolved') : t('agent_panel.inbox.open_only') }}
+                    </button>
+                </p>
             </div>
             <Link
                 v-if="newTicketUrl"
