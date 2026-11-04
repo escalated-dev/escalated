@@ -15,6 +15,7 @@ vi.mock('@inertiajs/vue3', () => ({
         visit: (...a) => router.visit(...a),
         reload: (...a) => router.reload(...a),
         post: (...a) => router.post(...a),
+        on: (...a) => (router.on ? router.on(...a) : () => {}),
     },
     useForm: (data) => ({ ...data, post: vi.fn(), processing: false, errors: {} }),
     Link: { props: ['href'], template: '<a :href="href"><slot /></a>' },
@@ -336,3 +337,48 @@ describe('Agent/TicketIndex polish', () => {
         expect(unringed).toEqual([]);
     });
 });
+
+describe('Agent/TicketIndex states', () => {
+    it('marks unread rows with a dot and says so to screen readers', () => {
+        mountPage('/support/agent/tickets');
+        const dot = rows()[0].get('[data-testid="esc-queue-unread"]');
+        expect(dot.text()).toBe('Unread');
+        expect(rows()[1].find('[data-testid="esc-queue-unread"]').exists()).toBe(false);
+    });
+
+    it('says the queue is empty when nothing narrows it', () => {
+        mountPage('/support/agent/tickets?assigned_to=7', { tickets: { data: [] }, filters: { assigned_to: '7' } });
+        const empty = wrapper.get('[data-testid="esc-queue-empty"]');
+        expect(empty.text()).toContain('No tickets in this queue.');
+        expect(empty.find('button').exists()).toBe(false);
+    });
+
+    it('offers to clear the search and filters when they leave nothing, keeping the queue', async () => {
+        mountPage('/support/agent/tickets?assigned_to=7&search=refund&priority=urgent', {
+            tickets: { data: [] },
+            filters: { assigned_to: '7', search: 'refund', priority: 'urgent' },
+        });
+        const empty = wrapper.get('[data-testid="esc-queue-empty"]');
+        expect(empty.text()).toContain('No tickets match your search or filters.');
+        await empty.get('button').trigger('click');
+        expect(router.get).toHaveBeenLastCalledWith('/support/agent/tickets', { assigned_to: 7 }, expect.any(Object));
+    });
+
+    it('marks the list busy while a search or filter loads', async () => {
+        let listeners = {};
+        router.on = vi.fn((event, cb) => {
+            listeners[event] = cb;
+            return () => {};
+        });
+        mountPage('/support/agent/tickets');
+        listeners.start({ detail: { visit: { url: new URL('http://x/support/agent/tickets?search=a'), method: 'get' } } });
+        await nextTick();
+        expect(wrapper.get('[data-testid="esc-queue-list"]').attributes('aria-busy')).toBe('true');
+        listeners.finish({ detail: { visit: {} } });
+        await nextTick();
+        expect(wrapper.get('[data-testid="esc-queue-list"]').attributes('aria-busy')).toBeUndefined();
+        delete router.on;
+        listeners = {};
+    });
+});
+

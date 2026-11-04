@@ -42,6 +42,8 @@ const props = defineProps({
     selectable: { type: Boolean, default: true },
     selectedIds: { type: Array, default: () => [] },
     newTicketUrl: { type: String, default: '' },
+    /** The queue's own filters, which "Clear filters" keeps. */
+    baseFilters: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['update:selectedIds', 'open']);
@@ -154,6 +156,45 @@ const FILTER_KEYS = [
     'snoozed',
     'following',
 ];
+// Anything beyond the queue's own filters narrows the list.
+const narrowed = computed(() =>
+    Object.entries(props.filters || {}).some(
+        ([key, value]) =>
+            key !== 'page' &&
+            value !== '' &&
+            value !== null &&
+            value !== undefined &&
+            String(props.baseFilters?.[key] ?? '') !== String(value),
+    ),
+);
+
+function clearFilters() {
+    search.value = '';
+    navigate({ ...(props.baseFilters || {}) });
+}
+
+// --- Loading -------------------------------------------------------------------
+// While a search, filter or page of this list loads, the rows dim.
+const loading = ref(false);
+const listPath = computed(() => props.indexUrl.split('?')[0]);
+const stopListening = [];
+if (typeof router.on === 'function') {
+    stopListening.push(
+        router.on('start', (event) => {
+            const visit = event?.detail?.visit;
+            const url = visit?.url;
+            const path = typeof url === 'string' ? url.split('?')[0] : url?.pathname;
+            if (String(visit?.method || 'get').toLowerCase() === 'get' && path && listPath.value.endsWith(path)) {
+                loading.value = true;
+            }
+        }),
+        router.on('finish', () => {
+            loading.value = false;
+        }),
+    );
+}
+onBeforeUnmount(() => stopListening.forEach((stop) => typeof stop === 'function' && stop()));
+
 const activeFilterCount = computed(
     () => FILTER_KEYS.filter((key) => props.filters?.[key] !== undefined && props.filters?.[key] !== '').length,
 );
@@ -290,7 +331,11 @@ const pagination = computed(() => {
 </script>
 
 <template>
-    <div class="flex h-full min-h-0 flex-col" data-testid="esc-queue-list">
+    <div
+        class="flex h-full min-h-0 flex-col"
+        :aria-busy="loading ? 'true' : undefined"
+        data-testid="esc-queue-list"
+    >
         <!-- Header -->
         <div class="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
             <div class="min-w-0">
@@ -403,7 +448,12 @@ const pagination = computed(() => {
         </div>
 
         <!-- Rows -->
-        <div class="min-h-0 flex-1 overflow-y-auto border-t border-[var(--esc-panel-border)]">
+        <div
+            :class="[
+                'min-h-0 flex-1 overflow-y-auto border-t border-[var(--esc-panel-border)] transition-opacity',
+                loading ? 'opacity-60' : '',
+            ]"
+        >
             <ul
                 v-if="rows.length"
                 :aria-label="title || t('agent_panel.inbox.tickets')"
@@ -542,9 +592,19 @@ const pagination = computed(() => {
                     </div>
                 </li>
             </ul>
-            <p v-else class="px-4 py-10 text-center text-[13px] text-[var(--esc-panel-text-tertiary)]">
-                {{ t('agent_panel.inbox.empty') }}
-            </p>
+            <div v-else class="px-4 py-10 text-center" data-testid="esc-queue-empty">
+                <p class="text-[14px] font-medium text-[var(--esc-panel-text-secondary)]">
+                    {{ narrowed ? t('agent_panel.inbox.no_matches') : t('agent_panel.inbox.empty') }}
+                </p>
+                <button
+                    v-if="narrowed"
+                    type="button"
+                    class="mt-3 h-7 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2.5 text-[13px] text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                    @click="clearFilters"
+                >
+                    {{ t('agent_panel.inbox.clear_filters') }}
+                </button>
+            </div>
 
             <nav
                 v-if="pagination"

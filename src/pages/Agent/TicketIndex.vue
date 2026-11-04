@@ -10,7 +10,14 @@ import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { useRealtime } from '../../composables/useRealtime';
 import { useI18n } from '../../composables/useI18n';
-import { activeQueueKey, normalisePrefix, queueHeading, rememberInbox, ticketsUrl } from '../../utils/agentQueues';
+import {
+    activeQueueKey,
+    normalisePrefix,
+    queueHeading,
+    rememberInbox,
+    ticketsUrl,
+    workspaceQueues,
+} from '../../utils/agentQueues';
 
 const props = defineProps({
     tickets: Object,
@@ -62,6 +69,18 @@ const queueKey = computed(() =>
         queue: props.queue,
     }),
 );
+
+// The queue's own filters: "Clear filters" goes back to these.
+const baseFilters = computed(() => {
+    const key = queueKey.value;
+    if (key === 'live') return { live_chat: 1 };
+    if (String(key || '').startsWith('view:')) {
+        const view = (props.inbox?.views || []).find((v) => `view:${v.id}` === key);
+        return { ...(view?.filters || {}) };
+    }
+    const queue = workspaceQueues(page.props.auth?.user?.id).find((q) => q.key === key);
+    return { ...(queue?.filters || {}) };
+});
 
 const heading = computed(() =>
     queueHeading({
@@ -155,6 +174,7 @@ onMounted(() => {
                         :index-url="indexUrl"
                         :prefix="prefix"
                         :new-ticket-url="newTicketUrl"
+                        :base-filters="baseFilters"
                     />
                 </div>
                 <PluginSlot slot="ticket.list.footer" :components="getPageComponents('ticket.list', 'footer')" />
