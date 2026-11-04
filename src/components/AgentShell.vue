@@ -117,19 +117,27 @@ const sections = computed(() => {
     const list = [
         {
             key: 'tickets',
+            icon: 'envelope',
             label: t('agent_panel.nav.tickets'),
             href: `${p}/agent/tickets`,
             active: onTicketPages.value,
         },
         {
             key: 'dashboard',
+            icon: 'chartBar',
             label: t('agent_panel.nav.dashboard'),
             href: `${p}/agent`,
             active: path.value === `${p}/agent`,
         },
     ];
     if (kbEnabled.value) {
-        list.push({ key: 'kb', label: t('agent_panel.nav.knowledge_base'), href: `${p}/kb`, active: false });
+        list.push({
+            key: 'kb',
+            icon: 'book',
+            label: t('agent_panel.nav.knowledge_base'),
+            href: `${p}/kb`,
+            active: false,
+        });
     }
     return list;
 });
@@ -173,7 +181,7 @@ const navigationCommands = computed(() => {
         {
             id: 'dashboard',
             label: t('agent_panel.nav.dashboard'),
-            icon: 'home',
+            icon: 'chartBar',
             group: go,
             run: () => visit(`${prefix.value}/agent`),
         },
@@ -265,7 +273,7 @@ watch(
 
 function navItemClass(active) {
     return [
-        'group flex h-8 items-center gap-2.5 rounded-[var(--esc-radius,6px)] px-2.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]',
+        'group flex h-7 items-center gap-2.5 rounded-[var(--esc-radius,6px)] px-2.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]',
         active
             ? 'bg-[var(--esc-panel-active)] font-medium text-[var(--esc-panel-active-text,var(--esc-panel-text))]'
             : 'text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]',
@@ -304,7 +312,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
     >
         <div
             v-if="navOpen"
-            class="fixed inset-0 z-30 bg-black/40 lg:hidden"
+            class="fixed inset-0 z-30 bg-black/40 xl:hidden"
             aria-hidden="true"
             data-testid="esc-nav-backdrop"
             @click="closeNav"
@@ -314,12 +322,12 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
         <aside
             id="esc-agent-rail"
             :class="[
-                // Below lg the rail is a drawer. Only max-lg: variants, so nothing
-                // has to be undone from lg up.
-                'flex w-60 shrink-0 flex-col border-r border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)] max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-40 max-lg:max-w-[85vw] max-lg:transition-[transform,visibility] max-lg:duration-200',
+                // Below xl (1280px) the rail is a drawer, so tablets give the list and the ticket the width. Only max-xl: variants, so nothing
+                // has to be undone from xl up.
+                'flex w-60 shrink-0 flex-col border-r border-[var(--esc-panel-border)] bg-[var(--esc-panel-sidebar-bg)] max-xl:fixed max-xl:inset-y-0 max-xl:left-0 max-xl:z-40 max-xl:max-w-[85vw] max-xl:transition-[transform,visibility] max-xl:duration-200',
                 navOpen
-                    ? 'max-lg:visible max-lg:translate-x-0 max-lg:shadow-2xl'
-                    : 'max-lg:invisible max-lg:-translate-x-full',
+                    ? 'max-xl:visible max-xl:translate-x-0 max-xl:shadow-2xl'
+                    : 'max-xl:invisible max-xl:-translate-x-full',
             ]"
             data-testid="esc-agent-rail"
         >
@@ -364,7 +372,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                 }}</span>
                 <button
                     type="button"
-                    class="-mr-1.5 ml-auto rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] lg:hidden"
+                    class="-mr-1.5 ml-auto rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] xl:hidden"
                     :aria-label="t('agent_panel.nav.close_navigation')"
                     data-testid="esc-nav-close"
                     @click="closeNav"
@@ -373,8 +381,8 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                 </button>
             </div>
 
-            <nav :aria-label="t('agent_panel.nav.label')" class="flex-1 overflow-y-auto px-2.5 py-3">
-                <div class="px-2.5 pb-1.5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
+            <nav :aria-label="t('agent_panel.nav.label')" class="flex-1 overflow-y-auto px-2.5 py-2.5">
+                <div class="px-2.5 pb-1 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
                     {{ t('agent_panel.nav.workspace') }}
                 </div>
                 <ul class="space-y-px" data-testid="esc-rail-queues">
@@ -412,7 +420,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                 </ul>
 
                 <template v-if="viewLinks.length || canSaveViews">
-                    <div class="mt-5 flex items-center justify-between px-2.5 pb-1.5">
+                    <div class="mt-4 flex items-center justify-between px-2.5 pb-1">
                         <span class="text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">{{
                             t('agent_panel.nav.views')
                         }}</span>
@@ -521,7 +529,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
             >
                 <button
                     type="button"
-                    class="-ml-1 rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-header-text,var(--esc-panel-text))] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] lg:hidden"
+                    class="-ml-1 rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-header-text,var(--esc-panel-text))] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] xl:hidden"
                     aria-controls="esc-agent-rail"
                     :aria-expanded="navOpen ? 'true' : 'false'"
                     :aria-label="t('agent_panel.nav.open_navigation')"
@@ -540,12 +548,13 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                         :href="section.href"
                         :aria-current="section.active ? 'page' : undefined"
                         :class="[
-                            'relative flex shrink-0 items-center whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
+                            'relative flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)]',
                             section.active
                                 ? 'text-[var(--esc-panel-header-text,var(--esc-panel-text))] after:absolute after:inset-x-2.5 after:bottom-0 after:h-0.5 after:bg-[var(--esc-panel-accent)]'
                                 : 'text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)]',
                         ]"
                     >
+                        <PanelIcon :name="section.icon" class="h-4 w-4 shrink-0 max-sm:hidden" />
                         {{ section.label }}
                     </Link>
                 </nav>

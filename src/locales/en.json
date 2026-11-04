@@ -971,6 +971,12 @@
                 "sla_at_risk": "SLA at risk",
                 "resolved_today": "Resolved today"
             },
+            "stats_short": {
+                "open": "Open",
+                "urgent": "Urgent",
+                "sla_at_risk": "At risk",
+                "resolved_today": "Resolved today"
+            },
             "new_ticket": "New ticket",
             "search": "Search tickets",
             "search_placeholder": "Search tickets",
@@ -983,6 +989,7 @@
             "page_of": "Page :current of :last",
             "previous": "Previous",
             "next": "Next",
+            "summary": "Summary",
             "select_a_ticket": "Select a ticket",
             "select_hint": "Use j and k to move through the list and Enter to open a ticket.",
             "shortcut_help": "All keyboard shortcuts",

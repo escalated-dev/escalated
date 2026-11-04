@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import TicketIndex from '../../src/pages/Agent/TicketIndex.vue';
 import PluginSlot from '../../src/components/PluginSlot.vue';
+import { PANEL_ICONS } from '../../src/components/PanelIcon.vue';
 import { forgetInbox, recallInbox } from '../../src/utils/agentQueues';
 
 const usePage = vi.fn();
@@ -239,12 +240,15 @@ describe('Agent/TicketIndex with inbox and queue', () => {
     it('renders the stat strip from inbox.stats', () => {
         mountPage('/support/agent/tickets?assigned_to=7', { inbox });
         const tiles = wrapper.findAll('[data-testid="esc-stat-strip"] button');
-        expect(tiles.map((b) => b.text().replace(/\s+/g, ' '))).toEqual([
+        expect(tiles.map((b) => b.attributes('aria-label'))).toEqual([
             '24 Open',
             '6 Urgent',
             '4 SLA at risk',
             '27 Resolved today',
         ]);
+        // One row in a 340px column: SLA at risk shows as "At risk" beside its clock.
+        expect(tiles[2].text().replace(/\s+/g, ' ')).toBe('4 At risk');
+        expect(tiles[2].attributes('title')).toBe('SLA at risk');
     });
 
     it('filters the list from a stat tile, and the active tile clears it again', async () => {
@@ -298,10 +302,10 @@ describe('Agent/TicketIndex polish', () => {
         expect(time.attributes('title')).toBe(new Date(tickets.data[0].updated_at).toLocaleString());
     });
 
-    it('narrows the list column at lg so the detail pane keeps its width', () => {
+    it('keeps the list column narrower than the conversation at every desktop width', () => {
         mountPage('/support/agent/tickets');
         const column = wrapper.get('section');
-        expect(column.classes()).toEqual(expect.arrayContaining(['lg:w-[340px]', 'xl:w-[420px]']));
+        expect(column.classes()).toEqual(expect.arrayContaining(['lg:w-[360px]', '2xl:w-[400px]']));
     });
 
     it('keeps the filter popover to the filters: no second search box or dead Save as View', async () => {
@@ -429,5 +433,66 @@ describe('Agent/TicketIndex open filter', () => {
     it('titles a view opened by id', () => {
         mountPage('/support/agent/tickets?view=urgent&open=1', { inbox, filters: { view: 'urgent', open: '1' } });
         expect(wrapper.get('h2').text()).toBe('Urgent');
+    });
+});
+
+describe('Agent/TicketIndex density', () => {
+    it('names the requester on every row, beside the age', () => {
+        mountPage('/support/agent/tickets');
+        const names = rows().map((row) => row.get('[data-testid="esc-queue-requester"]').text());
+        expect(names).toEqual(['Sarah Chen', 'James Wright', 'Maria Garcia']);
+        const first = rows()[0].get('[data-testid="esc-queue-requester"]').element.parentElement;
+        expect(first.querySelector('time')).not.toBeNull();
+    });
+
+    it('keeps the reference with the preview, so each row is three short lines', () => {
+        mountPage('/support/agent/tickets');
+        const preview = rows()[0].get('[data-testid="esc-queue-preview"]');
+        expect(preview.text()).toContain('ESC-1042');
+        expect(preview.text()).toContain('Export fails with a server error.');
+    });
+
+    it('uses a compact standard row: 8px padding and a 28px avatar', () => {
+        mountPage('/support/agent/tickets');
+        for (const row of rows()) {
+            expect(row.classes()).toContain('py-2');
+            expect(row.get('[data-testid="esc-queue-avatar"]').classes()).toEqual(
+                expect.arrayContaining(['h-7', 'w-7']),
+            );
+        }
+    });
+
+    it('shows inbox.stats as one compact row of toggles rather than KPI cards', () => {
+        mountPage('/support/agent/tickets?assigned_to=7', { inbox });
+        const strip = wrapper.get('[data-testid="esc-stat-strip"]');
+        const buttons = strip.findAll('button');
+        expect(buttons).toHaveLength(4);
+        for (const button of buttons) {
+            expect(button.classes()).toContain('h-7');
+            expect(button.html()).not.toContain('text-[18px]');
+        }
+        expect(strip.attributes('role')).toBe('group');
+        expect(strip.attributes('aria-label')).toBe('Summary');
+    });
+
+    it('marks each summary item with its own icon (fire, clock, check), not colour alone', () => {
+        mountPage('/support/agent/tickets?assigned_to=7', { inbox });
+        const buttons = wrapper.findAll('[data-testid="esc-stat-strip"] button');
+        const icons = buttons.map((b) => b.find('svg'));
+        icons.forEach((svg) => {
+            expect(svg.exists()).toBe(true);
+            expect(svg.attributes('aria-hidden')).toBe('true');
+        });
+        const paths = icons.map((svg) => svg.get('path').attributes('d'));
+        expect(new Set(paths).size).toBe(4);
+        expect(paths[1]).toBe(PANEL_ICONS.fire);
+        expect(paths[2]).toBe(PANEL_ICONS.clock);
+        expect(paths[3]).toBe(PANEL_ICONS.check);
+    });
+
+    it('keeps the list header to a single title line with a short subline', () => {
+        mountPage('/support/agent/tickets?assigned_to=7', { inbox });
+        const title = wrapper.get('h2');
+        expect(title.classes()).toContain('text-[15px]');
     });
 });

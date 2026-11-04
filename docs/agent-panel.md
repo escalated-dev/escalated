@@ -3,7 +3,7 @@
 The agent pages (`Escalated/Agent/TicketIndex`, `Escalated/Agent/TicketShow`)
 render with the props every backend already sends. The props below are
 optional. Without them the panel still works; it shows no counts, views or
-stat strip, and names the queue from the URL.
+summary, and names the queue from the URL.
 
 ## `inbox` (TicketIndex and TicketShow)
 
@@ -35,17 +35,18 @@ stat strip, and names the queue from the URL.
   get their own icon when their `id` is `urgent`, `sla_at_risk`,
   `waiting_on_me`, `waiting_on_customer` or `recently_updated`; the backend
   decides which of them exist.
-- `stats` fills the strip above the list. Each tile filters the list by adding
-  query parameters, and clicking it again removes them:
+- `stats` fills the one-line summary above the list (an icon, the number and a
+  short label per item). Each item filters the list by adding query
+  parameters, and clicking it again removes them:
 
-  | Tile | Adds |
+  | Item | Adds |
   |---|---|
   | Open | `status=open` |
   | Urgent | `priority=urgent` |
   | SLA at risk | `sla_at_risk=1` |
   | Resolved today | `status=resolved&resolved_today=1` |
 
-  A tile the backend leaves out of `stats` is not shown.
+  An item the backend leaves out of `stats` is not shown.
 
 The counts and stats are for the current agent and queue as the backend sees
 them; the frontend never computes or estimates them.
