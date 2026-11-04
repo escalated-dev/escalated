@@ -4,6 +4,7 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { useKeyboardShortcuts } from '../composables/useKeyboardShortcuts';
 import { agentCommands } from '../composables/useAgentCommands';
+import { AGENT_STATUSES, useAgentStatus } from '../composables/useAgentStatus';
 import { watchScrollAffordance } from '../utils/scrollAffordance';
 import {
     activeQueueKey,
@@ -17,6 +18,7 @@ import {
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
 import CommandPalette from './CommandPalette.vue';
 import PanelIcon from './PanelIcon.vue';
+import PanelMenu from './PanelMenu.vue';
 import SaveViewDialog from './SaveViewDialog.vue';
 
 /**
@@ -211,43 +213,35 @@ function onViewSaved() {
     router.reload({ only: ['inbox'] });
 }
 
-// --- Online status (live chat) ---------------------------------------------
+// --- Online status ------------------------------------------------------------
+// The agent's own availability. The backend may share it as
+// `escalated.agent_status` (or the live-chat `chat_status`); otherwise the
+// last choice in this browser is used. See useAgentStatus.
 const statusMenuOpen = ref(false);
-const agentStatus = ref(escalated.value.chat_status || escalated.value.agent_status || 'online');
-const statusOptions = computed(() => [
-    { value: 'online', label: t('agent_panel.status.online'), color: 'var(--esc-sla-ok)' },
-    { value: 'away', label: t('agent_panel.status.away'), color: 'var(--esc-sla-warn)' },
-    { value: 'offline', label: t('agent_panel.status.offline'), color: 'var(--esc-panel-text-muted)' },
-]);
-const currentStatus = computed(
-    () => statusOptions.value.find((option) => option.value === agentStatus.value) || statusOptions.value[0],
+const topbarStatusOpen = ref(false);
+const { status: agentStatus, setStatus: setAgentStatus } = useAgentStatus({
+    initial: escalated.value.agent_status || escalated.value.chat_status || null,
+});
+const STATUS_COLORS = {
+    online: 'var(--esc-sla-ok)',
+    away: 'var(--esc-priority-medium)',
+    offline: 'var(--esc-panel-text-tertiary)',
+};
+const statusItems = computed(() =>
+    AGENT_STATUSES.map((value) => ({
+        key: value,
+        label: t(`agent_panel.status.${value}`),
+        dot: STATUS_COLORS[value],
+        checked: value === agentStatus.value,
+    })),
 );
+const currentStatus = computed(() => ({
+    label: t(`agent_panel.status.${agentStatus.value}`),
+    color: STATUS_COLORS[agentStatus.value],
+}));
 
-function statusEndpoint() {
-    if (typeof window === 'undefined' || typeof window.route !== 'function') return '';
-    try {
-        const url = window.route('escalated.admin.chat.status');
-        return typeof url === 'string' && url !== '#' ? url : '';
-    } catch {
-        return '';
-    }
-}
-
-function setStatus(value) {
-    agentStatus.value = value;
-    statusMenuOpen.value = false;
-    const url = statusEndpoint();
-    if (!url) return;
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-        },
-        body: JSON.stringify({ status: value }),
-    }).catch(() => {});
+function setStatus(item) {
+    setAgentStatus(item.key);
 }
 
 function navItemClass(active) {
@@ -449,56 +443,44 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                 <div class="relative mt-1.5">
                     <button
                         type="button"
-                        class="flex w-full items-center gap-2.5 rounded-[var(--esc-radius,6px)] px-2 py-1.5 text-left hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] disabled:cursor-default disabled:hover:bg-transparent"
-                        :disabled="!chatEnabled"
-                        :aria-haspopup="chatEnabled ? 'menu' : undefined"
-                        :aria-expanded="chatEnabled ? (statusMenuOpen ? 'true' : 'false') : undefined"
+                        class="flex w-full items-center gap-2.5 rounded-[var(--esc-radius,6px)] px-2 py-1.5 text-left hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        aria-haspopup="menu"
+                        :aria-expanded="statusMenuOpen ? 'true' : 'false'"
                         data-testid="esc-rail-user"
                         @click="statusMenuOpen = !statusMenuOpen"
                     >
                         <span
-                            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[12px] font-semibold text-[var(--esc-panel-text-secondary)]"
-                            >{{ userInitial }}</span
+                            class="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[12px] font-semibold text-[var(--esc-panel-text-secondary)]"
+                            aria-hidden="true"
                         >
+                            {{ userInitial }}
+                            <span
+                                class="absolute -bottom-px -right-px h-2.5 w-2.5 rounded-full border-2 border-[var(--esc-panel-sidebar-bg)]"
+                                :style="{ background: currentStatus.color }"
+                                data-testid="esc-status-dot"
+                            ></span>
+                        </span>
                         <span class="min-w-0 flex-1">
                             <span class="block truncate text-[13px] font-medium text-[var(--esc-panel-text)]">{{
                                 userName
                             }}</span>
-                            <span
-                                v-if="chatEnabled"
-                                class="flex items-center gap-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)]"
-                            >
-                                <span
-                                    class="h-1.5 w-1.5 rounded-full"
-                                    :style="{ background: currentStatus.color }"
-                                ></span>
+                            <span class="block text-[12px] text-[var(--esc-panel-text-tertiary)]">
                                 {{ currentStatus.label }}
                             </span>
                         </span>
                         <PanelIcon
-                            v-if="chatEnabled"
                             name="chevronUpDown"
                             class="h-4 w-4 shrink-0 text-[var(--esc-panel-text-tertiary)]"
                         />
                     </button>
-                    <div
-                        v-if="chatEnabled && statusMenuOpen"
-                        role="menu"
-                        class="absolute bottom-full left-0 right-0 mb-1 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-sidebar-bg)] py-1 shadow-lg"
-                    >
-                        <button
-                            v-for="option in statusOptions"
-                            :key="option.value"
-                            type="button"
-                            role="menuitemradio"
-                            :aria-checked="option.value === agentStatus ? 'true' : 'false'"
-                            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)]"
-                            @click="setStatus(option.value)"
-                        >
-                            <span class="h-1.5 w-1.5 rounded-full" :style="{ background: option.color }"></span>
-                            {{ option.label }}
-                        </button>
-                    </div>
+                    <PanelMenu
+                        v-model:open="statusMenuOpen"
+                        :items="statusItems"
+                        :label="t('agent_panel.status.label')"
+                        direction="up"
+                        width="w-full"
+                        @select="setStatus"
+                    />
                 </div>
                 <a
                     v-if="showPoweredBy"
@@ -561,6 +543,33 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                         >{{ paletteHint }}</kbd
                     >
                 </button>
+                <div class="relative">
+                    <button
+                        type="button"
+                        class="relative flex h-8 w-8 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[12px] font-semibold text-[var(--esc-panel-text-secondary)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        aria-haspopup="menu"
+                        :aria-expanded="topbarStatusOpen ? 'true' : 'false'"
+                        :aria-label="`${userName}, ${currentStatus.label}`"
+                        :title="`${userName}, ${currentStatus.label}`"
+                        data-testid="esc-topbar-user"
+                        @click="topbarStatusOpen = !topbarStatusOpen"
+                    >
+                        <span aria-hidden="true">{{ userInitial }}</span>
+                        <span
+                            class="absolute -bottom-px -right-px h-2.5 w-2.5 rounded-full border-2 border-[var(--esc-panel-header-bg,var(--esc-panel-bg))]"
+                            :style="{ background: currentStatus.color }"
+                            aria-hidden="true"
+                        ></span>
+                    </button>
+                    <PanelMenu
+                        v-model:open="topbarStatusOpen"
+                        :items="statusItems"
+                        :label="t('agent_panel.status.label')"
+                        align="right"
+                        width="w-44"
+                        @select="setStatus"
+                    />
+                </div>
             </header>
 
             <main

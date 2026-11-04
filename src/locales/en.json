@@ -911,7 +911,8 @@
         "status": {
             "online": "Online",
             "away": "Away",
-            "offline": "Offline"
+            "offline": "Offline",
+            "label": "Your status"
         },
         "palette": {
             "label": "Command palette",
