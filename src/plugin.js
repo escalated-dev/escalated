@@ -139,7 +139,7 @@ const panelLightDefaults = {
     borderInput: '#d1d5db',
     text: '#111827',
     textSecondary: '#374151',
-    textTertiary: '#6b7280',
+    textTertiary: '#646b78',
     textMuted: '#9ca3af',
     accent: '#3b82f6',
     accentSecondary: '#6366f1',
@@ -153,10 +153,10 @@ const panelLightDefaults = {
     priorityLow: '#6b7280',
     priorityMedium: '#ca8a04',
     priorityHigh: '#ea580c',
-    priorityUrgent: '#dc2626',
+    priorityUrgent: '#b31b1b',
     slaOk: '#047857',
-    slaWarn: '#b45309',
-    slaBreach: '#dc2626',
+    slaWarn: '#a34807',
+    slaBreach: '#b91c1c',
 };
 
 const panelTokenMap = {

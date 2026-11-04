@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import {
+    absoluteTime,
     initials,
     isLive,
     isUnread,
@@ -118,6 +119,28 @@ function onSearchKeydown(event) {
 onBeforeUnmount(() => clearTimeout(searchTimer));
 
 const filtersOpen = ref(false);
+const filtersRef = ref(null);
+const filterToggleRef = ref(null);
+
+function closeFilters(returnFocus = false) {
+    filtersOpen.value = false;
+    if (returnFocus) filterToggleRef.value?.focus();
+}
+
+function onFiltersOutside(event) {
+    const inside = [filtersRef.value, filterToggleRef.value].some((el) => el?.contains(event.target));
+    if (!inside) closeFilters();
+}
+
+watch(filtersOpen, (open) => {
+    if (typeof document === 'undefined') return;
+    if (open) document.addEventListener('mousedown', onFiltersOutside, true);
+    else document.removeEventListener('mousedown', onFiltersOutside, true);
+});
+
+onBeforeUnmount(() => {
+    if (typeof document !== 'undefined') document.removeEventListener('mousedown', onFiltersOutside, true);
+});
 const FILTER_KEYS = [
     'status',
     'priority',
@@ -164,12 +187,22 @@ async function focusRow(index) {
     linkEl(focusedIndex.value)?.focus?.();
 }
 
+// Before the keyboard is used nothing looks focused, so the first j or k
+// lands on the current row (the open ticket, else the first) rather than
+// skipping past it. With a ticket open, that row is already in view, so
+// the first press moves on from it.
+function step(delta) {
+    const current = rows.value[focusedIndex.value];
+    const fresh = !keyboardActive.value && !(current && current.reference === props.selectedReference);
+    focusRow(fresh ? focusedIndex.value : focusedIndex.value + delta);
+}
+
 function moveDown() {
-    focusRow(focusedIndex.value + 1);
+    step(1);
 }
 
 function moveUp() {
-    focusRow(focusedIndex.value - 1);
+    step(-1);
 }
 
 function toggleSelectFocused() {
@@ -192,12 +225,13 @@ function focusSearch() {
 }
 
 function onListKeydown(event) {
+    // Focus is already on a row here, so the arrows always move.
     if (event.key === 'ArrowDown') {
         event.preventDefault();
-        moveDown();
+        focusRow(focusedIndex.value + 1);
     } else if (event.key === 'ArrowUp') {
         event.preventDefault();
-        moveUp();
+        focusRow(focusedIndex.value - 1);
     } else if (event.key === 'Home') {
         event.preventDefault();
         focusRow(0);
@@ -319,13 +353,14 @@ const pagination = computed(() => {
                     v-model="search"
                     type="search"
                     :placeholder="t('agent_panel.inbox.search_placeholder')"
-                    class="h-8 w-full rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-transparent pl-8 pr-2 text-[13px] text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-muted)] focus:border-[var(--esc-panel-accent)] focus:outline-none"
+                    class="h-8 w-full rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-transparent pl-8 pr-2 text-[13px] text-[var(--esc-panel-text)] placeholder-[var(--esc-panel-text-tertiary)] focus:border-[var(--esc-panel-accent)] focus:outline-none"
                     data-testid="esc-queue-search"
                     @input="onSearchInput"
                     @keydown="onSearchKeydown"
                 />
             </label>
             <button
+                ref="filterToggleRef"
                 type="button"
                 :class="[
                     'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--esc-radius,6px)] border text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]',
@@ -349,8 +384,10 @@ const pagination = computed(() => {
             <div
                 v-if="filtersOpen"
                 id="esc-queue-filters"
+                ref="filtersRef"
                 class="absolute left-4 right-4 top-full z-30 mt-1 max-h-[60vh] overflow-y-auto rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-sidebar-bg)] p-3 shadow-xl"
                 data-testid="esc-queue-filters"
+                @keydown.esc.stop="closeFilters(true)"
             >
                 <TicketFilters
                     :filters="filters"
@@ -359,6 +396,8 @@ const pagination = computed(() => {
                     :tags="tags"
                     show-assignee
                     show-following
+                    :show-search="false"
+                    :show-save-view="false"
                 />
             </div>
         </div>
@@ -386,26 +425,45 @@ const pagination = computed(() => {
                     :data-unread="isUnread(ticket) ? 'true' : undefined"
                     data-testid="esc-queue-row"
                 >
-                    <!-- Avatar, or a checkbox while selecting -->
-                    <div class="relative z-10 mt-0.5 h-8 w-8 shrink-0">
+                    <!-- Avatar; its initials make way for a checkbox on hover and while selecting -->
+                    <div
+                        class="relative z-10 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--esc-panel-active)]"
+                        data-testid="esc-queue-avatar"
+                    >
                         <span
-                            v-if="!selecting"
-                            class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--esc-panel-active)] text-[12px] font-semibold text-[var(--esc-panel-text-secondary)] transition-opacity group-hover:opacity-0"
+                            :class="[
+                                'text-[12px] font-semibold text-[var(--esc-panel-text-secondary)] transition-opacity',
+                                selectable && selecting ? 'opacity-0' : '',
+                                selectable ? 'group-hover:opacity-0' : '',
+                            ]"
                             aria-hidden="true"
                             >{{ initials(requesterName(ticket)) }}</span
                         >
-                        <input
-                            v-if="selectable"
-                            type="checkbox"
-                            :checked="selectedIds.includes(ticket.id)"
-                            :aria-label="t('agent_panel.inbox.select_ticket', { reference: ticket.reference })"
-                            :class="[
-                                'absolute inset-0 m-auto h-4 w-4 cursor-pointer rounded border-[var(--esc-panel-border-input)] accent-[var(--esc-panel-accent)] focus:opacity-100',
-                                selecting ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
-                            ]"
-                            data-testid="esc-queue-row-select"
-                            @change="toggleOne(ticket.id)"
-                        />
+                        <template v-if="selectable">
+                            <input
+                                type="checkbox"
+                                :checked="selectedIds.includes(ticket.id)"
+                                :aria-label="t('agent_panel.inbox.select_ticket', { reference: ticket.reference })"
+                                :class="[
+                                    'peer absolute inset-0 m-auto h-4 w-4 cursor-pointer appearance-none rounded-[4px] border border-[var(--esc-panel-text-tertiary)] bg-[var(--esc-panel-bg)] transition-opacity checked:border-[var(--esc-panel-accent)] checked:bg-[var(--esc-panel-accent)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--esc-panel-bg)]',
+                                    selecting ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+                                ]"
+                                data-testid="esc-queue-row-select"
+                                @change="toggleOne(ticket.id)"
+                            />
+                            <svg
+                                class="pointer-events-none absolute inset-0 m-auto hidden h-3 w-3 text-[var(--esc-panel-primary-text,#fff)] peer-checked:block"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M3.5 8.5l3 3 6-7" />
+                            </svg>
+                        </template>
                     </div>
 
                     <div class="min-w-0 flex-1">
@@ -417,9 +475,12 @@ const pagination = computed(() => {
                                 :title="t('agent_panel.inbox.requester_online')"
                                 data-testid="esc-queue-live"
                             ></span>
-                            <span class="ml-auto shrink-0 tabular-nums">{{
-                                relativeTime(lastActivity(ticket), t, now)
-                            }}</span>
+                            <time
+                                class="ml-auto shrink-0 tabular-nums"
+                                :datetime="lastActivity(ticket)"
+                                :title="absoluteTime(lastActivity(ticket))"
+                                >{{ relativeTime(lastActivity(ticket), t, now) }}</time
+                            >
                         </div>
                         <Link
                             :ref="(el) => (rowLinks[index] = el)"
@@ -492,14 +553,14 @@ const pagination = computed(() => {
                         v-if="pagination.prev"
                         :href="pagination.prev"
                         preserve-scroll
-                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)]"
+                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >{{ t('agent_panel.inbox.previous') }}</Link
                     >
                     <Link
                         v-if="pagination.next"
                         :href="pagination.next"
                         preserve-scroll
-                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)]"
+                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >{{ t('agent_panel.inbox.next') }}</Link
                     >
                 </span>

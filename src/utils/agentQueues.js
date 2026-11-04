@@ -101,10 +101,27 @@ export function activeQueueKey({ url, userId, views = [], queue = null }) {
             return `view:${view.id}`;
         }
     }
-    for (const candidate of workspaceQueues(userId)) {
+    const queues = workspaceQueues(userId);
+    for (const candidate of queues) {
         if (sameFilters(candidate.filters, params)) return candidate.key;
     }
-    return null;
+    // Searching, filtering or paging inside a queue keeps the agent in it:
+    // the URL then holds the queue's filters plus a few more. Mine and
+    // unassigned come first, then views, then all tickets.
+    for (const candidate of queues) {
+        if (candidate.key !== 'all' && containsFilters(params, candidate.filters)) return candidate.key;
+    }
+    const narrowest = [...(views || [])]
+        .filter((view) => view?.filters && Object.keys(view.filters).length)
+        .sort((a, b) => Object.keys(b.filters).length - Object.keys(a.filters).length)
+        .find((view) => containsFilters(params, view.filters));
+    if (narrowest) return `view:${narrowest.id}`;
+    return params.live_chat ? 'live' : 'all';
+}
+
+function containsFilters(params, filters = {}) {
+    const entries = Object.entries(filters || {}).filter(([, v]) => v !== '' && v !== null && v !== undefined);
+    return entries.length > 0 && entries.every(([key]) => sameFilters({ [key]: filters[key] }, { [key]: params[key] }));
 }
 
 // --- The remembered inbox list -------------------------------------------

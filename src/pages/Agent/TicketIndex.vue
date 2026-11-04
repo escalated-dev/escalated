@@ -134,7 +134,7 @@ onMounted(() => {
         <div class="flex h-full min-h-0">
             <!-- List column -->
             <section
-                class="flex min-h-0 w-full flex-col border-r border-[var(--esc-panel-border)] lg:w-[420px] lg:shrink-0"
+                class="flex min-h-0 w-full flex-col border-r border-[var(--esc-panel-border)] lg:w-[340px] lg:shrink-0 xl:w-[420px]"
                 :aria-label="heading.title"
             >
                 <PluginSlot
@@ -174,7 +174,7 @@ onMounted(() => {
                     </p>
                     <button
                         type="button"
-                        class="mt-3 text-[12px] text-[var(--esc-panel-text-tertiary)] underline-offset-2 hover:text-[var(--esc-panel-text)] hover:underline"
+                        class="mt-3 rounded text-[12px] text-[var(--esc-panel-text-tertiary)] underline-offset-2 hover:text-[var(--esc-panel-text)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         @click="showShortcutHelp = true"
                     >
                         {{ t('agent_panel.inbox.shortcut_help') }}
@@ -189,6 +189,6 @@ onMounted(() => {
             :departments="departments"
             @clear="selectedIds = []"
         />
-        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" />
+        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" agent />
     </EscalatedLayout>
 </template>

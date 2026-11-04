@@ -90,3 +90,19 @@ Ticket fields the page reads beyond the existing ones, all optional:
 | `requester_tickets` (falls back to `related_tickets`) | Recent tickets in the Customer tab |
 | `links_as_parent[].child_ticket`, `links_as_child[].parent_ticket`, `merged_tickets`, `merged_into` | Linked tickets in the Related tab |
 | `attachments[].size` | The file size on attachment cards |
+
+## The agent's own status
+
+The rail footer and the top bar show the signed-in agent with a status dot
+and a menu: Online, Away, Offline. The status is read from the shared
+`escalated.agent_status` (falling back to the live-chat
+`escalated.chat_status`), then from the agent's last choice in this browser
+(localStorage key `escalated-agent-status`), then defaults to Online.
+
+Choosing a status updates both places at once, remembers it in the browser
+and, when the host defines a route named `escalated.admin.chat.status`, posts
+`{ "status": "online" | "away" | "offline" }` to it (escalated-laravel stores
+it on the agent profile for live-chat routing). A host without that route, or
+one that shares no `agent_status`, gets a status that lives in the browser
+only. Backends that want it to follow the agent between devices should share
+`escalated.agent_status` and accept the post from agents, not only admins.

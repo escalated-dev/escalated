@@ -326,6 +326,8 @@ describe('Agent/TicketShow with the list and queue', () => {
         mountPage({ queue: { key: 'mine', title: 'My inbox' } });
         const list = wrapper.get('[data-testid="esc-show-list"]');
         expect(list.text()).toContain('My inbox');
+        // Narrower at lg so the ticket keeps a usable width at 1024px.
+        expect(list.classes()).toEqual(expect.arrayContaining(['w-[340px]', 'xl:w-[420px]']));
         const selected = list.get('a[aria-current="true"]');
         expect(selected.text()).toBe('Unable to export CSV');
         expect(wrapper.get('[data-testid="esc-back-to-list"]').classes()).toContain('lg:hidden');
@@ -346,5 +348,89 @@ describe('Agent/TicketShow live chat', () => {
         expect(wrapper.find('chat-thread-stub').exists()).toBe(true);
         expect(wrapper.find('chat-composer-stub').exists()).toBe(true);
         expect(wrapper.find('[data-testid="esc-composer"]').exists()).toBe(false);
+    });
+});
+
+describe('Agent/TicketShow tag picker', () => {
+    async function openPicker() {
+        mountPage();
+        await wrapper.get('[data-testid="esc-add-tag"]').trigger('click');
+        await nextTick();
+        return wrapper.get('[data-testid="esc-tag-picker"]');
+    }
+
+    it('opens with the filter focused and every tag as a checkable item', async () => {
+        const picker = await openPicker();
+        expect(document.activeElement).toBe(picker.get('input').element);
+        const items = picker.findAll('[role="menuitemcheckbox"]');
+        expect(items.map((i) => i.text().replace('✓', ''))).toEqual(['Billing', 'Export', 'Bug']);
+        expect(items.map((i) => i.attributes('aria-checked'))).toEqual(['true', 'true', 'false']);
+    });
+
+    it('filters as the agent types and toggles a tag through the tags endpoint', async () => {
+        const picker = await openPicker();
+        await picker.get('input').setValue('bu');
+        const items = picker.findAll('[role="menuitemcheckbox"]');
+        expect(items.map((i) => i.text())).toEqual(['Bug']);
+        await items[0].trigger('click');
+        expect(router.post).toHaveBeenCalledWith(
+            '/escalated.agent.tickets.tags/ESC-1042',
+            { tag_ids: [1, 2, 3] },
+            expect.any(Object),
+        );
+    });
+
+    it('closes on a click outside', async () => {
+        await openPicker();
+        document.body.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true }));
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-tag-picker"]').exists()).toBe(false);
+    });
+
+    it('closes on Escape and returns focus to the add button', async () => {
+        const picker = await openPicker();
+        await picker.get('input').trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('[data-testid="esc-tag-picker"]').exists()).toBe(false);
+        expect(document.activeElement).toBe(wrapper.get('[data-testid="esc-add-tag"]').element);
+    });
+});
+
+describe('Agent/TicketShow focus rings', () => {
+    function unringed(root) {
+        return [...root.querySelectorAll('a, button, [tabindex="0"]')]
+            .filter((el) => !el.closest('[role="menu"]'))
+            .filter((el) => !/focus-visible:(ring|after:ring)/.test(el.className))
+            .map((el) => (el.getAttribute('aria-label') || el.textContent).trim().replace(/\s+/g, ' '));
+    }
+
+    it('gives every control on the page a visible keyboard focus ring', async () => {
+        rememberInbox({
+            url: '/support/agent/tickets',
+            title: 'My inbox',
+            tickets: {
+                data: [{ id: 1042, reference: 'ESC-1042', subject: 'Unable to export CSV' }],
+                current_page: 1,
+                last_page: 2,
+                next_page_url: '/support/agent/tickets?page=2',
+            },
+        });
+        mountPage({}, { is_admin: true });
+        expect(unringed(wrapper.element)).toEqual([]);
+        for (const name of ['customer', 'related']) {
+            await wrapper.get(`#esc-tab-${name}`).trigger('click');
+            expect(unringed(wrapper.element)).toEqual([]);
+        }
+    });
+});
+
+describe('Agent/TicketShow on a phone', () => {
+    it('scrolls the header away with the thread and keeps the composer docked', () => {
+        mountPage();
+        const pane = wrapper.get('[data-testid="esc-detail-pane"]');
+        expect(pane.classes()).toContain('max-sm:overflow-y-auto');
+        expect(wrapper.get('[data-testid="esc-tabpanel"]').classes()).toContain('max-sm:overflow-visible');
+        expect(wrapper.get('[data-testid="esc-composer-dock"]').classes()).toEqual(
+            expect.arrayContaining(['max-sm:sticky', 'max-sm:bottom-0']),
+        );
     });
 });

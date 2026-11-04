@@ -337,7 +337,7 @@ onUnmounted(() => {
             <!-- The list the agent came from (wide screens) -->
             <section
                 v-if="listTickets"
-                class="flex min-h-0 w-[420px] shrink-0 flex-col border-r border-[var(--esc-panel-border)] max-lg:hidden"
+                class="flex min-h-0 w-[340px] shrink-0 flex-col xl:w-[420px] border-r border-[var(--esc-panel-border)] max-lg:hidden"
                 :aria-label="remembered.title"
                 data-testid="esc-show-list"
             >
@@ -362,7 +362,7 @@ onUnmounted(() => {
                 <Link
                     :href="backHref"
                     :class="[
-                        'flex shrink-0 items-center gap-1.5 border-b border-[var(--esc-panel-border)] px-4 py-2 text-[13px] text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)] sm:px-6',
+                        'flex shrink-0 items-center gap-1.5 border-b border-[var(--esc-panel-border)] px-4 py-2 text-[13px] text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--esc-panel-accent)] sm:px-6',
                         listTickets ? 'lg:hidden' : '',
                     ]"
                     data-testid="esc-back-to-list"
@@ -396,6 +396,6 @@ onUnmounted(() => {
             </section>
         </div>
 
-        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="detail" />
+        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="detail" agent :with-list="!!listTickets" />
     </EscalatedLayout>
 </template>

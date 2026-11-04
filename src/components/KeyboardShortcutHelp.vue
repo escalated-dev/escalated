@@ -1,225 +1,186 @@
 <script setup>
-import { computed, inject } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
     show: { type: Boolean, default: false },
+    /** 'list' or 'detail'. */
     context: { type: String, default: 'list' },
+    /** A ticket shown beside its list also answers the list keys. */
+    withList: { type: Boolean, default: false },
+    /** The agent panel adds the command palette and the g sequences. */
+    agent: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:show']);
-const escDark = inject(
-    'esc-dark',
-    computed(() => false),
-);
-
 const { t } = useI18n();
 
-const shortcutGroups = computed(() => [
-    {
-        title: 'List View',
-        contexts: ['list'],
+const isMac =
+    typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+
+const shortcutGroups = computed(() => {
+    const list = {
+        key: 'list',
+        title: t('keyboard.list_view'),
         shortcuts: [
-            { keys: ['j'], description: 'Move down' },
-            { keys: ['k'], description: 'Move up' },
-            { keys: ['x'], description: 'Toggle select' },
-            { keys: ['Enter'], description: 'Open ticket' },
+            { keys: ['j'], description: t('keyboard.move_down') },
+            { keys: ['k'], description: t('keyboard.move_up') },
+            { keys: ['x'], description: t('keyboard.toggle_select') },
+            { keys: ['Enter'], description: t('keyboard.open_ticket') },
             { keys: ['/'], description: t('agent_panel.keys.search') },
         ],
-    },
-    {
-        title: 'Detail View',
-        contexts: ['detail'],
+    };
+    const detail = {
+        key: 'detail',
+        title: t('keyboard.detail_view'),
         shortcuts: [
-            { keys: ['r'], description: 'Reply' },
-            { keys: ['n'], description: 'Internal note' },
-            { keys: ['s'], description: 'Change status' },
-            { keys: ['p'], description: 'Change priority' },
-            { keys: ['f'], description: 'Follow/unfollow' },
+            { keys: ['r'], description: t('keyboard.reply') },
+            { keys: ['n'], description: t('keyboard.internal_note') },
+            { keys: ['s'], description: t('keyboard.change_status') },
+            { keys: ['p'], description: t('keyboard.change_priority') },
+            { keys: ['f'], description: t('keyboard.follow_unfollow') },
             { keys: ['a'], description: t('agent_panel.keys.assign_me') },
             { keys: ['e'], description: t('agent_panel.keys.resolve') },
         ],
-    },
-    {
-        title: 'Global',
-        contexts: ['list', 'detail'],
-        shortcuts: [
-            { keys: ['?'], description: 'Show this help' },
-            { keys: ['Ctrl', 'K'], description: t('agent_panel.keys.palette') },
+    };
+    const global = {
+        key: 'global',
+        title: t('keyboard.global'),
+        shortcuts: [{ keys: ['?'], description: t('keyboard.show_help') }],
+    };
+    if (props.agent) {
+        global.shortcuts.push(
+            { keys: [isMac ? '⌘' : 'Ctrl', 'K'], description: t('agent_panel.keys.palette') },
             { keys: ['g', 'i'], description: t('agent_panel.keys.go_inbox') },
             { keys: ['g', 'u'], description: t('agent_panel.keys.go_unassigned') },
             { keys: ['g', 'a'], description: t('agent_panel.keys.go_all') },
-        ],
-    },
-]);
+        );
+    }
+    if (props.context === 'detail') {
+        // In the detail view the list keys skip "select", which the list beside a ticket does not offer.
+        const listKeys = { ...list, shortcuts: list.shortcuts.filter((s) => s.keys[0] !== 'x') };
+        return props.withList ? [detail, listKeys, global] : [detail, global];
+    }
+    return [list, global];
+});
 
-const filteredGroups = computed(() => shortcutGroups.value.filter((g) => g.contexts.includes(props.context)));
+const dialogRef = ref(null);
+const closeRef = ref(null);
+let returnFocus = null;
 
 function closeModal() {
     emit('update:show', false);
 }
+
+function onDocumentKeydown(event) {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+    }
+}
+
+watch(
+    () => props.show,
+    async (show) => {
+        if (typeof document === 'undefined') return;
+        if (show) {
+            returnFocus = document.activeElement;
+            document.addEventListener('keydown', onDocumentKeydown);
+            await nextTick();
+            closeRef.value?.focus();
+        } else {
+            document.removeEventListener('keydown', onDocumentKeydown);
+            if (returnFocus?.isConnected) returnFocus.focus?.();
+            returnFocus = null;
+        }
+    },
+    { immediate: true },
+);
+
+onBeforeUnmount(() => {
+    if (typeof document !== 'undefined') document.removeEventListener('keydown', onDocumentKeydown);
+});
+
+function onDialogKeydown(event) {
+    // Only the close button is focusable; keep Tab inside the dialog.
+    if (event.key === 'Tab') {
+        event.preventDefault();
+        closeRef.value?.focus();
+    }
+}
+
+const kbdClass =
+    'inline-flex min-w-[22px] items-center justify-center rounded-[4px] border border-[var(--esc-panel-border-input)] px-1.5 py-px font-sans text-[12px] text-[var(--esc-panel-text-secondary)]';
 </script>
 
 <template>
     <Teleport to="body">
-        <Transition
-            enter-active-class="transition duration-200 ease-out"
-            enter-from-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-active-class="transition duration-150 ease-in"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-        >
+        <div v-if="show" class="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <div class="absolute inset-0 bg-black/50" aria-hidden="true" @click="closeModal"></div>
             <div
-                v-if="show"
-                class="fixed inset-0 z-[100] flex items-center justify-center"
-                @keydown.escape="closeModal"
+                ref="dialogRef"
+                role="dialog"
+                aria-modal="true"
+                :aria-label="t('keyboard.title')"
+                class="relative z-10 w-full max-w-md overflow-hidden rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-sidebar-bg)] text-[var(--esc-panel-text)] shadow-2xl"
+                @keydown="onDialogKeydown"
             >
-                <!-- Backdrop -->
-                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeModal"></div>
-
-                <!-- Modal -->
-                <div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Keyboard shortcuts"
-                    :class="[
-                        'relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border shadow-2xl',
-                        escDark
-                            ? 'border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)]'
-                            : 'border-gray-200 bg-white',
-                    ]"
-                >
-                    <!-- Header -->
-                    <div
-                        :class="[
-                            'flex items-center justify-between border-b px-6 py-4',
-                            escDark ? 'border-[var(--esc-panel-border)]' : 'border-gray-200',
-                        ]"
+                <div class="flex items-center justify-between border-b border-[var(--esc-panel-border)] px-5 py-3">
+                    <h2 class="text-[14px] font-semibold text-[var(--esc-panel-text)]">
+                        {{ t('keyboard.title') }}
+                    </h2>
+                    <button
+                        ref="closeRef"
+                        type="button"
+                        :aria-label="t('keyboard.close')"
+                        class="-mr-1.5 rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                        @click="closeModal"
                     >
-                        <div class="flex items-center gap-3">
-                            <svg
-                                :class="[
-                                    'h-5 w-5',
-                                    escDark ? 'text-[var(--esc-panel-text-tertiary)]' : 'text-gray-500',
-                                ]"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
-                                />
-                            </svg>
-                            <h2
-                                :class="[
-                                    'text-base font-semibold',
-                                    escDark ? 'text-[var(--esc-panel-text)]' : 'text-gray-900',
-                                ]"
-                            >
-                                Keyboard Shortcuts
-                            </h2>
-                        </div>
-                        <button
-                            aria-label="Close"
-                            :class="[
-                                'rounded-lg p-1.5 transition-colors',
-                                escDark
-                                    ? 'text-[var(--esc-panel-text-muted)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text-secondary)]'
-                                    : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600',
-                            ]"
-                            @click="closeModal"
+                        <svg
+                            class="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
                         >
-                            <svg
-                                class="h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                                viewBox="0 0 24 24"
-                            >
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
-                    <!-- Body -->
-                    <div class="max-h-[60vh] overflow-y-auto px-6 py-4">
-                        <div
-                            v-for="(group, gi) in filteredGroups"
-                            :key="gi"
-                            :class="[
-                                'pb-4',
-                                gi < filteredGroups.length - 1 && 'mb-4 border-b',
-                                escDark ? 'border-[var(--esc-panel-border)]' : 'border-gray-100',
-                            ]"
-                        >
-                            <h3
-                                :class="[
-                                    'mb-3 text-xs font-semibold uppercase tracking-wider',
-                                    escDark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500',
-                                ]"
+                <div class="max-h-[65vh] overflow-y-auto px-5 py-3">
+                    <section
+                        v-for="(group, gi) in shortcutGroups"
+                        :key="group.key"
+                        :class="gi > 0 ? 'mt-3 border-t border-[var(--esc-panel-border)] pt-3' : ''"
+                    >
+                        <h3 class="mb-1.5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
+                            {{ group.title }}
+                        </h3>
+                        <dl>
+                            <div
+                                v-for="shortcut in group.shortcuts"
+                                :key="shortcut.keys.join('+')"
+                                class="flex items-center justify-between py-[3px]"
                             >
-                                {{ group.title }}
-                            </h3>
-                            <div class="space-y-2">
-                                <div
-                                    v-for="(shortcut, si) in group.shortcuts"
-                                    :key="si"
-                                    class="flex items-center justify-between"
-                                >
-                                    <span
-                                        :class="[
-                                            'text-sm',
-                                            escDark ? 'text-[var(--esc-panel-text-secondary)]' : 'text-gray-700',
-                                        ]"
-                                    >
-                                        {{ shortcut.description }}
-                                    </span>
-                                    <div class="flex items-center gap-1">
-                                        <kbd
-                                            v-for="(key, ki) in shortcut.keys"
-                                            :key="ki"
-                                            :class="[
-                                                'inline-flex min-w-[24px] items-center justify-center rounded-md border px-2 py-0.5 text-xs font-semibold',
-                                                escDark
-                                                    ? 'border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-secondary)]'
-                                                    : 'border-gray-300 bg-gray-100 text-gray-700',
-                                            ]"
-                                        >
-                                            {{ key }}
-                                        </kbd>
-                                    </div>
-                                </div>
+                                <dt class="text-[13px] text-[var(--esc-panel-text-secondary)]">
+                                    {{ shortcut.description }}
+                                </dt>
+                                <dd class="flex items-center gap-1">
+                                    <kbd v-for="key in shortcut.keys" :key="key" :class="kbdClass">{{ key }}</kbd>
+                                </dd>
                             </div>
-                        </div>
-                    </div>
+                        </dl>
+                    </section>
+                </div>
 
-                    <!-- Footer -->
-                    <div
-                        :class="[
-                            'border-t px-6 py-3 text-center text-xs',
-                            escDark
-                                ? 'border-[var(--esc-panel-border)] text-[var(--esc-panel-text-muted)]'
-                                : 'border-gray-100 text-gray-400',
-                        ]"
-                    >
-                        Press
-                        <kbd
-                            :class="[
-                                'mx-1 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold',
-                                escDark
-                                    ? 'border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-hover)] text-[var(--esc-panel-text-tertiary)]'
-                                    : 'border-gray-300 bg-gray-100 text-gray-600',
-                            ]"
-                            >Esc</kbd
-                        >
-                        to close
-                    </div>
+                <div
+                    class="border-t border-[var(--esc-panel-border)] px-5 py-2.5 text-center text-[12px] text-[var(--esc-panel-text-tertiary)]"
+                >
+                    {{ t('keyboard.esc_to_close') }}
                 </div>
             </div>
-        </Transition>
+        </div>
     </Teleport>
 </template>

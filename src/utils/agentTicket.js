@@ -95,6 +95,13 @@ export function relativeTime(date, t, now = Date.now()) {
     return t('agent_panel.time.days_ago', { count: Math.floor(hours / 24) });
 }
 
+/** The full local date and time, for a tooltip beside a relative time. */
+export function absoluteTime(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
+}
+
 export function lastActivity(ticket) {
     return ticket?.last_reply_at || ticket?.updated_at || ticket?.created_at;
 }

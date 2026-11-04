@@ -196,6 +196,8 @@ describe('Agent/TicketIndex without the new props', () => {
         const press = (key) => document.dispatchEvent(new window.KeyboardEvent('keydown', { key, cancelable: true }));
         press('j');
         await nextTick();
+        press('j');
+        await nextTick();
         press('x');
         await nextTick();
         expect(wrapper.findAll('[data-testid="esc-queue-row-select"]')[1].element.checked).toBe(true);
@@ -264,5 +266,73 @@ describe('Agent/TicketIndex with inbox and queue', () => {
     it('omits stat tiles the backend did not count', () => {
         mountPage('/support/agent/tickets', { inbox: { stats: { open: 3 } } });
         expect(wrapper.findAll('[data-testid="esc-stat-strip"] button')).toHaveLength(1);
+    });
+});
+
+describe('Agent/TicketIndex polish', () => {
+    it('lands the first j on the first row instead of skipping it', async () => {
+        mountPage('/support/agent/tickets');
+        document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'j', cancelable: true }));
+        await nextTick();
+        await nextTick();
+        expect(document.activeElement).toBe(rows()[0].get('a').element);
+    });
+
+    it('keeps the avatar on hover and swaps in a themed checkbox, never the native one', () => {
+        mountPage('/support/agent/tickets');
+        const row = rows()[0];
+        const avatar = row.get('[data-testid="esc-queue-avatar"]');
+        // The circle stays; only its initials make way for the checkbox.
+        expect(avatar.classes()).toContain('bg-[var(--esc-panel-active)]');
+        expect(avatar.classes().some((c) => c.includes('opacity-0'))).toBe(false);
+        const box = row.get('[data-testid="esc-queue-row-select"]');
+        expect(box.classes()).toContain('appearance-none');
+        expect(box.classes()).toContain('bg-[var(--esc-panel-bg)]');
+    });
+
+    it('gives each row age an absolute time tooltip', () => {
+        mountPage('/support/agent/tickets');
+        const time = rows()[0].get('time');
+        expect(time.attributes('datetime')).toBe(tickets.data[0].updated_at);
+        expect(time.attributes('title')).toBe(new Date(tickets.data[0].updated_at).toLocaleString());
+    });
+
+    it('narrows the list column at lg so the detail pane keeps its width', () => {
+        mountPage('/support/agent/tickets');
+        const column = wrapper.get('section');
+        expect(column.classes()).toEqual(expect.arrayContaining(['lg:w-[340px]', 'xl:w-[420px]']));
+    });
+
+    it('keeps the filter popover to the filters: no second search box or dead Save as View', async () => {
+        mountPage('/support/agent/tickets', { filters: { status: 'open' } });
+        await wrapper.get('[data-testid="esc-queue-filter-toggle"]').trigger('click');
+        const pop = wrapper.get('[data-testid="esc-queue-filters"]');
+        expect(pop.find('input[aria-label="Search tickets"]').exists()).toBe(false);
+        expect(pop.text()).not.toContain('Save as View');
+        expect(pop.find('select[aria-label="Filter by status"]').exists()).toBe(true);
+    });
+
+    it('closes the filter popover on Escape and on a click outside', async () => {
+        mountPage('/support/agent/tickets');
+        const toggle = wrapper.get('[data-testid="esc-queue-filter-toggle"]');
+        await toggle.trigger('click');
+        await wrapper.get('[data-testid="esc-queue-filters"]').trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('[data-testid="esc-queue-filters"]').exists()).toBe(false);
+        expect(document.activeElement).toBe(toggle.element);
+        await toggle.trigger('click');
+        document.body.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true }));
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-queue-filters"]').exists()).toBe(false);
+    });
+
+    it('gives every control a visible keyboard focus ring', () => {
+        mountPage('/support/agent/tickets', {
+            inbox,
+            tickets: { ...tickets, last_page: 2, next_page_url: '/x?page=2' },
+        });
+        const unringed = [...wrapper.element.querySelectorAll('a, button, input:not([type="search"])')]
+            .filter((el) => !/focus-visible:(ring|after:ring)/.test(el.className))
+            .map((el) => (el.getAttribute('aria-label') || el.textContent).trim());
+        expect(unringed).toEqual([]);
     });
 });

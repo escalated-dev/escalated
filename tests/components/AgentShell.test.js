@@ -5,6 +5,7 @@ import EscalatedLayout from '../../src/components/EscalatedLayout.vue';
 import AgentShell from '../../src/components/AgentShell.vue';
 import { registerAgentCommands } from '../../src/composables/useAgentCommands';
 import { forgetInbox, rememberInbox } from '../../src/utils/agentQueues';
+import { resetAgentStatus } from '../../src/composables/useAgentStatus';
 
 const usePage = vi.fn();
 const visit = vi.fn();
@@ -50,6 +51,8 @@ function mountLayout(url, props, escalated) {
 }
 
 beforeEach(() => {
+    window.localStorage.clear();
+    resetAgentStatus();
     usePage.mockReset();
     visit.mockReset();
     reload.mockReset();
@@ -185,13 +188,49 @@ describe('AgentShell rail', () => {
         ).toBe('/support/admin/reports');
     });
 
-    it('shows the agent and offers an online status menu when chat is on', async () => {
-        mountLayout('/support/agent/tickets', {}, { chat_enabled: true });
+    it('shows the agent with an online status and a status menu, chat or not', async () => {
+        mountLayout('/support/agent/tickets');
         const user = wrapper.get('[data-testid="esc-rail-user"]');
+        expect(user.attributes('disabled')).toBeUndefined();
         expect(user.text()).toContain('Mike Agent');
         expect(user.text()).toContain('Online');
+        expect(user.find('[data-testid="esc-status-dot"]').exists()).toBe(true);
         await user.trigger('click');
-        expect(wrapper.findAll('[role="menuitemradio"]').map((b) => b.text())).toEqual(['Online', 'Away', 'Offline']);
+        const items = wrapper.findAll('[role="menuitemradio"]');
+        expect(items.map((b) => b.text().replace('✓', ''))).toEqual(['Online', 'Away', 'Offline']);
+        expect(items[0].attributes('aria-checked')).toBe('true');
+    });
+
+    it('changes the status from the menu and keeps it for the next page', async () => {
+        mountLayout('/support/agent/tickets');
+        await wrapper.get('[data-testid="esc-rail-user"]').trigger('click');
+        await wrapper.findAll('[role="menuitemradio"]')[1].trigger('click');
+        expect(wrapper.get('[data-testid="esc-rail-user"]').text()).toContain('Away');
+        expect(wrapper.findAll('[role="menuitemradio"]')).toHaveLength(0);
+        expect(window.localStorage.getItem('escalated-agent-status')).toBe('away');
+    });
+
+    it('closes the status menu with Escape and returns focus to its button', async () => {
+        mountLayout('/support/agent/tickets');
+        const user = wrapper.get('[data-testid="esc-rail-user"]');
+        await user.trigger('click');
+        await wrapper.get('[role="menu"]').trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('[role="menu"]').exists()).toBe(false);
+        expect(document.activeElement).toBe(user.element);
+    });
+
+    it('starts from the status the backend shares', () => {
+        mountLayout('/support/agent/tickets', {}, { agent_status: 'offline' });
+        expect(wrapper.get('[data-testid="esc-rail-user"]').text()).toContain('Offline');
+    });
+
+    it('puts the agent avatar with its status in the top bar too', async () => {
+        mountLayout('/support/agent/tickets');
+        const avatar = wrapper.get('[data-testid="esc-topbar-user"]');
+        expect(avatar.text()).toContain('M');
+        expect(avatar.attributes('aria-label')).toBe('Mike Agent, Online');
+        await avatar.trigger('click');
+        expect(wrapper.findAll('[role="menuitemradio"]')).toHaveLength(3);
     });
 });
 
@@ -201,6 +240,13 @@ describe('AgentShell top bar', () => {
         const sections = wrapper.findAll('nav[aria-label="Sections"] a');
         expect(sections.map((a) => a.text())).toEqual(['Tickets', 'Dashboard', 'Knowledge base']);
         expect(sections[0].attributes('aria-current')).toBe('page');
+    });
+
+    it('keeps each section label on one line and lets the tabs scroll on a phone', () => {
+        mountLayout('/support/agent/tickets');
+        const nav = wrapper.get('nav[aria-label="Sections"]');
+        expect(nav.classes()).toEqual(expect.arrayContaining(['min-w-0', 'overflow-x-auto']));
+        for (const a of nav.findAll('a')) expect(a.classes()).toContain('whitespace-nowrap');
     });
 
     it('drops the knowledge base when it is off', () => {

@@ -17,7 +17,7 @@ import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
 import PluginSlot from './PluginSlot.vue';
 import PresenceIndicator from './PresenceIndicator.vue';
-import TagSelect from './TagSelect.vue';
+import TagPicker from './TagPicker.vue';
 import TicketMergeDialog from './TicketMergeDialog.vue';
 import TicketSubjects from './TicketSubjects.vue';
 
@@ -140,6 +140,14 @@ const canEditTags = computed(() => !props.notesOnly && !!props.routes.tags);
 
 const ticketTags = computed(() => props.ticket.tags || []);
 const tagIds = computed(() => ticketTags.value.map((tag) => tag.id));
+
+// The ticket's own tags carry colours the tag list may not.
+const pickerTags = computed(() =>
+    props.tags.map((tag) => ({
+        ...tag,
+        color: tag.color || ticketTags.value.find((own) => own.id === tag.id)?.color || null,
+    })),
+);
 
 function updateTags(ids) {
     post(props.routes.tags, { tag_ids: ids });
@@ -308,9 +316,23 @@ function togglePin(reply) {
 }
 
 const threadEnd = ref(null);
+const paneRoot = ref(null);
+
+// Open on the latest message. On a phone the whole pane scrolls (the header
+// scrolls away and the composer sticks to the bottom), so scroll the pane to
+// its end; scrolling the marker into view would leave it behind the composer.
+function scrollToLatest() {
+    const root = paneRoot.value;
+    if (root && typeof window !== 'undefined' && window.getComputedStyle(root).overflowY === 'auto') {
+        root.scrollTop = root.scrollHeight;
+        return;
+    }
+    threadEnd.value?.scrollIntoView?.({ block: 'end' });
+}
+
 watch(
     () => [props.ticket.id, thread.value.length],
-    () => nextTick(() => threadEnd.value?.scrollIntoView?.({ block: 'end' })),
+    () => nextTick(scrollToLatest),
     { immediate: true, flush: 'post' },
 );
 
@@ -412,7 +434,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
 </script>
 
 <template>
-    <div class="flex h-full min-h-0 flex-col" data-testid="esc-detail-pane">
+    <div ref="paneRoot" class="flex h-full min-h-0 flex-col max-sm:overflow-y-auto" data-testid="esc-detail-pane">
         <!-- Header -->
         <header class="shrink-0 px-4 pt-4 sm:px-6">
             <div class="flex items-center gap-1.5">
@@ -567,7 +589,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                     <button
                         v-if="canEditTags"
                         type="button"
-                        class="ml-0.5 rounded-full p-0.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
+                        class="ml-0.5 rounded-full p-0.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         :aria-label="t('agent_panel.ticket.remove_tag', { name: tag.name })"
                         @click="removeTag(tag.id)"
                     >
@@ -579,19 +601,19 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                         type="button"
                         class="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--esc-panel-border-input)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         :aria-label="t('agent_panel.ticket.add_tag')"
+                        aria-haspopup="menu"
                         :aria-expanded="tagsOpen ? 'true' : 'false'"
                         data-testid="esc-add-tag"
                         @click="tagsOpen = !tagsOpen"
                     >
                         <PanelIcon name="plus" class="h-3.5 w-3.5" />
                     </button>
-                    <div
-                        v-if="tagsOpen"
-                        class="absolute left-0 top-full z-40 mt-1 w-64 rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-sidebar-bg)] p-2 shadow-lg"
-                        @keydown.esc="tagsOpen = false"
-                    >
-                        <TagSelect :tags="tags" :model-value="tagIds" @update:model-value="updateTags" />
-                    </div>
+                    <TagPicker
+                        v-model:open="tagsOpen"
+                        :tags="pickerTags"
+                        :model-value="tagIds"
+                        @update:model-value="updateTags"
+                    />
                 </div>
 
                 <div class="ml-auto flex items-center gap-2">
@@ -671,7 +693,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
             :id="`esc-tabpanel-${tab}`"
             role="tabpanel"
             :aria-labelledby="`esc-tab-${tab}`"
-            class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6"
+            class="min-h-0 flex-1 overflow-y-auto px-4 py-4 max-sm:flex-none max-sm:overflow-visible sm:px-6"
             data-testid="esc-tabpanel"
         >
             <!-- Conversation -->
@@ -696,7 +718,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                                 <button
                                     v-if="routes.pin"
                                     type="button"
-                                    class="ml-auto rounded px-1.5 py-0.5 hover:bg-[var(--esc-panel-hover)]"
+                                    class="ml-auto rounded px-1.5 py-0.5 hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                                     @click="togglePin(note)"
                                 >
                                     {{ t('reply.unpin') }}
@@ -752,7 +774,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                                     <button
                                         v-if="routes.pin"
                                         type="button"
-                                        class="ml-auto rounded px-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
+                                        class="ml-auto rounded px-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                                         @click="togglePin(message)"
                                     >
                                         {{ message.is_pinned ? t('reply.unpin') : t('reply.pin') }}
@@ -957,7 +979,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                     <li v-for="item in recentTickets" :key="item.reference">
                         <Link
                             :href="ticketUrl(prefix, item.reference)"
-                            class="flex items-center gap-3 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)]"
+                            class="-mx-1.5 flex items-center gap-3 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >
                             <span class="shrink-0 tabular-nums text-[var(--esc-panel-text-tertiary)]">{{
                                 item.reference
@@ -995,7 +1017,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                     <li v-for="link in links" :key="`${link.relation}-${link.ticket.reference}`">
                         <Link
                             :href="ticketUrl(prefix, link.ticket.reference)"
-                            class="flex items-center gap-3 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)]"
+                            class="-mx-1.5 flex items-center gap-3 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >
                             <span class="w-20 shrink-0 text-[12px] text-[var(--esc-panel-text-tertiary)]">{{
                                 relationLabel(link.relation)
@@ -1025,7 +1047,10 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
         </div>
 
         <!-- Composer -->
-        <div class="shrink-0 px-4 pb-4 sm:px-6">
+        <div
+            class="shrink-0 px-4 pb-4 max-sm:sticky max-sm:bottom-0 max-sm:bg-[var(--esc-panel-bg)] max-sm:pt-2 sm:px-6"
+            data-testid="esc-composer-dock"
+        >
             <div
                 v-if="chat.active"
                 class="overflow-hidden rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)]"

@@ -149,7 +149,8 @@
         "change_priority": "Change priority",
         "follow_unfollow": "Follow/unfollow",
         "show_help": "Show this help",
-        "esc_to_close": "Press Esc to close"
+        "esc_to_close": "Press Esc to close",
+        "close": "Close"
     },
     "sla": {
         "overdue": "Overdue",
@@ -911,7 +912,8 @@
         "status": {
             "online": "Online",
             "away": "Away",
-            "offline": "Offline"
+            "offline": "Offline",
+            "label": "Your status"
         },
         "palette": {
             "label": "Command palette",
@@ -1063,7 +1065,9 @@
                 "related": "Related",
                 "duplicate": "Duplicate"
             },
-            "back_to": "Back to :queue"
+            "back_to": "Back to :queue",
+            "filter_tags": "Filter tags",
+            "no_tags_match": "No tags match."
         }
     }
 }
