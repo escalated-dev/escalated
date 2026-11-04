@@ -422,3 +422,15 @@ describe('Agent/TicketShow focus rings', () => {
         }
     });
 });
+
+describe('Agent/TicketShow on a phone', () => {
+    it('scrolls the header away with the thread and keeps the composer docked', () => {
+        mountPage();
+        const pane = wrapper.get('[data-testid="esc-detail-pane"]');
+        expect(pane.classes()).toContain('max-sm:overflow-y-auto');
+        expect(wrapper.get('[data-testid="esc-tabpanel"]').classes()).toContain('max-sm:overflow-visible');
+        expect(wrapper.get('[data-testid="esc-composer-dock"]').classes()).toEqual(
+            expect.arrayContaining(['max-sm:sticky', 'max-sm:bottom-0']),
+        );
+    });
+});

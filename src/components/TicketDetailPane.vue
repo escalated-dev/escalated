@@ -316,9 +316,23 @@ function togglePin(reply) {
 }
 
 const threadEnd = ref(null);
+const paneRoot = ref(null);
+
+// Open on the latest message. On a phone the whole pane scrolls (the header
+// scrolls away and the composer sticks to the bottom), so scroll the pane to
+// its end; scrolling the marker into view would leave it behind the composer.
+function scrollToLatest() {
+    const root = paneRoot.value;
+    if (root && typeof window !== 'undefined' && window.getComputedStyle(root).overflowY === 'auto') {
+        root.scrollTop = root.scrollHeight;
+        return;
+    }
+    threadEnd.value?.scrollIntoView?.({ block: 'end' });
+}
+
 watch(
     () => [props.ticket.id, thread.value.length],
-    () => nextTick(() => threadEnd.value?.scrollIntoView?.({ block: 'end' })),
+    () => nextTick(scrollToLatest),
     { immediate: true, flush: 'post' },
 );
 
@@ -420,7 +434,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
 </script>
 
 <template>
-    <div class="flex h-full min-h-0 flex-col" data-testid="esc-detail-pane">
+    <div ref="paneRoot" class="flex h-full min-h-0 flex-col max-sm:overflow-y-auto" data-testid="esc-detail-pane">
         <!-- Header -->
         <header class="shrink-0 px-4 pt-4 sm:px-6">
             <div class="flex items-center gap-1.5">
@@ -679,7 +693,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
             :id="`esc-tabpanel-${tab}`"
             role="tabpanel"
             :aria-labelledby="`esc-tab-${tab}`"
-            class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6"
+            class="min-h-0 flex-1 overflow-y-auto px-4 py-4 max-sm:flex-none max-sm:overflow-visible sm:px-6"
             data-testid="esc-tabpanel"
         >
             <!-- Conversation -->
@@ -1033,7 +1047,10 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
         </div>
 
         <!-- Composer -->
-        <div class="shrink-0 px-4 pb-4 sm:px-6">
+        <div
+            class="shrink-0 px-4 pb-4 max-sm:sticky max-sm:bottom-0 max-sm:bg-[var(--esc-panel-bg)] max-sm:pt-2 sm:px-6"
+            data-testid="esc-composer-dock"
+        >
             <div
                 v-if="chat.active"
                 class="overflow-hidden rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)]"
