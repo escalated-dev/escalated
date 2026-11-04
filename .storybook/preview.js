@@ -52,7 +52,7 @@ const panelPresets = {
         '--esc-panel-border-input': '#d1d5db',
         '--esc-panel-text': '#111827',
         '--esc-panel-text-secondary': '#374151',
-        '--esc-panel-text-tertiary': '#6b7280',
+        '--esc-panel-text-tertiary': '#646b78',
         '--esc-panel-text-muted': '#9ca3af',
         '--esc-panel-accent': '#3b82f6',
         '--esc-panel-accent-secondary': '#6366f1',

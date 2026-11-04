@@ -4,6 +4,13 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- **Light panel contrast.** The light theme's tertiary text (`#646b78`), urgent
+  priority (`#b31b1b`), SLA breach (`#b91c1c`) and SLA warning (`#a34807`)
+  are a shade darker so they hold WCAG AA (4.5:1) on hovered, active and
+  selected rows and on the urgent tint. Hosts that set these tokens keep
+  their own values.
+
 ### Changed
 - **Agent ticket view.** `Agent/TicketShow` keeps the inbox list beside the
   ticket on wide screens and shows the ticket in a new `TicketDetailPane`: the
