@@ -20,9 +20,9 @@ function render(
     mode,
     {
         inbox = inboxProp,
-        url = '/support/agent/tickets?assigned_to=7',
+        url = '/support/agent/tickets?assigned_to=7&open=1',
         tickets = ticketsPage,
-        filters = { assigned_to: '7' },
+        filters = { assigned_to: '7', open: '1' },
     } = {},
 ) {
     const shared = { auth: { user: agentUser }, escalated: sharedEscalated, inbox };
