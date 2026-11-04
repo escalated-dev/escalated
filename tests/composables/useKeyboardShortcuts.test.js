@@ -371,4 +371,81 @@ describe('useKeyboardShortcuts', () => {
             expect(handler).toHaveBeenCalledTimes(1);
         });
     });
+    // ----------------------------------------------------------------
+    // Key sequences ("g i")
+    // ----------------------------------------------------------------
+    describe('key sequences', () => {
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it('runs a two-key sequence', () => {
+            const inbox = vi.fn();
+            wrapper = mountWithShortcuts({ 'g i': inbox });
+
+            const first = pressKey('g');
+            expect(first.defaultPrevented).toBe(true);
+            expect(inbox).not.toHaveBeenCalled();
+            pressKey('i');
+
+            expect(inbox).toHaveBeenCalledTimes(1);
+        });
+
+        it('keeps sequences sharing a prefix apart', () => {
+            const inbox = vi.fn();
+            const all = vi.fn();
+            wrapper = mountWithShortcuts({ 'g i': inbox, 'g a': all });
+
+            pressKey('g');
+            pressKey('a');
+
+            expect(all).toHaveBeenCalledTimes(1);
+            expect(inbox).not.toHaveBeenCalled();
+        });
+
+        it('does not run the second key on its own while a sequence is pending', () => {
+            const inbox = vi.fn();
+            const single = vi.fn();
+            wrapper = mountWithShortcuts({ 'g i': inbox, i: single });
+
+            pressKey('g');
+            pressKey('i');
+
+            expect(inbox).toHaveBeenCalledTimes(1);
+            expect(single).not.toHaveBeenCalled();
+        });
+
+        it('still runs single keys when no sequence is pending', () => {
+            const single = vi.fn();
+            wrapper = mountWithShortcuts({ 'g i': vi.fn(), i: single });
+
+            pressKey('i');
+
+            expect(single).toHaveBeenCalledTimes(1);
+        });
+
+        it('drops a pending prefix after a second', () => {
+            vi.useFakeTimers();
+            const inbox = vi.fn();
+            wrapper = mountWithShortcuts({ 'g i': inbox });
+
+            pressKey('g');
+            vi.advanceTimersByTime(1100);
+            pressKey('i');
+
+            expect(inbox).not.toHaveBeenCalled();
+        });
+
+        it('falls back to the single-key handler when the follow-up is not part of a sequence', () => {
+            const inbox = vi.fn();
+            const reply = vi.fn();
+            wrapper = mountWithShortcuts({ 'g i': inbox, r: reply });
+
+            pressKey('g');
+            pressKey('r');
+
+            expect(reply).toHaveBeenCalledTimes(1);
+            expect(inbox).not.toHaveBeenCalled();
+        });
+    });
 });

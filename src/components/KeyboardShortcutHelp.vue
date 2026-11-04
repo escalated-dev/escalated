@@ -1,5 +1,6 @@
 <script setup>
 import { computed, inject } from 'vue';
+import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
     show: { type: Boolean, default: false },
@@ -12,7 +13,9 @@ const escDark = inject(
     computed(() => false),
 );
 
-const shortcutGroups = [
+const { t } = useI18n();
+
+const shortcutGroups = computed(() => [
     {
         title: 'List View',
         contexts: ['list'],
@@ -21,6 +24,7 @@ const shortcutGroups = [
             { keys: ['k'], description: 'Move up' },
             { keys: ['x'], description: 'Toggle select' },
             { keys: ['Enter'], description: 'Open ticket' },
+            { keys: ['/'], description: t('agent_panel.keys.search') },
         ],
     },
     {
@@ -32,16 +36,24 @@ const shortcutGroups = [
             { keys: ['s'], description: 'Change status' },
             { keys: ['p'], description: 'Change priority' },
             { keys: ['f'], description: 'Follow/unfollow' },
+            { keys: ['a'], description: t('agent_panel.keys.assign_me') },
+            { keys: ['e'], description: t('agent_panel.keys.resolve') },
         ],
     },
     {
         title: 'Global',
         contexts: ['list', 'detail'],
-        shortcuts: [{ keys: ['?'], description: 'Show this help' }],
+        shortcuts: [
+            { keys: ['?'], description: 'Show this help' },
+            { keys: ['Ctrl', 'K'], description: t('agent_panel.keys.palette') },
+            { keys: ['g', 'i'], description: t('agent_panel.keys.go_inbox') },
+            { keys: ['g', 'u'], description: t('agent_panel.keys.go_unassigned') },
+            { keys: ['g', 'a'], description: t('agent_panel.keys.go_all') },
+        ],
     },
-];
+]);
 
-const filteredGroups = computed(() => shortcutGroups.filter((g) => g.contexts.includes(props.context)));
+const filteredGroups = computed(() => shortcutGroups.value.filter((g) => g.contexts.includes(props.context)));
 
 function closeModal() {
     emit('update:show', false);

@@ -4,6 +4,27 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Changed
+- **Agent panel shell.** Pages under `/agent` now use a rail and top bar in the
+  same family as the admin panel instead of the old top navigation. The rail
+  lists the workspace queues (Inbox, Unassigned, All tickets), saved views and
+  live chats; the top bar has the section tabs (Tickets, Dashboard, Knowledge
+  base when it is enabled) and a search button that opens a command palette
+  (Cmd K / Ctrl K: open a ticket by reference, search tickets, run actions).
+  `g i`, `g u` and `g a` go to the three queues. Counts and views appear when
+  the backend sends the optional `inbox` page prop (documented with the inbox
+  redesign); without it the rail shows the queues without numbers. The admin
+  layout is unchanged. `EscalatedLayout` takes a new optional `fullBleed` prop
+  for pages that lay out their own panes.
+
+### Added
+- Semantic panel tokens, set by `theme.panel` in dark and light and each
+  overridable by its camelCase name: `--esc-panel-note-{bg,border,text}`,
+  `--esc-panel-selected-{bg,border}` (from the accent),
+  `--esc-panel-primary-{bg,text}` (accent with a readable text colour),
+  `--esc-priority-{low,medium,high,urgent}` and `--esc-sla-{ok,warn,breach}`.
+- `useKeyboardShortcuts` accepts two-key sequences such as `'g i'`.
+
 ### Security
 - Dev dependencies only; nothing here ships in the package (its one runtime
   dependency is `@escalated-dev/locale`).

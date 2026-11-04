@@ -885,5 +885,54 @@
             "no_manage": "You need the newsletters.manage permission to view this page.",
             "no_send": "You need the newsletters.send permission to send or schedule."
         }
+    },
+    "agent_panel": {
+        "nav": {
+            "label": "Agent navigation",
+            "sections": "Sections",
+            "workspace": "Workspace",
+            "inbox": "Inbox",
+            "unassigned": "Unassigned",
+            "all_tickets": "All tickets",
+            "views": "Views",
+            "new_view": "Save current filters as a view",
+            "live_chats": "Live chats",
+            "tickets": "Tickets",
+            "dashboard": "Dashboard",
+            "knowledge_base": "Knowledge base",
+            "admin": "Admin",
+            "back_to_app": "Back to app",
+            "open_navigation": "Open navigation",
+            "close_navigation": "Close navigation",
+            "search": "Search and commands",
+            "search_placeholder": "Search",
+            "agent": "Agent"
+        },
+        "status": {
+            "online": "Online",
+            "away": "Away",
+            "offline": "Offline"
+        },
+        "palette": {
+            "label": "Command palette",
+            "placeholder": "Type a reference, search tickets or run a command",
+            "open_ticket": "Open ticket :reference",
+            "search_for": "Search tickets for “:query”",
+            "group_tickets": "Tickets",
+            "group_navigation": "Go to",
+            "group_actions": "Actions",
+            "no_results": "No matching commands"
+        },
+        "keys": {
+            "search": "Search",
+            "palette": "Open command palette",
+            "go_inbox": "Go to inbox",
+            "go_unassigned": "Go to unassigned",
+            "go_all": "Go to all tickets",
+            "assign_me": "Assign to me",
+            "resolve": "Resolve",
+            "open": "Open ticket",
+            "select": "Select"
+        }
     }
 }

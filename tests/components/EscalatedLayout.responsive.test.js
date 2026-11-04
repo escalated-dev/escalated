@@ -111,38 +111,32 @@ describe('EscalatedLayout — admin sidebar below lg', () => {
     });
 });
 
-describe('EscalatedLayout — agent top nav below lg', () => {
-    it('hides the inline links below lg and shows a menu button instead', () => {
+describe('EscalatedLayout — agent rail below lg', () => {
+    it('folds the rail behind a menu button below lg', () => {
         mountLayout('/support/agent/tickets');
         const toggle = wrapper.get('[data-testid="esc-nav-toggle"]');
-        expect(toggle.attributes('aria-controls')).toBe('esc-agent-menu');
+        expect(toggle.attributes('aria-controls')).toBe('esc-agent-rail');
         expect(toggle.classes()).toContain('lg:hidden');
-        expect(wrapper.find('[data-testid="esc-agent-menu"]').exists()).toBe(false);
-
-        const inline = wrapper.findAll('.hidden.lg\\:flex');
-        expect(inline.length).toBe(2);
-        expect(inline.map((el) => el.text()).join(' ')).toContain('Back to App');
+        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-lg:-translate-x-full');
     });
 
-    it('never wraps Back to App', () => {
+    it('never wraps Back to app', () => {
         mountLayout('/support/agent/tickets');
-        const backLinks = wrapper.findAll('a').filter((a) => a.text() === 'Back to App');
+        const backLinks = wrapper.findAll('a').filter((a) => a.text() === 'Back to app');
         expect(backLinks.length).toBeGreaterThan(0);
         for (const link of backLinks) expect(link.classes()).toContain('whitespace-nowrap');
     });
 
-    it('opens a menu with every destination, and following one closes it', async () => {
+    it('opens the rail with every destination, and following one closes it', async () => {
         mountLayout('/support/agent/tickets');
         await wrapper.get('[data-testid="esc-nav-toggle"]').trigger('click');
+        const rail = wrapper.get('[data-testid="esc-agent-rail"]');
+        expect(rail.classes()).toContain('max-lg:translate-x-0');
+        const labels = rail.findAll('a').map((a) => a.text().trim());
+        expect(labels).toEqual(expect.arrayContaining(['Inbox', 'Unassigned', 'All tickets', 'Admin', 'Back to app']));
 
-        const menu = wrapper.get('[data-testid="esc-agent-menu"]');
-        expect(menu.attributes('id')).toBe('esc-agent-menu');
-        const labels = menu.findAll('a').map((a) => a.text());
-        expect(labels).toEqual(['Dashboard', 'Tickets', 'Admin', 'Back to App']);
-        expect(menu.find('a[aria-current="page"]').text()).toBe('Tickets');
-
-        await menu.findAll('a')[0].trigger('click');
-        expect(wrapper.find('[data-testid="esc-agent-menu"]').exists()).toBe(false);
+        await rail.findAll('a')[0].trigger('click');
+        expect(wrapper.get('[data-testid="esc-agent-rail"]').classes()).toContain('max-lg:-translate-x-full');
     });
 });
 
@@ -160,10 +154,10 @@ describe('EscalatedLayout — theme hooks', () => {
         expect(html).toContain('text-[var(--esc-panel-header-text,var(--esc-panel-text))]');
     });
 
-    it('uses the header hook for the agent nav, falling back to the sidebar colour it had', () => {
+    it('uses the header hook for the agent top bar, falling back to the page background', () => {
         mountLayout('/support/agent');
-        expect(wrapper.get('nav[aria-label="Agent navigation"]').classes()).toContain(
-            'bg-[var(--esc-panel-header-bg,var(--esc-panel-sidebar-bg))]',
+        expect(wrapper.get('[data-testid="esc-agent-topbar"]').classes()).toContain(
+            'bg-[var(--esc-panel-header-bg,var(--esc-panel-bg))]',
         );
     });
 });

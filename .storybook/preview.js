@@ -1,6 +1,18 @@
 import { computed } from 'vue';
 import './tailwind.css';
 import './storybook.css';
+import { panelThemeTokens } from '../src/plugin.js';
+
+// The agent pages build URLs with the host's Ziggy-style route() helper.
+if (typeof window !== 'undefined' && typeof window.route !== 'function') {
+    window.route = (name, params) => {
+        const path = `/${String(name)
+            .replace(/^escalated\./, 'support/')
+            .replace(/\./g, '/')}`;
+        const list = params === undefined ? [] : Array.isArray(params) ? params : [params];
+        return [path, ...list].join('/');
+    };
+}
 
 const panelDarkDefaults = {
     '--esc-panel-bg': '#000000',
@@ -64,8 +76,19 @@ const panelPresets = {
     },
 };
 
+// The semantic agent-panel tokens (notes, selection, priority, SLA) come from
+// the plugin itself, under each preset's own values.
+const semanticBase = {
+    'default-dark': panelThemeTokens('dark'),
+    'default-light': panelThemeTokens('light'),
+    'custom-brand': panelThemeTokens('dark', { accent: '#e94560' }),
+};
+
 function applyPanelPreset(el, presetName) {
-    const preset = panelPresets[presetName] || panelDarkDefaults;
+    const preset = {
+        ...(semanticBase[presetName] || semanticBase['default-dark']),
+        ...(panelPresets[presetName] || panelDarkDefaults),
+    };
     for (const [prop, value] of Object.entries(preset)) {
         el.style.setProperty(prop, value);
     }
