@@ -345,7 +345,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                 }}</span>
                 <button
                     type="button"
-                    class="-mr-1.5 ml-auto rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] lg:hidden"
+                    class="-mr-1.5 ml-auto rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] lg:hidden"
                     :aria-label="t('agent_panel.nav.close_navigation')"
                     data-testid="esc-nav-close"
                     @click="closeNav"
@@ -487,7 +487,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                     href="https://escalated.dev"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="mt-1.5 block px-2 text-[11px] text-[var(--esc-panel-text-muted)] hover:text-[var(--esc-panel-text-tertiary)]"
+                    class="mt-1.5 block rounded px-2 text-[11px] text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                     >Powered by Escalated</a
                 >
             </div>
@@ -502,7 +502,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
             >
                 <button
                     type="button"
-                    class="-ml-1 rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-header-text,var(--esc-panel-text))] hover:bg-[var(--esc-panel-hover)] lg:hidden"
+                    class="-ml-1 rounded-[var(--esc-radius,6px)] p-1.5 text-[var(--esc-panel-header-text,var(--esc-panel-text))] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)] lg:hidden"
                     aria-controls="esc-agent-rail"
                     :aria-expanded="navOpen ? 'true' : 'false'"
                     :aria-label="t('agent_panel.nav.open_navigation')"

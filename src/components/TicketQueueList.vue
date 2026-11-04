@@ -553,14 +553,14 @@ const pagination = computed(() => {
                         v-if="pagination.prev"
                         :href="pagination.prev"
                         preserve-scroll
-                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)]"
+                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >{{ t('agent_panel.inbox.previous') }}</Link
                     >
                     <Link
                         v-if="pagination.next"
                         :href="pagination.next"
                         preserve-scroll
-                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)]"
+                        class="rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] px-2 py-1 text-[var(--esc-panel-text-secondary)] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >{{ t('agent_panel.inbox.next') }}</Link
                     >
                 </span>

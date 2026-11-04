@@ -394,3 +394,31 @@ describe('Agent/TicketShow tag picker', () => {
         expect(document.activeElement).toBe(wrapper.get('[data-testid="esc-add-tag"]').element);
     });
 });
+
+describe('Agent/TicketShow focus rings', () => {
+    function unringed(root) {
+        return [...root.querySelectorAll('a, button, [tabindex="0"]')]
+            .filter((el) => !el.closest('[role="menu"]'))
+            .filter((el) => !/focus-visible:(ring|after:ring)/.test(el.className))
+            .map((el) => (el.getAttribute('aria-label') || el.textContent).trim().replace(/\s+/g, ' '));
+    }
+
+    it('gives every control on the page a visible keyboard focus ring', async () => {
+        rememberInbox({
+            url: '/support/agent/tickets',
+            title: 'My inbox',
+            tickets: {
+                data: [{ id: 1042, reference: 'ESC-1042', subject: 'Unable to export CSV' }],
+                current_page: 1,
+                last_page: 2,
+                next_page_url: '/support/agent/tickets?page=2',
+            },
+        });
+        mountPage({}, { is_admin: true });
+        expect(unringed(wrapper.element)).toEqual([]);
+        for (const name of ['customer', 'related']) {
+            await wrapper.get(`#esc-tab-${name}`).trigger('click');
+            expect(unringed(wrapper.element)).toEqual([]);
+        }
+    });
+});

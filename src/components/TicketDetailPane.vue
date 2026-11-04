@@ -575,7 +575,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                     <button
                         v-if="canEditTags"
                         type="button"
-                        class="ml-0.5 rounded-full p-0.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
+                        class="ml-0.5 rounded-full p-0.5 text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         :aria-label="t('agent_panel.ticket.remove_tag', { name: tag.name })"
                         @click="removeTag(tag.id)"
                     >
@@ -704,7 +704,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                                 <button
                                     v-if="routes.pin"
                                     type="button"
-                                    class="ml-auto rounded px-1.5 py-0.5 hover:bg-[var(--esc-panel-hover)]"
+                                    class="ml-auto rounded px-1.5 py-0.5 hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                                     @click="togglePin(note)"
                                 >
                                     {{ t('reply.unpin') }}
@@ -760,7 +760,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                                     <button
                                         v-if="routes.pin"
                                         type="button"
-                                        class="ml-auto rounded px-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]"
+                                        class="ml-auto rounded px-1.5 text-[12px] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                                         @click="togglePin(message)"
                                     >
                                         {{ message.is_pinned ? t('reply.unpin') : t('reply.pin') }}
@@ -965,7 +965,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                     <li v-for="item in recentTickets" :key="item.reference">
                         <Link
                             :href="ticketUrl(prefix, item.reference)"
-                            class="flex items-center gap-3 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)]"
+                            class="-mx-1.5 flex items-center gap-3 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >
                             <span class="shrink-0 tabular-nums text-[var(--esc-panel-text-tertiary)]">{{
                                 item.reference
@@ -1003,7 +1003,7 @@ const ddClass = 'min-w-0 py-1.5 text-[13px] text-[var(--esc-panel-text)]';
                     <li v-for="link in links" :key="`${link.relation}-${link.ticket.reference}`">
                         <Link
                             :href="ticketUrl(prefix, link.ticket.reference)"
-                            class="flex items-center gap-3 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)]"
+                            class="-mx-1.5 flex items-center gap-3 rounded-[var(--esc-radius,6px)] px-1.5 py-2 text-[13px] hover:bg-[var(--esc-panel-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         >
                             <span class="w-20 shrink-0 text-[12px] text-[var(--esc-panel-text-tertiary)]">{{
                                 relationLabel(link.relation)

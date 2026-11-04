@@ -324,4 +324,15 @@ describe('Agent/TicketIndex polish', () => {
         await nextTick();
         expect(wrapper.find('[data-testid="esc-queue-filters"]').exists()).toBe(false);
     });
+
+    it('gives every control a visible keyboard focus ring', () => {
+        mountPage('/support/agent/tickets', {
+            inbox,
+            tickets: { ...tickets, last_page: 2, next_page_url: '/x?page=2' },
+        });
+        const unringed = [...wrapper.element.querySelectorAll('a, button, input:not([type="search"])')]
+            .filter((el) => !/focus-visible:(ring|after:ring)/.test(el.className))
+            .map((el) => (el.getAttribute('aria-label') || el.textContent).trim());
+        expect(unringed).toEqual([]);
+    });
 });

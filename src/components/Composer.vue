@@ -402,7 +402,7 @@ const toolButton =
                 <span class="tabular-nums text-[var(--esc-panel-text-tertiary)]">{{ formatSize(file.size) }}</span>
                 <button
                     type="button"
-                    class="rounded p-0.5 text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)]"
+                    class="rounded p-0.5 text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                     :aria-label="t('agent_panel.composer.remove_file', { name: file.name })"
                     @click="removeFile(index)"
                 >
@@ -468,7 +468,7 @@ const toolButton =
                         :key="emoji"
                         type="button"
                         role="menuitem"
-                        class="flex h-8 w-8 items-center justify-center rounded text-[16px] hover:bg-[var(--esc-panel-hover)]"
+                        class="flex h-8 w-8 items-center justify-center rounded text-[16px] outline-none hover:bg-[var(--esc-panel-hover)] focus:bg-[var(--esc-panel-active)]"
                         @click="
                             insertText(emoji);
                             emojiOpen = false;

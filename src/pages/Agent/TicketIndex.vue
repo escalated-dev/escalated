@@ -174,7 +174,7 @@ onMounted(() => {
                     </p>
                     <button
                         type="button"
-                        class="mt-3 text-[12px] text-[var(--esc-panel-text-tertiary)] underline-offset-2 hover:text-[var(--esc-panel-text)] hover:underline"
+                        class="mt-3 rounded text-[12px] text-[var(--esc-panel-text-tertiary)] underline-offset-2 hover:text-[var(--esc-panel-text)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
                         @click="showShortcutHelp = true"
                     >
                         {{ t('agent_panel.inbox.shortcut_help') }}
