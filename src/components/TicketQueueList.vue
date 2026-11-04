@@ -119,6 +119,28 @@ function onSearchKeydown(event) {
 onBeforeUnmount(() => clearTimeout(searchTimer));
 
 const filtersOpen = ref(false);
+const filtersRef = ref(null);
+const filterToggleRef = ref(null);
+
+function closeFilters(returnFocus = false) {
+    filtersOpen.value = false;
+    if (returnFocus) filterToggleRef.value?.focus();
+}
+
+function onFiltersOutside(event) {
+    const inside = [filtersRef.value, filterToggleRef.value].some((el) => el?.contains(event.target));
+    if (!inside) closeFilters();
+}
+
+watch(filtersOpen, (open) => {
+    if (typeof document === 'undefined') return;
+    if (open) document.addEventListener('mousedown', onFiltersOutside, true);
+    else document.removeEventListener('mousedown', onFiltersOutside, true);
+});
+
+onBeforeUnmount(() => {
+    if (typeof document !== 'undefined') document.removeEventListener('mousedown', onFiltersOutside, true);
+});
 const FILTER_KEYS = [
     'status',
     'priority',
@@ -338,6 +360,7 @@ const pagination = computed(() => {
                 />
             </label>
             <button
+                ref="filterToggleRef"
                 type="button"
                 :class="[
                     'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--esc-radius,6px)] border text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]',
@@ -361,8 +384,10 @@ const pagination = computed(() => {
             <div
                 v-if="filtersOpen"
                 id="esc-queue-filters"
+                ref="filtersRef"
                 class="absolute left-4 right-4 top-full z-30 mt-1 max-h-[60vh] overflow-y-auto rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-sidebar-bg)] p-3 shadow-xl"
                 data-testid="esc-queue-filters"
+                @keydown.esc.stop="closeFilters(true)"
             >
                 <TicketFilters
                     :filters="filters"
@@ -371,6 +396,8 @@ const pagination = computed(() => {
                     :tags="tags"
                     show-assignee
                     show-following
+                    :show-search="false"
+                    :show-save-view="false"
                 />
             </div>
         </div>

@@ -302,4 +302,26 @@ describe('Agent/TicketIndex polish', () => {
         const column = wrapper.get('section');
         expect(column.classes()).toEqual(expect.arrayContaining(['lg:w-[340px]', 'xl:w-[420px]']));
     });
+
+    it('keeps the filter popover to the filters: no second search box or dead Save as View', async () => {
+        mountPage('/support/agent/tickets', { filters: { status: 'open' } });
+        await wrapper.get('[data-testid="esc-queue-filter-toggle"]').trigger('click');
+        const pop = wrapper.get('[data-testid="esc-queue-filters"]');
+        expect(pop.find('input[aria-label="Search tickets"]').exists()).toBe(false);
+        expect(pop.text()).not.toContain('Save as View');
+        expect(pop.find('select[aria-label="Filter by status"]').exists()).toBe(true);
+    });
+
+    it('closes the filter popover on Escape and on a click outside', async () => {
+        mountPage('/support/agent/tickets');
+        const toggle = wrapper.get('[data-testid="esc-queue-filter-toggle"]');
+        await toggle.trigger('click');
+        await wrapper.get('[data-testid="esc-queue-filters"]').trigger('keydown', { key: 'Escape' });
+        expect(wrapper.find('[data-testid="esc-queue-filters"]').exists()).toBe(false);
+        expect(document.activeElement).toBe(toggle.element);
+        await toggle.trigger('click');
+        document.body.dispatchEvent(new window.MouseEvent('mousedown', { bubbles: true }));
+        await nextTick();
+        expect(wrapper.find('[data-testid="esc-queue-filters"]').exists()).toBe(false);
+    });
 });

@@ -17,6 +17,10 @@ const props = defineProps({
     modelValue: { type: Object, default: () => ({}) },
     showFollowing: { type: Boolean, default: false },
     showAssignee: { type: Boolean, default: false },
+    /** Hide the search box where the page has its own. */
+    showSearch: { type: Boolean, default: true },
+    /** Hide "Save as View" where nothing listens for `save-view`. */
+    showSaveView: { type: Boolean, default: true },
 });
 
 const emit = defineEmits(['update:modelValue', 'save-view']);
@@ -112,6 +116,7 @@ defineExpose({ filterData });
     <div class="space-y-3">
         <div class="flex flex-wrap items-center gap-3">
             <input
+                v-if="showSearch"
                 v-model="filterData.search"
                 type="text"
                 placeholder="Search tickets..."
@@ -122,7 +127,7 @@ defineExpose({ filterData });
                 {{ showAdvanced ? 'Simple' : 'Advanced' }}
             </button>
             <button
-                v-if="hasActiveFilters"
+                v-if="showSaveView && hasActiveFilters"
                 type="button"
                 :class="[
                     'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
