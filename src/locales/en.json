@@ -149,7 +149,8 @@
         "change_priority": "Change priority",
         "follow_unfollow": "Follow/unfollow",
         "show_help": "Show this help",
-        "esc_to_close": "Press Esc to close"
+        "esc_to_close": "Press Esc to close",
+        "close": "Close"
     },
     "sla": {
         "overdue": "Overdue",

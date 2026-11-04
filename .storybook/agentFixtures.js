@@ -23,6 +23,13 @@ export const AgentFrame = defineComponent({
             'esc-dark',
             computed(() => props.mode !== 'light'),
         );
+        // Teleported dialogs render under <body>, outside this frame, so the
+        // tokens go on the document too (each agent story has one mode).
+        if (typeof document !== 'undefined') {
+            for (const [prop, value] of Object.entries(panelThemeTokens(props.mode))) {
+                document.documentElement.style.setProperty(prop, value);
+            }
+        }
         const style = computed(() => ({
             ...panelThemeTokens(props.mode),
             '--esc-radius': '6px',

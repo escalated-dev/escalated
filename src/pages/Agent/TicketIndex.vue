@@ -189,6 +189,6 @@ onMounted(() => {
             :departments="departments"
             @clear="selectedIds = []"
         />
-        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" />
+        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" agent />
     </EscalatedLayout>
 </template>

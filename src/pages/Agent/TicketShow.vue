@@ -396,6 +396,6 @@ onUnmounted(() => {
             </section>
         </div>
 
-        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="detail" />
+        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="detail" agent :with-list="!!listTickets" />
     </EscalatedLayout>
 </template>
