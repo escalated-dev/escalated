@@ -338,7 +338,8 @@ describe('AgentShell below lg', () => {
 });
 
 describe('AgentShell toasts', () => {
-    const toasts = () => wrapper.findAll('[data-testid="esc-toast"]').map((el) => [el.attributes('data-tone'), el.text()]);
+    const toasts = () =>
+        wrapper.findAll('[data-testid="esc-toast"]').map((el) => [el.attributes('data-tone'), el.text()]);
 
     it('shows the flash message the backend sends', () => {
         mountLayout('/support/agent/tickets', { flash: { success: 'Reply added.' } });
@@ -357,4 +358,3 @@ describe('AgentShell toasts', () => {
         expect(toasts()).toEqual([['success', 'Link copied']]);
     });
 });
-

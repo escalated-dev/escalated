@@ -22,7 +22,11 @@ export function toast(message, tone = 'success') {
     if (last && last.message === text && last.tone === tone) return last.id;
     const id = nextId++;
     toasts.value = [...toasts.value, { id, message: text, tone }].slice(-3);
-    if (tone !== 'error') timers.set(id, setTimeout(() => dismissToast(id), 4000));
+    if (tone !== 'error')
+        timers.set(
+            id,
+            setTimeout(() => dismissToast(id), 4000),
+        );
     return id;
 }
 

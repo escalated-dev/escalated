@@ -530,4 +530,3 @@ describe('Agent/TicketShow related tab', () => {
         expect(wrapper.find('[data-testid="esc-kb-link"]').exists()).toBe(false);
     });
 });
-

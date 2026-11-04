@@ -439,7 +439,9 @@ onUnmounted(() => {
                         :prefix="prefix"
                         :channel-prefix="page.props.escalated?.broadcasting?.channel_prefix"
                         :routes="routes"
-                        :knowledge-base-url="page.props.escalated?.knowledge_base_enabled === false ? '' : `${prefix}/kb`"
+                        :knowledge-base-url="
+                            page.props.escalated?.knowledge_base_enabled === false ? '' : `${prefix}/kb`
+                        "
                         :chat="chat"
                         @chat-send="onChatSend"
                         @end-chat="onEndChat"

@@ -65,9 +65,10 @@ describe('queueHeading', () => {
         })[key]?.replace(':count', r.count) ?? key;
 
     it('says open when the list is limited to open tickets', () => {
-        expect(queueHeading({ key: 'mine', total: 24, open: true, t }).subtitle).toBe('24 open tickets assigned to you');
+        expect(queueHeading({ key: 'mine', total: 24, open: true, t }).subtitle).toBe(
+            '24 open tickets assigned to you',
+        );
         expect(queueHeading({ key: 'mine', total: 24, t }).subtitle).toBe('24 tickets assigned to you');
         expect(queueHeading({ key: 'view:x', total: 3, open: true, t }).subtitle).toBe('3 open tickets');
     });
 });
-

@@ -239,4 +239,3 @@ describe('Composer', () => {
         expect(send.text()).toContain('Sending');
     });
 });
-

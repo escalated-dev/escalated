@@ -564,7 +564,10 @@ const toolButton =
                     data-testid="esc-composer-send"
                     @click="submit()"
                 >
-                    <PanelIcon :name="isNote ? 'lock' : 'send'" :class="['h-4 w-4', submitting ? 'animate-pulse' : '']" />
+                    <PanelIcon
+                        :name="isNote ? 'lock' : 'send'"
+                        :class="['h-4 w-4', submitting ? 'animate-pulse' : '']"
+                    />
                     {{
                         submitting
                             ? t('agent_panel.composer.sending')

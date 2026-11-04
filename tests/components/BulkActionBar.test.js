@@ -33,7 +33,11 @@ describe('BulkActionBar', () => {
         vi.spyOn(window, 'confirm').mockReturnValue(true);
         mountBar();
         await deleteButton().trigger('click');
-        expect(post).toHaveBeenCalledWith('/bulk', { ticket_ids: [1, 2], action: 'delete', value: null }, expect.any(Object));
+        expect(post).toHaveBeenCalledWith(
+            '/bulk',
+            { ticket_ids: [1, 2], action: 'delete', value: null },
+            expect.any(Object),
+        );
     });
 
     it('stays fixed to the viewport by default and sits inside its container when contained', () => {

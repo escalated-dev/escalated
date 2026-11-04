@@ -371,7 +371,9 @@ describe('Agent/TicketIndex states', () => {
             return () => {};
         });
         mountPage('/support/agent/tickets');
-        listeners.start({ detail: { visit: { url: new URL('http://x/support/agent/tickets?search=a'), method: 'get' } } });
+        listeners.start({
+            detail: { visit: { url: new URL('http://x/support/agent/tickets?search=a'), method: 'get' } },
+        });
         await nextTick();
         expect(wrapper.get('[data-testid="esc-queue-list"]').attributes('aria-busy')).toBe('true');
         listeners.finish({ detail: { visit: {} } });
@@ -429,4 +431,3 @@ describe('Agent/TicketIndex open filter', () => {
         expect(wrapper.get('h2').text()).toBe('Urgent');
     });
 });
-

@@ -339,11 +339,7 @@ const pagination = computed(() => {
 </script>
 
 <template>
-    <div
-        class="flex h-full min-h-0 flex-col"
-        :aria-busy="loading ? 'true' : undefined"
-        data-testid="esc-queue-list"
-    >
+    <div class="flex h-full min-h-0 flex-col" :aria-busy="loading ? 'true' : undefined" data-testid="esc-queue-list">
         <!-- Header -->
         <div class="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
             <div class="min-w-0">

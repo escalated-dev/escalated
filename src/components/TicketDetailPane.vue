@@ -188,17 +188,26 @@ const canAssignToMe = computed(
 );
 
 function assignToMe() {
-    if (canAssignToMe.value) post(props.routes.assign, { agent_id: props.currentUserId }, t('agent_panel.toast.assigned'));
+    if (canAssignToMe.value)
+        post(props.routes.assign, { agent_id: props.currentUserId }, t('agent_panel.toast.assigned'));
 }
 
 function resolve() {
     if (canEditStatus.value && props.ticket.status !== 'resolved') {
-        post(props.routes.status, { status: 'resolved' }, t('agent_panel.toast.status', { status: statusLabel('resolved') }));
+        post(
+            props.routes.status,
+            { status: 'resolved' },
+            t('agent_panel.toast.status', { status: statusLabel('resolved') }),
+        );
     }
 }
 
 function toggleFollow() {
-    post(props.routes.follow, {}, props.isFollowing ? t('agent_panel.toast.unfollowed') : t('agent_panel.toast.followed'));
+    post(
+        props.routes.follow,
+        {},
+        props.isFollowing ? t('agent_panel.toast.unfollowed') : t('agent_panel.toast.followed'),
+    );
 }
 
 const copied = ref(false);
@@ -243,7 +252,8 @@ const moreItems = computed(() => {
 });
 
 function onMore(item) {
-    if (item.macro) post(props.routes.macro, { macro_id: item.macro.id }, t('agent_panel.toast.macro', { name: item.macro.name }));
+    if (item.macro)
+        post(props.routes.macro, { macro_id: item.macro.id }, t('agent_panel.toast.macro', { name: item.macro.name }));
     else if (item.action) {
         if (item.action.confirmation && typeof window !== 'undefined' && !window.confirm(item.action.confirmation)) {
             return;
@@ -341,7 +351,11 @@ function fullDate(date) {
 
 function togglePin(reply) {
     if (!props.routes.pin) return;
-    post(props.routes.pin(reply.id), {}, reply.is_pinned ? t('agent_panel.toast.unpinned') : t('agent_panel.toast.pinned'));
+    post(
+        props.routes.pin(reply.id),
+        {},
+        reply.is_pinned ? t('agent_panel.toast.unpinned') : t('agent_panel.toast.pinned'),
+    );
 }
 
 const threadEnd = ref(null);
