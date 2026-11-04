@@ -164,12 +164,22 @@ async function focusRow(index) {
     linkEl(focusedIndex.value)?.focus?.();
 }
 
+// Before the keyboard is used nothing looks focused, so the first j or k
+// lands on the current row (the open ticket, else the first) rather than
+// skipping past it. With a ticket open, that row is already in view, so
+// the first press moves on from it.
+function step(delta) {
+    const current = rows.value[focusedIndex.value];
+    const fresh = !keyboardActive.value && !(current && current.reference === props.selectedReference);
+    focusRow(fresh ? focusedIndex.value : focusedIndex.value + delta);
+}
+
 function moveDown() {
-    focusRow(focusedIndex.value + 1);
+    step(1);
 }
 
 function moveUp() {
-    focusRow(focusedIndex.value - 1);
+    step(-1);
 }
 
 function toggleSelectFocused() {
@@ -192,12 +202,13 @@ function focusSearch() {
 }
 
 function onListKeydown(event) {
+    // Focus is already on a row here, so the arrows always move.
     if (event.key === 'ArrowDown') {
         event.preventDefault();
-        moveDown();
+        focusRow(focusedIndex.value + 1);
     } else if (event.key === 'ArrowUp') {
         event.preventDefault();
-        moveUp();
+        focusRow(focusedIndex.value - 1);
     } else if (event.key === 'Home') {
         event.preventDefault();
         focusRow(0);
