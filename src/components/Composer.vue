@@ -310,7 +310,9 @@ const toolButton =
     <div
         :class="[
             'rounded-[var(--esc-radius-lg,8px)] border bg-[var(--esc-panel-surface)] transition-colors',
-            isNote ? 'border-[var(--esc-panel-note-border)]' : 'border-[var(--esc-panel-border-input)]',
+            isNote
+                ? 'border-[var(--esc-panel-note-border)] focus-within:border-[var(--esc-panel-note-text)]'
+                : 'border-[var(--esc-panel-border-input)] focus-within:border-[var(--esc-panel-accent)]',
         ]"
         :data-mode="currentMode"
         data-testid="esc-composer"

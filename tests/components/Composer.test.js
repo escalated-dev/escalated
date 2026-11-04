@@ -186,4 +186,17 @@ describe('Composer', () => {
         await wrapper.get('button[aria-label="Remove error-export.png"]').trigger('click');
         expect(wrapper.find('[data-testid="esc-composer-files"]').exists()).toBe(false);
     });
+
+    it('uses an AA placeholder colour and shows focus on the whole box', () => {
+        mountComposer();
+        expect(input().classes()).toContain('placeholder-[var(--esc-panel-text-tertiary)]');
+        const box = wrapper.get('[data-testid="esc-composer"]');
+        expect(box.classes()).toContain('focus-within:border-[var(--esc-panel-accent)]');
+    });
+
+    it('tints the focus border amber on an internal note', async () => {
+        mountComposer({ mode: 'note' });
+        const box = wrapper.get('[data-testid="esc-composer"]');
+        expect(box.classes()).toContain('focus-within:border-[var(--esc-panel-note-text)]');
+    });
 });
