@@ -434,8 +434,36 @@ export const notificationItems = [
     },
 ];
 
+export const kbArticles = [
+    {
+        id: 11,
+        title: 'Exporting reports to CSV',
+        excerpt: 'Reports can be exported from the dashboard or scheduled weekly. Large exports run in the background.',
+        url: 'https://example.com/support/kb/exporting-reports-to-csv',
+        category: { id: 3, name: 'Reports' },
+        updated_at: minutesAgo(60 * 24 * 3),
+    },
+    {
+        id: 12,
+        title: 'Why a scheduled export arrives empty',
+        excerpt: 'An empty export usually means the saved filter matched nothing for the period.',
+        url: 'https://example.com/support/kb/scheduled-export-empty',
+        category: { id: 3, name: 'Reports' },
+        updated_at: minutesAgo(60 * 24 * 12),
+    },
+    {
+        id: 13,
+        title: 'Export worker runbook',
+        excerpt: 'Restarting the export worker and clearing stuck jobs.',
+        url: 'https://example.com/support/kb/export-worker-runbook',
+        category: { id: 9, name: 'Operations' },
+        updated_at: minutesAgo(60 * 5),
+        internal: true,
+    },
+];
+
 /**
- * Answers the agent panel's JSON routes in stories (the notifications feed),
+ * Answers the agent panel's JSON routes in stories (the notifications feed, knowledge-base search),
  * so a story shows real-looking data without a backend.
  */
 export function mockAgentApi() {
@@ -445,6 +473,11 @@ export function mockAgentApi() {
     const json = (data) => Promise.resolve(new window.Response(JSON.stringify(data), { status: 200 }));
     window.fetch = (input, init = {}) => {
         const url = String(typeof input === 'string' ? input : input?.url || '');
+        if (url.includes('/agent/kb/search')) {
+            const q = new window.URL(url, window.location.href).searchParams.get('q') || '';
+            const data = kbArticles.filter((a) => `${a.title} ${a.excerpt}`.toLowerCase().includes(q.toLowerCase()));
+            return json({ data });
+        }
         if (url.includes('/agent/notifications')) {
             if ((init.method || 'GET') === 'POST') return json({ unread_count: 0 });
             const unreadOnly = url.includes('unread=1');

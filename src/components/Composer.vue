@@ -5,6 +5,8 @@ import { useI18n } from '../composables/useI18n';
 import { useMentions } from '../composables/useMentions';
 import { toast } from '../composables/useAgentToasts';
 import { readFlash } from '../utils/flash';
+import { articleLink } from '../composables/useKbSearch';
+import KbArticleSearch from './KbArticleSearch.vue';
 import MentionDropdown from './MentionDropdown.vue';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
@@ -36,6 +38,8 @@ const props = defineProps({
     typingEndpoint: { type: String, default: '' },
     /** `{ name, email }`: who a public reply goes to. */
     recipient: { type: Object, default: null },
+    /** The host's `escalated.agent.kb.search` URL; with it the toolbar offers "Insert article link". */
+    kbSearchUrl: { type: String, default: '' },
 });
 
 const emit = defineEmits(['update:mode', 'sent']);
@@ -151,6 +155,7 @@ const expanded = computed(
         hasContent.value ||
         cannedOpen.value ||
         emojiOpen.value ||
+        kbOpen.value ||
         sendMenuOpen.value ||
         !!sendError.value ||
         submitting.value,
@@ -317,6 +322,37 @@ function onCanned(item) {
 }
 
 const emojiOpen = ref(false);
+
+// --- Knowledge-base article links -------------------------------------------------
+const kbOpen = ref(false);
+const kbWrapRef = ref(null);
+const kbButtonRef = ref(null);
+
+function closeKb(returnFocus = false) {
+    kbOpen.value = false;
+    if (returnFocus) kbButtonRef.value?.focus();
+}
+
+function onKbOutside(event) {
+    if (kbWrapRef.value && !kbWrapRef.value.contains(event.target)) closeKb();
+}
+
+watch(kbOpen, (open) => {
+    if (typeof document === 'undefined') return;
+    if (open) document.addEventListener('mousedown', onKbOutside, true);
+    else document.removeEventListener('mousedown', onKbOutside, true);
+});
+
+onBeforeUnmount(() => {
+    if (typeof document !== 'undefined') document.removeEventListener('mousedown', onKbOutside, true);
+});
+
+/** Insert a link to a knowledge-base article at the cursor. */
+function insertArticle(article) {
+    if (!article?.url || article.internal) return;
+    kbOpen.value = false;
+    insertText(articleLink(article));
+}
 const EMOJI = ['\u{1F44D}', '\u{1F642}', '\u{1F64F}', '\u{1F389}', '\u{2705}', '\u{1F440}', '\u{1F4A1}', '\u{1F914}'];
 
 // --- Attachments ---------------------------------------------------------------
@@ -411,7 +447,7 @@ function focus(mode) {
 
 watch(expanded, () => nextTick(autosize));
 
-defineExpose({ focus, setMode });
+defineExpose({ focus, setMode, insertArticle });
 
 const toolButton =
     'flex h-7 w-7 items-center justify-center rounded-[var(--esc-radius,6px)] text-[var(--esc-panel-text-tertiary)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]';
@@ -593,6 +629,30 @@ const toolButton =
                     width="w-64"
                     @select="onCanned"
                 />
+            </div>
+            <div v-if="kbSearchUrl" ref="kbWrapRef" class="relative" @keydown.esc.stop="closeKb(true)">
+                <button
+                    ref="kbButtonRef"
+                    type="button"
+                    :class="toolButton"
+                    aria-haspopup="dialog"
+                    :aria-expanded="kbOpen ? 'true' : 'false'"
+                    :aria-label="t('agent_panel.kb.insert_link')"
+                    :title="t('agent_panel.kb.insert_link')"
+                    data-testid="esc-composer-kb"
+                    @click="kbOpen = !kbOpen"
+                >
+                    <PanelIcon name="book" class="h-4 w-4" />
+                </button>
+                <div
+                    v-if="kbOpen"
+                    role="dialog"
+                    :aria-label="t('agent_panel.kb.insert_link')"
+                    class="absolute bottom-full left-0 z-40 mb-1 w-[min(22rem,calc(100vw-2rem))] rounded-[var(--esc-radius-lg,8px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-sidebar-bg)] p-2 shadow-lg"
+                    data-testid="esc-composer-kb-picker"
+                >
+                    <KbArticleSearch :search-url="kbSearchUrl" picker can-insert autofocus @insert="insertArticle" />
+                </div>
             </div>
             <div class="relative">
                 <button

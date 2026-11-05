@@ -892,6 +892,20 @@
         }
     },
     "agent_panel": {
+        "kb": {
+            "search": "Search knowledge base articles",
+            "search_placeholder": "Search articles",
+            "articles": "Articles",
+            "results": "Articles",
+            "internal": "Internal",
+            "updated": "Updated :time",
+            "insert_link": "Insert article link",
+            "insert_link_to": "Insert a link to :title",
+            "searching": "Searching...",
+            "failed": "Search did not load.",
+            "no_results": "No articles match.",
+            "hint": "Type at least 2 characters."
+        },
         "notifications": {
             "title": "Notifications",
             "label_unread": "Notifications, :count unread",

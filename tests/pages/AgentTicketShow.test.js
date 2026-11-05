@@ -938,6 +938,71 @@ describe('Agent/TicketShow customer and details panel', () => {
         expect(without.find('[data-testid="esc-kb-link"]').exists()).toBe(false);
     });
 
+    it('searches knowledge-base articles under Related and inserts a link into the reply', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(() =>
+                Promise.resolve({
+                    ok: true,
+                    json: () =>
+                        Promise.resolve({
+                            data: [
+                                {
+                                    id: 5,
+                                    title: 'Exporting reports',
+                                    excerpt: 'How to export.',
+                                    url: 'https://example.com/support/kb/exporting-reports',
+                                    category: { id: 1, name: 'Reports' },
+                                    updated_at: null,
+                                },
+                            ],
+                        }),
+                }),
+            ),
+        );
+        const panel = await openPanel();
+        const related = panel.get('[data-testid="esc-related-kb"]');
+        const input = related.get('[data-testid="esc-kb-search-input"]');
+        input.element.value = 'export';
+        await input.trigger('input');
+        await input.trigger('keydown', { key: 'Enter' });
+        await flushPromises();
+        expect(fetch.mock.calls.at(-1)[0]).toBe('/escalated.agent.kb.search/?q=export&limit=8');
+        await related.get('[data-testid="esc-kb-insert"]').trigger('click');
+        await nextTick();
+        expect(wrapper.get('[data-testid="esc-composer-input"]').element.value).toContain(
+            '<a href="https://example.com/support/kb/exporting-reports">Exporting reports</a>',
+        );
+    });
+
+    it('offers article search in the composer toolbar', async () => {
+        mountPage();
+        await wrapper.get('[data-testid="esc-composer-input"]').trigger('focus');
+        await wrapper.get('[data-testid="esc-composer-kb"]').trigger('click');
+        expect(wrapper.find('[data-testid="esc-composer-kb-picker"] [data-testid="esc-kb-search"]').exists()).toBe(
+            true,
+        );
+    });
+
+    it('has no article search without the route, or with the knowledge base off', async () => {
+        route.mockImplementation((name, params) => {
+            if (name === 'escalated.agent.kb.search') throw new Error('no route');
+            const list = Array.isArray(params) ? params : [params];
+            return `/${name}/${list.join('/')}`;
+        });
+        let panel = await openPanel();
+        expect(panel.find('[data-testid="esc-related-kb"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="esc-composer-kb"]').exists()).toBe(false);
+        wrapper.unmount();
+        route.mockImplementation((name, params) => {
+            const list = Array.isArray(params) ? params : [params];
+            return `/${name}/${list.join('/')}`;
+        });
+        panel = await openPanel({}, { knowledge_base_enabled: false });
+        expect(panel.find('[data-testid="esc-related-kb"]').exists()).toBe(false);
+        expect(wrapper.find('[data-testid="esc-composer-kb"]').exists()).toBe(false);
+    });
+
     it('opens the ticket history from the overflow menu', async () => {
         mountPage({
             ticket: makeTicket({
