@@ -4,6 +4,13 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- The @mention picker in the reply, note and chat composers now searches the
+  host's `escalated.admin.agents.search` route when the host defines it, so
+  backends whose routes are not under `/support` (the `/escalated` prefix of
+  the NestJS, Go and Spring packages, or a custom prefix) are reached. Without
+  the route it still requests `/support/admin/agents/search`.
+
 ### Added
 - **Embedding the admin in your own admin panel (optional).** Off unless you
   opt in; with only `layout` set nothing changes. New `layoutScope` plugin
