@@ -291,11 +291,11 @@ const rowLink =
                                         <template v-if="presence.online">{{
                                             t('agent_panel.ticket.online_now')
                                         }}</template>
-                                        <template v-else
+                                        <span v-else
                                             >{{ t('agent_panel.ticket.last_seen') }}
                                             <time :datetime="presence.seenAt" :title="absoluteTime(presence.seenAt)">{{
                                                 relativeTime(presence.seenAt, t, now)
-                                            }}</time></template
+                                            }}</time></span
                                         >
                                     </span>
                                     <span
