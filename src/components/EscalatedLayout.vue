@@ -317,6 +317,7 @@ function connectFrame() {
         allowedOrigins: serverEmbed.value.allowed_origins,
         baseUrl: serverEmbed.value.base_url,
         getState: () => ({ ...frameState }),
+        getRoot: () => document.querySelector('[data-testid="esc-embedded-admin"]'),
         subscribeNavigate: (callback) => router.on('navigate', () => setTimeout(callback, 0)),
         visit: (url) => router.visit(url),
         onTheme: ({ mode, tokens }) => {

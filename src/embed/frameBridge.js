@@ -23,7 +23,9 @@ import {
  * @param {Function} [options.subscribeNavigate] (callback) => unsubscribe; called after each navigation
  * @param {Function} [options.visit]          (url) => void, an Inertia visit
  * @param {Function} [options.onTheme]        ({ mode, tokens }) => void
- * @param {Element} [options.root]            element whose height is reported (default: <html>)
+ * @param {Function} [options.getRoot]       () => the element whose height is reported, read each time
+ *                                            (default: <body>). Not <html>: inside a frame its height
+ *                                            is at least the frame's, so the frame could never shrink.
  * @param {Window} [options.win]
  * @returns {Function} stop
  */
@@ -62,9 +64,11 @@ export function startFrameBridge(options = {}) {
 
     win.addEventListener('message', onMessage);
 
+    const measured = () => (typeof options.getRoot === 'function' && options.getRoot()) || win.document?.body;
+
     let lastHeight = -1;
     function reportHeight() {
-        const root = options.root || win.document?.documentElement;
+        const root = measured();
         if (!root) return;
         const height = Math.ceil(root.scrollHeight || root.getBoundingClientRect?.().height || 0);
         if (height !== lastHeight) {
@@ -76,7 +80,8 @@ export function startFrameBridge(options = {}) {
     let observer = null;
     if (typeof win.ResizeObserver === 'function') {
         observer = new win.ResizeObserver(reportHeight);
-        observer.observe(options.root || win.document.documentElement);
+        // The body grows and shrinks with each page, so watching it catches every change.
+        if (win.document?.body) observer.observe(win.document.body);
     }
 
     const unsubscribe =

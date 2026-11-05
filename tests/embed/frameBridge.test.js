@@ -14,7 +14,7 @@ function fakeWindow({ parentOrigin = 'https://admin.example.com', ancestor = tru
     const win = {
         parent,
         location: { ancestorOrigins: ancestor ? [parentOrigin] : undefined },
-        document: { referrer: ancestor ? '' : `${parentOrigin}/admin/page`, documentElement: { scrollHeight: 640 } },
+        document: { referrer: ancestor ? '' : `${parentOrigin}/admin/page`, body: { scrollHeight: 640 } },
         addEventListener: (type, fn) => type === 'message' && listeners.add(fn),
         removeEventListener: (type, fn) => listeners.delete(fn),
         dispatch(event) {
@@ -96,6 +96,26 @@ describe('startFrameBridge', () => {
             url: '/admin/support/tags',
             title: 'Tags',
         });
+    });
+
+    it('measures the page element each time, so the frame can shrink', () => {
+        const root = { scrollHeight: 1200 };
+        let fire;
+        startFrameBridge({
+            win,
+            allowedOrigins: ALLOWED,
+            baseUrl: '/admin/support',
+            getState: state,
+            getRoot: () => root,
+            subscribeNavigate: (cb) => {
+                fire = cb;
+                return () => {};
+            },
+        });
+        root.scrollHeight = 400;
+        fire();
+        const heights = win.parent.postMessage.mock.calls.filter(([m]) => m.type === 'resize').map(([m]) => m.height);
+        expect(heights).toEqual([1200, 400]);
     });
 
     it('applies a theme and navigates only for messages from the allow-listed parent', () => {
