@@ -83,6 +83,7 @@ const routes = computed(() => {
         unsnooze: adminFallback('unsnooze', reference),
         merge: page.props.escalated?.is_admin ? routeOr('escalated.admin.tickets.merge', reference) : '',
         unread: markRoute(props.ticket, true),
+        kbSearch: page.props.escalated?.knowledge_base_enabled === false ? '' : routeOr('escalated.agent.kb.search'),
         pin: routeOr('escalated.agent.tickets.pin', [reference, 0])
             ? (replyId) => routeOr('escalated.agent.tickets.pin', [reference, replyId])
             : null,

@@ -627,6 +627,11 @@ onBeforeUnmount(() => resizeObserver?.disconnect());
 
 // --- Composer ------------------------------------------------------------------------
 const composerRef = ref(null);
+
+/** Put a knowledge-base article's link into the reply, from the Related panel. */
+function insertArticle(article) {
+    composerRef.value?.insertArticle(article);
+}
 const composerMode = ref(props.notesOnly ? 'note' : 'reply');
 
 function focusReply() {
@@ -1391,6 +1396,7 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                 email: ticket.requester?.email || ticket.requester_email || '',
                             }"
                             :typing-endpoint="routes.typing || ''"
+                            :kb-search-url="routes.kbSearch || ''"
                         />
                     </div>
                 </div>
@@ -1404,6 +1410,8 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                 :prefix="prefix"
                 :followers-count="followersCount"
                 :knowledge-base-url="knowledgeBaseUrl"
+                :kb-search-url="routes.kbSearch || ''"
+                :can-insert-article="!chat?.active"
                 :history="history"
                 :sla="slaItems"
                 :overlay="!contextInline"
@@ -1411,6 +1419,7 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                 :status-label="statusLabel"
                 :status-color="statusColor"
                 @close="closeContext"
+                @insert-article="insertArticle"
             />
         </div>
 

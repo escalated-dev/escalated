@@ -7,6 +7,7 @@ import { absoluteTime, initials, isLive, relativeTime, requesterName } from '../
 import { ticketUrl } from '../utils/agentQueues';
 import PanelIcon from './PanelIcon.vue';
 import PluginSlot from './PluginSlot.vue';
+import KbArticleSearch from './KbArticleSearch.vue';
 import TicketSubjects from './TicketSubjects.vue';
 
 /**
@@ -23,6 +24,10 @@ const props = defineProps({
     prefix: { type: String, default: 'support' },
     followersCount: { type: Number, default: 0 },
     knowledgeBaseUrl: { type: String, default: '' },
+    /** The host's `escalated.agent.kb.search` URL; with it Related offers article search. */
+    kbSearchUrl: { type: String, default: '' },
+    /** The composer can take an article link (not in a live chat). */
+    canInsertArticle: { type: Boolean, default: false },
     /** `[{ id, text, created_at }]`: the ticket's activity, newest last. */
     history: { type: Array, default: () => [] },
     /** `[{ key, label, text, tone }]`: SLA targets. */
@@ -34,7 +39,7 @@ const props = defineProps({
     statusColor: { type: Function, default: () => 'var(--esc-panel-text-tertiary)' },
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'insert-article']);
 const { t } = useI18n();
 const { getPageComponents } = usePluginExtensions();
 const now = Date.now();
@@ -286,11 +291,11 @@ const rowLink =
                                         <template v-if="presence.online">{{
                                             t('agent_panel.ticket.online_now')
                                         }}</template>
-                                        <template v-else
+                                        <span v-else
                                             >{{ t('agent_panel.ticket.last_seen') }}
                                             <time :datetime="presence.seenAt" :title="absoluteTime(presence.seenAt)">{{
                                                 relativeTime(presence.seenAt, t, now)
-                                            }}</time></template
+                                            }}</time></span
                                         >
                                     </span>
                                     <span
@@ -453,6 +458,16 @@ const rowLink =
                         <p v-else class="text-[13px] text-[var(--esc-panel-text-tertiary)]">
                             {{ t('agent_panel.ticket.no_links') }}
                         </p>
+                        <div v-if="kbSearchUrl" class="mt-3" data-testid="esc-related-kb">
+                            <h4 class="mb-1.5 text-[12px] font-medium text-[var(--esc-panel-text-tertiary)]">
+                                {{ t('agent_panel.kb.articles') }}
+                            </h4>
+                            <KbArticleSearch
+                                :search-url="kbSearchUrl"
+                                :can-insert="canInsertArticle"
+                                @insert="emit('insert-article', $event)"
+                            />
+                        </div>
                         <Link
                             v-if="knowledgeBaseUrl"
                             :href="knowledgeBaseUrl"

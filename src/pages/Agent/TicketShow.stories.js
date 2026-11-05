@@ -12,6 +12,7 @@ import {
     inboxProp,
     longTicket,
     longTicketsPage,
+    mockAgentApi,
     rememberedInbox,
     sharedEscalated,
     ticketDetail,
@@ -173,4 +174,48 @@ export const AssigneeMenuOpen = {
     play: async ({ canvasElement }) => {
         await userEvent.click(within(canvasElement).getByTestId('esc-assignee'));
     },
+};
+
+async function searchRelated({ canvasElement }) {
+    const canvas = within(canvasElement);
+    if (!canvasElement.querySelector('[data-testid="esc-context-panel"]')) {
+        await userEvent.click(canvas.getByTestId('esc-context-toggle'));
+    }
+    const related = canvasElement.querySelector('[data-testid="esc-related-kb"]');
+    await userEvent.type(within(related).getByTestId('esc-kb-search-input'), 'export');
+    await within(related).findByTestId('esc-kb-results');
+    related.scrollIntoView({ block: 'end' });
+}
+
+/** Knowledge-base search under Related (needs the host's `escalated.agent.kb.search`). */
+export const RelatedArticles = {
+    render: render('dark'),
+    loaders: [async () => mockAgentApi()],
+    play: searchRelated,
+};
+
+export const RelatedArticlesLight = {
+    render: render('light'),
+    loaders: [async () => mockAgentApi()],
+    play: searchRelated,
+};
+
+async function pickArticle({ canvasElement }) {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByTestId('esc-composer-input'));
+    await userEvent.click(canvas.getByTestId('esc-composer-kb'));
+    await userEvent.type(canvas.getByTestId('esc-composer-kb-picker').querySelector('input'), 'export');
+}
+
+/** The composer's Insert article link menu. */
+export const ComposerArticleLink = {
+    render: render('dark'),
+    loaders: [async () => mockAgentApi()],
+    play: pickArticle,
+};
+
+export const ComposerArticleLinkLight = {
+    render: render('light'),
+    loaders: [async () => mockAgentApi()],
+    play: pickArticle,
 };

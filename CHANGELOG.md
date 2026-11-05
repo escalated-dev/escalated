@@ -17,6 +17,12 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `postMessage` bridge (height, theme, navigation) and a host helper,
   `connectEscalatedFrame`, from `@escalated-dev/escalated/embed`. See
   docs/embedding-admin.md and ADR 2026-11-05-embeddable-admin.
+- **Knowledge-base search on the ticket page.** With the host's
+  `escalated.agent.kb.search` route, Related in the customer panel gets an
+  article search (open in a new tab, or insert the link into the reply) and
+  the composer toolbar gets Insert article link. Internal articles are shown
+  to agents but never inserted. Hidden without the route or with the
+  knowledge base off. See ADR 2026-11-05-agent-panel-data.
 - **Notifications bell.** When the backend shares `escalated.notifications`
   (`{ unread_count }`) and has `escalated.agent.notifications.index`, the top
   bar shows a bell with the unread count and a popover with the feed (newest

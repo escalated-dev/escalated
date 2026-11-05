@@ -256,3 +256,25 @@ to the list when it is open. Without it the count is refreshed by each page
 visit and when the popover opens.
 
 There is no notifications page; the popover pages through the feed.
+
+## Knowledge-base search
+
+When the host has the route `escalated.agent.kb.search` and the knowledge base
+is on (`escalated.knowledge_base_enabled` is not `false`), the ticket page
+offers article search in two places:
+
+- **Related** in the customer and details panel: a search box under the
+  linked tickets. Each result opens the article in a new tab and, on hover,
+  has a button that inserts its link into the reply.
+- The composer toolbar's **Insert article link** (book icon): a search menu;
+  choosing an article inserts `<a href="url">title</a>` at the cursor.
+
+Typing two or more characters (debounced) asks
+`GET escalated.agent.kb.search?q=...&limit=8`, which answers
+`{ "data": [{ "id", "title", "excerpt", "url", "category", "updated_at", "internal"? }] }`.
+Each result shows the title, the category name and "Updated 3d ago", and
+two lines of the excerpt. Articles marked `"internal": true` show a lock and
+"Internal" and are never inserted into a reply. In a live chat the panel does
+not offer insertion. Without the route, or with the knowledge base off,
+neither the search box nor the toolbar button appears; the "Search the
+knowledge base" link stays as before.
