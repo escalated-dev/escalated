@@ -4,6 +4,27 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- **Embedding the admin in your own admin panel (optional).** Off unless you
+  opt in; with only `layout` set nothing changes. New `layoutScope` plugin
+  option (default `['customer']`): list `'admin'` (and optionally `'agent'`)
+  and those pages render inside your layout, the admin chrome-free (no
+  Escalated sidebar or top bar). `layouts` registers named layouts a backend
+  can pick per page. Pages honour the backend's `escalated.embed` flag
+  (chrome-free under any host prefix). `<EscalatedNavigation />`,
+  `useEscalatedNavigation()` and `escalatedNavIcons` render the
+  `escalated.navigation` menu in your sidebar. iframe mode: an allow-listed
+  `postMessage` bridge (height, theme, navigation) and a host helper,
+  `connectEscalatedFrame`, from `@escalated-dev/escalated/embed`. See
+  docs/embedding-admin.md and ADR 2026-11-05-embeddable-admin.
+
+### Changed
+- The README's Layout Integration section now says what `layout` has always
+  done: it wraps customer pages; admin and agent pages keep their own chrome
+  unless listed in `layoutScope`.
+- The API tokens screen posts to the embedded admin's base URL when the admin
+  is embedded (unchanged otherwise).
+
 ## [0.12.8] - 2026-11-04
 
 ### Upgrading
