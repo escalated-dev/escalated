@@ -17,6 +17,13 @@ export const PROTOCOL_VERSION = 1;
 export const FRAME_SOURCE = 'escalated';
 export const HOST_SOURCE = 'escalated-host';
 
+/** `path` without trailing slashes (a loop, not a regex, so input cannot make it slow). */
+export function trimTrailingSlashes(path) {
+    let end = path.length;
+    while (end > 0 && path[end - 1] === '/') end -= 1;
+    return path.slice(0, end);
+}
+
 /** A normalised origin (`scheme://host[:port]`), or null for anything that is not one. */
 export function toOrigin(value) {
     if (typeof value !== 'string' || value === '' || value === '*' || value === 'null') return null;
@@ -59,7 +66,7 @@ export function isProtocolMessage(data, source) {
 export function isPathUnder(url, base) {
     if (typeof url !== 'string' || typeof base !== 'string') return false;
     if (!url.startsWith('/') || url.startsWith('//') || url.includes('\\')) return false;
-    const root = base.replace(/\/+$/, '') || '/';
+    const root = trimTrailingSlashes(base) || '/';
     const path = url.split(/[?#]/)[0];
     if (path.split('/').includes('..')) return false;
     if (root === '/') return true;

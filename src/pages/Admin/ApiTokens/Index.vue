@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
+import { trimTrailingSlashes } from '../../../embed/protocol';
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { readFlash } from '../../../utils/flash';
 
@@ -24,7 +25,7 @@ const prefix = computed(() => {
 const adminBase = computed(() => {
     const embed = page.props.escalated?.embed;
     if (embed?.enabled === true && typeof embed.base_url === 'string' && embed.base_url.startsWith('/')) {
-        return embed.base_url.replace(/\/+$/, '');
+        return trimTrailingSlashes(embed.base_url);
     }
     return `${prefix.value}/admin`;
 });
