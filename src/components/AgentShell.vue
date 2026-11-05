@@ -4,7 +4,7 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { useKeyboardShortcuts } from '../composables/useKeyboardShortcuts';
 import { agentCommands } from '../composables/useAgentCommands';
-import { AGENT_STATUSES, useAgentStatus } from '../composables/useAgentStatus';
+import { useAgentStatus } from '../composables/useAgentStatus';
 import { toast } from '../composables/useAgentToasts';
 import { readFlash } from '../utils/flash';
 import { watchScrollAffordance } from '../utils/scrollAffordance';
@@ -234,8 +234,13 @@ function onViewSaved() {
 // last choice in this browser is used. See useAgentStatus.
 const statusMenuOpen = ref(false);
 const topbarStatusOpen = ref(false);
-const { status: agentStatus, setStatus: setAgentStatus } = useAgentStatus({
+const {
+    status: agentStatus,
+    statuses: agentStatuses,
+    setStatus: setAgentStatus,
+} = useAgentStatus({
     initial: escalated.value.agent_status || escalated.value.chat_status || null,
+    allowed: escalated.value.agent_statuses || null,
 });
 const STATUS_COLORS = {
     online: 'var(--esc-sla-ok)',
@@ -243,7 +248,7 @@ const STATUS_COLORS = {
     offline: 'var(--esc-panel-text-tertiary)',
 };
 const statusItems = computed(() =>
-    AGENT_STATUSES.map((value) => ({
+    agentStatuses.value.map((value) => ({
         key: value,
         label: t(`agent_panel.status.${value}`),
         dot: STATUS_COLORS[value],
