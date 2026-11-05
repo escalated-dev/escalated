@@ -22,6 +22,8 @@ import {
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
 import AgentToasts from './AgentToasts.vue';
 import CommandPalette from './CommandPalette.vue';
+import NotificationBell from './NotificationBell.vue';
+import { notificationRoutes } from '../composables/useNotifications';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
 import SaveViewDialog from './SaveViewDialog.vue';
@@ -56,6 +58,13 @@ const showPoweredBy = computed(() => escalated.value.show_powered_by !== false);
 const kbEnabled = computed(() => escalated.value.knowledge_base_enabled !== false);
 const chatEnabled = computed(() => escalated.value.chat_enabled === true);
 const activeChats = computed(() => escalated.value.active_chats || []);
+// The bell needs the shared count and the feed's route; hosts without either get none.
+const notificationsEnabled = computed(
+    () =>
+        !!escalated.value.notifications &&
+        typeof escalated.value.notifications === 'object' &&
+        !!notificationRoutes().index,
+);
 
 const inbox = computed(() => page.props.inbox || null);
 const counts = computed(() => inbox.value?.counts || {});
@@ -590,6 +599,7 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                         >{{ paletteHint }}</kbd
                     >
                 </button>
+                <NotificationBell v-if="notificationsEnabled" :user-id="userId" />
                 <div class="relative">
                     <button
                         type="button"

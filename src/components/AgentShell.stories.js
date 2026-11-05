@@ -1,6 +1,6 @@
 import { userEvent, within } from 'storybook/test';
 import AgentShell from './AgentShell.vue';
-import { AgentFrame, agentUser, inboxProp, sharedEscalated } from '../../.storybook/agentFixtures.js';
+import { AgentFrame, agentUser, inboxProp, mockAgentApi, sharedEscalated } from '../../.storybook/agentFixtures.js';
 
 export default {
     title: 'Agent/Shell',
@@ -48,4 +48,25 @@ export const StatusMenuLight = {
     play: async ({ canvasElement }) => {
         await userEvent.click(within(canvasElement).getByTestId('esc-topbar-user'));
     },
+};
+
+const withNotifications = {
+    auth: { user: agentUser },
+    escalated: { ...sharedEscalated, notifications: { unread_count: 3 } },
+    inbox: inboxProp,
+};
+
+/** The bell with the agent's notifications (needs `escalated.notifications` and the feed route). */
+export const Notifications = {
+    render: render('dark', withNotifications),
+    loaders: [async () => mockAgentApi()],
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getByTestId('esc-notifications-bell'));
+    },
+};
+
+export const NotificationsLight = {
+    render: render('light', withNotifications),
+    loaders: [async () => mockAgentApi()],
+    play: Notifications.play,
 };
