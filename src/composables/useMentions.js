@@ -1,4 +1,5 @@
 import { ref, computed, onUnmounted } from 'vue';
+import { routeOr } from '../utils/agentApi';
 
 /**
  * Composable that detects `@` typed in a text input/textarea,
@@ -6,7 +7,8 @@ import { ref, computed, onUnmounted } from 'vue';
  * an insert function to replace the mention token.
  *
  * @param {Object} options
- * @param {string} [options.searchEndpoint] - API endpoint for agent search (default: route-based)
+ * @param {string} [options.searchEndpoint] - API endpoint for agent search (default: the host's
+ *   `escalated.admin.agents.search` route, else `/support/admin/agents/search`)
  * @param {number} [options.debounce=250] - Debounce delay in ms
  * @returns {Object}
  */
@@ -80,7 +82,10 @@ export function useMentions(options = {}) {
     async function fetchSuggestions(searchQuery, version) {
         loading.value = true;
         try {
-            const endpoint = options.searchEndpoint || '/support/admin/agents/search';
+            // The host's named route, so a backend with another prefix
+            // (`/escalated/admin/agents/search`) is reached too.
+            const endpoint =
+                options.searchEndpoint || routeOr('escalated.admin.agents.search') || '/support/admin/agents/search';
             const url = `${endpoint}?q=${encodeURIComponent(searchQuery)}`;
             const response = await fetch(url, {
                 headers: {

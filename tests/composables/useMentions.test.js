@@ -225,3 +225,34 @@ describe('mention request lifecycle', () => {
         if (action === 'close') wrapper.unmount();
     });
 });
+
+describe('useMentions search endpoint', () => {
+    let requests;
+
+    beforeEach(() => {
+        requests = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve([]) });
+        vi.stubGlobal('fetch', requests);
+    });
+
+    afterEach(() => {
+        delete window.route;
+    });
+
+    async function searchedUrl() {
+        const wrapper = mount(TestComponent);
+        wrapper.vm.onTextChange({ selectionStart: 1 }, '@');
+        await nextTick();
+        await Promise.resolve();
+        return requests.mock.calls.at(-1)[0];
+    }
+
+    it("uses the host's escalated.admin.agents.search route when it has one", async () => {
+        window.route = (name) => (name === 'escalated.admin.agents.search' ? '/escalated/admin/agents/search' : '#');
+        expect(await searchedUrl()).toBe('/escalated/admin/agents/search?q=');
+    });
+
+    it('falls back to the Laravel default path without the route', async () => {
+        window.route = () => '#';
+        expect(await searchedUrl()).toBe('/support/admin/agents/search?q=');
+    });
+});
