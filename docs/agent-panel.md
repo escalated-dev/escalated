@@ -221,3 +221,38 @@ neither route gets a status that lives in the browser only.
 The shapes are fixed by the developer-context ADR
 `decisions/2026-11-05-agent-panel-data.md`. The status is the same field
 live-chat routing uses, so there is one stored status per agent.
+
+## Notifications
+
+A bell in the top bar shows the agent's unread notifications and, on click,
+a popover with the feed, newest first. It appears only when the backend shares
+`escalated.notifications` and has the route
+`escalated.agent.notifications.index`; otherwise there is no bell.
+
+```json
+{ "notifications": { "unread_count": 3 } }
+```
+
+(inside the shared `escalated` prop). The count shows on the bell (99+ past
+99) and follows every answer from the backend.
+
+| Action | Route | Answer |
+|---|---|---|
+| Open the popover, Show more, Unread only | `GET escalated.agent.notifications.index` (`?page=`, `?unread=1`) | `{ data: [items], meta: { current_page, last_page, per_page, total }, unread_count }` |
+| Click an item | `POST escalated.agent.notifications.read` (the item's `id`) | `{ unread_count }` |
+| Mark all read (shown only with the route) | `POST escalated.agent.notifications.read-all` | `{ unread_count }` |
+
+An item is `{ id, type, title, body, ticket, url, created_at, read_at }`.
+Clicking it marks it read and opens `url` (an Inertia visit on the same
+origin); an item with no `url` (a ticket the agent can no longer see) is only
+marked read. `type` picks the icon: `ticket_assigned`, `ticket_reply`,
+`mention`, `sla_warning`, `sla_breached`, `chat_transferred`, `new_ticket`,
+`ticket_escalated`, `status_changed`; any other type gets a bell. Failed
+marks are put back.
+
+With broadcasting configured, `notification.created` on the agent's private
+channel (`{channel_prefix}.agents.{userId}`) adds the item to the count, and
+to the list when it is open. Without it the count is refreshed by each page
+visit and when the popover opens.
+
+There is no notifications page; the popover pages through the feed.

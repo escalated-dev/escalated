@@ -17,6 +17,13 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `postMessage` bridge (height, theme, navigation) and a host helper,
   `connectEscalatedFrame`, from `@escalated-dev/escalated/embed`. See
   docs/embedding-admin.md and ADR 2026-11-05-embeddable-admin.
+- **Notifications bell.** When the backend shares `escalated.notifications`
+  (`{ unread_count }`) and has `escalated.agent.notifications.index`, the top
+  bar shows a bell with the unread count and a popover with the feed (newest
+  first, Show more, Unread only, Mark all read). Clicking an item marks it
+  read and opens its ticket. `notification.created` on the agent's channel
+  updates it live. Hosts without the prop or route get no bell. See ADR
+  2026-11-05-agent-panel-data.
 - **Mark tickets read and unread.** With the host's
   `escalated.agent.tickets.read` / `.unread` routes, each inbox row gets a
   menu with Mark as read / Mark as unread (`Shift U` for the focused row), the

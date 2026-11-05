@@ -370,3 +370,91 @@ export const longTicketsPage = {
 };
 
 export const emptyTicketsPage = { data: [], current_page: 1, last_page: 1, total: 0 };
+
+export const notificationItems = [
+    {
+        id: 'n-1',
+        type: 'ticket_reply',
+        title: 'Sarah Chen replied to ESC-1042',
+        body: 'Still failing after the restart. Attaching the new error.',
+        ticket: { id: 1042, reference: 'ESC-1042', subject: 'Unable to export CSV reports from dashboard' },
+        url: '/support/agent/tickets/ESC-1042',
+        created_at: minutesAgo(3),
+        read_at: null,
+    },
+    {
+        id: 'n-2',
+        type: 'sla_warning',
+        title: 'ESC-1041 first response is due in 25 minutes',
+        body: 'SSO login redirect loop on Firefox',
+        ticket: { id: 1041, reference: 'ESC-1041', subject: 'SSO login redirect loop on Firefox' },
+        url: '/support/agent/tickets/ESC-1041',
+        created_at: minutesAgo(18),
+        read_at: null,
+    },
+    {
+        id: 'n-3',
+        type: 'ticket_assigned',
+        title: 'ESC-1039 was assigned to you',
+        body: 'Webhook notifications delayed by 15+ minutes',
+        ticket: { id: 1039, reference: 'ESC-1039', subject: 'Webhook notifications delayed by 15+ minutes' },
+        url: '/support/agent/tickets/ESC-1039',
+        created_at: minutesAgo(52),
+        read_at: null,
+    },
+    {
+        id: 'n-4',
+        type: 'mention',
+        title: 'Ana Lopez mentioned you on ESC-1038',
+        body: 'Can you check the search index on this one?',
+        ticket: { id: 1038, reference: 'ESC-1038', subject: 'Knowledge base search returning no results' },
+        url: '/support/agent/tickets/ESC-1038',
+        created_at: minutesAgo(140),
+        read_at: minutesAgo(100),
+    },
+    {
+        id: 'n-5',
+        type: 'sla_breached',
+        title: 'ESC-1035 missed its resolution target',
+        body: 'Refund not received',
+        ticket: { id: 1035, reference: 'ESC-1035', subject: 'Refund not received' },
+        url: '/support/agent/tickets/ESC-1035',
+        created_at: minutesAgo(60 * 26),
+        read_at: minutesAgo(60 * 20),
+    },
+    {
+        id: 'n-6',
+        type: 'ticket_assigned',
+        title: 'A ticket you can no longer view',
+        body: null,
+        ticket: null,
+        url: null,
+        created_at: minutesAgo(60 * 50),
+        read_at: minutesAgo(60 * 49),
+    },
+];
+
+/**
+ * Answers the agent panel's JSON routes in stories (the notifications feed),
+ * so a story shows real-looking data without a backend.
+ */
+export function mockAgentApi() {
+    if (typeof window === 'undefined' || window.__escAgentApiMocked) return;
+    window.__escAgentApiMocked = true;
+    const realFetch = window.fetch.bind(window);
+    const json = (data) => Promise.resolve(new window.Response(JSON.stringify(data), { status: 200 }));
+    window.fetch = (input, init = {}) => {
+        const url = String(typeof input === 'string' ? input : input?.url || '');
+        if (url.includes('/agent/notifications')) {
+            if ((init.method || 'GET') === 'POST') return json({ unread_count: 0 });
+            const unreadOnly = url.includes('unread=1');
+            const data = notificationItems.filter((item) => !unreadOnly || !item.read_at);
+            return json({
+                data,
+                meta: { current_page: 1, last_page: 1, per_page: 20, total: data.length },
+                unread_count: 3,
+            });
+        }
+        return realFetch(input, init);
+    };
+}

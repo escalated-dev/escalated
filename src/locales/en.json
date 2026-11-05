@@ -892,6 +892,19 @@
         }
     },
     "agent_panel": {
+        "notifications": {
+            "title": "Notifications",
+            "label_unread": "Notifications, :count unread",
+            "unread": "Unread",
+            "unread_only": "Unread only",
+            "mark_all_read": "Mark all read",
+            "empty": "No notifications yet.",
+            "empty_unread": "No unread notifications.",
+            "loading": "Loading...",
+            "failed": "Notifications did not load.",
+            "retry": "Try again",
+            "show_more": "Show more"
+        },
         "nav": {
             "unread_count": ":count unread",
             "label": "Agent navigation",
