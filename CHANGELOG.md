@@ -4,6 +4,38 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.8] - 2026-11-04
+
+### Upgrading
+- **The agent panel is redesigned** (#227 to #237). Pages under `/agent`
+  use a rail and top bar instead of the old top navigation,
+  `Agent/TicketIndex` is a list beside a detail pane, and `Agent/TicketShow`
+  is a conversation-first workspace with a customer and details panel and a
+  new composer. Page names and the props they already read are unchanged,
+  and the admin layout is untouched. Hosts that restyle the agent pages with
+  their own CSS should check them; the panel tokens (`theme.panel`) still
+  apply.
+- **New optional agent page props**, all listed in `pages.json` and
+  documented in `docs/agent-panel.md`: `inbox` and `queue` on
+  `Agent/TicketIndex` and `Agent/TicketShow` (rail counts, saved views, the
+  queue title and stat strip), `agents` (`[{ id, name }]`, for reassigning)
+  on `Agent/TicketShow`, and `ticket.requester_tickets` (the customer's
+  other conversations). A backend that sends none of them gets the same
+  lists and tickets without counts, views, the reassign list or previous
+  conversations. The escalated backends send them from their releases of
+  2026-11-04.
+- **The customer panel reads only `requester_tickets`.** It used to list
+  `related_tickets` (linked tickets on escalated-laravel) as the customer's
+  recent tickets; linked tickets now show under Related only.
+- **Snooze, unsnooze and agent status from the agent panel** call
+  `escalated.agent.tickets.snooze` / `escalated.agent.tickets.unsnooze`
+  (the admin routes for admins) and, when the host has it,
+  `escalated.admin.chat.status`. A backend without these routes keeps the
+  rest of the panel; the actions fail with an error toast.
+- `TicketFilters` gains `showSearch` and `showSaveView` (both `true` by
+  default) and `KeyboardShortcutHelp` gains `withList` and `agent`; existing
+  uses render as before.
+
 ### Fixed
 - **Customer history.** The customer tab listed `related_tickets` (a
   ticket's linked tickets on escalated-laravel) as the customer's recent
@@ -66,6 +98,12 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `escalated.chat_status`), then the browser's last choice, and posts changes
   to `escalated.admin.chat.status` when the host has that route. See
   `docs/agent-panel.md`.
+- Semantic panel tokens, set by `theme.panel` in dark and light and each
+  overridable by its camelCase name: `--esc-panel-note-{bg,border,text}`,
+  `--esc-panel-selected-{bg,border}` (from the accent),
+  `--esc-panel-primary-{bg,text}` (accent with a readable text colour),
+  `--esc-priority-{low,medium,high,urgent}` and `--esc-sla-{ok,warn,breach}`.
+- `useKeyboardShortcuts` accepts two-key sequences such as `'g i'`.
 
 ### Changed
 - **A lighter, faster composer.** Idle and empty it is 75px instead of 159px
@@ -143,14 +181,11 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   redesign); without it the rail shows the queues without numbers. The admin
   layout is unchanged. `EscalatedLayout` takes a new optional `fullBleed` prop
   for pages that lay out their own panes.
-
-### Added
-- Semantic panel tokens, set by `theme.panel` in dark and light and each
-  overridable by its camelCase name: `--esc-panel-note-{bg,border,text}`,
-  `--esc-panel-selected-{bg,border}` (from the accent),
-  `--esc-panel-primary-{bg,text}` (accent with a readable text colour),
-  `--esc-priority-{low,medium,high,urgent}` and `--esc-sla-{ok,warn,breach}`.
-- `useKeyboardShortcuts` accepts two-key sequences such as `'g i'`.
+- **README.** The demo GIF opens on Pinecone, a made-up notes app, and
+  then shows the redesigned agent panel (#230, #233); the social image shows
+  the new agent inbox (#234).
+- The widget bundle (`dist/widget/escalated-widget.js`) is rebuilt with
+  Vue 3.5.44. The widget's source did not change.
 
 ### Security
 - Dev dependencies only; nothing here ships in the package (its one runtime
