@@ -75,6 +75,7 @@ export const inboxProp = {
         { id: 'recently_updated', name: 'Recently updated', count: 31, filters: { sort_by: 'updated_at' } },
     ],
     stats: { open: 24, urgent: 6, sla_at_risk: 4, resolved_today: 27 },
+    unread: { mine: 2, unassigned: 5, all: 0 },
 };
 
 function person(name, email) {

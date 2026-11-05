@@ -14,7 +14,8 @@ summary, and names the queue from the URL.
         { "id": "urgent", "name": "Urgent", "count": 6, "filters": { "priority": "urgent" } },
         { "id": 12, "name": "Billing escalations", "count": 3, "filters": { "department_id": 4 } }
     ],
-    "stats": { "open": 24, "urgent": 6, "sla_at_risk": 4, "resolved_today": 27 }
+    "stats": { "open": 24, "urgent": 6, "sla_at_risk": 4, "resolved_today": 27 },
+    "unread": { "mine": 3, "unassigned": 5, "all": 11 }
 }
 ```
 
@@ -48,6 +49,11 @@ summary, and names the queue from the URL.
 
   An item the backend leaves out of `stats` is not shown.
 
+- `unread` has the same keys as `counts`: how many of those open tickets are
+  unread for the current agent. A queue with a number above zero gets a small
+  accent dot before its count (and "3 unread" for screen readers and as the
+  tooltip). A missing key, or no `unread`, shows no dot.
+
 The counts and stats are for the current agent and queue as the backend sees
 them; the frontend never computes or estimates them.
 
@@ -68,7 +74,7 @@ All optional; each one only adds to the row when present.
 
 | Field | Shows |
 |---|---|
-| `is_unread` | The subject in full weight |
+| `is_unread` | An accent dot, and the requester and subject in full weight |
 | `requester_online`, `requester.is_online`, `is_live_chat` | A green dot after the requester's name |
 | `latest_reply.body` | The one-line preview (falls back to `description`) |
 | `last_reply_at` | The age (falls back to `updated_at`, then `created_at`) |
@@ -76,6 +82,27 @@ All optional; each one only adds to the row when present.
 
 The **New ticket** button appears only when the host has a route named
 `escalated.agent.tickets.create`.
+
+### Marking read and unread
+
+When the host has the routes `escalated.agent.tickets.read` and
+`escalated.agent.tickets.unread` (`POST {prefix}/agent/tickets/{ticket}/read`
+and `/unread`, answering `{ "is_unread": false | true }` to a JSON request):
+
+- each row has a menu (the "..." over the age on hover) with Mark as read or
+  Mark as unread, and `Shift U` does the same for the focused row;
+- the bulk bar adds Mark read and Mark unread, posting `action: "mark_read"`
+  or `"mark_unread"` (no `value`) to `escalated.agent.tickets.bulk`;
+- the ticket page's overflow menu offers Mark as unread, which goes back to
+  the list (opening the ticket again would mark it read).
+
+The change shows at once and then reloads `inbox` for the counts; if the
+backend refuses, the row goes back and a toast says so. Opening a ticket
+marks it read on the backend (`GET escalated.agent.tickets.show`), and the list
+beside the ticket shows it read straight away. Without the routes there is no
+menu, no bulk action and no shortcut; `is_unread` is still shown. Semantics
+(what counts as activity, the read marker) are in the developer-context ADR
+`decisions/2026-11-05-agent-panel-data.md`.
 
 ## The ticket page
 
