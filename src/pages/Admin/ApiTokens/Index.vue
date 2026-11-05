@@ -19,6 +19,15 @@ const prefix = computed(() => {
     const p = page.props.escalated?.prefix || 'support';
     return p.startsWith('/') ? p : `/${p}`;
 });
+// Where the admin lives: `{prefix}/admin`, or the host's prefix when the admin
+// is embedded in the host's admin panel (ADR 2026-11-05).
+const adminBase = computed(() => {
+    const embed = page.props.escalated?.embed;
+    if (embed?.enabled === true && typeof embed.base_url === 'string' && embed.base_url.startsWith('/')) {
+        return embed.base_url.replace(/\/+$/, '');
+    }
+    return `${prefix.value}/admin`;
+});
 
 const showCreate = ref(false);
 const copiedToken = ref(null);
@@ -31,7 +40,7 @@ const form = useForm({
 });
 
 function createToken() {
-    form.post(`${prefix.value}/admin/api-tokens`, {
+    form.post(`${adminBase.value}/api-tokens`, {
         preserveScroll: true,
         onSuccess: (page) => {
             const token = readFlash(page).plain_text_token;
@@ -44,7 +53,7 @@ function createToken() {
 
 function revokeToken(id) {
     if (!confirm('Are you sure you want to revoke this token? This cannot be undone.')) return;
-    useForm({}).delete(`${prefix.value}/admin/api-tokens/${id}`, { preserveScroll: true });
+    useForm({}).delete(`${adminBase.value}/api-tokens/${id}`, { preserveScroll: true });
 }
 
 function copyToken() {

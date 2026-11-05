@@ -148,6 +148,37 @@ describe('EscalatedPlugin', () => {
         expect(provideSpy).toHaveBeenCalledWith('escalated-theme', theme);
     });
 
+    it('provides nothing new for layoutScope or layouts when only layout is given', () => {
+        const app = createApp({ template: '<div />' });
+        const provideSpy = vi.spyOn(app, 'provide');
+
+        app.use(EscalatedPlugin, { layout: { name: 'FakeLayout', template: '<div />' } });
+
+        const keys = provideSpy.mock.calls.map((c) => c[0]);
+        expect(keys).toEqual(['escalated-layout']);
+    });
+
+    it('provides the layout scope, keeping known sections only', () => {
+        const app = createApp({ template: '<div />' });
+        const provideSpy = vi.spyOn(app, 'provide');
+
+        app.use(EscalatedPlugin, { layoutScope: ['admin', 'customer', 'bogus'] });
+
+        expect(provideSpy).toHaveBeenCalledWith('escalated-layout-scope', ['customer', 'admin']);
+    });
+
+    it('provides named layouts the backend can pick', () => {
+        const AdminLayout = { name: 'AdminLayout', template: '<div />' };
+        const app = createApp({ template: '<div />' });
+        const provideSpy = vi.spyOn(app, 'provide');
+
+        app.use(EscalatedPlugin, { layouts: { 'Layouts/AdminLayout': AdminLayout } });
+
+        expect(provideSpy).toHaveBeenCalledWith('escalated-layouts', {
+            'Layouts/AdminLayout': expect.objectContaining({ name: 'AdminLayout' }),
+        });
+    });
+
     it('does not call provide for layout when none given', () => {
         const app = createApp({ template: '<div />' });
         const provideSpy = vi.spyOn(app, 'provide');

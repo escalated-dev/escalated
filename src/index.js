@@ -29,6 +29,7 @@ export { default as ContextPanelSection } from './components/ContextPanelSection
 export { default as CustomFieldRenderer } from './components/CustomFieldRenderer.vue';
 export { default as CustomTicketActions } from './components/CustomTicketActions.vue';
 export { default as EscalatedLayout } from './components/EscalatedLayout.vue';
+export { default as EscalatedNavigation } from './components/EscalatedNavigation.vue';
 export { default as FileDropzone } from './components/FileDropzone.vue';
 export { default as FollowButton } from './components/FollowButton.vue';
 export { default as KeyboardShortcutHelp } from './components/KeyboardShortcutHelp.vue';
@@ -74,10 +75,13 @@ export { usePluginExtensions } from './composables/usePluginExtensions';
 export { usePluginHooks } from './composables/usePluginHooks';
 export { useChat } from './composables/useChat';
 export { useRealtime } from './composables/useRealtime';
+// The admin menu for a host's own sidebar (embedding the admin; ADR 2026-11-05).
+export { useEscalatedNavigation } from './composables/useEscalatedNavigation';
 
 // Utilities
 export { TICKET_STATUSES, TICKET_PRIORITIES, TICKET_TYPES, TICKET_TYPE_COLORS } from './utils/constants';
 export { timeAgo, slaClass } from './utils/formatting';
+export { escalatedNavIcons } from './utils/adminNavIcons';
 
 // Plugin authoring helper
 export { defineEscalatedPlugin } from './defineEscalatedPlugin';

@@ -28,6 +28,7 @@
     "exports": {
         "./components/*": "./src/components/*",
         "./pages/*": "./src/pages/*",
+        "./embed": "./src/embed/index.js",
         "./locales": "./src/locales/index.js",
         "./locales/*": "./src/locales/*",
         ".": "./src/index.js",
