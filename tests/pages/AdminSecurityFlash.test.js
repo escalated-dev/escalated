@@ -81,6 +81,19 @@ describe('API token flash contracts', () => {
         });
     }
 
+    it('posts to the embedded admin base when the admin is embedded in the host panel', async () => {
+        state.page.props = {
+            escalated: {
+                prefix: 'support',
+                embed: { enabled: true, mode: 'layout', base_url: '/backoffice/helpdesk' },
+            },
+            errors: {},
+        };
+        render(ApiTokens, { tokens: [], users: [], api_enabled: true });
+        await createToken({ props: {} });
+        expect(state.form.post.mock.lastCall[0]).toBe('/backoffice/helpdesk/api-tokens');
+    });
+
     it('preserves shared flash when the adapter supplies an empty top-level map', async () => {
         render(ApiTokens, { tokens: [], users: [], api_enabled: true });
         await createToken({ props: { flash: { plain_text_token: 'shared-token' } }, flash: {} });

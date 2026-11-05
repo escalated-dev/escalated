@@ -73,6 +73,39 @@ Pick your framework:
 
 Each backend repo has full setup instructions — install command, migrations, config, and frontend integration.
 
+<!-- Self-contained section: safe to move as a block. -->
+## Embedding the admin in your own admin panel (optional)
+
+Escalated comes with its own standalone admin panel, and that stays the default.
+If your app already has an admin panel, you can optionally show Escalated's admin
+screens inside it instead: under your sidebar and header, your URL prefix and
+your middleware, with Escalated's menu available to render in your own sidebar.
+Nothing changes unless you turn it on.
+
+Three ways to do it, depending on your admin:
+
+- **Vue + Inertia admin**: Escalated's admin pages render chrome-free inside your
+  layout (`app.use(EscalatedPlugin, { layout, layoutScope: ['admin'] })`), and
+  `<EscalatedNavigation />` lists the admin menu in your sidebar.
+- **Server-rendered admin** (Blade, ERB, Django templates, …): your admin template
+  becomes the Inertia root view for the embedded pages.
+- **Anything else**: an allow-listed iframe with a small `postMessage` protocol
+  for height, theme and navigation (`@escalated-dev/escalated/embed`).
+
+Guides: [frontend](docs/embedding-admin.md) ·
+[Laravel](https://github.com/escalated-dev/escalated-laravel/blob/main/docs/embedding-admin.md) ·
+[Rails](https://github.com/escalated-dev/escalated-rails/blob/main/docs/embedding-admin.md) ·
+[Django](https://github.com/escalated-dev/escalated-django/blob/main/docs/embedding-admin.md) ·
+[AdonisJS](https://github.com/escalated-dev/escalated-adonis/blob/main/docs/embedding-admin.md) ·
+[NestJS](https://github.com/escalated-dev/escalated-nestjs/blob/main/docs/embedding-admin.md) ·
+[Symfony](https://github.com/escalated-dev/escalated-symfony/blob/master/docs/embedding-admin.md) ·
+[Phoenix](https://github.com/escalated-dev/escalated-phoenix/blob/master/docs/embedding-admin.md) ·
+[Go](https://github.com/escalated-dev/escalated-go/blob/main/docs/embedding-admin.md) ·
+[.NET](https://github.com/escalated-dev/escalated-dotnet/blob/main/docs/embedding-admin.md) ·
+[Spring](https://github.com/escalated-dev/escalated-spring/blob/main/docs/embedding-admin.md) ·
+[WordPress](https://github.com/escalated-dev/escalated-wordpress/blob/main/docs/embedding-admin.md).
+Laravel is the reference implementation; the other backends are adding it.
+
 ## Tailwind CSS
 
 Escalated components use Tailwind CSS utility classes (~hundreds of them across 140+ Vue files). **Some Tailwind-compatible class processor must be available in the host app for the UI to render correctly** — without one, every component renders as unstyled DOM with class names that don't resolve to any CSS.
@@ -130,7 +163,10 @@ app.use(EscalatedPlugin, {
 
 ### Layout Integration
 
-Pass your app's layout component and all Escalated pages render inside it automatically. The layout component must accept a `#header` slot and a default slot:
+Pass your app's layout component and Escalated's **customer pages** (the ticket
+portal and knowledge base) render inside it. The admin and agent panels keep
+their own navigation by default. The layout component must accept a `#header`
+slot and a default slot:
 
 ```vue
 <!-- Your layout must support these slots -->
@@ -144,6 +180,20 @@ Pass your app's layout component and all Escalated pages render inside it automa
 ```
 
 When no layout is provided, Escalated uses its own built-in navigation bar.
+
+To render the admin (and optionally the agent workspace) inside your layout as
+well, list those sections in `layoutScope`. Admin pages then render without
+Escalated's sidebar and top bar, with the page title in your `#header` slot:
+
+```js
+app.use(EscalatedPlugin, {
+    layout: AdminLayout,
+    layoutScope: ['customer', 'admin'], // default: ['customer']
+})
+```
+
+This is optional and only changes anything when you set it. See
+[Embedding the admin in your own admin panel](#embedding-the-admin-in-your-own-admin-panel-optional).
 
 ### CSS Custom Properties
 

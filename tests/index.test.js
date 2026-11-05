@@ -109,6 +109,7 @@ describe('index.js exports', () => {
         'TicketTypeSelector',
         'TotpInput',
         'TwoFactorSetup',
+        'EscalatedNavigation',
     ];
 
     describe('component exports', () => {
@@ -122,8 +123,8 @@ describe('index.js exports', () => {
             expect(typeof component).toBe('object');
         });
 
-        it('exports exactly 56 components', () => {
-            expect(expectedComponents).toHaveLength(56);
+        it('exports exactly 57 components', () => {
+            expect(expectedComponents).toHaveLength(57);
             for (const name of expectedComponents) {
                 expect(escalated[name]).toBeDefined();
             }
@@ -143,9 +144,9 @@ describe('index.js exports', () => {
 
         it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 57 components + 2 saved-view components + 1 plugin + 7 composables
-            // + 1 helper + 5 pages + 6 utils + 4 page-resolution = 83
-            expect(keys).toHaveLength(83);
+            // 58 components + 2 saved-view components + 1 plugin + 8 composables
+            // + 1 helper + 5 pages + 7 utils + 4 page-resolution = 86
+            expect(keys).toHaveLength(86);
         });
 
         it('every export key is a non-empty string', () => {

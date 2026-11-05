@@ -14,6 +14,18 @@ import { markRaw } from 'vue';
  *           radius: '0.75rem',
  *       }
  *   })
+ *
+ * `layout` wraps customer pages. To render admin (and optionally agent) pages
+ * inside a host layout as well, list them in `layoutScope`; admin pages then
+ * render chrome-free (no Escalated sidebar or top bar) in its slots. `layouts`
+ * names layouts the backend can pick per page (`escalated.embed.layout`).
+ * See docs/embedding-admin.md. Both are optional; with neither set nothing
+ * changes.
+ *
+ *   app.use(EscalatedPlugin, {
+ *       layout: AdminLayout,
+ *       layoutScope: ['customer', 'admin'],
+ *   })
  */
 export const EscalatedPlugin = {
     install(app, options = {}) {
@@ -21,6 +33,18 @@ export const EscalatedPlugin = {
 
         if (options.layout) {
             app.provide('escalated-layout', markRaw(options.layout));
+        }
+
+        if (options.layoutScope !== undefined) {
+            app.provide('escalated-layout-scope', normaliseLayoutScope(options.layoutScope));
+        }
+
+        if (options.layouts && typeof options.layouts === 'object') {
+            const named = {};
+            for (const [name, component] of Object.entries(options.layouts)) {
+                if (component) named[name] = markRaw(component);
+            }
+            app.provide('escalated-layouts', named);
         }
 
         if (options.theme) {
@@ -39,6 +63,14 @@ export const EscalatedPlugin = {
         }
     },
 };
+
+export const LAYOUT_SECTIONS = Object.freeze(['customer', 'admin', 'agent']);
+
+/** The sections a host layout wraps. Unknown names are dropped; a string is one section. */
+export function normaliseLayoutScope(scope) {
+    const list = Array.isArray(scope) ? scope : typeof scope === 'string' ? [scope] : [];
+    return LAYOUT_SECTIONS.filter((section) => list.includes(section));
+}
 
 // 77 components in this package call the Ziggy `route()` helper (Laravel's
 // named-route URL generator). Laravel hosts ship Ziggy and get `window.route`
@@ -263,7 +295,7 @@ export function panelThemeTokens(mode = 'dark', overrides = {}) {
     return resolvePanelTokens({ ...overrides, mode });
 }
 
-function applyPanelTheme(panelConfig) {
+export function applyPanelTheme(panelConfig) {
     const style = document.documentElement.style;
     for (const [cssVar, value] of Object.entries(resolvePanelTokens(panelConfig))) {
         style.setProperty(cssVar, value);
