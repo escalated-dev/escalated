@@ -130,6 +130,29 @@ export const CustomerPanelLight = {
     play: CustomerPanel.play,
 };
 
+/** An offline customer: when they were last on the site, from `requester_last_seen_at`. */
+export const CustomerLastSeen = {
+    render: render('dark', {
+        ticket: {
+            ...ticketDetail,
+            requester_online: false,
+            requester_last_seen_at: new Date(Date.now() - 42 * 60000).toISOString(),
+        },
+    }),
+    play: CustomerPanel.play,
+};
+
+export const CustomerLastSeenLight = {
+    render: render('light', {
+        ticket: {
+            ...ticketDetail,
+            requester_online: false,
+            requester_last_seen_at: new Date(Date.now() - 42 * 60000).toISOString(),
+        },
+    }),
+    play: CustomerPanel.play,
+};
+
 export const Snoozed = {
     render: render('light', { ticket: { ...ticketDetail, snoozed_until: minutesAhead(60 * 20) } }),
 };

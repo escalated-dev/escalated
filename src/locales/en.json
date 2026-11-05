@@ -1127,6 +1127,8 @@
             "previous_conversations": "Previous conversations",
             "no_previous_conversations": "No other conversations with this customer.",
             "ticket_count": ":count tickets in total",
+            "online_now": "Online now",
+            "last_seen": "Last seen",
             "organization": "Organization",
             "details": "Details",
             "related": "Related",

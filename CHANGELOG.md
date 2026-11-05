@@ -24,6 +24,10 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `escalated.agent_statuses`, keeps the `agent_status` the backend answers
   with, and goes back to the previous status when the backend refuses the
   change. See ADR 2026-11-05-agent-panel-data.
+- **Customer presence in the ticket's customer panel.** "Online now" when the
+  ticket's optional `requester_online` is true (or the chat is live), else
+  "Last seen ..." from the optional `requester_last_seen_at`. Without either
+  field nothing is shown. See ADR 2026-11-05-agent-panel-data.
 
 ### Changed
 - The README's Layout Integration section now says what `layout` has always
