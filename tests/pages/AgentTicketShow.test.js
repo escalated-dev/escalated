@@ -819,6 +819,34 @@ describe('Agent/TicketShow customer and details panel', () => {
         ]);
     });
 
+    it('says the customer is online when the backend says so', async () => {
+        const panel = await openPanel({
+            ticket: makeTicket({ requester_online: true, requester_last_seen_at: minutesAgo(0) }),
+        });
+        const presence = panel.get('[data-testid="esc-customer-presence"]');
+        expect(presence.text()).toBe('Online now');
+        expect(presence.find('[data-testid="esc-customer-online-dot"]').exists()).toBe(true);
+    });
+
+    it('says when an offline customer was last seen', async () => {
+        const seen = minutesAgo(12);
+        const panel = await openPanel({
+            ticket: makeTicket({ requester_online: false, requester_last_seen_at: seen }),
+        });
+        const presence = panel.get('[data-testid="esc-customer-presence"]');
+        expect(presence.text()).toBe('Last seen 12m ago');
+        expect(presence.get('time').attributes('datetime')).toBe(seen);
+        expect(presence.find('[data-testid="esc-customer-online-dot"]').exists()).toBe(false);
+    });
+
+    it('shows no presence line when the backend sends none, or never saw the customer', async () => {
+        let panel = await openPanel();
+        expect(panel.find('[data-testid="esc-customer-presence"]').exists()).toBe(false);
+        wrapper.unmount();
+        panel = await openPanel({ ticket: makeTicket({ requester_online: false, requester_last_seen_at: null }) });
+        expect(panel.find('[data-testid="esc-customer-presence"]').exists()).toBe(false);
+    });
+
     it("never presents linked tickets as the customer's history", async () => {
         const panel = await openPanel();
         expect(panel.find('[data-testid="esc-customer-tickets"]').exists()).toBe(false);

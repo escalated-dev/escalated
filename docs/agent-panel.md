@@ -69,7 +69,7 @@ All optional; each one only adds to the row when present.
 | Field | Shows |
 |---|---|
 | `is_unread` | The subject in full weight |
-| `requester_online`, `requester.is_online`, `is_live_chat` | A green dot after the reference |
+| `requester_online`, `requester.is_online`, `is_live_chat` | A green dot after the requester's name |
 | `latest_reply.body` | The one-line preview (falls back to `description`) |
 | `last_reply_at` | The age (falls back to `updated_at`, then `created_at`) |
 | `first_response_due_at`, `resolution_due_at`, `sla_*_breached` | An SLA marker when breached or due within the hour |
@@ -102,6 +102,12 @@ SLA). `replied` and `note_added` activities are not repeated as events. A
 reply is the customer's when the backend says so (`is_customer: true` or
 `is_agent: false`), when its `author_type`/`author_id` match the ticket's
 `requester_type`/`requester_id`, or when it has no author (a guest).
+
+Customer presence (`requester_online`, `requester_last_seen_at`) is staff-only
+data: the backend sends it on agent pages, never to customers, guests or the
+widget. A customer is online when the widget, a live chat or the customer
+portal saw them within the backend's window (2 minutes by default). See the
+developer-context ADR `decisions/2026-11-05-agent-panel-data.md`.
 
 ### Optional prop: `agents`
 
@@ -142,6 +148,7 @@ Ticket fields the page reads beyond the existing ones, all optional:
 | `requester_tickets` (`[{ id, reference, subject, status, created_at, updated_at }]`) | Previous conversations in the customer panel. `related_tickets` is not used for this: it holds linked tickets. |
 | `requester.organization` (`{ name }` or a string), `organization`, `requester.company` | The customer's organization |
 | `requester_ticket_count` | "N tickets in total" |
+| `requester_online`, `requester_last_seen_at` | "Online now" with a green dot, else "Last seen 12m ago" under the customer's name; nothing when neither is sent or the customer was never seen (`null`) |
 | `custom_fields` (`[{ label, value }]` or `{ label: value }`) | Details; fields without a value are left out |
 | `links_as_parent[].child_ticket`, `links_as_child[].parent_ticket`, `merged_tickets`, `merged_into` | Related tickets |
 | `snoozed_until` | "Snoozed until ..." in the header, and Unsnooze |

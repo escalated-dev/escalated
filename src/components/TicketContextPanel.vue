@@ -86,6 +86,15 @@ const organization = computed(() => {
     return typeof org === 'string' ? org : org.name || '';
 });
 
+// Whether the customer is on the site now (the backend's `requester_online`,
+// or a live chat), else when they were last seen. Nothing when the backend
+// sends neither.
+const presence = computed(() => {
+    if (isLive(props.ticket)) return { online: true };
+    const seenAt = props.ticket.requester_last_seen_at;
+    return seenAt ? { online: false, seenAt } : null;
+});
+
 // The requester's other tickets. Not `related_tickets`: those are the ticket's
 // linked tickets, not the customer's history.
 const conversations = computed(() =>
@@ -258,20 +267,46 @@ const rowLink =
                                     class="flex items-center gap-1.5 text-[14px] font-semibold text-[var(--esc-panel-text)]"
                                 >
                                     <span class="truncate">{{ requesterName(ticket) || t('ticket.unknown') }}</span>
-                                    <span
-                                        v-if="isLive(ticket)"
-                                        class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--esc-sla-ok)]"
-                                        :title="t('agent_panel.inbox.requester_online')"
-                                        ><span class="sr-only">{{
-                                            t('agent_panel.inbox.requester_online')
-                                        }}</span></span
-                                    >
                                 </p>
                                 <p
-                                    v-if="typeof ticket.requester_ticket_count === 'number'"
-                                    class="text-[12px] tabular-nums text-[var(--esc-panel-text-tertiary)]"
+                                    v-if="presence || typeof ticket.requester_ticket_count === 'number'"
+                                    class="flex min-w-0 items-center gap-1 text-[12px] text-[var(--esc-panel-text-tertiary)]"
                                 >
-                                    {{ t('agent_panel.ticket.ticket_count', { count: ticket.requester_ticket_count }) }}
+                                    <span
+                                        v-if="presence"
+                                        class="flex shrink-0 items-center gap-1.5"
+                                        data-testid="esc-customer-presence"
+                                    >
+                                        <span
+                                            v-if="presence.online"
+                                            class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--esc-sla-ok)]"
+                                            aria-hidden="true"
+                                            data-testid="esc-customer-online-dot"
+                                        ></span>
+                                        <template v-if="presence.online">{{
+                                            t('agent_panel.ticket.online_now')
+                                        }}</template>
+                                        <template v-else
+                                            >{{ t('agent_panel.ticket.last_seen') }}
+                                            <time :datetime="presence.seenAt" :title="absoluteTime(presence.seenAt)">{{
+                                                relativeTime(presence.seenAt, t, now)
+                                            }}</time></template
+                                        >
+                                    </span>
+                                    <span
+                                        v-if="presence && typeof ticket.requester_ticket_count === 'number'"
+                                        aria-hidden="true"
+                                        >&middot;</span
+                                    >
+                                    <span
+                                        v-if="typeof ticket.requester_ticket_count === 'number'"
+                                        class="truncate tabular-nums"
+                                        >{{
+                                            t('agent_panel.ticket.ticket_count', {
+                                                count: ticket.requester_ticket_count,
+                                            })
+                                        }}</span
+                                    >
                                 </p>
                             </div>
                         </div>
