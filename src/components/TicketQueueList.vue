@@ -6,7 +6,6 @@ import {
     absoluteTime,
     initials,
     isLive,
-    isUnread,
     isUrgent,
     lastActivity,
     latestPreview,
@@ -16,7 +15,9 @@ import {
     slaState,
 } from '../utils/agentTicket';
 import { ticketUrl } from '../utils/agentQueues';
+import { markRoute, ticketUnread, useUnread } from '../composables/useUnread';
 import PanelIcon from './PanelIcon.vue';
+import PanelMenu from './PanelMenu.vue';
 import TicketFilters from './TicketFilters.vue';
 
 /**
@@ -275,6 +276,12 @@ function openFocused() {
     if (ticket) open(ticket);
 }
 
+/** Mark the focused row read, or unread when it is read (Shift U). */
+function toggleUnreadFocused() {
+    const ticket = rows.value[focusedIndex.value];
+    if (ticket && markRoute(ticket, !ticketUnread(ticket))) setUnread(ticket, !ticketUnread(ticket));
+}
+
 function focusSearch() {
     searchRef.value?.focus();
 }
@@ -304,7 +311,7 @@ function onRowClick(event, ticket, index) {
     open(ticket);
 }
 
-defineExpose({ moveDown, moveUp, toggleSelectFocused, openFocused, focusSearch });
+defineExpose({ moveDown, moveUp, toggleSelectFocused, toggleUnreadFocused, openFocused, focusSearch });
 
 // --- Selection ---------------------------------------------------------------
 const selecting = computed(() => props.selectedIds.length > 0);
@@ -315,6 +322,33 @@ function toggleOne(id) {
     if (index >= 0) ids.splice(index, 1);
     else ids.push(id);
     emit('update:selectedIds', ids);
+}
+
+// --- Row menu ------------------------------------------------------------------
+// Mark read / unread, when the host has the routes (ADR 2026-11-05-agent-panel-data).
+const { setUnread } = useUnread();
+const menuFor = ref(null);
+
+function rowMenuItems(ticket) {
+    const unread = ticketUnread(ticket);
+    if (!markRoute(ticket, !unread)) return [];
+    return [
+        unread
+            ? { key: 'read', label: t('agent_panel.inbox.mark_read'), icon: 'envelopeOpen' }
+            : { key: 'unread', label: t('agent_panel.inbox.mark_unread'), icon: 'envelope' },
+    ];
+}
+
+function rowMenuKey(ticket) {
+    return ticket.id ?? ticket.reference;
+}
+
+function setRowMenu(ticket, open) {
+    menuFor.value = open ? rowMenuKey(ticket) : menuFor.value === rowMenuKey(ticket) ? null : menuFor.value;
+}
+
+function onRowMenu(ticket, item) {
+    setUnread(ticket, item.key === 'unread');
 }
 
 // --- Row display -------------------------------------------------------------
@@ -498,11 +532,11 @@ const pagination = computed(() => {
                             ? 'bg-[var(--esc-panel-hover)]'
                             : '',
                     ]"
-                    :data-unread="isUnread(ticket) ? 'true' : undefined"
+                    :data-unread="ticketUnread(ticket) ? 'true' : undefined"
                     data-testid="esc-queue-row"
                 >
                     <span
-                        v-if="isUnread(ticket)"
+                        v-if="ticketUnread(ticket)"
                         class="absolute left-[5px] top-[19px] h-1.5 w-1.5 rounded-full bg-[var(--esc-panel-accent)]"
                         data-testid="esc-queue-unread"
                         ><span class="sr-only">{{ t('agent_panel.inbox.unread') }}</span></span
@@ -548,13 +582,47 @@ const pagination = computed(() => {
                         </template>
                     </div>
 
+                    <!-- Row menu: over the age, on hover or focus -->
+                    <div
+                        v-if="rowMenuItems(ticket).length"
+                        :class="[
+                            'absolute right-3 top-1.5 z-20',
+                            menuFor === rowMenuKey(ticket)
+                                ? 'opacity-100'
+                                : 'opacity-0 focus-within:opacity-100 group-hover:opacity-100',
+                        ]"
+                    >
+                        <button
+                            type="button"
+                            class="flex h-6 w-6 items-center justify-center rounded-[var(--esc-radius,6px)] border border-[var(--esc-panel-border-input)] bg-[var(--esc-panel-bg)] text-[var(--esc-panel-text-tertiary)] hover:text-[var(--esc-panel-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--esc-panel-accent)]"
+                            aria-haspopup="menu"
+                            :aria-expanded="menuFor === rowMenuKey(ticket) ? 'true' : 'false'"
+                            :aria-label="t('agent_panel.inbox.row_actions', { reference: ticket.reference })"
+                            :title="t('agent_panel.inbox.row_actions', { reference: ticket.reference })"
+                            tabindex="-1"
+                            data-testid="esc-queue-row-menu"
+                            @click="setRowMenu(ticket, menuFor !== rowMenuKey(ticket))"
+                        >
+                            <PanelIcon name="ellipsis" class="h-4 w-4" />
+                        </button>
+                        <PanelMenu
+                            :open="menuFor === rowMenuKey(ticket)"
+                            :items="rowMenuItems(ticket)"
+                            :label="t('agent_panel.inbox.row_actions', { reference: ticket.reference })"
+                            align="right"
+                            width="w-44"
+                            @update:open="(open) => setRowMenu(ticket, open)"
+                            @select="(item) => onRowMenu(ticket, item)"
+                        />
+                    </div>
+
                     <div class="min-w-0 flex-1">
                         <!-- Who and when -->
                         <div class="flex items-center gap-1.5 text-[12px] leading-4">
                             <span
                                 :class="[
                                     'min-w-0 truncate',
-                                    isUnread(ticket)
+                                    ticketUnread(ticket)
                                         ? 'font-semibold text-[var(--esc-panel-text)]'
                                         : 'font-medium text-[var(--esc-panel-text-secondary)]',
                                 ]"
@@ -583,7 +651,7 @@ const pagination = computed(() => {
                             :title="ticket.subject"
                             :class="[
                                 'block truncate text-[14px] leading-5 after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--esc-panel-accent)]',
-                                isUnread(ticket)
+                                ticketUnread(ticket)
                                     ? 'font-semibold text-[var(--esc-panel-text)]'
                                     : 'font-medium text-[var(--esc-panel-text-secondary)]',
                             ]"

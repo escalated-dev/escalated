@@ -8,6 +8,8 @@ const props = defineProps({
     bulkRoute: { type: String, required: true },
     agents: { type: Array, default: () => [] },
     departments: { type: Array, default: () => [] },
+    /** Offer Mark read / Mark unread (bulk `mark_read` / `mark_unread`); the host must support them. */
+    readActions: { type: Boolean, default: false },
     /** Sit at the bottom of the nearest positioned container instead of the viewport. */
     contained: { type: Boolean, default: false },
 });
@@ -60,6 +62,13 @@ const priorityOptions = [
     { value: 'urgent', label: 'Urgent' },
     { value: 'critical', label: 'Critical' },
 ];
+
+const textButtonClass = computed(() => [
+    'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50',
+    escDark.value
+        ? 'text-[var(--esc-panel-text-secondary)] ring-1 ring-[var(--esc-panel-border-input)] hover:bg-[var(--esc-panel-hover)] hover:text-[var(--esc-panel-text)]'
+        : 'text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50',
+]);
 
 const selectClass = computed(() =>
     escDark.value
@@ -147,6 +156,27 @@ const selectClass = computed(() =>
                     <option value="">{{ t('bulk.department_placeholder') }}</option>
                     <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
                 </select>
+
+                <template v-if="readActions">
+                    <button
+                        type="button"
+                        :class="textButtonClass"
+                        :disabled="processing"
+                        data-testid="esc-bulk-mark-read"
+                        @click="performAction('mark_read', null)"
+                    >
+                        {{ t('bulk.mark_read') }}
+                    </button>
+                    <button
+                        type="button"
+                        :class="textButtonClass"
+                        :disabled="processing"
+                        data-testid="esc-bulk-mark-unread"
+                        @click="performAction('mark_unread', null)"
+                    >
+                        {{ t('bulk.mark_unread') }}
+                    </button>
+                </template>
 
                 <button
                     :class="[

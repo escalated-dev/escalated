@@ -10,6 +10,7 @@ import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { useRealtime } from '../../composables/useRealtime';
 import { useI18n } from '../../composables/useI18n';
+import { canMarkTickets, forgetMarks } from '../../composables/useUnread';
 import {
     activeQueueKey,
     normalisePrefix,
@@ -28,8 +29,8 @@ const props = defineProps({
     tags: Array,
     /**
      * Optional. `{ counts: { mine, unassigned, all }, views: [{ id, name, count, filters }],
-     * stats: { open, urgent, sla_at_risk, resolved_today } }`. Without it the
-     * inbox shows no counts, views or stat strip.
+     * stats: { open, urgent, sla_at_risk, resolved_today }, unread: { mine, unassigned, all } }`.
+     * Without it the inbox shows no counts, views, unread markers or stat strip.
      */
     inbox: { type: Object, default: null },
     /** Optional. `{ key, title }`: the queue this list is. Otherwise read off the URL. */
@@ -100,6 +101,13 @@ const heading = computed(() =>
     }),
 );
 
+// Fresh rows from the backend say what is unread; marks made here give way.
+watch(
+    () => props.tickets,
+    (fresh) => forgetMarks(fresh?.data || []),
+);
+const canMark = computed(() => canMarkTickets());
+
 // On a wide screen the ticket page shows this list beside the ticket.
 watch(
     () => [props.tickets, props.queue, props.inbox, page.url],
@@ -122,6 +130,7 @@ useKeyboardShortcuts({
     j: () => listRef.value?.moveDown(),
     k: () => listRef.value?.moveUp(),
     x: () => listRef.value?.toggleSelectFocused(),
+    U: () => listRef.value?.toggleUnreadFocused(),
     Enter: () => listRef.value?.openFocused(),
     '/': () => listRef.value?.focusSearch(),
     '?': () => {
@@ -216,9 +225,10 @@ onMounted(() => {
                 :selected-ids="selectedIds"
                 :bulk-route="route('escalated.agent.tickets.bulk')"
                 :departments="departments"
+                :read-actions="canMark"
                 @clear="selectedIds = []"
             />
         </div>
-        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" agent />
+        <KeyboardShortcutHelp v-model:show="showShortcutHelp" context="list" agent :mark-unread="canMark" />
     </EscalatedLayout>
 </template>

@@ -17,6 +17,14 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `postMessage` bridge (height, theme, navigation) and a host helper,
   `connectEscalatedFrame`, from `@escalated-dev/escalated/embed`. See
   docs/embedding-admin.md and ADR 2026-11-05-embeddable-admin.
+- **Mark tickets read and unread.** With the host's
+  `escalated.agent.tickets.read` / `.unread` routes, each inbox row gets a
+  menu with Mark as read / Mark as unread (`Shift U` for the focused row), the
+  bulk bar gets Mark read / Mark unread (`mark_read` / `mark_unread` on the
+  bulk route), and the ticket's overflow menu gets Mark as unread. The change
+  shows at once and rolls back if refused. The rail marks queues with unread
+  tickets from the optional `inbox.unread`. Hosts without the routes see no
+  new controls. See ADR 2026-11-05-agent-panel-data.
 - **Agents set their own status through the agent route.** The Online / Away /
   Offline menu posts to `escalated.agent.status` when the host has it, and
   falls back to the admin live-chat route `escalated.admin.chat.status`

@@ -91,6 +91,8 @@
         "assign_placeholder": "Assign to...",
         "department_placeholder": "Department...",
         "delete": "Delete",
+        "mark_read": "Mark read",
+        "mark_unread": "Mark unread",
         "deselect_all": "Deselect All",
         "confirm_delete_one": "Delete 1 ticket? This cannot be undone.",
         "confirm_delete_other": "Delete :count tickets? This cannot be undone."
@@ -891,6 +893,7 @@
     },
     "agent_panel": {
         "nav": {
+            "unread_count": ":count unread",
             "label": "Agent navigation",
             "sections": "Sections",
             "workspace": "Workspace",
@@ -930,6 +933,7 @@
         },
         "keys": {
             "search": "Search",
+            "mark_unread": "Mark read or unread",
             "palette": "Open command palette",
             "go_inbox": "Go to inbox",
             "go_unassigned": "Go to unassigned",
@@ -987,6 +991,9 @@
             "filters": "Filters",
             "tickets": "Tickets",
             "select_ticket": "Select :reference",
+            "mark_read": "Mark as read",
+            "mark_unread": "Mark as unread",
+            "row_actions": "Actions for :reference",
             "requester_online": "Requester is online",
             "empty": "No tickets in this queue.",
             "pagination": "Pages",
@@ -1138,6 +1145,7 @@
         "toast": {
             "dismiss": "Dismiss",
             "failed": "That did not go through. Try again.",
+            "marked_unread": "Marked as unread",
             "status": "Status set to :status",
             "priority": "Priority set to :priority",
             "tags": "Tags updated",

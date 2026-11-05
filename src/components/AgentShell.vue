@@ -59,6 +59,7 @@ const activeChats = computed(() => escalated.value.active_chats || []);
 
 const inbox = computed(() => page.props.inbox || null);
 const counts = computed(() => inbox.value?.counts || {});
+const unread = computed(() => inbox.value?.unread || {});
 const views = computed(() => (Array.isArray(inbox.value?.views) ? inbox.value.views : []));
 const canSaveViews = computed(() => Array.isArray(inbox.value?.views));
 // A backend that sends counts counts open tickets; the links then open those.
@@ -79,6 +80,7 @@ const queues = computed(() =>
         label: queueLabels.value[queue.key],
         href: ticketsUrl(prefix.value, queueLinkFilters(queue.filters, countsOpen.value)),
         count: counts.value[queue.key],
+        unread: typeof unread.value[queue.key] === 'number' ? unread.value[queue.key] : 0,
     })),
 );
 
@@ -400,6 +402,15 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
                         >
                             <PanelIcon :name="queue.icon" class="h-4 w-4 shrink-0 opacity-80" />
                             <span class="min-w-0 flex-1 truncate">{{ queue.label }}</span>
+                            <span
+                                v-if="queue.unread > 0"
+                                class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--esc-panel-accent)]"
+                                :title="t('agent_panel.nav.unread_count', { count: formatCount(queue.unread) })"
+                                data-testid="esc-rail-unread"
+                                ><span class="sr-only">{{
+                                    t('agent_panel.nav.unread_count', { count: formatCount(queue.unread) })
+                                }}</span></span
+                            >
                             <span
                                 v-if="formatCount(queue.count)"
                                 class="text-[12px] tabular-nums text-[var(--esc-panel-text-tertiary)]"

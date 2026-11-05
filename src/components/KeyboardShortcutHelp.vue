@@ -10,6 +10,8 @@ const props = defineProps({
     withList: { type: Boolean, default: false },
     /** The agent panel adds the command palette and the g sequences. */
     agent: { type: Boolean, default: false },
+    /** The host can mark tickets read and unread (Shift U on the list). */
+    markUnread: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['update:show']);
@@ -26,6 +28,7 @@ const shortcutGroups = computed(() => {
             { keys: ['j'], description: t('keyboard.move_down') },
             { keys: ['k'], description: t('keyboard.move_up') },
             { keys: ['x'], description: t('keyboard.toggle_select') },
+            ...(props.markUnread ? [{ keys: ['Shift', 'U'], description: t('agent_panel.keys.mark_unread') }] : []),
             { keys: ['Enter'], description: t('keyboard.open_ticket') },
             { keys: ['/'], description: t('agent_panel.keys.search') },
         ],

@@ -5,6 +5,8 @@ import TicketShow from '../../src/pages/Agent/TicketShow.vue';
 import PluginSlot from '../../src/components/PluginSlot.vue';
 import { forgetInbox, rememberInbox } from '../../src/utils/agentQueues';
 import { clearToasts, useAgentToasts } from '../../src/composables/useAgentToasts';
+import { forgetMarks } from '../../src/composables/useUnread';
+import { flushPromises } from '@vue/test-utils';
 
 const usePage = vi.fn();
 const router = { post: vi.fn(), reload: vi.fn(), visit: vi.fn(), get: vi.fn() };
@@ -303,6 +305,59 @@ describe('Agent/TicketShow with the list and queue', () => {
         expect(wrapper.get('[data-testid="esc-back-to-list"]').attributes('href')).toBe(
             '/support/agent/tickets?assigned_to=7',
         );
+    });
+
+    it('shows the opened ticket as read in the list beside it', () => {
+        forgetMarks();
+        rememberInbox({
+            url: '/support/agent/tickets?assigned_to=7',
+            tickets: {
+                data: [
+                    { id: 1042, reference: 'ESC-1042', subject: 'Unable to export CSV', is_unread: true },
+                    { id: 1041, reference: 'ESC-1041', subject: 'SSO loop', is_unread: true },
+                ],
+            },
+        });
+        mountPage();
+        const rows = wrapper.get('[data-testid="esc-show-list"]').findAll('[data-testid="esc-queue-row"]');
+        expect(rows[0].attributes('data-unread')).toBeUndefined();
+        expect(rows[1].attributes('data-unread')).toBe('true');
+    });
+
+    it('marks the ticket unread from the overflow menu and goes back to the list', async () => {
+        forgetMarks();
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ is_unread: true }) })),
+        );
+        mountPage();
+        await wrapper.get('[data-testid="esc-ticket-more"]').trigger('click');
+        await wrapper
+            .findAll('[role="menuitem"]')
+            .find((i) => i.text() === 'Mark as unread')
+            .trigger('click');
+        await flushPromises();
+        expect(fetch).toHaveBeenCalledWith(
+            '/escalated.agent.tickets.unread/ESC-1042',
+            expect.objectContaining({ method: 'POST' }),
+        );
+        expect(router.visit).toHaveBeenCalledWith('/support/agent/tickets');
+        expect(useAgentToasts().toasts.value.at(-1).message).toBe('Marked as unread');
+    });
+
+    it('offers no Mark as unread without the unread route', async () => {
+        route.mockImplementation((name, params) => {
+            if (name === 'escalated.agent.tickets.unread') throw new Error('no route');
+            const list = Array.isArray(params) ? params : [params];
+            return `/${name}/${list.join('/')}`;
+        });
+        mountPage();
+        await wrapper.get('[data-testid="esc-ticket-more"]').trigger('click');
+        expect(wrapper.findAll('[role="menuitem"]').map((i) => i.text())).not.toContain('Mark as unread');
+        route.mockImplementation((name, params) => {
+            const list = Array.isArray(params) ? params : [params];
+            return `/${name}/${list.join('/')}`;
+        });
     });
 
     it('names the queue in the back link from the queue prop', () => {

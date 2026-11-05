@@ -66,3 +66,31 @@ export const FiltersOpen = {
         await userEvent.click(within(canvasElement).getByTestId('esc-queue-filter-toggle'));
     },
 };
+
+/** The row menu on an unread row: Mark as read (needs the host's read and unread routes). */
+export const RowMenuOpen = {
+    render: render('dark'),
+    play: async ({ canvasElement }) => {
+        await userEvent.click(within(canvasElement).getAllByTestId('esc-queue-row-menu')[0]);
+    },
+};
+
+export const RowMenuOpenLight = {
+    render: render('light'),
+    play: RowMenuOpen.play,
+};
+
+/** Two rows selected: the bulk bar with Mark read and Mark unread. */
+export const BulkSelection = {
+    render: render('dark'),
+    play: async ({ canvasElement }) => {
+        const boxes = within(canvasElement).getAllByTestId('esc-queue-row-select');
+        await userEvent.click(boxes[0]);
+        await userEvent.click(boxes[1]);
+    },
+};
+
+export const BulkSelectionLight = {
+    render: render('light'),
+    play: BulkSelection.play,
+};

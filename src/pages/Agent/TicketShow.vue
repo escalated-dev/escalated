@@ -11,6 +11,8 @@ import { useRealtime } from '../../composables/useRealtime';
 import { useChat } from '../../composables/useChat';
 import { useI18n } from '../../composables/useI18n';
 import { useAgentCommands } from '../../composables/useAgentCommands';
+import { markRoute, markSeen, useUnread } from '../../composables/useUnread';
+import { toast } from '../../composables/useAgentToasts';
 import { normalisePrefix, recallInbox, ticketsUrl } from '../../utils/agentQueues';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { ref, computed, onUnmounted, watch } from 'vue';
@@ -80,6 +82,7 @@ const routes = computed(() => {
         snooze: adminFallback('snooze', reference),
         unsnooze: adminFallback('unsnooze', reference),
         merge: page.props.escalated?.is_admin ? routeOr('escalated.admin.tickets.merge', reference) : '',
+        unread: markRoute(props.ticket, true),
         pin: routeOr('escalated.agent.tickets.pin', [reference, 0])
             ? (replyId) => routeOr('escalated.agent.tickets.pin', [reference, replyId])
             : null,
@@ -214,6 +217,23 @@ const adjacent = computed(() => {
     return { previous: rows[index - 1] || null, next: rows[index + 1] || null };
 });
 const backLabel = computed(() => props.queue?.title || remembered.value?.title || t('agent_panel.nav.tickets'));
+
+// --- Read state -------------------------------------------------------------------
+// Opening the ticket marked it read on the backend; the list beside it shows
+// that too. "Mark as unread" goes back to the list, as reopening the ticket
+// would mark it read again.
+watch(
+    () => props.ticket.id,
+    () => markSeen(props.ticket),
+    { immediate: true },
+);
+const { setUnread } = useUnread();
+async function markUnread() {
+    if (await setUnread(props.ticket, true)) {
+        toast(t('agent_panel.toast.marked_unread'));
+        router.visit(backHref.value);
+    }
+}
 
 // --- Switching tickets ----------------------------------------------------------
 // Opening another ticket keeps this page and swaps its props, which can take
@@ -496,6 +516,7 @@ onUnmounted(() => {
                         :chat="chat"
                         @chat-send="onChatSend"
                         @end-chat="onEndChat"
+                        @mark-unread="markUnread"
                     />
                 </div>
             </section>

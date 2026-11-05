@@ -66,7 +66,7 @@ const props = defineProps({
     knowledgeBaseUrl: { type: String, default: '' },
 });
 
-const emit = defineEmits(['chat-send', 'end-chat']);
+const emit = defineEmits(['chat-send', 'end-chat', 'mark-unread']);
 const { t } = useI18n();
 const { getPageComponents } = usePluginExtensions();
 const escDark = inject(
@@ -368,6 +368,7 @@ const moreItems = computed(() => {
     items.push({ key: 'h-ticket', heading: true, label: t('agent_panel.ticket.ticket') });
     items.push({ key: 'history', label: t('agent_panel.ticket.history'), icon: 'clock' });
     items.push({ key: 'copy', label: t('agent_panel.ticket.copy_link'), icon: 'link' });
+    if (props.routes.unread) items.push({ key: 'unread', label: t('agent_panel.inbox.mark_unread'), icon: 'envelope' });
     if (props.routes.merge) items.push({ key: 'merge', label: t('agent_panel.ticket.merge'), icon: 'ticket' });
     return items;
 });
@@ -383,6 +384,7 @@ function onMore(item) {
     } else if (item.key === 'merge') mergeOpen.value = true;
     else if (item.key === 'copy') copyLink();
     else if (item.key === 'history') openHistory();
+    else if (item.key === 'unread') emit('mark-unread');
 }
 
 // --- Previous and next ticket ---------------------------------------------------------
