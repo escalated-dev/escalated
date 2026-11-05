@@ -171,10 +171,19 @@ and a menu: Online, Away, Offline. The status is read from the shared
 `escalated.chat_status`), then from the agent's last choice in this browser
 (localStorage key `escalated-agent-status`), then defaults to Online.
 
+The backend may also share `escalated.agent_statuses`, the values it accepts
+(`["online", "away", "offline"]`); the menu then offers only those. Without
+it all three are offered.
+
 Choosing a status updates both places at once, remembers it in the browser
-and, when the host defines a route named `escalated.admin.chat.status`, posts
-`{ "status": "online" | "away" | "offline" }` to it (escalated-laravel stores
-it on the agent profile for live-chat routing). A host without that route, or
-one that shares no `agent_status`, gets a status that lives in the browser
-only. Backends that want it to follow the agent between devices should share
-`escalated.agent_status` and accept the post from agents, not only admins.
+and posts `{ "status": "online" | "away" | "offline" }` to the host's
+`escalated.agent.status` route (`PUT`/`POST {prefix}/agent/status`, open to
+every agent). A host without that route but with the admin live-chat route
+`escalated.admin.chat.status` gets the post there instead, as before. When the
+answer is JSON with `agent_status`, that value is shown; when the backend
+refuses the change (a 4xx or 5xx), the previous status comes back. A host with
+neither route gets a status that lives in the browser only.
+
+The shapes are fixed by the developer-context ADR
+`decisions/2026-11-05-agent-panel-data.md`. The status is the same field
+live-chat routing uses, so there is one stored status per agent.

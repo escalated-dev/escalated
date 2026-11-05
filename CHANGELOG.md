@@ -17,6 +17,13 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `postMessage` bridge (height, theme, navigation) and a host helper,
   `connectEscalatedFrame`, from `@escalated-dev/escalated/embed`. See
   docs/embedding-admin.md and ADR 2026-11-05-embeddable-admin.
+- **Agents set their own status through the agent route.** The Online / Away /
+  Offline menu posts to `escalated.agent.status` when the host has it, and
+  falls back to the admin live-chat route `escalated.admin.chat.status`
+  otherwise. It offers only the values in the optional shared
+  `escalated.agent_statuses`, keeps the `agent_status` the backend answers
+  with, and goes back to the previous status when the backend refuses the
+  change. See ADR 2026-11-05-agent-panel-data.
 
 ### Changed
 - The README's Layout Integration section now says what `layout` has always

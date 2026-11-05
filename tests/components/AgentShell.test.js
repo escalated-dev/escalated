@@ -246,6 +246,13 @@ describe('AgentShell rail', () => {
         expect(wrapper.get('[data-testid="esc-rail-user"]').text()).toContain('Offline');
     });
 
+    it('offers only the statuses the backend accepts', async () => {
+        mountLayout('/support/agent/tickets', {}, { agent_status: 'online', agent_statuses: ['online', 'offline'] });
+        await wrapper.get('[data-testid="esc-rail-user"]').trigger('click');
+        const items = wrapper.findAll('[role="menuitemradio"]');
+        expect(items.map((b) => b.text().replace('✓', ''))).toEqual(['Online', 'Offline']);
+    });
+
     it('puts the agent avatar with its status in the top bar too', async () => {
         mountLayout('/support/agent/tickets');
         const avatar = wrapper.get('[data-testid="esc-topbar-user"]');

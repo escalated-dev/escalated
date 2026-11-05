@@ -10,12 +10,19 @@ import { computed, ref } from 'vue';
  *   3. online.
  *
  * Changing it updates every caller at once, remembers the choice in this
- * browser and, when the host defines the `escalated.admin.chat.status` route
- * (escalated-laravel does), posts `{ status }` to it so live-chat routing
- * follows. A host without that route keeps the status client-side only.
+ * browser and posts `{ status }` to the host's `escalated.agent.status` route
+ * (any agent may set their own), falling back to the admin live-chat route
+ * `escalated.admin.chat.status` on hosts that only have that one. When the
+ * backend answers with `{ agent_status }` that value is kept; when it refuses
+ * the change the previous status comes back. A host with neither route keeps
+ * the status client-side only.
+ *
+ * `allowed` is the backend's `escalated.agent_statuses`; the menu offers only
+ * those of the known values.
  */
 export const AGENT_STATUSES = ['online', 'away', 'offline'];
 export const STATUS_STORAGE_KEY = 'escalated-agent-status';
+const STATUS_ROUTES = ['escalated.agent.status', 'escalated.admin.chat.status'];
 
 const current = ref(null);
 
@@ -39,17 +46,25 @@ function remember(value) {
     }
 }
 
-function statusEndpoint() {
-    if (typeof window === 'undefined' || typeof window.route !== 'function') return '';
+function routeUrl(name) {
     try {
-        const url = window.route('escalated.admin.chat.status');
+        const url = window.route(name);
         return typeof url === 'string' && url !== '#' ? url : '';
     } catch {
         return '';
     }
 }
 
-function post(value) {
+function statusEndpoint() {
+    if (typeof window === 'undefined' || typeof window.route !== 'function') return '';
+    for (const name of STATUS_ROUTES) {
+        const url = routeUrl(name);
+        if (url) return url;
+    }
+    return '';
+}
+
+function post(value, previous) {
     const url = statusEndpoint();
     if (!url || typeof fetch !== 'function') return;
     fetch(url, {
@@ -61,22 +76,46 @@ function post(value) {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
         },
         body: JSON.stringify({ status: value }),
-    }).catch(() => {});
+    })
+        .then(async (response) => {
+            // A later choice has replaced this one: leave it alone.
+            if (!response || current.value !== value) return;
+            if (response.ok === false) {
+                if (previous) {
+                    current.value = previous;
+                    remember(previous);
+                }
+                return;
+            }
+            const data = typeof response.json === 'function' ? await response.json().catch(() => null) : null;
+            const confirmed = valid(data?.agent_status);
+            if (confirmed && current.value === value) {
+                current.value = confirmed;
+                remember(confirmed);
+            }
+        })
+        .catch(() => {});
 }
 
-export function useAgentStatus({ initial = null } = {}) {
+export function useAgentStatus({ initial = null, allowed = null } = {}) {
     if (current.value === null) {
         current.value = valid(initial) || remembered() || 'online';
     }
 
+    const statuses = computed(() => {
+        const offered = Array.isArray(allowed) ? allowed.filter((value) => valid(value)) : [];
+        return offered.length ? offered : AGENT_STATUSES;
+    });
+
     function setStatus(value) {
         if (!valid(value)) return;
+        const previous = current.value;
         current.value = value;
         remember(value);
-        post(value);
+        post(value, previous);
     }
 
-    return { status: computed(() => current.value), setStatus };
+    return { status: computed(() => current.value), statuses, setStatus };
 }
 
 /** Forget the shared status (tests, and a sign-out in a long-lived tab). */
