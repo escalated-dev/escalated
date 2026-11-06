@@ -4,6 +4,36 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.9] - 2026-11-05
+
+### Upgrading
+- **Everything new is optional and gated on the backend.** The notifications
+  bell, read/unread controls, knowledge-base search, customer presence and
+  the agent status route appear only when the backend shares the matching
+  prop or defines the matching route (ADR 2026-11-05-agent-panel-data). A
+  backend that sends none of them renders the agent panel as 0.12.8 did. The
+  escalated backends send them from their releases of 2026-11-05; those
+  releases add tables (`ticket_reads`, `customer_presence`,
+  `notifications`, agent statuses) and need their migrations run.
+- **Agent status posts to `escalated.agent.status` first.** The Online /
+  Away / Offline menu used to post only to `escalated.admin.chat.status`; it
+  now prefers the agent route and falls back to the admin one. On the
+  backends whose live-chat routing reads the agent's own status, an agent
+  must set themselves Online to receive chats.
+- **The @mention picker follows the host's route.** When the shared route
+  list has `escalated.admin.agents.search` it requests that URL instead of
+  the hard-coded `/support/admin/agents/search`. A host that proxied the old
+  path for a non-`/support` prefix can drop the proxy.
+- **Admin embedding is off by default.** `layoutScope` defaults to
+  `['customer']`, so `layout` wraps the customer pages exactly as before.
+  Listing `'admin'` (and optionally `'agent'`), the backend's
+  `escalated.embed` flag, `<EscalatedNavigation />` and the iframe connector
+  (`@escalated-dev/escalated/embed`, a new package export) only matter once a
+  host opts in; see docs/embedding-admin.md.
+- The widget bundle (`dist/widget/escalated-widget.js`) is unchanged apart
+  from its version banner: built from this release and from 0.12.8 with the
+  locked dependencies, the two are byte-identical before the version bump.
+
 ### Fixed
 - The @mention picker in the reply, note and chat composers now searches the
   host's `escalated.admin.agents.search` route when the host defines it, so
