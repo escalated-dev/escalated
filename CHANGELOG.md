@@ -4,6 +4,21 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.10] - 2026-11-07
+
+### Upgrading
+- No host changes. This release only updates build tooling in the lockfile;
+  the package's dependencies and peer ranges are unchanged.
+- The widget bundle (`dist/widget/escalated-widget.js`) is unchanged apart
+  from its version banner: built from this release and from 0.12.9 with the
+  locked dependencies, the two are byte-identical before the version bump, so
+  the backends' vendored widgets stay as they are.
+
+### Changed
+- **Dependencies (dev, lock):** tailwindcss and @tailwindcss/postcss 4.3.5,
+  postcss 8.5.32, autoprefixer 10.6.2 and @vitejs/plugin-vue 6.0.10, within
+  the existing ranges (#252).
+
 ## [0.12.9] - 2026-11-05
 
 ### Upgrading
