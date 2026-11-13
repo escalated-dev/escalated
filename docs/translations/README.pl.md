@@ -1,354 +1,199 @@
-<p align="center">
-  <a href="README.ar.md">العربية</a> •
-  <a href="README.de.md">Deutsch</a> •
-  <a href="../../README.md">English</a> •
-  <a href="README.es.md">Español</a> •
-  <a href="README.fr.md">Français</a> •
-  <a href="README.it.md">Italiano</a> •
-  <a href="README.ja.md">日本語</a> •
-  <a href="README.ko.md">한국어</a> •
-  <a href="README.nl.md">Nederlands</a> •
-  <b>Polski</b> •
-  <a href="README.pt-BR.md">Português (BR)</a> •
-  <a href="README.ru.md">Русский</a> •
-  <a href="README.tr.md">Türkçe</a> •
+<p align="center"><sub>
+  <a href="README.ar.md">العربية</a> ·
+  <a href="README.de.md">Deutsch</a> ·
+  <a href="../../README.md">English</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a> ·
+  <a href="README.it.md">Italiano</a> ·
+  <a href="README.ja.md">日本語</a> ·
+  <a href="README.ko.md">한국어</a> ·
+  <a href="README.nl.md">Nederlands</a> ·
+  <b>Polski</b> ·
+  <a href="README.pt-BR.md">Português (BR)</a> ·
+  <a href="README.ru.md">Русский</a> ·
+  <a href="README.tr.md">Türkçe</a> ·
   <a href="README.zh-CN.md">简体中文</a>
+</sub></p>
+
+<p align="center">
+  <a href="https://escalated.dev"><img src="../assets/readme/logo.png" width="72" height="72" alt="Escalated"></a>
 </p>
 
-<h1>
-  <img src="https://escalated.dev/apple-touch-icon.png" width="28" style="vertical-align:middle;" />
-  Escalated
-</h1>
+<h1 align="center">Escalated</h1>
 
-[![Tests](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml/badge.svg)](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml)
-[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B62107%2Fgithub.com%2Fescalated-dev%2Fescalated.svg?type=shield)](https://app.fossa.com/projects/custom%2B62107%2Fgithub.com%2Fescalated-dev%2Fescalated?ref=badge_shield)
-[![npm](https://img.shields.io/npm/v/@escalated-dev/escalated)](https://www.npmjs.com/package/@escalated-dev/escalated)
-[![Vue 3](https://img.shields.io/badge/vue-3.x-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  Zgłoszenia supportowe wbudowane w Twoją aplikację.<br>
+  Helpdesk open source z SLA, regułami eskalacji, skrzynką dla agentów i portalem klienta.
+</p>
 
-Escalated to osadzalny system zgloszen wsparcia z monitorowaniem SLA, regulami eskalacji, przepywami pracy agentow i portalem klienta. To repozytorium zawiera wszystkie wspoldzielone zasoby frontendowe (Vue 3 + Inertia.js) uzywane we wszystkich obslugiwanych frameworkach backendowych.
+<p align="center">
+  <a href="https://escalated.dev"><b>Strona</b></a> ·
+  <a href="https://escalated.dev/docs"><b>Dokumentacja</b></a> ·
+  <a href="https://escalated.dev/cloud"><b>Cloud</b></a> ·
+  <a href="../../CHANGELOG.md"><b>Lista zmian</b></a>
+</p>
 
-👉 **Dowiedz sie wiecej, obejrzyj dema i porownaj opcje Chmura vs Samodzielny hosting na** **[https://escalated.dev](https://escalated.dev)**
+<br>
 
-**Nie instaluj tego pakietu bezposrednio.** Zacznij od pakietu backendowego dla swojego frameworka — zajmie sie wszystkim, w tym pobieraniem tych zasobow frontendowych.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/inbox-dark.png">
+  <img src="../assets/readme/inbox-light.png" alt="Skrzynka agenta w Escalated: zapisane widoki z licznikami, odliczanie SLA i priorytety przy każdym zgłoszeniu" width="100%">
+</picture>
+
+## Co potrafi
+
+<table>
+  <tr>
+    <td width="40%">
+      <h3>Skrzynka, w której Twoi agenci mogą pracować cały dzień</h3>
+      Rozmowa, notatki wewnętrzne, gotowe odpowiedzi i liczniki SLA na jednym ekranie, ze skrótami klawiszowymi do poruszania się po kolejce.
+    </td>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/ticket-dark.png">
+        <img src="../assets/readme/ticket-light.png" alt="Zgłoszenie otwarte w obszarze roboczym agenta z edytorem odpowiedzi">
+      </picture>
+    </td>
+  </tr>
+  <tr>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/dashboard-dark.png">
+        <img src="../assets/readme/dashboard-light.png" alt="Strona raportów w panelu administracyjnym z czasami odpowiedzi, CSAT i naruszeniami SLA">
+      </picture>
+    </td>
+    <td width="40%">
+      <h3>Widoczne SLA i reguły eskalacji</h3>
+      Ustaw cele odpowiedzi i rozwiązania dla każdego priorytetu, eskaluj automatycznie, gdy nie są dotrzymywane, i śledź naruszenia na stronie raportów.
+    </td>
+  </tr>
+  <tr>
+    <td width="40%">
+      <h3>Gotowy portal klienta</h3>
+      Klienci otwierają zgłoszenia, odpowiadają i sprawdzają status w Twojej aplikacji, a obok mają bazę wiedzy. Możesz też osadzić widżet na dowolnej stronie.
+    </td>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/portal-dark.png">
+        <img src="../assets/readme/portal-light.png" alt="Lista zgłoszeń w portalu klienta">
+      </picture>
+    </td>
+  </tr>
+</table>
 
 ## Funkcje
 
-- **Dzielenie zgloszen** — Podziel odpowiedz na nowe samodzielne zgloszenie z zachowaniem kontekstu
-- **Odkadanie zgloszen** — Odloz zgloszenia z predefiniowanymi ustawieniami (1h, 4h, jutro, nastepny tydzien) i automatycznym budzeniem
-- **Zapisane widoki / niestandardowe kolejki** — Zapisuj, nazywaj i udostepniaj ustawienia filtrow jako wielokrotnie uzywane widoki zgloszen
-- **Osadzalny widget wsparcia** — Gotowy widget `<script>` z wyszukiwaniem bazy wiedzy, formularzem zgloszenia i sprawdzaniem statusu
-- **Aktualizacje w czasie rzeczywistym** — Obsluga WebSocket (Pusher/Reverb/Soketi) z automatycznym fallbackiem pollingu
-- **Przelacznik bazy wiedzy** — Wlacz lub wylacz publiczna baze wiedzy w ustawieniach administratora
-- **CI: ESLint + Prettier** — Automatyczne egzekwowanie stylu kodu przy kazdym pull requeście
+<table>
+<tr>
+<td width="33%" valign="top">
 
-## Pierwsze Kroki
+**Obszar roboczy agenta**
+- Filtrowana kolejka z zapisanymi widokami
+- Szybkie filtry: moje, nieprzypisane, pilne, SLA
+- Akcje zbiorcze i makra
+- Notatki wewnętrzne i przypięte notatki
+- Gotowe odpowiedzi w edytorze
+- Skróty klawiszowe i paleta poleceń
 
-Wybierz swoj framework:
+</td>
+<td width="33%" valign="top">
 
-| Framework | Repozytorium | Instalacja |
-|-----------|------|---------|
-| **Laravel** | [escalated-dev/escalated-laravel](https://github.com/escalated-dev/escalated-laravel) | `composer require escalated-dev/escalated-laravel` |
-| **Rails** | [escalated-dev/escalated-rails](https://github.com/escalated-dev/escalated-rails) | `gem "escalated"` |
-| **Django** | [escalated-dev/escalated-django](https://github.com/escalated-dev/escalated-django) | `pip install escalated-django` |
-| **AdonisJS** | [escalated-dev/escalated-adonis](https://github.com/escalated-dev/escalated-adonis) | `npm install @escalated-dev/escalated-adonis` |
-| **WordPress** | [escalated-dev/escalated-wordpress](https://github.com/escalated-dev/escalated-wordpress) | [Pobierz escalated.zip](https://github.com/escalated-dev/escalated-wordpress/releases/latest) |
-| **Filament** | [escalated-dev/escalated-filament](https://github.com/escalated-dev/escalated-filament) | `composer require escalated-dev/escalated-filament` |
-| **React Native** | [escalated-dev/escalated-react-native](https://github.com/escalated-dev/escalated-react-native) | `npm install @escalated-dev/escalated-react-native` |
-| **Flutter** | [escalated-dev/escalated-flutter](https://github.com/escalated-dev/escalated-flutter) | Zobacz [konfiguracja pubspec.yaml](https://github.com/escalated-dev/escalated-flutter#quick-start) |
+**Narzędzia zgłoszeń**
+- Wydzielanie odpowiedzi do nowego zgłoszenia
+- Odkładanie z gotowymi ustawieniami i automatycznym wybudzaniem
+- Obserwowanie ważnych dla Ciebie zgłoszeń
+- Załączniki metodą przeciągnij i upuść
+- Pełna oś czasu aktywności
 
-Kazde repozytorium backendowe ma pelne instrukcje konfiguracji — polecenie instalacji, migracje, konfiguracja i integracja frontendowa.
+</td>
+<td width="33%" valign="top">
 
-## Tailwind CSS
+**SLA i eskalacja**
+- Odliczanie SLA z ostrzeżeniem i naruszeniem
+- Zarządzanie politykami SLA
+- Kreator reguł eskalacji
+- Działy i tagi
 
-Komponenty Escalated uzywaja klas Tailwind CSS. **Musisz** dodac ten pakiet do konfiguracji `content` Tailwinda, aby jego klasy nie zostaly usuniete:
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
 
-```js
-// tailwind.config.js
-export default {
-    content: [
-        // ... twoje istniejace sciezki
-        './node_modules/@escalated-dev/escalated/src/**/*.vue',
-    ],
-}
-```
+**Portal klienta**
+- Lista zgłoszeń z filtrami i wyszukiwaniem
+- Formularz nowego zgłoszenia z załącznikami
+- Wątek odpowiedzi i śledzenie statusu
+- Ocena CSAT z komentarzami
+- Baza wiedzy, włączana lub wyłączana
 
-Bez tego interfejs Escalated zostanie wyrenderowany, ale style takie jak tla przyciskow i kolory odznak beda brakujace.
+</td>
+<td width="33%" valign="top">
 
-## Motywy
+**Czas rzeczywisty**
+- Aktualizacje na żywo przez Pusher, Reverb lub Soketi
+- Automatyczny polling jako rozwiązanie zapasowe
+- Podgląd, kto jeszcze przegląda zgłoszenie
+- Ostrzeżenie o kolizji podczas odpowiadania
 
-Escalated domyslnie renderuje sie wewnatrz samodzielnego layoutu. Aby zintegrowac go z systemem projektowania swojej aplikacji, uzyj `EscalatedPlugin`:
+</td>
+<td width="33%" valign="top">
 
-```js
-import { createApp } from 'vue'
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/Layouts/AppLayout.vue'
+**Pasuje do Twojej aplikacji**
+- Renderuje się w Twoim własnym układzie
+- Tokeny motywów dla koloru, zaokrągleń, czcionki
+- Panel administracyjny do osadzenia w Twoim panelu admina
+- Gotowy widżet wsparcia dla dowolnej strony
+- Wtyczki dla stron i widżetów paska bocznego
 
-const app = createApp(...)
+</td>
+</tr>
+</table>
 
-app.use(EscalatedPlugin, {
-    layout: AppLayout,
-    theme: {
-        primary: '#3b82f6',
-        radius: '0.75rem',
-    }
-})
-```
-
-### Integracja Layoutu
-
-Przekaz komponent layoutu swojej aplikacji, a wszystkie strony Escalated beda renderowane wewnatrz niego automatycznie. Komponent layoutu musi akceptowac slot `#header` i domyslny slot:
-
-```vue
-<!-- Twoj layout musi obslugiwac te sloty -->
-<template>
-    <div>
-        <nav>...</nav>
-        <header><slot name="header" /></header>
-        <main><slot /></main>
-    </div>
-</template>
-```
-
-Gdy nie zostanie podany layout, Escalated uzywa wlasnego wbudowanego paska nawigacji.
-
-### Niestandardowe Wlasciwosci CSS
-
-Opcja `theme` ustawia niestandardowe wlasciwosci CSS, do ktorych mozesz sie odwolywac we wlasnych stylach:
-
-| Wlasciwosc | Domyslnie | Opis |
-|----------|---------|-------------|
-| `--esc-primary` | `#4f46e5` | Glowny kolor akcji |
-| `--esc-primary-hover` | automatycznie przyciemniony | Glowny kolor najechania |
-| `--esc-radius` | `0.5rem` | Promien obramowania dla pol i przyciskow |
-| `--esc-radius-lg` | automatycznie skalowany | Promien obramowania dla kart i paneli |
-| `--esc-font-family` | dziedziczony | Nadpisanie rodziny czcionek |
-
-### Przyklady Frameworkow
-
-**Laravel** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AuthenticatedLayout })
-```
-
-**Rails** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/layouts/AppLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AppLayout })
-```
-
-**Django** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import BaseLayout from '@/layouts/BaseLayout.vue'
-
-app.use(EscalatedPlugin, { layout: BaseLayout })
-```
-
-**AdonisJS** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/layouts/AppLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AppLayout })
-```
-
-## Co Jest w Tym Repozytorium
-
-Wszystkie komponenty Vue 3 + Inertia.js napedzajace interfejs Escalated. Sa identyczne w Laravel, Rails, Django i AdonisJS — framework backendowy renderuje je przez Inertia.
-
-## 📸 Zrzuty Ekranu
-
-> Zrzuty ekranu sa automatycznie generowane ze Storybooka przez workflow [component-screenshots](.github/workflows/screenshots.yml).
+<p align="center"><sub><a href="../components.md">Wszystkie strony i komponenty</a></sub></p>
 
 <p align="center">
-  <strong>Panel Administratora (Ciemny)</strong><br/>
-  <img src="../../docs/assets/escalated_admin_1.png" alt="Panel administratora Escalated — tryb ciemny z nawigacja boczna, kartami KPI, statystykami i lista zgloszen" width="800" />
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
 </p>
 
-<p align="center">
-  <strong>Panel Administratora (Jasny)</strong><br/>
-  <img src="../../docs/assets/escalated_admin_3.png" alt="Panel administratora Escalated — tryb jasny z nawigacja boczna, kartami KPI, statystykami i lista zgloszen" width="800" />
-</p>
+## Szybki start
 
-<p align="center">
-  <strong>Kolejka Zgloszen</strong><br/>
-  <img src="../../docs/assets/escalated_ticket_list.png" alt="Kolejka zgloszen Escalated — lista zgloszen agenta z filtrami, wyszukiwaniem, akcjami masowymi i wskaznikami SLA" width="800" />
-</p>
+Ten pakiet to wspólny frontend Vue 3 + Inertia. Nie instalujesz go osobno: dodaj pakiet dla swojego backendu, a ten interfejs przyjdzie razem z nim.
 
-<p align="center">
-  <strong>Panel Agenta</strong><br/>
-  <img src="../../docs/assets/escalated_admin_2.png" alt="Panel agenta Escalated — gorny pasek nawigacji, statystyki i kolejka przypisanych zgloszen" width="800" />
-</p>
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-laravel"><b>Laravel</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-rails"><b>Rails</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-django"><b>Django</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-nestjs"><b>NestJS</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-adonis"><b>AdonisJS</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-symfony"><b>Symfony</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-phoenix"><b>Phoenix</b></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-go"><b>Go</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-dotnet"><b>.NET</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-spring"><b>Spring</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-wordpress"><b>WordPress</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-filament"><b>Filament</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-react-native"><b>React Native</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-flutter"><b>Flutter</b></a></td>
+  </tr>
+</table>
 
-<p align="center">
-  <strong>Widok Szczegolowy Zgloszenia</strong><br/>
-  <img src="../../docs/assets/escalated_ticket_view.png" alt="Widok szczegolowy zgloszenia Escalated — watek rozmowy, edytor odpowiedzi i boczny panel zgloszenia z zegarem SLA" width="800" />
-</p>
+## Dowiedz się więcej
 
-### Strony
-
-**Portal Klienta** — Samoobslugowe zarzadzanie zgloszeniami
-- `pages/Customer/Index.vue` — Lista zgloszen z filtrami statusu i wyszukiwaniem
-- `pages/Customer/Create.vue` — Formularz nowego zgloszenia z zalacznikami plikow
-- `pages/Customer/Show.vue` — Szczegoly zgloszenia z watkiem odpowiedzi
-
-**Panel Agenta** — Kolejka zgloszen i przeplywy pracy
-- `pages/Agent/Dashboard.vue` — Przeglad statystyk i ostatnich zgloszen
-- `pages/Agent/TicketIndex.vue` — Filtrowalna kolejka zgloszen
-- `pages/Agent/TicketShow.vue` — Pelny widok zgloszenia z panelem bocznym, notatkami wewnetnymi, gotowymi odpowiedziami
-
-**Panel Administratora** — Konfiguracja systemu
-- `pages/Admin/Reports.vue` — Panel analityczny
-- `pages/Admin/Departments/` — Zarzadzanie dzialami (CRUD)
-- `pages/Admin/SlaPolicies/` — Zarzadzanie politykami SLA
-- `pages/Admin/EscalationRules/` — Kreator regul eskalacji
-- `pages/Admin/Tags/` — Zarzadzanie tagami
-- `pages/Admin/CannedResponses/` — Szablony gotowych odpowiedzi
-
-### Wspoldzielone Komponenty
-
-Wielokrotnie uzywane bloki budulcowe stosowane na powyzszych stronach.
-
-| Komponent | Opis |
-|-----------|-------------|
-| `StatusBadge` | Kolorowa odznaka statusu zgloszenia |
-| `PriorityBadge` | Kolorowa odznaka priorytetu zgloszenia |
-| `TicketList` | Paginowana tabela zgloszen |
-| `ReplyThread` | Chronologiczny widok odpowiedzi |
-| `ReplyComposer` | Edytor odpowiedzi/notatki z przesylaniem plikow i wstawianiem gotowych odpowiedzi |
-| `ActivityTimeline` | Dziennik audytu zdarzen zgloszenia |
-| `SlaTimer` | Odliczanie SLA ze stanami naruszenia/ostrzezenia |
-| `TicketFilters` | Pasek filtrow statusu, priorytetu, agenta, dzialu |
-| `TicketSidebar` | Boczny panel szczegulow zgloszenia (status, SLA, tagi, aktywnosc) |
-| `AssigneeSelect` | Rozwijana lista przypisania agenta |
-| `TagSelect` | Wielokrotny wybor tagow |
-| `FileDropzone` | Przesylanie plikow przeciagnij i upusc |
-| `AttachmentList` | Wyswietlanie zalacznikow z linkami do pobrania |
-| `StatsCard` | Karta metryk z etykieta, wartoscia i trendem |
-| `EscalatedLayout` | Layout najwyzszego poziomu z nawigacja (obsluguje wstrzykiwanie layoutu hosta) |
-| `BulkActionBar` | Pasek narzedzi do operacji masowych na wybranych zgloszeniach |
-| `QuickFilters` | Chipy filtrow jednym kliknieciem (Moje Zgloszenia, Nieprzypisane, Pilne, SLA Naruszone) |
-| `MacroDropdown` | Rozwijana lista do stosowania wieloetapowych makr na zgloszeniu |
-| `FollowButton` | Przycisk przelaczania sledzenia/odsledzenia zgloszenia |
-| `SatisfactionRating` | Wprowadzanie oceny CSAT 1-5 gwiazdek z opcjonalnym komentarzem |
-| `KeyboardShortcutHelp` | Nakladka modalna pokazujaca wszystkie dostepne skroty klawiszowe |
-| `PinnedNotes` | Wyswietlanie przypinych notatek wewnetrznych na gorze watku |
-| `PresenceIndicator` | Wskaznik w czasie rzeczywistym pokazujacy kto przegada zgloszenie |
-
-### Composables
-
-| Composable | Opis |
-|------------|-------------|
-| `useKeyboardShortcuts` | Rejestruje i zarzadza skrotami klawiszowymi dla akcji na zgloszeniach |
-
-### Plugin
-
-| Eksport | Opis |
-|--------|-------------|
-| `EscalatedPlugin` | Plugin Vue do wstrzykiwania layoutu i motywow CSS |
-
-## Tworzenie Pluginow
-
-Escalated obsluguje pluginy niezalezne od frameworka, zbudowane za pomoca [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk). Pluginy sa pisane raz w TypeScript i dzialaja na wszystkich backendach Escalated.
-
-### Jak Dziala System Pluginow Frontendowych
-
-Frontend uzywa `defineEscalatedPlugin()` do rejestrowania komponentow Vue — niestandardowych stron administratora, widgetow paska bocznego zgloszen lub paneli dashboardu — ktore sa automatycznie montowane, gdy plugin jest aktywny.
-
-```typescript
-import { defineEscalatedPlugin } from '@escalated-dev/escalated'
-import MySettingsPage from './MySettingsPage.vue'
-
-export default defineEscalatedPlugin({
-  name: 'my-plugin',
-  pages: {
-    'admin/my-plugin/settings': MySettingsPage,
-  },
-})
-```
-
-### Jak Laczy Sie z Backendem
-
-Backend uzywa `definePlugin()` z [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk) do obslugi logiki biznesowej TypeScript — subskrybowania hookow cyklu zycia zgloszen, udostepniania endpointow API i utrwalania danych. Wpisy frontendowe i backendowe dzialaja razem jako pojedynczy pakiet npm.
-
-```typescript
-// wpis backendowy (index.ts)
-import { definePlugin } from '@escalated-dev/plugin-sdk'
-
-export default definePlugin({
-  name: 'my-plugin',
-  version: '1.0.0',
-  actions: {
-    'ticket.created': async (event, ctx) => {
-      ctx.log.info('New ticket!', event)
-    },
-  },
-})
-```
-
-### Szybki Przyklad: Oba Punkty Wejscia
-
-Opublikowany pakiet pluginu typowo eksportuje oba:
-
-```
-my-plugin/
-  index.ts          ← backend: definePlugin() dla logiki TypeScript
-  frontend.ts       ← frontend: defineEscalatedPlugin() dla komponentow Vue
-```
-
-Framework backendowy (Laravel, Rails, Django, AdonisJS) laduje `index.ts` przez [Plugin Runtime](https://github.com/escalated-dev/escalated-plugin-runtime). Aplikacja Vue importuje `frontend.ts` i rejestruje go za pomoca `app.use()`.
-
-### Instalacja Pluginow
-
-```bash
-npm install @escalated-dev/plugin-slack
-npm install @escalated-dev/plugin-jira
-```
-
-### Zasoby
-
-- [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk) — TypeScript SDK do tworzenia pluginow
-- [Plugin Runtime](https://github.com/escalated-dev/escalated-plugin-runtime) — Host uruchomieniowy dla pluginow
-- [Przewodnik Tworzenia Pluginow](https://github.com/escalated-dev/escalated-docs) — Pelna dokumentacja
-
-## Dla Opiekunow Pakietow
-
-Jesli budujesz nowa integracje backendowa, ten pakiet jest dostepny na npm:
-
-```bash
-npm install @escalated-dev/escalated
-```
-
-```js
-// Importuj plugin
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-
-// Importuj pojedyncze komponenty
-import { StatusBadge, SlaTimer } from '@escalated-dev/escalated'
-
-// Lub odwoluj sie do stron bezposrednio dla rozdzielczosci Inertia
-import CustomerIndex from '@escalated-dev/escalated/pages/Customer/Index.vue'
-```
-
-Zaleznosci peer: `vue` ^3.3.0, `@inertiajs/vue3` ^1.0.0 || ^2.0.0
-
-## Ekosystem
-
-To jest wspoldzielony frontend dla systemu zgloszen wsparcia Escalated. Pakiety backendowe dostepne dla kazdego waznego frameworka:
-
-- **[Escalated dla Laravel](https://github.com/escalated-dev/escalated-laravel)** — Pakiet Laravel Composer
-- **[Escalated dla Rails](https://github.com/escalated-dev/escalated-rails)** — Silnik Ruby on Rails
-- **[Escalated dla Django](https://github.com/escalated-dev/escalated-django)** — Wielokrotnie uzywana aplikacja Django
-- **[Escalated dla AdonisJS](https://github.com/escalated-dev/escalated-adonis)** — Pakiet AdonisJS v6
-- **[Escalated dla Filament](https://github.com/escalated-dev/escalated-filament)** — Plugin panelu administratora Filament v3
-- **[Wspoldzielony Frontend](https://github.com/escalated-dev/escalated)** — Komponenty UI Vue 3 + Inertia.js (jestes tutaj)
+- [Wszystkie funkcje](../features.md)
+- [Pierwsze kroki z każdym backendem](../getting-started.md)
+- [Integracja z aplikacją: Tailwind, motywy, osadzanie panelu administracyjnego](../host-integration.md)
+- [Tokeny motywów](../theming.md) · [Panel agenta](../agent-panel.md) · [Osadzanie widżetu](../embedding-the-widget.md)
+- [Strony i komponenty w tym pakiecie](../components.md)
+- [Tworzenie wtyczek](../plugin-development.md)
+- [Dla opiekunów pakietów](../package-maintainers.md)
+- [Współtworzenie](../../CONTRIBUTING.md)
 
 ## Licencja
 
-MIT
+MIT. Copyright (c) Escalated.dev. Zobacz [LICENSE](../../LICENSE).

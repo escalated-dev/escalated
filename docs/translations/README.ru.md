@@ -1,354 +1,199 @@
-<p align="center">
-  <a href="README.ar.md">العربية</a> •
-  <a href="README.de.md">Deutsch</a> •
-  <a href="../../README.md">English</a> •
-  <a href="README.es.md">Español</a> •
-  <a href="README.fr.md">Français</a> •
-  <a href="README.it.md">Italiano</a> •
-  <a href="README.ja.md">日本語</a> •
-  <a href="README.ko.md">한국어</a> •
-  <a href="README.nl.md">Nederlands</a> •
-  <a href="README.pl.md">Polski</a> •
-  <a href="README.pt-BR.md">Português (BR)</a> •
-  <b>Русский</b> •
-  <a href="README.tr.md">Türkçe</a> •
+<p align="center"><sub>
+  <a href="README.ar.md">العربية</a> ·
+  <a href="README.de.md">Deutsch</a> ·
+  <a href="../../README.md">English</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a> ·
+  <a href="README.it.md">Italiano</a> ·
+  <a href="README.ja.md">日本語</a> ·
+  <a href="README.ko.md">한국어</a> ·
+  <a href="README.nl.md">Nederlands</a> ·
+  <a href="README.pl.md">Polski</a> ·
+  <a href="README.pt-BR.md">Português (BR)</a> ·
+  <b>Русский</b> ·
+  <a href="README.tr.md">Türkçe</a> ·
   <a href="README.zh-CN.md">简体中文</a>
+</sub></p>
+
+<p align="center">
+  <a href="https://escalated.dev"><img src="../assets/readme/logo.png" width="72" height="72" alt="Escalated"></a>
 </p>
 
-<h1>
-  <img src="https://escalated.dev/apple-touch-icon.png" width="28" style="vertical-align:middle;" />
-  Escalated
-</h1>
+<h1 align="center">Escalated</h1>
 
-[![Tests](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml/badge.svg)](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml)
-[![FOSSA Status](https://app.fossa.com/api/projects/custom%2B62107%2Fgithub.com%2Fescalated-dev%2Fescalated.svg?type=shield)](https://app.fossa.com/projects/custom%2B62107%2Fgithub.com%2Fescalated-dev%2Fescalated?ref=badge_shield)
-[![npm](https://img.shields.io/npm/v/@escalated-dev/escalated)](https://www.npmjs.com/package/@escalated-dev/escalated)
-[![Vue 3](https://img.shields.io/badge/vue-3.x-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  Тикеты поддержки прямо в вашем приложении.<br>
+  Хелпдеск с открытым исходным кодом: SLA, правила эскалации, входящие для агентов и клиентский портал.
+</p>
 
-Escalated — это встраиваемая система тикетов поддержки с отслеживанием SLA, правилами эскалации, рабочими процессами агентов и клиентским порталом. Этот репозиторий содержит все общие фронтенд-ресурсы (Vue 3 + Inertia.js), используемые во всех поддерживаемых бэкенд-фреймворках.
+<p align="center">
+  <a href="https://escalated.dev"><b>Сайт</b></a> ·
+  <a href="https://escalated.dev/docs"><b>Документация</b></a> ·
+  <a href="https://escalated.dev/cloud"><b>Cloud</b></a> ·
+  <a href="../../CHANGELOG.md"><b>Список изменений</b></a>
+</p>
 
-👉 **Узнайте больше, посмотрите демо и сравните варианты Облако vs Самостоятельный хостинг на** **[https://escalated.dev](https://escalated.dev)**
+<br>
 
-**Не устанавливайте этот пакет напрямую.** Начните с бэкенд-пакета для вашего фреймворка — он позаботится обо всём, включая подключение этих фронтенд-ресурсов.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/inbox-dark.png">
+  <img src="../assets/readme/inbox-light.png" alt="Входящие агента в Escalated: сохранённые представления со счётчиками, обратный отсчёт SLA и приоритеты у каждого тикета" width="100%">
+</picture>
+
+## Что он умеет
+
+<table>
+  <tr>
+    <td width="40%">
+      <h3>Входящие, в которых агенты могут работать весь день</h3>
+      Переписка, внутренние заметки, шаблоны ответов и таймеры SLA на одном экране, а горячие клавиши помогают быстро двигаться по очереди.
+    </td>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/ticket-dark.png">
+        <img src="../assets/readme/ticket-light.png" alt="Тикет, открытый в рабочем пространстве агента, с редактором ответа">
+      </picture>
+    </td>
+  </tr>
+  <tr>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/dashboard-dark.png">
+        <img src="../assets/readme/dashboard-light.png" alt="Страница отчётов в админке со временем ответа, CSAT и нарушениями SLA">
+      </picture>
+    </td>
+    <td width="40%">
+      <h3>Наглядные SLA и правила эскалации</h3>
+      Задайте цели по времени ответа и решения для каждого приоритета, автоматически эскалируйте тикеты, когда сроки срываются, и отслеживайте нарушения на странице отчётов.
+    </td>
+  </tr>
+  <tr>
+    <td width="40%">
+      <h3>Готовый клиентский портал</h3>
+      Клиенты создают тикеты, отвечают и проверяют статус прямо в вашем приложении, а рядом есть база знаний. Или встройте виджет на любой сайт.
+    </td>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="../assets/readme/portal-dark.png">
+        <img src="../assets/readme/portal-light.png" alt="Список тикетов в клиентском портале">
+      </picture>
+    </td>
+  </tr>
+</table>
 
 ## Возможности
 
-- **Разделение тикетов** — Разделите ответ на новый самостоятельный тикет с сохранением контекста
-- **Откладывание тикетов** — Откладывайте тикеты с предустановками (1ч, 4ч, завтра, следующая неделя) и автоматическим пробуждением
-- **Сохранённые представления / пользовательские очереди** — Сохраняйте, именуйте и делитесь предустановками фильтров как многоразовыми представлениями тикетов
-- **Встраиваемый виджет поддержки** — Готовый виджет `<script>` с поиском по базе знаний, формой тикета и проверкой статуса
-- **Обновления в реальном времени** — Поддержка WebSocket (Pusher/Reverb/Soketi) с автоматическим откатом на поллинг
-- **Переключатель базы знаний** — Включайте или отключайте публичную базу знаний в настройках администратора
-- **CI: ESLint + Prettier** — Автоматическое применение стиля кода при каждом pull request
+<table>
+<tr>
+<td width="33%" valign="top">
 
-## Начало работы
+**Рабочее место агента**
+- Очередь с фильтрами и сохранёнными представлениями
+- Быстрые фильтры: мои, неназначенные, срочные, SLA
+- Массовые действия и макросы
+- Внутренние и закреплённые заметки
+- Шаблоны ответов в редакторе
+- Горячие клавиши и палитра команд
 
-Выберите ваш фреймворк:
+</td>
+<td width="33%" valign="top">
 
-| Фреймворк | Репозиторий | Установка |
-|-----------|------|---------|
-| **Laravel** | [escalated-dev/escalated-laravel](https://github.com/escalated-dev/escalated-laravel) | `composer require escalated-dev/escalated-laravel` |
-| **Rails** | [escalated-dev/escalated-rails](https://github.com/escalated-dev/escalated-rails) | `gem "escalated"` |
-| **Django** | [escalated-dev/escalated-django](https://github.com/escalated-dev/escalated-django) | `pip install escalated-django` |
-| **AdonisJS** | [escalated-dev/escalated-adonis](https://github.com/escalated-dev/escalated-adonis) | `npm install @escalated-dev/escalated-adonis` |
-| **WordPress** | [escalated-dev/escalated-wordpress](https://github.com/escalated-dev/escalated-wordpress) | [Скачать escalated.zip](https://github.com/escalated-dev/escalated-wordpress/releases/latest) |
-| **Filament** | [escalated-dev/escalated-filament](https://github.com/escalated-dev/escalated-filament) | `composer require escalated-dev/escalated-filament` |
-| **React Native** | [escalated-dev/escalated-react-native](https://github.com/escalated-dev/escalated-react-native) | `npm install @escalated-dev/escalated-react-native` |
-| **Flutter** | [escalated-dev/escalated-flutter](https://github.com/escalated-dev/escalated-flutter) | См. [настройка pubspec.yaml](https://github.com/escalated-dev/escalated-flutter#quick-start) |
+**Работа с тикетами**
+- Выделение ответа в новый тикет
+- Откладывание с пресетами и автоматическим возвратом
+- Подписка на важные для вас тикеты
+- Вложения через перетаскивание
+- Полная история действий
 
-Каждый бэкенд-репозиторий содержит полные инструкции по настройке — команда установки, миграции, конфигурация и интеграция фронтенда.
+</td>
+<td width="33%" valign="top">
 
-## Tailwind CSS
+**SLA и эскалация**
+- Обратный отсчёт SLA с предупреждением и нарушением
+- Управление политиками SLA
+- Конструктор правил эскалации
+- Отделы и теги
 
-Компоненты Escalated используют классы Tailwind CSS. Вы **должны** добавить этот пакет в конфигурацию `content` Tailwind, чтобы его классы не были удалены:
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
 
-```js
-// tailwind.config.js
-export default {
-    content: [
-        // ... ваши существующие пути
-        './node_modules/@escalated-dev/escalated/src/**/*.vue',
-    ],
-}
-```
+**Клиентский портал**
+- Список тикетов с фильтрами и поиском
+- Форма нового тикета с вложениями
+- Ветка ответов и отслеживание статуса
+- Оценка CSAT с комментариями
+- База знаний, включается по желанию
 
-Без этого интерфейс Escalated будет отрендерен, но стили, такие как фоны кнопок и цвета бейджей, будут отсутствовать.
+</td>
+<td width="33%" valign="top">
 
-## Темы
+**Реальное время**
+- Обновления в реальном времени через Pusher, Reverb или Soketi
+- Автоматический переход на опрос сервера
+- Видно, кто ещё просматривает тикет
+- Предупреждение о конфликте при ответе
 
-Escalated по умолчанию рендерится внутри автономного макета. Чтобы интегрировать его в систему дизайна вашего приложения, используйте `EscalatedPlugin`:
+</td>
+<td width="33%" valign="top">
 
-```js
-import { createApp } from 'vue'
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/Layouts/AppLayout.vue'
+**Вписывается в ваше приложение**
+- Отображается внутри вашего собственного макета
+- Токены темы для цвета, скругления, шрифта
+- Админку можно встроить в вашу панель администратора
+- Готовый виджет поддержки для любого сайта
+- Плагины для страниц и виджетов боковой панели
 
-const app = createApp(...)
+</td>
+</tr>
+</table>
 
-app.use(EscalatedPlugin, {
-    layout: AppLayout,
-    theme: {
-        primary: '#3b82f6',
-        radius: '0.75rem',
-    }
-})
-```
-
-### Интеграция макета
-
-Передайте компонент макета вашего приложения, и все страницы Escalated автоматически будут рендериться внутри него. Компонент макета должен принимать слот `#header` и слот по умолчанию:
-
-```vue
-<!-- Ваш макет должен поддерживать эти слоты -->
-<template>
-    <div>
-        <nav>...</nav>
-        <header><slot name="header" /></header>
-        <main><slot /></main>
-    </div>
-</template>
-```
-
-Когда макет не предоставлен, Escalated использует свою встроенную навигационную панель.
-
-### Пользовательские CSS-свойства
-
-Опция `theme` устанавливает пользовательские CSS-свойства, на которые вы можете ссылаться в своих стилях:
-
-| Свойство | По умолчанию | Описание |
-|----------|---------|-------------|
-| `--esc-primary` | `#4f46e5` | Основной цвет действия |
-| `--esc-primary-hover` | автозатемнение | Основной цвет при наведении |
-| `--esc-radius` | `0.5rem` | Радиус границы для полей ввода и кнопок |
-| `--esc-radius-lg` | автомасштабирование | Радиус границы для карточек и панелей |
-| `--esc-font-family` | наследуется | Переопределение семейства шрифтов |
-
-### Примеры для фреймворков
-
-**Laravel** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AuthenticatedLayout })
-```
-
-**Rails** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/layouts/AppLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AppLayout })
-```
-
-**Django** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import BaseLayout from '@/layouts/BaseLayout.vue'
-
-app.use(EscalatedPlugin, { layout: BaseLayout })
-```
-
-**AdonisJS** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/layouts/AppLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AppLayout })
-```
-
-## Что в этом репозитории
-
-Все компоненты Vue 3 + Inertia.js, которые обеспечивают работу интерфейса Escalated. Они идентичны для Laravel, Rails, Django и AdonisJS — бэкенд-фреймворк рендерит их через Inertia.
-
-## 📸 Скриншоты
-
-> Скриншоты автоматически генерируются из Storybook через рабочий процесс [component-screenshots](.github/workflows/screenshots.yml).
+<p align="center"><sub><a href="../components.md">Все страницы и компоненты</a></sub></p>
 
 <p align="center">
-  <strong>Панель администратора (Тёмная)</strong><br/>
-  <img src="../../docs/assets/escalated_admin_1.png" alt="Панель администратора Escalated — тёмный режим с боковой навигацией, KPI-карточками, статистикой и списком тикетов" width="800" />
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
 </p>
 
-<p align="center">
-  <strong>Панель администратора (Светлая)</strong><br/>
-  <img src="../../docs/assets/escalated_admin_3.png" alt="Панель администратора Escalated — светлый режим с боковой навигацией, KPI-карточками, статистикой и списком тикетов" width="800" />
-</p>
+## Быстрый старт
 
-<p align="center">
-  <strong>Очередь тикетов</strong><br/>
-  <img src="../../docs/assets/escalated_ticket_list.png" alt="Очередь тикетов Escalated — список тикетов агента с фильтрами, поиском, массовыми действиями и индикаторами SLA" width="800" />
-</p>
+Этот пакет представляет собой общий фронтенд на Vue 3 + Inertia. Отдельно его не устанавливают: добавьте пакет для своего бэкенда, и этот интерфейс подключится вместе с ним.
 
-<p align="center">
-  <strong>Панель агента</strong><br/>
-  <img src="../../docs/assets/escalated_admin_2.png" alt="Панель агента Escalated — верхняя навигация, статистика и очередь назначенных тикетов" width="800" />
-</p>
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-laravel"><b>Laravel</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-rails"><b>Rails</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-django"><b>Django</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-nestjs"><b>NestJS</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-adonis"><b>AdonisJS</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-symfony"><b>Symfony</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-phoenix"><b>Phoenix</b></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-go"><b>Go</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-dotnet"><b>.NET</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-spring"><b>Spring</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-wordpress"><b>WordPress</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-filament"><b>Filament</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-react-native"><b>React Native</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-flutter"><b>Flutter</b></a></td>
+  </tr>
+</table>
 
-<p align="center">
-  <strong>Детальный просмотр тикета</strong><br/>
-  <img src="../../docs/assets/escalated_ticket_view.png" alt="Детальный просмотр тикета Escalated — ветка разговора, редактор ответа и боковая панель тикета с таймером SLA" width="800" />
-</p>
+## Подробнее
 
-### Страницы
-
-**Клиентский портал** — Самообслуживание тикетов
-- `pages/Customer/Index.vue` — Список тикетов с фильтрами статуса и поиском
-- `pages/Customer/Create.vue` — Форма нового тикета с вложениями файлов
-- `pages/Customer/Show.vue` — Детали тикета с веткой ответов
-
-**Панель агента** — Очередь тикетов и рабочие процессы
-- `pages/Agent/Dashboard.vue` — Обзор статистики и последних тикетов
-- `pages/Agent/TicketIndex.vue` — Фильтруемая очередь тикетов
-- `pages/Agent/TicketShow.vue` — Полный просмотр тикета с боковой панелью, внутренними заметками, шаблонами ответов
-
-**Панель администратора** — Конфигурация системы
-- `pages/Admin/Reports.vue` — Аналитическая панель
-- `pages/Admin/Departments/` — Управление отделами (CRUD)
-- `pages/Admin/SlaPolicies/` — Управление политиками SLA
-- `pages/Admin/EscalationRules/` — Конструктор правил эскалации
-- `pages/Admin/Tags/` — Управление тегами
-- `pages/Admin/CannedResponses/` — Шаблоны готовых ответов
-
-### Общие компоненты
-
-Переиспользуемые строительные блоки, используемые на страницах выше.
-
-| Компонент | Описание |
-|-----------|-------------|
-| `StatusBadge` | Цветной бейдж для статуса тикета |
-| `PriorityBadge` | Цветной бейдж для приоритета тикета |
-| `TicketList` | Пагинированная таблица тикетов |
-| `ReplyThread` | Хронологическое отображение ответов |
-| `ReplyComposer` | Редактор ответа/заметки с загрузкой файлов и вставкой шаблонных ответов |
-| `ActivityTimeline` | Журнал аудита событий тикета |
-| `SlaTimer` | Обратный отсчёт SLA с состояниями нарушения/предупреждения |
-| `TicketFilters` | Панель фильтров статуса, приоритета, агента, отдела |
-| `TicketSidebar` | Боковая панель деталей тикета (статус, SLA, теги, активность) |
-| `AssigneeSelect` | Выпадающий список назначения агента |
-| `TagSelect` | Множественный выбор тегов |
-| `FileDropzone` | Загрузка файлов перетаскиванием |
-| `AttachmentList` | Отображение вложений с ссылками для скачивания |
-| `StatsCard` | Карточка метрик с меткой, значением и трендом |
-| `EscalatedLayout` | Макет верхнего уровня с навигацией (поддерживает внедрение хост-макета) |
-| `BulkActionBar` | Панель инструментов для массовых операций над выбранными тикетами |
-| `QuickFilters` | Фильтр-чипы в один клик (Мои тикеты, Неназначенные, Срочные, SLA нарушен) |
-| `MacroDropdown` | Выпадающий список для применения многошаговых макросов к тикету |
-| `FollowButton` | Кнопка переключения для подписки/отписки от тикета |
-| `SatisfactionRating` | Ввод оценки CSAT от 1 до 5 звёзд с необязательным комментарием |
-| `KeyboardShortcutHelp` | Модальное окно со всеми доступными горячими клавишами |
-| `PinnedNotes` | Отображение закреплённых внутренних заметок вверху ветки |
-| `PresenceIndicator` | Индикатор реального времени, показывающий кто просматривает тикет |
-
-### Composables
-
-| Composable | Описание |
-|------------|-------------|
-| `useKeyboardShortcuts` | Регистрирует и управляет горячими клавишами для действий с тикетами |
-
-### Плагин
-
-| Экспорт | Описание |
-|--------|-------------|
-| `EscalatedPlugin` | Vue-плагин для внедрения макета и CSS-тем |
-
-## Разработка плагинов
-
-Escalated поддерживает фреймворк-независимые плагины, созданные с помощью [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk). Плагины пишутся один раз на TypeScript и работают на всех бэкендах Escalated.
-
-### Как работает система плагинов фронтенда
-
-Фронтенд использует `defineEscalatedPlugin()` для регистрации компонентов Vue — пользовательских страниц администратора, виджетов боковой панели тикетов или панелей дашборда — которые автоматически монтируются, когда плагин активен.
-
-```typescript
-import { defineEscalatedPlugin } from '@escalated-dev/escalated'
-import MySettingsPage from './MySettingsPage.vue'
-
-export default defineEscalatedPlugin({
-  name: 'my-plugin',
-  pages: {
-    'admin/my-plugin/settings': MySettingsPage,
-  },
-})
-```
-
-### Как он подключается к бэкенду
-
-Бэкенд использует `definePlugin()` из [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk) для обработки бизнес-логики TypeScript — подписка на хуки жизненного цикла тикетов, предоставление API-эндпоинтов и сохранение данных. Фронтенд и бэкенд входные точки работают вместе как единый npm-пакет.
-
-```typescript
-// бэкенд входная точка (index.ts)
-import { definePlugin } from '@escalated-dev/plugin-sdk'
-
-export default definePlugin({
-  name: 'my-plugin',
-  version: '1.0.0',
-  actions: {
-    'ticket.created': async (event, ctx) => {
-      ctx.log.info('New ticket!', event)
-    },
-  },
-})
-```
-
-### Быстрый пример: обе точки входа
-
-Опубликованный пакет плагина обычно экспортирует оба:
-
-```
-my-plugin/
-  index.ts          ← бэкенд: definePlugin() для логики TypeScript
-  frontend.ts       ← фронтенд: defineEscalatedPlugin() для компонентов Vue
-```
-
-Бэкенд-фреймворк (Laravel, Rails, Django, AdonisJS) загружает `index.ts` через [Plugin Runtime](https://github.com/escalated-dev/escalated-plugin-runtime). Vue-приложение импортирует `frontend.ts` и регистрирует его через `app.use()`.
-
-### Установка плагинов
-
-```bash
-npm install @escalated-dev/plugin-slack
-npm install @escalated-dev/plugin-jira
-```
-
-### Ресурсы
-
-- [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk) — TypeScript SDK для создания плагинов
-- [Plugin Runtime](https://github.com/escalated-dev/escalated-plugin-runtime) — Хост выполнения для плагинов
-- [Руководство по разработке плагинов](https://github.com/escalated-dev/escalated-docs) — Полная документация
-
-## Для мейнтейнеров пакетов
-
-Если вы создаёте новую бэкенд-интеграцию, этот пакет доступен на npm:
-
-```bash
-npm install @escalated-dev/escalated
-```
-
-```js
-// Импорт плагина
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-
-// Импорт отдельных компонентов
-import { StatusBadge, SlaTimer } from '@escalated-dev/escalated'
-
-// Или ссылка на страницы напрямую для разрешения Inertia
-import CustomerIndex from '@escalated-dev/escalated/pages/Customer/Index.vue'
-```
-
-Peer-зависимости: `vue` ^3.3.0, `@inertiajs/vue3` ^1.0.0 || ^2.0.0
-
-## Экосистема
-
-Это общий фронтенд для системы тикетов поддержки Escalated. Бэкенд-пакеты доступны для каждого основного фреймворка:
-
-- **[Escalated для Laravel](https://github.com/escalated-dev/escalated-laravel)** — Пакет Laravel Composer
-- **[Escalated для Rails](https://github.com/escalated-dev/escalated-rails)** — Движок Ruby on Rails
-- **[Escalated для Django](https://github.com/escalated-dev/escalated-django)** — Переиспользуемое приложение Django
-- **[Escalated для AdonisJS](https://github.com/escalated-dev/escalated-adonis)** — Пакет AdonisJS v6
-- **[Escalated для Filament](https://github.com/escalated-dev/escalated-filament)** — Плагин панели администратора Filament v3
-- **[Общий фронтенд](https://github.com/escalated-dev/escalated)** — Компоненты UI Vue 3 + Inertia.js (вы здесь)
+- [Все возможности](../features.md)
+- [Начало работы с каждым бэкендом](../getting-started.md)
+- [Интеграция с приложением: Tailwind, темы, встраивание админки](../host-integration.md)
+- [Токены темы](../theming.md) · [Панель агента](../agent-panel.md) · [Встраивание виджета](../embedding-the-widget.md)
+- [Страницы и компоненты этого пакета](../components.md)
+- [Разработка плагинов](../plugin-development.md)
+- [Для сопровождающих пакетов](../package-maintainers.md)
+- [Участие в разработке](../../CONTRIBUTING.md)
 
 ## Лицензия
 
-MIT
+MIT. Copyright (c) Escalated.dev. Подробнее в файле [LICENSE](../../LICENSE).

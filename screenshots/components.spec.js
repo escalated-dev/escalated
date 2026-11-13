@@ -130,3 +130,119 @@ test('README hero: Agent ticket, light (escalated_admin_2)', async ({ page }) =>
 test('README hero: Agent ticket (escalated_ticket_view)', async ({ page }) => {
     await agentShot(page, 'agent-pages-ticket--dark', 'docs/assets/escalated_ticket_view.png');
 });
+
+// ----------------------------------------------------------------
+// README set → docs/assets/readme/<name>-<mode>.png
+// The shared images every Escalated README links to, in both GitHub themes.
+// Each capture is placed in a browser window on a soft background so the
+// README reads like a product page rather than a raw screenshot.
+// ----------------------------------------------------------------
+
+const FRAME = {
+    light: {
+        page: '#f6f7fb',
+        glow: ['rgba(249,115,22,0.16)', 'rgba(34,197,94,0.14)', 'rgba(59,130,246,0.18)', 'rgba(139,92,246,0.16)'],
+        chrome: '#ffffff',
+        border: 'rgba(15,23,42,0.10)',
+        dot: '#d4d7de',
+        pill: '#f1f3f7',
+        pillText: '#6b7280',
+        shadow: '0 30px 70px -20px rgba(15,23,42,0.28), 0 12px 24px -12px rgba(15,23,42,0.14)',
+    },
+    dark: {
+        page: '#07080b',
+        glow: ['rgba(249,115,22,0.20)', 'rgba(34,197,94,0.14)', 'rgba(59,130,246,0.24)', 'rgba(139,92,246,0.22)'],
+        chrome: '#121318',
+        border: 'rgba(255,255,255,0.09)',
+        dot: '#2f3139',
+        pill: '#1b1d24',
+        pillText: '#8b8f9a',
+        shadow: '0 30px 80px -20px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04)',
+    },
+};
+
+function frameHtml(png, mode, url) {
+    const c = FRAME[mode];
+    const [g1, g2, g3, g4] = c.glow;
+    return `<!doctype html><html><head><style>
+        html, body { margin: 0; }
+        body { font-family: Inter, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        #stage {
+            display: inline-block; padding: 72px 88px 88px;
+            background:
+                radial-gradient(60% 55% at 12% 8%, ${g1}, transparent 70%),
+                radial-gradient(50% 50% at 38% 100%, ${g2}, transparent 70%),
+                radial-gradient(55% 55% at 88% 12%, ${g3}, transparent 70%),
+                radial-gradient(50% 60% at 100% 95%, ${g4}, transparent 70%),
+                ${c.page};
+        }
+        .window { width: 1440px; border-radius: 14px; overflow: hidden; background: ${c.chrome};
+            border: 1px solid ${c.border}; box-shadow: ${c.shadow}; }
+        .bar { height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-bottom: 1px solid ${c.border}; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: ${c.dot}; }
+        .pill { margin: 0 auto; transform: translateX(-30px); height: 26px; min-width: 380px; padding: 0 14px; border-radius: 7px;
+            background: ${c.pill}; color: ${c.pillText}; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+        img { display: block; width: 1440px; }
+    </style></head><body><div id="stage"><div class="window">
+        <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="pill">${url}</span></div>
+        <img src="data:image/png;base64,${png.toString('base64')}">
+    </div></div></body></html>`;
+}
+
+test.describe('README set', () => {
+    test.use({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+
+    const shots = [
+        {
+            name: 'inbox',
+            story: (m) => `agent-pages-inbox--${m}`,
+            url: 'your-app.com/support/agent/tickets',
+            ready: '[data-testid="esc-queue-row"]',
+        },
+        {
+            name: 'ticket',
+            story: (m) => `agent-pages-ticket--${m}`,
+            url: 'your-app.com/support/agent/tickets/ESC-1042',
+            ready: '[data-testid="esc-queue-row"]',
+        },
+        {
+            name: 'dashboard',
+            story: (m) => `pages-admindashboard--full-dashboard${m === 'light' ? '-light' : ''}`,
+            url: 'your-app.com/support/admin/reports',
+            // The story wraps the app in a padded card; capture just the app.
+            element: 'xpath=//aside/..',
+        },
+        { name: 'portal', story: (m) => `customer-pages-portal--${m}`, url: 'your-app.com/support/tickets' },
+    ];
+
+    for (const shot of shots) {
+        for (const mode of ['dark', 'light']) {
+            test(`${shot.name}-${mode}`, async ({ page }) => {
+                await openStory(page, shot.story(mode));
+                if (shot.ready) await page.locator(shot.ready).first().waitFor({ state: 'visible' });
+                await page.evaluate(() => document.fonts.ready);
+                const options = { animations: 'disabled', caret: 'hide' };
+                let png;
+                if (shot.element) {
+                    const el = page.locator(shot.element).first();
+                    await el.evaluate((node) => {
+                        node.style.borderRadius = '0';
+                        node.style.border = '0';
+                        node.style.width = '1440px';
+                        node.style.minHeight = '900px';
+                    });
+                    png = await el.screenshot(options);
+                } else {
+                    png = await page.screenshot(options);
+                }
+
+                await page.setViewportSize({ width: 1800, height: 1200 });
+                await page.setContent(frameHtml(png, mode, shot.url));
+                await page.locator('#stage img').evaluate((img) => img.decode());
+                await page
+                    .locator('#stage')
+                    .screenshot({ path: `docs/assets/readme/${shot.name}-${mode}.png`, ...options });
+            });
+        }
+    }
+});
