@@ -130,3 +130,38 @@ test('README hero: Agent ticket, light (escalated_admin_2)', async ({ page }) =>
 test('README hero: Agent ticket (escalated_ticket_view)', async ({ page }) => {
     await agentShot(page, 'agent-pages-ticket--dark', 'docs/assets/escalated_ticket_view.png');
 });
+
+// ----------------------------------------------------------------
+// README set → docs/assets/readme/<name>-<mode>.png
+// The shared images every Escalated README links to, in both GitHub themes.
+// ----------------------------------------------------------------
+
+test.describe('README set', () => {
+    test.use({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+
+    const shots = [
+        { name: 'inbox', story: 'agent-pages-inbox', ready: '[data-testid="esc-queue-row"]' },
+        { name: 'ticket', story: 'agent-pages-ticket', ready: '[data-testid="esc-queue-row"]' },
+        { name: 'dashboard', story: 'pages-admindashboard--full-dashboard', ready: null },
+        { name: 'portal', story: 'customer-pages-portal', ready: null },
+    ];
+
+    for (const shot of shots) {
+        for (const mode of ['dark', 'light']) {
+            test(`${shot.name}-${mode}`, async ({ page }) => {
+                const id =
+                    shot.name === 'dashboard'
+                        ? `${shot.story}${mode === 'light' ? '-light' : ''}`
+                        : `${shot.story}--${mode}`;
+                await openStory(page, id);
+                if (shot.ready) await page.locator(shot.ready).first().waitFor({ state: 'visible' });
+                await page.evaluate(() => document.fonts.ready);
+                await page.screenshot({
+                    path: `docs/assets/readme/${shot.name}-${mode}.png`,
+                    animations: 'disabled',
+                    caret: 'hide',
+                });
+            });
+        }
+    }
+});

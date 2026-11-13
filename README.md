@@ -1,549 +1,122 @@
-<p align="center">
-  <a href="docs/translations/README.ar.md">العربية</a> •
-  <a href="docs/translations/README.de.md">Deutsch</a> •
-  <b>English</b> •
-  <a href="docs/translations/README.es.md">Español</a> •
-  <a href="docs/translations/README.fr.md">Français</a> •
-  <a href="docs/translations/README.it.md">Italiano</a> •
-  <a href="docs/translations/README.ja.md">日本語</a> •
-  <a href="docs/translations/README.ko.md">한국어</a> •
-  <a href="docs/translations/README.nl.md">Nederlands</a> •
-  <a href="docs/translations/README.pl.md">Polski</a> •
-  <a href="docs/translations/README.pt-BR.md">Português (BR)</a> •
-  <a href="docs/translations/README.ru.md">Русский</a> •
-  <a href="docs/translations/README.tr.md">Türkçe</a> •
+<p align="center"><sub>
+  <a href="docs/translations/README.ar.md">العربية</a> ·
+  <a href="docs/translations/README.de.md">Deutsch</a> ·
+  <b>English</b> ·
+  <a href="docs/translations/README.es.md">Español</a> ·
+  <a href="docs/translations/README.fr.md">Français</a> ·
+  <a href="docs/translations/README.it.md">Italiano</a> ·
+  <a href="docs/translations/README.ja.md">日本語</a> ·
+  <a href="docs/translations/README.ko.md">한국어</a> ·
+  <a href="docs/translations/README.nl.md">Nederlands</a> ·
+  <a href="docs/translations/README.pl.md">Polski</a> ·
+  <a href="docs/translations/README.pt-BR.md">Português (BR)</a> ·
+  <a href="docs/translations/README.ru.md">Русский</a> ·
+  <a href="docs/translations/README.tr.md">Türkçe</a> ·
   <a href="docs/translations/README.zh-CN.md">简体中文</a>
-</p>
-
-<h1 align="center">
-  <img src="https://escalated.dev/apple-touch-icon.png" width="28" style="vertical-align:middle;" />
-  Escalated
-</h1>
-
-<div align="center">
-
-[![Tests](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml/badge.svg)](https://github.com/escalated-dev/escalated/actions/workflows/run-tests.yml)[![npm](https://img.shields.io/npm/v/@escalated-dev/escalated)](https://www.npmjs.com/package/@escalated-dev/escalated)
-[![npm downloads](https://img.shields.io/npm/dm/@escalated-dev/escalated)](https://www.npmjs.com/package/@escalated-dev/escalated)
-[![Vue 3](https://img.shields.io/badge/vue-3.x-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Views](https://hits.sh/github.com/escalated-dev/escalated.svg?style=flat&label=views&color=007ec6)](https://hits.sh/github.com/escalated-dev/escalated/)
-
-</div>
+</sub></p>
 
 <p align="center">
-  <a href="https://escalated.dev">
-    <img src=".github/og.png" alt="Escalated — support tickets, built into your app" width="840" />
-  </a>
+  <a href="https://escalated.dev"><img src="docs/assets/readme/logo.png" width="72" height="72" alt="Escalated"></a>
 </p>
 
-Escalated is an embeddable support ticket system with SLA tracking, escalation rules, agent workflows, and a customer portal. This repo contains all the shared frontend assets (Vue 3 + Inertia.js) used across every supported backend framework.
-
-👉 **Learn more, view demos, and compare Cloud vs Self-Hosted options at** **[https://escalated.dev](https://escalated.dev)**
-
-**You don't install this package directly.** Start with the backend package for your framework — it handles everything including pulling in these frontend assets.
+<h1 align="center">Escalated</h1>
 
 <p align="center">
-  <img src=".github/profile/demo.gif" alt="Escalated demo: on Pinecone, a made-up notes app, a customer files a ticket from the support widget themed in the app's green, then, in the dark agent panel, an agent opens it from the inbox, assigns it, replies and sets the status" width="800" />
-</p>
-
-## Features
-
-- **Ticket splitting** — Split a reply into a new standalone ticket while preserving context
-- **Ticket snooze** — Snooze tickets with presets (1h, 4h, tomorrow, next week) and automatic wake
-- **Saved views / custom queues** — Save, name, and share filter presets as reusable ticket views
-- **Embeddable support widget** — Drop-in `<script>` widget with KB search, ticket form, and status check
-- **Real-time updates** — WebSocket support (Pusher/Reverb/Soketi) with automatic polling fallback
-- **Knowledge base toggle** — Enable or disable the public knowledge base from admin settings
-- **CI: ESLint + Prettier** — Automated code style enforcement on every pull request
-
-## Get Started
-
-Pick your framework:
-
-| Framework | Repo | Install |
-|-----------|------|---------|
-| **Laravel** | [escalated-dev/escalated-laravel](https://github.com/escalated-dev/escalated-laravel) | `composer require escalated-dev/escalated-laravel` |
-| **Rails** | [escalated-dev/escalated-rails](https://github.com/escalated-dev/escalated-rails) | `gem "escalated"` |
-| **Django** | [escalated-dev/escalated-django](https://github.com/escalated-dev/escalated-django) | `pip install escalated-django` |
-| **AdonisJS** | [escalated-dev/escalated-adonis](https://github.com/escalated-dev/escalated-adonis) | `npm install @escalated-dev/escalated-adonis` |
-| **WordPress** | [escalated-dev/escalated-wordpress](https://github.com/escalated-dev/escalated-wordpress) | [Download escalated.zip](https://github.com/escalated-dev/escalated-wordpress/releases/latest) |
-| **Filament** | [escalated-dev/escalated-filament](https://github.com/escalated-dev/escalated-filament) | `composer require escalated-dev/escalated-filament` |
-| **React Native** | [escalated-dev/escalated-react-native](https://github.com/escalated-dev/escalated-react-native) | `npm install @escalated-dev/escalated-react-native` |
-| **Flutter** | [escalated-dev/escalated-flutter](https://github.com/escalated-dev/escalated-flutter) | See [pubspec.yaml setup](https://github.com/escalated-dev/escalated-flutter#quick-start) |
-
-Each backend repo has full setup instructions — install command, migrations, config, and frontend integration.
-
-<!-- Self-contained section: safe to move as a block. -->
-## Embedding the admin in your own admin panel (optional)
-
-Escalated comes with its own standalone admin panel, and that stays the default.
-If your app already has an admin panel, you can optionally show Escalated's admin
-screens inside it instead: under your sidebar and header, your URL prefix and
-your middleware, with Escalated's menu available to render in your own sidebar.
-Nothing changes unless you turn it on.
-
-Three ways to do it, depending on your admin:
-
-- **Vue + Inertia admin**: Escalated's admin pages render chrome-free inside your
-  layout (`app.use(EscalatedPlugin, { layout, layoutScope: ['admin'] })`), and
-  `<EscalatedNavigation />` lists the admin menu in your sidebar.
-- **Server-rendered admin** (Blade, ERB, Django templates, …): your admin template
-  becomes the Inertia root view for the embedded pages.
-- **Anything else**: an allow-listed iframe with a small `postMessage` protocol
-  for height, theme and navigation (`@escalated-dev/escalated/embed`).
-
-Guides: [frontend](docs/embedding-admin.md) ·
-[Laravel](https://github.com/escalated-dev/escalated-laravel/blob/main/docs/embedding-admin.md) ·
-[Rails](https://github.com/escalated-dev/escalated-rails/blob/main/docs/embedding-admin.md) ·
-[Django](https://github.com/escalated-dev/escalated-django/blob/main/docs/embedding-admin.md) ·
-[AdonisJS](https://github.com/escalated-dev/escalated-adonis/blob/main/docs/embedding-admin.md) ·
-[NestJS](https://github.com/escalated-dev/escalated-nestjs/blob/main/docs/embedding-admin.md) ·
-[Symfony](https://github.com/escalated-dev/escalated-symfony/blob/master/docs/embedding-admin.md) ·
-[Phoenix](https://github.com/escalated-dev/escalated-phoenix/blob/master/docs/embedding-admin.md) ·
-[Go](https://github.com/escalated-dev/escalated-go/blob/main/docs/embedding-admin.md) ·
-[.NET](https://github.com/escalated-dev/escalated-dotnet/blob/main/docs/embedding-admin.md) ·
-[Spring](https://github.com/escalated-dev/escalated-spring/blob/main/docs/embedding-admin.md) ·
-[WordPress](https://github.com/escalated-dev/escalated-wordpress/blob/main/docs/embedding-admin.md).
-Laravel is the reference implementation; the other backends are adding it.
-
-## Tailwind CSS
-
-Escalated components use Tailwind CSS utility classes (~hundreds of them across 140+ Vue files). **Some Tailwind-compatible class processor must be available in the host app for the UI to render correctly** — without one, every component renders as unstyled DOM with class names that don't resolve to any CSS.
-
-### Recommended: Tailwind in your existing build
-
-If your host app already uses Tailwind via Vite / PostCSS / Tailwind CLI, just add this package to your `content` config so its classes aren't purged:
-
-```js
-// tailwind.config.js
-export default {
-    content: [
-        // ... your existing paths
-        './node_modules/@escalated-dev/escalated/src/**/*.vue',
-    ],
-}
-```
-
-> **Tailwind 4+ users:** `content` globs are auto-detected from imported modules — you usually don't need to add anything. Skip this step if you're on v4.
-
-### Using Escalated without a Tailwind build step
-
-If you don't want a Tailwind toolchain in your build pipeline, you have a few options. Each has trade-offs — pick the one closest to your project's constraints:
-
-| Option | When to use | How |
-|---|---|---|
-| **Tailwind Play CDN** | Prototyping, internal tools, demos. Not recommended for production (no purging, ~3 MB script tag). | Add `<script src="https://cdn.tailwindcss.com"></script>` to the page that renders Escalated. The CDN script JIT-compiles classes at runtime. |
-| **Tailwind standalone CLI** | You want a static stylesheet without npm/Vite. | Download the [standalone CLI binary](https://tailwindcss.com/blog/standalone-cli) and run `tailwindcss -i input.css -o public/escalated.css --content './node_modules/@escalated-dev/escalated/src/**/*.vue' --minify`. Link the output stylesheet from your page. |
-| **UnoCSS / Twind in attributify mode** | Already using one of these atomic-CSS engines. | Configure with the Tailwind preset (`@unocss/preset-wind` or `@twind/preset-tailwind`) and add the Escalated package path to the engine's scan config. Class semantics match. |
-| **Forking with hand-rolled CSS** | You categorically cannot ship any Tailwind-compatible tooling and are willing to maintain a fork. | Replace utility classes with scoped CSS per component. Substantial effort; not officially supported. |
-
-If none of these fit, please [open a discussion](https://github.com/escalated-dev/escalated/discussions) so we can understand the constraint and consider a pre-compiled CSS distribution.
-
-Whatever path you choose, also make sure the [theme tokens](#theming) (CSS custom properties) are applied — those control colour, spacing, and radius and are independent of Tailwind.
-
-## Theming
-
-Escalated renders inside a standalone layout by default. To integrate it into your app's design system, use the `EscalatedPlugin`:
-
-```js
-import { createApp } from 'vue'
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/Layouts/AppLayout.vue'
-
-const app = createApp(...)
-
-app.use(EscalatedPlugin, {
-    layout: AppLayout,
-    theme: {
-        primary: '#3b82f6',
-        radius: '0.75rem',
-    }
-})
-```
-
-### Layout Integration
-
-Pass your app's layout component and Escalated's **customer pages** (the ticket
-portal and knowledge base) render inside it. The admin and agent panels keep
-their own navigation by default. The layout component must accept a `#header`
-slot and a default slot:
-
-```vue
-<!-- Your layout must support these slots -->
-<template>
-    <div>
-        <nav>...</nav>
-        <header><slot name="header" /></header>
-        <main><slot /></main>
-    </div>
-</template>
-```
-
-When no layout is provided, Escalated uses its own built-in navigation bar.
-
-To render the admin (and optionally the agent workspace) inside your layout as
-well, list those sections in `layoutScope`. Admin pages then render without
-Escalated's sidebar and top bar, with the page title in your `#header` slot:
-
-```js
-app.use(EscalatedPlugin, {
-    layout: AdminLayout,
-    layoutScope: ['customer', 'admin'], // default: ['customer']
-})
-```
-
-This is optional and only changes anything when you set it. See
-[Embedding the admin in your own admin panel](#embedding-the-admin-in-your-own-admin-panel-optional).
-
-### CSS Custom Properties
-
-The `theme` option sets CSS custom properties you can reference in your own styles:
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--esc-primary` | `#4f46e5` | Primary action color |
-| `--esc-primary-hover` | auto-darkened | Primary hover color |
-| `--esc-radius` | `0.5rem` | Border radius for inputs and buttons |
-| `--esc-radius-lg` | auto-scaled | Border radius for cards and panels |
-| `--esc-font-family` | inherit | Font family override |
-
-### Admin and Agent Panels
-
-`theme.panel` colours the admin and agent panels: navigation, header, logo
-tile, links and surfaces, in dark or light mode. Both panels collapse their
-navigation behind a menu button below 1024px. See
-[docs/theming.md](docs/theming.md) for every token.
-
-### Framework Examples
-
-**Laravel** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AuthenticatedLayout })
-```
-
-**Rails** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/layouts/AppLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AppLayout })
-```
-
-**Django** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import BaseLayout from '@/layouts/BaseLayout.vue'
-
-app.use(EscalatedPlugin, { layout: BaseLayout })
-```
-
-**AdonisJS** (Inertia + Vue 3):
-```js
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-import AppLayout from '@/layouts/AppLayout.vue'
-
-app.use(EscalatedPlugin, { layout: AppLayout })
-```
-
-## What's in This Repo
-
-All the Vue 3 + Inertia.js components that power the Escalated UI. These are identical across Laravel, Rails, Django, and AdonisJS — the backend framework renders them via Inertia.
-
-## 📸 Screenshots
-
-> Screenshots are auto-generated from Storybook via the [component-screenshots](.github/workflows/screenshots.yml) workflow.
-
-<p align="center">
-  <strong>Admin Panel (Dark)</strong><br/>
-  <img src="docs/assets/escalated_admin_1.png" alt="Escalated Admin Panel — dark mode with sidebar navigation, KPI cards, stats, and ticket list" width="800" />
+  Support tickets, built into your app.<br>
+  An open-source helpdesk with SLAs, escalation rules, an agent inbox and a customer portal.
 </p>
 
 <p align="center">
-  <strong>Admin Panel (Light)</strong><br/>
-  <img src="docs/assets/escalated_admin_3.png" alt="Escalated Admin Panel — light mode with sidebar navigation, KPI cards, stats, and ticket list" width="800" />
+  <a href="https://escalated.dev"><b>Website</b></a> ·
+  <a href="https://escalated.dev/docs"><b>Docs</b></a> ·
+  <a href="https://escalated.dev/cloud"><b>Cloud</b></a> ·
+  <a href="CHANGELOG.md"><b>Changelog</b></a>
 </p>
 
-<p align="center">
-  <strong>Agent Inbox</strong><br/>
-  <img src="docs/assets/escalated_ticket_list.png" alt="Escalated agent inbox in dark mode: queue rail with saved views and counts, stat strip, and the ticket list beside an empty detail pane" width="800" />
-</p>
+<br>
 
-<p align="center">
-  <strong>Agent Panel (Light)</strong><br/>
-  <img src="docs/assets/escalated_admin_2.png" alt="Escalated agent panel in light mode: a ticket open beside the inbox list" width="800" />
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/inbox-dark.png">
+  <img src="docs/assets/readme/inbox-light.png" alt="The Escalated agent inbox: saved views with counts, SLA countdowns and priorities on every ticket" width="100%">
+</picture>
 
-<p align="center">
-  <strong>Ticket View</strong><br/>
-  <img src="docs/assets/escalated_ticket_view.png" alt="Escalated ticket view in dark mode: inbox list beside the ticket with status, priority, tags, conversation, and the reply composer" width="800" />
-</p>
+## What it does
 
-### Pages
+<table>
+  <tr>
+    <td width="40%">
+      <h3>An inbox your agents can work in all day</h3>
+      Conversation, internal notes, canned replies and SLA timers on one screen, with keyboard shortcuts to move through the queue.
+    </td>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/ticket-dark.png">
+        <img src="docs/assets/readme/ticket-light.png" alt="A ticket open in the agent workspace with the reply composer">
+      </picture>
+    </td>
+  </tr>
+  <tr>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/dashboard-dark.png">
+        <img src="docs/assets/readme/dashboard-light.png" alt="The admin reports page with response times, CSAT and SLA breaches">
+      </picture>
+    </td>
+    <td width="40%">
+      <h3>SLAs and escalation rules you can see</h3>
+      Set response and resolution targets per priority, escalate automatically when they slip, and track breaches on the reports page.
+    </td>
+  </tr>
+  <tr>
+    <td width="40%">
+      <h3>A customer portal that's already built</h3>
+      Customers open tickets, reply and check status from your app, with a knowledge base beside it. Or embed the widget on any site.
+    </td>
+    <td width="60%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/assets/readme/portal-dark.png">
+        <img src="docs/assets/readme/portal-light.png" alt="The customer portal ticket list">
+      </picture>
+    </td>
+  </tr>
+</table>
 
-**Customer Portal** — Self-service ticket management
-- `pages/Customer/Index.vue` — Ticket list with status filters and search
-- `pages/Customer/Create.vue` — New ticket form with file attachments
-- `pages/Customer/Show.vue` — Ticket detail with reply thread
+## Quick start
 
-**Agent Dashboard** — Ticket queue and workflows
-- `pages/Agent/Dashboard.vue` — Stats overview and recent tickets
-- `pages/Agent/TicketIndex.vue` — Filterable ticket queue
-- `pages/Agent/TicketShow.vue` — Full ticket view with sidebar, internal notes, canned responses
+This package is the shared Vue 3 + Inertia frontend. You don't install it on its own: add the package for your backend and it brings this UI with it.
 
-**Admin Panel** — System configuration
-- `pages/Admin/Reports.vue` — Analytics dashboard
-- `pages/Admin/Departments/` — Department CRUD
-- `pages/Admin/SlaPolicies/` — SLA policy management
-- `pages/Admin/EscalationRules/` — Escalation rule builder
-- `pages/Admin/Tags/` — Tag management
-- `pages/Admin/CannedResponses/` — Canned response templates
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-laravel"><b>Laravel</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-rails"><b>Rails</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-django"><b>Django</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-nestjs"><b>NestJS</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-adonis"><b>AdonisJS</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-symfony"><b>Symfony</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-phoenix"><b>Phoenix</b></a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-go"><b>Go</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-dotnet"><b>.NET</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-spring"><b>Spring</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-wordpress"><b>WordPress</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-filament"><b>Filament</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-react-native"><b>React Native</b></a></td>
+    <td align="center"><a href="https://github.com/escalated-dev/escalated-flutter"><b>Flutter</b></a></td>
+  </tr>
+</table>
 
-### Shared Components
+## Learn more
 
-Reusable building blocks used across the pages above.
-
-| Component | Description |
-|-----------|-------------|
-| `StatusBadge` | Colored badge for ticket status |
-| `PriorityBadge` | Colored badge for ticket priority |
-| `TicketList` | Paginated ticket table |
-| `ReplyThread` | Chronological reply display |
-| `ReplyComposer` | Reply/note editor with file upload and canned response insertion |
-| `ActivityTimeline` | Audit log of ticket events |
-| `SlaTimer` | SLA countdown with breach/warning states |
-| `TicketFilters` | Status, priority, agent, department filter bar |
-| `TicketSidebar` | Ticket detail sidebar (status, SLA, tags, activity) |
-| `AssigneeSelect` | Agent assignment dropdown |
-| `TagSelect` | Multi-select tag picker |
-| `FileDropzone` | Drag-and-drop file upload |
-| `AttachmentList` | File attachment display with download links |
-| `StatsCard` | Metric card with label, value, and trend |
-| `EscalatedLayout` | Top-level layout with navigation (supports host layout injection) |
-| `BulkActionBar` | Toolbar for batch operations on selected tickets |
-| `QuickFilters` | One-click filter chips (My Tickets, Unassigned, Urgent, SLA Breaching) |
-| `MacroDropdown` | Dropdown to apply multi-step macros to a ticket |
-| `FollowButton` | Toggle button to follow/unfollow a ticket |
-| `SatisfactionRating` | 1-5 star CSAT rating input with optional comment |
-| `KeyboardShortcutHelp` | Modal overlay showing all available keyboard shortcuts |
-| `PinnedNotes` | Display pinned internal notes at the top of the thread |
-| `PresenceIndicator` | Real-time indicator showing who is viewing a ticket |
-
-### Composables
-
-| Composable | Description |
-|------------|-------------|
-| `useKeyboardShortcuts` | Registers and manages keyboard shortcuts for ticket actions |
-
-### Plugin
-
-| Export | Description |
-|--------|-------------|
-| `EscalatedPlugin` | Vue plugin for layout injection and CSS theming |
-
-## Plugin Development
-
-Escalated supports framework-agnostic plugins built with the [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk). Plugins are written once in TypeScript and work across all Escalated backends.
-
-### How the Frontend Plugin System Works
-
-The frontend uses `defineEscalatedPlugin()` to register Vue components — custom admin pages, ticket sidebar widgets, or dashboard panels — that are mounted automatically when the plugin is active.
-
-```typescript
-import { defineEscalatedPlugin } from '@escalated-dev/escalated'
-import MySettingsPage from './MySettingsPage.vue'
-
-export default defineEscalatedPlugin({
-  name: 'my-plugin',
-  pages: {
-    'admin/my-plugin/settings': MySettingsPage,
-  },
-})
-```
-
-### How It Connects to the Backend
-
-The backend uses `definePlugin()` from the [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk) to handle TypeScript business logic — subscribing to ticket lifecycle hooks, exposing API endpoints, and persisting data. The frontend and backend entries work together as a single npm package.
-
-```typescript
-// backend entry (index.ts)
-import { definePlugin } from '@escalated-dev/plugin-sdk'
-
-export default definePlugin({
-  name: 'my-plugin',
-  version: '1.0.0',
-  actions: {
-    'ticket.created': async (event, ctx) => {
-      ctx.log.info('New ticket!', event)
-    },
-  },
-})
-```
-
-### Quick Example: Both Entry Points
-
-A published plugin package typically exports both:
-
-```
-my-plugin/
-  index.ts          ← backend: definePlugin() for TypeScript logic
-  frontend.ts       ← frontend: defineEscalatedPlugin() for Vue components
-```
-
-The backend framework (Laravel, Rails, Django, AdonisJS) loads `index.ts` via the [Plugin Runtime](https://github.com/escalated-dev/escalated-plugin-runtime). The Vue app imports `frontend.ts` and registers it with `app.use()`.
-
-### Installing Plugins
-
-```bash
-npm install @escalated-dev/plugin-slack
-npm install @escalated-dev/plugin-jira
-```
-
-### Resources
-
-- [Plugin SDK](https://github.com/escalated-dev/escalated-plugin-sdk) — TypeScript SDK for building plugins
-- [Plugin Runtime](https://github.com/escalated-dev/escalated-plugin-runtime) — Runtime host for plugins
-- [Plugin Development Guide](https://github.com/escalated-dev/escalated-docs) — Full documentation
-
-## For Package Maintainers
-
-Verified guest access is enabled by backend capabilities. `Escalated/Guest/Create`
-accepts optional `verification_url` and `lookup_url` props. With these URLs, the
-form requests an email code before posting a ticket; a separate form verifies
-email to find existing tickets by tracking/ticket reference and renew private
-links. `Guest/Show` displays `ticket.guest_access_expires_at` when supplied.
-
-The built-in widget enables the same flow only when `/config` returns
-`guest_verification_required: true`. The backend must provide POST `/verification`
-with email and purpose (`ticket`, `chat`, `lookup`), returning `verification_id`;
-creation accepts `verification_id` and the eight-digit `verification_code`.
-POST `/lookup` returns `{ data: [{ reference, subject, guest_access_token,
-expires_at }] }`; subsequent widget status reads send the token as a Bearer
-header. Chat creation returns an opaque `id` and polling uses
-`/chat/{id}/messages`. Proofs and private results are cleared on destination or
-identity changes. Tokens remain in component memory. CSRF headers are sent only
-to the page's own origin.
-
-Backends that omit these capabilities retain their existing form contract. Hosts
-must ship these forms before requiring verification in their backend. This does
-not implement verification in the other backend packages or release the separate
-web-widget plugin.
-
-The widget can also be embedded on other sites, as a launcher or an on-page
-support form, with host parameters (department, prefill, metadata) and a
-JavaScript API. Backends opt in with an origin allow list, CORS and a CSRF
-exemption for those origins. See [Embedding the widget](docs/embedding-the-widget.md).
-
-Backends with account isolation can share `escalated.broadcasting.channel_prefix`
-through Inertia, for example `escalated.tenants.<opaque-account-namespace>`.
-Ticket, agent, chat and presence subscriptions use this prefix and rejoin when it
-changes. Omitting it preserves the existing `escalated` channels. Standalone
-`PresenceIndicator` consumers can pass its `channelPrefix` prop; `useRealtime`
-and `useChat` accept `channelPrefix` as a string, ref or getter. Raw
-`useRealtime().listen(channel, event, callback)` still treats the channel literally.
-
-The backend must authorize the current account and each private/presence join.
-Channel names alone are not authorization. Ticket presence should expose only
-agent identity/display names, with requester access limited to private ticket
-updates. Deploy a frontend version containing this support before enabling a
-backend's account-scoped channels.
-
-If you're building a new backend integration, this package is available on npm:
-
-```bash
-npm install @escalated-dev/escalated
-```
-
-```js
-// Import the plugin
-import { EscalatedPlugin } from '@escalated-dev/escalated'
-
-// Import individual components
-import { StatusBadge, SlaTimer } from '@escalated-dev/escalated'
-
-// Or reference pages directly for Inertia resolution
-import CustomerIndex from '@escalated-dev/escalated/pages/Customer/Index.vue'
-```
-
-Peer dependencies: `vue` ^3.3.0, `@inertiajs/vue3` ^1.0.0 || ^2.0.0 || ^3.0.0
-
-The API token and two-factor pages accept flash data from `page.props.flash`
-(legacy shared props) and `page.flash` (Inertia 3). Top-level values take
-precedence, including explicit `null` values that clear legacy data. Inertia 3
-backends should send one-time tokens, setup URIs, and recovery codes through
-top-level flash so they are excluded from the adapter's browser history state.
-Hosts must deploy a frontend release containing this support before changing
-their backend's flash protocol.
-
-## Contributing
-
-The development tools require Node **22.22.2+ on the 22.x line**, **24.15.0+
-on the 24.x line**, or **26+**. Use `nvm use` to select the version in `.nvmrc`.
-These requirements apply when working on this repository; the published Vue
-and Inertia peer dependencies are listed above.
-
-```bash
-npm ci
-npm test
-npm run lint
-npm run format:check
-npm run pages:check
-npm run build-storybook
-npm audit
-```
-
-Commit `package-lock.json` with dependency updates. CI installs that exact graph
-with `npm ci`, checks dependency engines and peer requirements, and runs the test
-suite on Node 22.22.2, 24.15.0, and 26. Storybook's production build and the full
-dependency audit also run before merging.
-
-The browser contract packs the current source, installs that tarball in isolated
-consumers with real Inertia 1, 2, and 3 adapters, audits each consumer, and tests
-token and two-factor flows on desktop and mobile Chromium. It uses a local HTTP
-server and synthetic credentials. The clipboard boundary is simulated so the
-test does not change your clipboard.
-
-```bash
-npx --no-install playwright install chromium
-npm run test:inertia
-# Or select a single adapter major:
-npm run test:inertia -- 3
-```
-
-Reports and screenshots are written to `test-results/inertia-flash/`. CI runs
-each adapter separately and uploads that evidence on success or failure.
-
-## Backend settings capabilities
-
-The `Escalated/Admin/Settings` page accepts optional `supported_settings` and
-`update_url` props. Pass an array of editable setting names to show and submit only
-those fields, and a URL accepting a flat POST payload. An empty array exposes no
-editable settings. Omitting these props preserves the full settings form and its
-Laravel named route. Backends must validate their own setting allowlist; hiding a
-control is not authorization.
-
-For example, a backend implementing only knowledge-base and branding preferences
-can expose `knowledge_base_enabled`, `knowledge_base_public`,
-`knowledge_base_feedback_enabled`, and `show_powered_by`. Supply typed values in
-the `settings` prop. Changing the settings/account props clears stale form values
-and pending requests, including previously entered credentials.
-
-## Ecosystem
-
-This is the shared frontend for the Escalated support ticket system. Host framework packages and client SDKs available across the ecosystem:
-
-- **[Escalated for Laravel](https://github.com/escalated-dev/escalated-laravel)** — Laravel Composer package
-- **[Escalated for Rails](https://github.com/escalated-dev/escalated-rails)** — Ruby on Rails engine
-- **[Escalated for Django](https://github.com/escalated-dev/escalated-django)** — Django reusable app
-- **[Escalated for AdonisJS](https://github.com/escalated-dev/escalated-adonis)** — AdonisJS v6 package
-- **[Escalated for WordPress](https://github.com/escalated-dev/escalated-wordpress)** — WordPress plugin
-- **[Escalated for Filament](https://github.com/escalated-dev/escalated-filament)** — Filament v3 admin panel plugin
-- **[Escalated for React Native](https://github.com/escalated-dev/escalated-react-native)** — React Native SDK
-- **[Escalated for Flutter](https://github.com/escalated-dev/escalated-flutter)** — Flutter SDK
-- **[Shared Frontend](https://github.com/escalated-dev/escalated)** — Vue 3 + Inertia.js UI components (you are here)
+- [All features](docs/features.md)
+- [Getting started with each backend](docs/getting-started.md)
+- [Integrating with your app: Tailwind, theming, embedding the admin](docs/host-integration.md)
+- [Theming tokens](docs/theming.md) · [Agent panel](docs/agent-panel.md) · [Embedding the widget](docs/embedding-the-widget.md)
+- [Pages and components in this package](docs/components.md)
+- [Plugin development](docs/plugin-development.md)
+- [For package maintainers](docs/package-maintainers.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## License
 
-MIT - Copyright (c) Escalated.dev. See [LICENSE](LICENSE).
+MIT. Copyright (c) Escalated.dev. See [LICENSE](LICENSE).
