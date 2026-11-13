@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## Fonctionnalités
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Espace de travail de l'agent**
+- File d'attente filtrable avec vues enregistrées
+- Filtres rapides : les miens, non assignés, urgents, SLA
+- Actions groupées et macros
+- Notes internes et notes épinglées
+- Réponses prédéfinies dans l'éditeur
+- Raccourcis clavier et palette de commandes
+
+</td>
+<td width="33%" valign="top">
+
+**Outils de ticket**
+- Scinder une réponse en nouveau ticket
+- Mise en veille avec préréglages et réveil automatique
+- Suivre les tickets qui vous intéressent
+- Pièces jointes par glisser-déposer
+- Historique d'activité complet
+
+</td>
+<td width="33%" valign="top">
+
+**SLA et escalade**
+- Comptes à rebours SLA avec alerte et dépassement
+- Gestion des politiques SLA
+- Éditeur de règles d'escalade
+- Départements et étiquettes
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**Portail client**
+- Liste des tickets avec filtres et recherche
+- Formulaire de nouveau ticket avec pièces jointes
+- Fil de réponses et suivi du statut
+- Note CSAT avec commentaires
+- Base de connaissances, activable ou non
+
+</td>
+<td width="33%" valign="top">
+
+**Temps réel**
+- Mises à jour en direct via Pusher, Reverb ou Soketi
+- Repli automatique sur le polling
+- Voyez qui d'autre consulte un ticket
+- Alerte de collision pendant la réponse
+
+</td>
+<td width="33%" valign="top">
+
+**S'intègre à votre application**
+- S'affiche dans votre propre mise en page
+- Jetons de thème pour la couleur, l'arrondi, la police
+- Administration intégrable à votre panneau d'administration
+- Widget de support prêt à l'emploi pour n'importe quel site
+- Plugins pour les pages et les widgets de barre latérale
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="../components.md">Toutes les pages et tous les composants</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## Démarrage rapide
 
 Ce paquet est le frontend Vue 3 + Inertia partagé. Vous ne l'installez pas seul : ajoutez le paquet de votre backend, il apporte cette interface avec lui.

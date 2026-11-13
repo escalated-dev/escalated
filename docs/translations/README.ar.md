@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## الميزات
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**مساحة عمل الوكيل**
+- قائمة انتظار قابلة للتصفية مع طرق عرض محفوظة
+- عوامل تصفية سريعة: تذاكري، غير المسندة، العاجلة، SLA
+- إجراءات جماعية ووحدات ماكرو
+- ملاحظات داخلية وملاحظات مثبتة
+- ردود جاهزة داخل محرر الرد
+- اختصارات لوحة المفاتيح ولوحة الأوامر
+
+</td>
+<td width="33%" valign="top">
+
+**أدوات التذاكر**
+- فصل رد إلى تذكرة جديدة
+- تأجيل مع خيارات جاهزة واستئناف تلقائي
+- متابعة التذاكر التي تهمك
+- مرفقات بالسحب والإفلات
+- سجل نشاط كامل
+
+</td>
+<td width="33%" valign="top">
+
+**اتفاقيات مستوى الخدمة والتصعيد**
+- عدادات تنازلية لـ SLA مع تحذير وانتهاك
+- إدارة سياسات SLA
+- منشئ قواعد التصعيد
+- الأقسام والوسوم
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**بوابة العملاء**
+- قائمة تذاكر مع عوامل تصفية وبحث
+- نموذج تذكرة جديدة مع مرفقات
+- سلسلة الردود وتتبع الحالة
+- تقييم CSAT مع تعليقات
+- قاعدة معرفية يمكن تفعيلها أو إيقافها
+
+</td>
+<td width="33%" valign="top">
+
+**الوقت الفعلي**
+- تحديثات مباشرة عبر Pusher أو Reverb أو Soketi
+- رجوع تلقائي إلى الاستطلاع الدوري
+- معرفة من يشاهد التذكرة أيضا
+- تحذير من التعارض أثناء الرد
+
+</td>
+<td width="33%" valign="top">
+
+**يتلاءم مع تطبيقك**
+- يُعرض داخل تخطيطك الخاص
+- رموز سمات للون والحواف والخط
+- لوحة إدارة يمكن تضمينها في لوحة الإدارة لديك
+- أداة دعم جاهزة لأي موقع
+- إضافات للصفحات وأدوات الشريط الجانبي
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="../components.md">كل الصفحات والمكونات</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## البدء السريع
 
 هذه الحزمة هي الواجهة الأمامية المشتركة المبنية على Vue 3 + Inertia. لا تثبّتها بمفردها: أضف الحزمة الخاصة بالواجهة الخلفية لديك وستأتي هذه الواجهة معها.

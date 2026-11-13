@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## Özellikler
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Temsilci çalışma alanı**
+- Kayıtlı görünümlerle filtrelenebilir kuyruk
+- Hızlı filtreler: benim, atanmamış, acil, SLA
+- Toplu işlemler ve makrolar
+- Dahili notlar ve sabitlenmiş notlar
+- Düzenleyicide hazır yanıtlar
+- Klavye kısayolları ve komut paleti
+
+</td>
+<td width="33%" valign="top">
+
+**Talep araçları**
+- Bir yanıtı yeni bir talebe ayırma
+- Hazır seçeneklerle erteleme ve otomatik uyandırma
+- Önemsediğiniz talepleri takip etme
+- Sürükle ve bırak ile ekler
+- Eksiksiz etkinlik zaman çizelgesi
+
+</td>
+<td width="33%" valign="top">
+
+**SLA'lar ve eskalasyon**
+- Uyarı ve ihlal gösteren SLA geri sayımları
+- SLA politikası yönetimi
+- Eskalasyon kuralı oluşturucu
+- Departmanlar ve etiketler
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**Müşteri portalı**
+- Filtre ve aramalı talep listesi
+- Ek destekli yeni talep formu
+- Yanıt dizisi ve durum takibi
+- Yorumlu CSAT puanlaması
+- Bilgi bankası, açık veya kapalı
+
+</td>
+<td width="33%" valign="top">
+
+**Gerçek zamanlı**
+- Pusher, Reverb veya Soketi üzerinden canlı güncellemeler
+- Otomatik polling yedeği
+- Bir talebi başka kimin görüntülediğini görün
+- Yanıt yazarken çakışma uyarısı
+
+</td>
+<td width="33%" valign="top">
+
+**Uygulamanıza uyum sağlar**
+- Kendi düzeninizin içinde görüntülenir
+- Renk, köşe yuvarlaklığı ve yazı tipi için tema token'ları
+- Kendi yönetim panelinize gömülebilen yönetim ekranı
+- Her siteye eklenebilen hazır destek widget'ı
+- Sayfalar ve kenar çubuğu widget'ları için eklentiler
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="../components.md">Tüm sayfalar ve bileşenler</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## Hızlı başlangıç
 
 Bu paket, ortak Vue 3 + Inertia ön yüzüdür. Tek başına kurulmaz: backend'iniz için olan paketi ekleyin, bu arayüz de onunla birlikte gelir.

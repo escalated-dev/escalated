@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## Возможности
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Рабочее место агента**
+- Очередь с фильтрами и сохранёнными представлениями
+- Быстрые фильтры: мои, неназначенные, срочные, SLA
+- Массовые действия и макросы
+- Внутренние и закреплённые заметки
+- Шаблоны ответов в редакторе
+- Горячие клавиши и палитра команд
+
+</td>
+<td width="33%" valign="top">
+
+**Работа с тикетами**
+- Выделение ответа в новый тикет
+- Откладывание с пресетами и автоматическим возвратом
+- Подписка на важные для вас тикеты
+- Вложения через перетаскивание
+- Полная история действий
+
+</td>
+<td width="33%" valign="top">
+
+**SLA и эскалация**
+- Обратный отсчёт SLA с предупреждением и нарушением
+- Управление политиками SLA
+- Конструктор правил эскалации
+- Отделы и теги
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**Клиентский портал**
+- Список тикетов с фильтрами и поиском
+- Форма нового тикета с вложениями
+- Ветка ответов и отслеживание статуса
+- Оценка CSAT с комментариями
+- База знаний, включается по желанию
+
+</td>
+<td width="33%" valign="top">
+
+**Реальное время**
+- Обновления в реальном времени через Pusher, Reverb или Soketi
+- Автоматический переход на опрос сервера
+- Видно, кто ещё просматривает тикет
+- Предупреждение о конфликте при ответе
+
+</td>
+<td width="33%" valign="top">
+
+**Вписывается в ваше приложение**
+- Отображается внутри вашего собственного макета
+- Токены темы для цвета, скругления, шрифта
+- Админку можно встроить в вашу панель администратора
+- Готовый виджет поддержки для любого сайта
+- Плагины для страниц и виджетов боковой панели
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="../components.md">Все страницы и компоненты</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## Быстрый старт
 
 Этот пакет представляет собой общий фронтенд на Vue 3 + Inertia. Отдельно его не устанавливают: добавьте пакет для своего бэкенда, и этот интерфейс подключится вместе с ним.

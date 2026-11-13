@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## Features
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Agent workspace**
+- Filterable queue with saved views
+- Quick filters: mine, unassigned, urgent, SLA
+- Bulk actions and macros
+- Internal notes and pinned notes
+- Canned responses in the composer
+- Keyboard shortcuts and command palette
+
+</td>
+<td width="33%" valign="top">
+
+**Ticket tools**
+- Split a reply into a new ticket
+- Snooze with presets and automatic wake
+- Follow tickets you care about
+- Attachments with drag and drop
+- Full activity timeline
+
+</td>
+<td width="33%" valign="top">
+
+**SLAs and escalation**
+- SLA countdowns with warning and breach
+- SLA policy management
+- Escalation rule builder
+- Departments and tags
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**Customer portal**
+- Ticket list with filters and search
+- New ticket form with attachments
+- Reply thread and status tracking
+- CSAT rating with comments
+- Knowledge base, on or off
+
+</td>
+<td width="33%" valign="top">
+
+**Real time**
+- Live updates over Pusher, Reverb or Soketi
+- Automatic polling fallback
+- See who else is viewing a ticket
+- Collision warning while replying
+
+</td>
+<td width="33%" valign="top">
+
+**Fits your app**
+- Renders inside your own layout
+- Theme tokens for colour, radius, font
+- Admin embeddable in your admin panel
+- Drop-in support widget for any site
+- Plugins for pages and sidebar widgets
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="docs/components.md">Every page and component</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## Quick start
 
 This package is the shared Vue 3 + Inertia frontend. You don't install it on its own: add the package for your backend and it brings this UI with it.

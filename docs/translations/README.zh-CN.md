@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## 功能列表
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**客服工作区**
+- 可筛选的队列与已保存视图
+- 快速筛选：我的、未分配、紧急、SLA
+- 批量操作和宏
+- 内部备注和置顶备注
+- 编辑器中的预设回复
+- 键盘快捷键和命令面板
+
+</td>
+<td width="33%" valign="top">
+
+**工单工具**
+- 将回复拆分为新工单
+- 暂缓工单，支持预设时长并自动唤醒
+- 关注你在意的工单
+- 拖放上传附件
+- 完整的活动时间线
+
+</td>
+<td width="33%" valign="top">
+
+**SLA 和升级**
+- 带警告和违规提示的 SLA 倒计时
+- SLA 策略管理
+- 升级规则构建器
+- 部门和标签
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**客户门户**
+- 带筛选和搜索的工单列表
+- 支持附件的新建工单表单
+- 回复线程和状态跟踪
+- 带评论的 CSAT 评分
+- 知识库，可开可关
+
+</td>
+<td width="33%" valign="top">
+
+**实时**
+- 通过 Pusher、Reverb 或 Soketi 实时更新
+- 自动回退到轮询
+- 查看还有谁在浏览同一工单
+- 回复时的冲突提醒
+
+</td>
+<td width="33%" valign="top">
+
+**融入你的应用**
+- 在你自己的布局中渲染
+- 颜色、圆角、字体的主题令牌
+- 管理后台可嵌入你的管理面板
+- 可放到任意网站的即用型支持小组件
+- 用于页面和侧边栏小组件的插件
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="../components.md">全部页面和组件</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## 快速开始
 
 这个包是共享的 Vue 3 + Inertia 前端。你不需要单独安装它：为你的后端添加对应的包，这套界面会随之一起安装。

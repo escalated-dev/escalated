@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## Functies
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Werkruimte voor medewerkers**
+- Filterbare wachtrij met opgeslagen weergaven
+- Snelfilters: van mij, niet toegewezen, urgent, SLA
+- Bulkacties en macro's
+- Interne notities en vastgezette notities
+- Standaardantwoorden in de editor
+- Sneltoetsen en opdrachtenpalet
+
+</td>
+<td width="33%" valign="top">
+
+**Tickettools**
+- Een antwoord afsplitsen naar een nieuw ticket
+- Snoozen met voorinstellingen en automatisch wekken
+- Tickets volgen die belangrijk voor je zijn
+- Bijlagen met slepen en neerzetten
+- Volledige activiteitentijdlijn
+
+</td>
+<td width="33%" valign="top">
+
+**SLA's en escalatie**
+- SLA-afteltimers met waarschuwing en overschrijding
+- Beheer van SLA-beleid
+- Bouwer voor escalatieregels
+- Afdelingen en tags
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**Klantportaal**
+- Ticketlijst met filters en zoeken
+- Formulier voor nieuwe tickets met bijlagen
+- Antwoordthread en statusopvolging
+- CSAT-beoordeling met opmerkingen
+- Kennisbank, aan of uit
+
+</td>
+<td width="33%" valign="top">
+
+**Realtime**
+- Live updates via Pusher, Reverb of Soketi
+- Automatische terugval op polling
+- Zie wie een ticket ook bekijkt
+- Botsingswaarschuwing tijdens het antwoorden
+
+</td>
+<td width="33%" valign="top">
+
+**Past in je app**
+- Wordt weergegeven binnen je eigen layout
+- Thematokens voor kleur, afronding, lettertype
+- Beheeromgeving insluitbaar in je eigen beheerpaneel
+- Kant-en-klare supportwidget voor elke site
+- Plugins voor pagina's en zijbalkwidgets
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="../components.md">Alle pagina's en componenten</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## Snel aan de slag
 
 Dit pakket is de gedeelde Vue 3 + Inertia-frontend. Je installeert het niet los: voeg het pakket voor je backend toe en deze interface komt mee.

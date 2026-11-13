@@ -81,6 +81,83 @@
   </tr>
 </table>
 
+## 機能一覧
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**エージェントワークスペース**
+- 保存済みビュー付きのフィルタ可能なキュー
+- クイックフィルタ: 自分の担当、未割り当て、緊急、SLA
+- 一括操作とマクロ
+- 内部メモとピン留めメモ
+- 返信エディタ内の定型返信
+- キーボードショートカットとコマンドパレット
+
+</td>
+<td width="33%" valign="top">
+
+**チケットツール**
+- 返信を新しいチケットに分割
+- プリセットと自動再開付きのスヌーズ
+- 気になるチケットをフォロー
+- ドラッグ＆ドロップでファイルを添付
+- すべてを記録するアクティビティタイムライン
+
+</td>
+<td width="33%" valign="top">
+
+**SLA とエスカレーション**
+- 警告と違反を表示する SLA カウントダウン
+- SLA ポリシーの管理
+- エスカレーションルールビルダー
+- 部署とタグ
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+**顧客ポータル**
+- フィルタと検索付きのチケット一覧
+- 添付ファイル対応の新規チケットフォーム
+- 返信スレッドとステータス追跡
+- コメント付きの CSAT 評価
+- ナレッジベース (オン/オフ切り替え可)
+
+</td>
+<td width="33%" valign="top">
+
+**リアルタイム**
+- Pusher、Reverb、Soketi によるライブ更新
+- 自動ポーリングへのフォールバック
+- 同じチケットを見ている他のユーザーを表示
+- 返信中の衝突警告
+
+</td>
+<td width="33%" valign="top">
+
+**アプリになじむ設計**
+- 既存のレイアウト内で描画
+- 色、角丸、フォントのテーマトークン
+- 管理画面を自分の管理パネルに埋め込み可能
+- どのサイトにも置けるサポートウィジェット
+- ページとサイドバーウィジェット用のプラグイン
+
+</td>
+</tr>
+</table>
+
+<p align="center"><sub><a href="../components.md">すべてのページとコンポーネント</a></sub></p>
+
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3"></a>
+  <a href="https://inertiajs.com"><img src="https://img.shields.io/badge/Inertia_1--3-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia 1, 2 and 3"></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"></a>
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/Plugin_SDK_in_TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="Plugin SDK in TypeScript"></a>
+</p>
+
 ## クイックスタート
 
 このパッケージは共有の Vue 3 + Inertia フロントエンドです。単体ではインストールしません。お使いのバックエンド用のパッケージを追加すると、この UI も一緒に導入されます。
