@@ -14,7 +14,8 @@ import { useAgentCommands } from '../../composables/useAgentCommands';
 import { markRoute, markSeen, useUnread } from '../../composables/useUnread';
 import { toast } from '../../composables/useAgentToasts';
 import { normalisePrefix, recallInbox, ticketsUrl } from '../../utils/agentQueues';
-import { Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ticketPageTitle } from '../../utils/ticketTitle';
 import { ref, computed, onUnmounted, watch } from 'vue';
 
 const props = defineProps({
@@ -33,6 +34,8 @@ const props = defineProps({
     /** Optional. `[{ id, name }]`: who the ticket can be assigned to. Without it only "Assign to me" is offered. */
     agents: { type: Array, default: null },
 });
+// "#ESC-1042 Unable to export": the page heading and the browser tab.
+const pageTitle = computed(() => ticketPageTitle(props.ticket));
 
 const page = usePage();
 const { t } = useI18n();
@@ -432,7 +435,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <EscalatedLayout :title="ticket.subject" full-bleed>
+    <EscalatedLayout :title="pageTitle" full-bleed>
+        <Head :title="pageTitle" />
         <div class="flex h-full min-h-0">
             <!-- The list the agent came from (wide screens) -->
             <section

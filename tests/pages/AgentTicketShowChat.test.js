@@ -16,6 +16,7 @@ vi.mock('@inertiajs/vue3', () => {
         usePage: vi.fn(() => ({ props: { escalated: { prefix: 'support' }, auth: { user: { id: 1 } } } })),
         router: { post: vi.fn(), reload: vi.fn() },
         Link: { template: '<a><slot /></a>' },
+        Head: { render: () => null },
     };
 });
 

@@ -22,6 +22,7 @@ vi.mock('@inertiajs/vue3', () => ({
     },
     useForm: (data) => ({ ...data, post: vi.fn(), processing: false, errors: {} }),
     Link: { props: ['href'], template: '<a :href="href"><slot /></a>' },
+    Head: { name: 'InertiaHead', props: ['title'], render: () => null },
 }));
 
 vi.mock('../../src/composables/useChat', () => ({
@@ -143,6 +144,13 @@ describe('Agent/TicketShow without the new props', () => {
         expect(wrapper.get('[data-testid="esc-back-to-list"]').text()).toBe('Back to Tickets');
         expect(wrapper.get('[data-testid="esc-subject"]').text()).toBe('Unable to export CSV reports from dashboard');
         expect(wrapper.text()).toContain('ESC-1042');
+    });
+
+    it('titles the page with the reference and subject', () => {
+        mountPage();
+        const title = '#ESC-1042 Unable to export CSV reports from dashboard';
+        expect(wrapper.findComponent({ name: 'InertiaHead' }).props('title')).toBe(title);
+        expect(wrapper.get('h1').text()).toBe(title);
     });
 
     it('shows status, priority, tags and assignee in the header', () => {
