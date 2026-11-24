@@ -8,8 +8,9 @@ import TagSelect from './TagSelect.vue';
 import TicketTypeSelector from './TicketTypeSelector.vue';
 import ActivityTimeline from './ActivityTimeline.vue';
 import TicketSubjects from './TicketSubjects.vue';
+import { resolutionStoppedAt } from '../utils/sla';
 
-defineProps({
+const props = defineProps({
     ticket: { type: Object, required: true },
     agents: { type: Array, default: () => [] },
     tags: { type: Array, default: () => [] },
@@ -28,6 +29,17 @@ const cardClass = computed(() =>
         ? 'rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-4'
         : 'rounded-lg border border-gray-200 bg-white p-4',
 );
+
+// The select is only offered to someone who can edit; everyone else still
+// needs to see who has the ticket.
+const showAssigneeSelect = computed(() => props.editable && props.agents.length > 0);
+const assigneeName = computed(() => {
+    const ticket = props.ticket;
+    if (ticket.assignee?.name) return ticket.assignee.name;
+    if (ticket.assigned_to == null || ticket.assigned_to === '') return null;
+    const agent = props.agents.find((a) => String(a.id) === String(ticket.assigned_to));
+    return agent?.name || null;
+});
 
 function renderStars(rating) {
     return Array.from({ length: 5 }, (_, i) => (i < rating ? 'filled' : 'empty'));
@@ -75,6 +87,12 @@ function renderStars(rating) {
                                 ? ticket.ticket_type.charAt(0).toUpperCase() + ticket.ticket_type.slice(1)
                                 : '—'
                         }}
+                    </dd>
+                </div>
+                <div v-if="!showAssigneeSelect" class="flex justify-between" data-testid="esc-sidebar-assignee">
+                    <dt :class="escDark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'">Assigned To</dt>
+                    <dd :class="escDark ? 'text-[var(--esc-panel-text-secondary)]' : ''">
+                        {{ assigneeName || 'Unassigned' }}
                     </dd>
                 </div>
                 <div class="flex justify-between">
@@ -135,17 +153,19 @@ function renderStars(rating) {
                 v-if="ticket.first_response_due_at"
                 :due-at="ticket.first_response_due_at"
                 :breached="ticket.sla_first_response_breached"
+                :stopped-at="ticket.first_response_at || null"
                 label="First Response"
             />
             <SlaTimer
                 v-if="ticket.resolution_due_at"
                 :due-at="ticket.resolution_due_at"
                 :breached="ticket.sla_resolution_breached"
+                :stopped-at="resolutionStoppedAt(ticket)"
                 label="Resolution"
             />
         </div>
 
-        <div v-if="editable && agents.length" :class="cardClass">
+        <div v-if="showAssigneeSelect" :class="cardClass">
             <AssigneeSelect
                 :agents="agents"
                 :model-value="ticket.assigned_to"
