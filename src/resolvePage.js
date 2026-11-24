@@ -25,6 +25,11 @@ import manifest from '../pages.json';
  *             ),
  *     });
  *
+ * Names under `Escalated/` always resolve to this package. Every other name
+ * goes to `fallback`, even one that matches a path this package ships, so a
+ * host page such as `Admin/Users/Index` or `Error` is never replaced. Only a
+ * host that passes no fallback gets unprefixed names resolved here.
+ *
  * @param {string} name             The page name the backend rendered.
  * @param {Function} [fallback]     Resolver for names this package does not own.
  * @param {Object} [options]
@@ -35,18 +40,23 @@ export function resolveEscalatedPage(name, fallback, options = {}) {
     const pages = import.meta.glob('./pages/**/*.vue');
     const path = `./pages/${String(name ?? '').replace(/^Escalated\//, '')}.vue`;
 
-    if (pages[path]) {
-        return pages[path]();
+    // A name under `Escalated/` is ours: resolve it, or say loudly that it is
+    // missing. A host resolver cannot supply one.
+    if (isEscalatedPage(name)) {
+        return pages[path] ? pages[path]() : missing(name, options);
     }
 
-    // Not ours: a host page, or a plugin's. Only names this package claims are
-    // its responsibility to complain about.
-    if (!isEscalatedPage(name)) {
-        if (fallback) {
-            return fallback(name);
-        }
+    // Any other name belongs to the host or a plugin, even when it matches a
+    // path this package also ships (`Admin/Users/Index`, `Error`). Looking it
+    // up here first would replace the host's page with ours.
+    if (fallback) {
+        return fallback(name);
+    }
 
-        return missing(name, options);
+    // No host resolver at all: keep resolving unprefixed names against the
+    // package, as hosts that pass none have always relied on.
+    if (pages[path]) {
+        return pages[path]();
     }
 
     return missing(name, options);
