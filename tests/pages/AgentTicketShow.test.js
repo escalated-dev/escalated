@@ -1029,6 +1029,32 @@ describe('Agent/TicketShow customer and details panel', () => {
         expect(history.text()).toContain('Mike Agent changed the priority to High');
     });
 
+    it('stops the SLA clocks at the first response and at resolution', async () => {
+        const hours = (h) => new Date(Date.now() + h * 3600000).toISOString();
+        const panel = await openPanel({
+            ticket: makeTicket({
+                status: 'resolved',
+                first_response_due_at: hours(-10),
+                first_response_at: hours(-12),
+                resolution_due_at: hours(-3),
+                resolved_at: hours(-1),
+            }),
+        });
+        const details = panel.get('[data-testid="esc-context-details"]').text();
+        expect(details).toMatch(/First response\s*Met/i);
+        expect(details).toMatch(/Resolution\s*Missed/i);
+        expect(details).not.toContain('Overdue');
+        expect(wrapper.find('[data-testid="esc-header-sla"]').exists()).toBe(false);
+    });
+
+    it('keeps counting down a running SLA clock', async () => {
+        const panel = await openPanel({
+            ticket: makeTicket({ resolution_due_at: new Date(Date.now() + 30 * 60000).toISOString() }),
+        });
+        expect(panel.get('[data-testid="esc-context-details"]').text()).toMatch(/Due in \d+m/);
+        expect(wrapper.find('[data-testid="esc-header-sla"]').exists()).toBe(true);
+    });
+
     it('remembers collapsed sections', async () => {
         const panel = await openPanel();
         const header = panel.get('[data-testid="esc-context-details"] button');

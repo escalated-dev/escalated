@@ -986,7 +986,9 @@
             "overdue": "Overdue",
             "due_minutes": "Due in :countm",
             "due_hours": "Due in :counth",
-            "due_days": "Due in :countd"
+            "due_days": "Due in :countd",
+            "met": "Met",
+            "missed": "Missed"
         },
         "inbox": {
             "title_mine": "My inbox",

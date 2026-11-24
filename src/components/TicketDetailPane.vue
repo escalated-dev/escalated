@@ -17,6 +17,7 @@ import {
     snoozePresets,
 } from '../utils/agentTicket';
 import { ticketUrl } from '../utils/agentQueues';
+import { resolutionStoppedAt, slaOutcome } from '../utils/sla';
 import ChatActionBar from './ChatActionBar.vue';
 import ChatComposer from './ChatComposer.vue';
 import ChatThread from './ChatThread.vue';
@@ -529,8 +530,13 @@ watch(
 );
 
 // --- SLA ---------------------------------------------------------------------------
-function slaText(due, breached) {
+function slaText(due, breached, stoppedAt = null) {
     if (!due && !breached) return null;
+    // A stopped clock (responded to, resolved or closed) no longer counts down.
+    const outcome = slaOutcome(due, stoppedAt, breached);
+    if (outcome === 'met') return { tone: 'var(--esc-sla-ok)', text: t('agent_panel.sla.met'), urgent: false, outcome };
+    if (outcome === 'missed')
+        return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.missed'), urgent: false, outcome };
     if (breached) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.breached'), urgent: true };
     const minutes = Math.round((new Date(due).getTime() - now.value) / 60000);
     if (minutes < 0) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.overdue'), urgent: true };
@@ -545,11 +551,18 @@ function slaText(due, breached) {
 const slaItems = computed(() => {
     const ticket = props.ticket;
     const items = [];
-    const first = isClosed.value ? null : slaText(ticket.first_response_due_at, ticket.sla_first_response_breached);
-    if (first && !ticket.first_response_at) {
-        items.push({ key: 'first_response', label: t('agent_panel.ticket.first_response'), ...first });
-    }
-    const resolution = isClosed.value ? null : slaText(ticket.resolution_due_at, ticket.sla_resolution_breached);
+    const firstStop = ticket.first_response_at || null;
+    const resolutionStop = resolutionStoppedAt(ticket);
+    // A closed ticket with no stop time to judge by shows no SLA, as before.
+    const first =
+        isClosed.value && !firstStop
+            ? null
+            : slaText(ticket.first_response_due_at, ticket.sla_first_response_breached, firstStop);
+    if (first) items.push({ key: 'first_response', label: t('agent_panel.ticket.first_response'), ...first });
+    const resolution =
+        isClosed.value && !resolutionStop
+            ? null
+            : slaText(ticket.resolution_due_at, ticket.sla_resolution_breached, resolutionStop);
     if (resolution) items.push({ key: 'resolution', label: t('agent_panel.ticket.resolution'), ...resolution });
     return items;
 });
