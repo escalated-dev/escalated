@@ -46,7 +46,8 @@ const staffPanelLabel = computed(() => (isAdmin.value ? 'Open admin panel' : 'Op
             <TicketFilters :filters="filters" :route="route('escalated.customer.tickets.index')" />
             <Link
                 :href="route('escalated.customer.tickets.create')"
-                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                class="px-4 py-2 text-sm font-medium bg-[var(--esc-primary,#4f46e5)] text-white hover:bg-[var(--esc-primary-hover,#4338ca)] rounded-[var(--esc-radius,0.5rem)]"
+                data-testid="esc-new-ticket"
             >
                 New Ticket
             </Link>
