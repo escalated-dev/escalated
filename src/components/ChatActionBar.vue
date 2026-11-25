@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     sessionId: { type: [String, Number], default: null },
@@ -54,12 +55,8 @@ async function confirmEndChat() {
         try {
             await fetch(props.endEndpoint, {
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
+                credentials: 'same-origin',
+                headers: requestHeaders({ json: true }),
                 // The end endpoint takes no fields (escalated-laravel
                 // ChatController::end); send an empty object so backends that
                 // parse the JSON body get a valid one.
@@ -80,12 +77,8 @@ function transferTo(type, id) {
     if (props.transferEndpoint) {
         fetch(props.transferEndpoint, {
             method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders({ json: true }),
             // The backends' transfer endpoint reads agent_id / department_id
             // (escalated-laravel ChatController::transfer).
             body: JSON.stringify(type === 'agent' ? { agent_id: id } : { department_id: id }),

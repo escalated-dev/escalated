@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, inject, nextTick } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     savedViews: { type: Array, default: () => [] },
@@ -52,12 +53,8 @@ function saveEdit(view) {
     }
     fetch(route('escalated.admin.saved-views.update', view.id), {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
+        credentials: 'same-origin',
+        headers: requestHeaders({ json: true }),
         body: JSON.stringify({ name: editName.value, filters: view.filters }),
     }).then(() => {
         view.name = editName.value;
@@ -75,12 +72,8 @@ function updateViewFilters(view) {
     }
     fetch(route('escalated.admin.saved-views.update', view.id), {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
+        credentials: 'same-origin',
+        headers: requestHeaders({ json: true }),
         body: JSON.stringify({ name: view.name, filters: nonEmptyFilters }),
     }).then(() => {
         view.filters = nonEmptyFilters;
@@ -93,11 +86,8 @@ function deleteView(view) {
     if (!confirm(`Delete view "${view.name}"?`)) return;
     fetch(route('escalated.admin.saved-views.destroy', view.id), {
         method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
+        credentials: 'same-origin',
+        headers: requestHeaders(),
     }).then(() => {
         if (activeViewId.value === view.id) {
             activeViewId.value = null;

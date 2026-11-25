@@ -1,4 +1,5 @@
 import { ref, watch } from 'vue';
+import { requestHeaders } from '../../../utils/http';
 
 /**
  * Debounced HTTP preview composable for the newsletter compose form.
@@ -20,10 +21,8 @@ export function usePreview(formRef, endpoint) {
                 try {
                     const res = await fetch(endpoint, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                        },
+                        credentials: 'same-origin',
+                        headers: requestHeaders({ json: true }),
                         body: JSON.stringify(formRef.value),
                     });
                     if (res.ok) {

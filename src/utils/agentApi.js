@@ -4,6 +4,8 @@
  * define, and JSON requests to it.
  */
 
+import { requestHeaders, xsrfCookie } from './http';
+
 /**
  * The URL of a named route, or '' when the host has no such route. Ziggy
  * throws for an unknown name; the non-Laravel shims return '#'.
@@ -19,20 +21,10 @@ export function routeOr(name, params) {
     }
 }
 
-function xsrfCookie() {
-    if (typeof document === 'undefined') return '';
-    const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
-    return match ? decodeURIComponent(match[1]) : '';
-}
-
 function headers(withBody) {
-    const list = {
-        Accept: 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-    };
-    if (withBody) list['Content-Type'] = 'application/json';
-    const token = typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.content : '';
-    if (token) list['X-CSRF-TOKEN'] = token;
+    const list = requestHeaders({ json: withBody });
+    // These requests have always sent the cookie as well when both exist;
+    // keep doing so for backends that read only X-XSRF-TOKEN.
     const xsrf = xsrfCookie();
     if (xsrf) list['X-XSRF-TOKEN'] = xsrf;
     return list;

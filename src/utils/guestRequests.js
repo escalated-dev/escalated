@@ -1,16 +1,9 @@
+import { csrfHeaders } from './http';
+
 /** Never forward the embedding site's CSRF token to another origin. */
 export function guestCsrfHeaders(url) {
-    if (typeof window === 'undefined' || new URL(url, window.location.href).origin !== window.location.origin)
-        return {};
-    const token = document.querySelector('meta[name="csrf-token"]')?.content;
-    if (token) return { 'X-CSRF-TOKEN': token };
-    const cookie = document.cookie.split('; ').find((value) => value.startsWith('XSRF-TOKEN='));
-    if (!cookie) return {};
-    try {
-        return { 'X-XSRF-TOKEN': decodeURIComponent(cookie.slice('XSRF-TOKEN='.length)) };
-    } catch {
-        return {};
-    }
+    if (typeof window === 'undefined') return {};
+    return csrfHeaders(new URL(url, window.location.href).href);
 }
 
 export async function guestRequest(url, body) {

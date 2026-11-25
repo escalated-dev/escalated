@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     show: { type: Boolean, default: false },
@@ -47,12 +48,8 @@ async function save() {
     try {
         const response = await fetch(route('escalated.admin.saved-views.store'), {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders({ json: true }),
             body: JSON.stringify({
                 name: name.value.trim(),
                 filters: nonEmptyFilters,

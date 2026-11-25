@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { requestHeaders } from '../../../utils/http';
 
 const props = defineProps({
     job: { type: Object, required: true },
@@ -14,7 +15,10 @@ const isFinished = computed(() => ['completed', 'failed'].includes(jobData.value
 
 async function pollStatus() {
     try {
-        const response = await fetch(route('escalated.admin.import.status', jobData.value.id));
+        const response = await fetch(route('escalated.admin.import.status', jobData.value.id), {
+            credentials: 'same-origin',
+            headers: requestHeaders(),
+        });
         const data = await response.json();
         Object.assign(jobData.value, data);
 

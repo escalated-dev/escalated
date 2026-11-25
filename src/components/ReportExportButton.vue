@@ -30,7 +30,7 @@ async function exportAs(format) {
             a.click();
             URL.revokeObjectURL(a.href);
         } else {
-            const response = await fetch(url);
+            const response = await fetch(url, { credentials: 'same-origin' });
             if (!response.ok) throw new Error(`Export failed (${response.status}). Please try again.`);
             const blob = await response.blob();
             const a = document.createElement('a');

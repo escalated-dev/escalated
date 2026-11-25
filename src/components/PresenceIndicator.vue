@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, inject, onUnmounted, watch } from 'vue';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     ticketReference: { type: String, required: true },
@@ -36,12 +37,8 @@ async function fetchPresence() {
         const response = await fetch(route(`${props.routePrefix}.tickets.presence`, props.ticketReference), {
             method: 'POST',
             signal: controller.signal,
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders({ json: true }),
         });
         if (response.ok) {
             const data = await response.json();
