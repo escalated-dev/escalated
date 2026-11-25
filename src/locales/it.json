@@ -155,7 +155,9 @@
         "overdue": "Scaduto",
         "breached": "SLA Violato",
         "first_response": "Prima Risposta",
-        "resolution": "Risoluzione"
+        "resolution": "Risoluzione",
+        "met": "Rispettato",
+        "missed": "Mancato"
     },
     "follow": {
         "following": "Seguito",
@@ -723,5 +725,14 @@
             "update": "Aggiorna Workflow",
             "create": "Crea Workflow"
         }
+    },
+    "scheduler": {
+        "title": "Le attività ricorrenti non sono in esecuzione",
+        "never_run": "Il controllo SLA non è mai stato eseguito.",
+        "last_run": "Ultimo controllo SLA: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Cerca nella knowledge base",
+        "search_failed": "Ricerca non riuscita. Riprova."
     }
 }

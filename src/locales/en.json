@@ -160,7 +160,9 @@
         "overdue": "Overdue",
         "breached": "SLA Breached",
         "first_response": "First Response",
-        "resolution": "Resolution"
+        "resolution": "Resolution",
+        "met": "Met",
+        "missed": "Missed"
     },
     "follow": {
         "following": "Following",
@@ -986,9 +988,7 @@
             "overdue": "Overdue",
             "due_minutes": "Due in :countm",
             "due_hours": "Due in :counth",
-            "due_days": "Due in :countd",
-            "met": "Met",
-            "missed": "Missed"
+            "due_days": "Due in :countd"
         },
         "inbox": {
             "title_mine": "My inbox",
@@ -1212,5 +1212,14 @@
             "system": "System",
             "ticket_split": ":name split the ticket"
         }
+    },
+    "scheduler": {
+        "title": "Recurring jobs are not running",
+        "never_run": "The SLA check has never run.",
+        "last_run": "Last SLA check: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Search knowledge base",
+        "search_failed": "Search failed. Try again."
     }
 }

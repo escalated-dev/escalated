@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useKbSearch, KB_MIN_QUERY } from '../composables/useKbSearch';
 import { routeOr } from '../utils/agentApi';
+import { useI18n } from '../composables/useI18n';
 
 /**
  * Knowledge-base search beside a ticket. It searches the host's real
@@ -15,6 +16,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['insert-link', 'quote']);
+const { t } = useI18n();
 const expanded = ref(true);
 
 const url = computed(() => props.searchUrl ?? routeOr('escalated.agent.kb.search'));
@@ -59,7 +61,7 @@ function quoteArticle(article) {
             <input
                 :value="searchTerm"
                 type="search"
-                aria-label="Search knowledge base"
+                :aria-label="t('knowledge_panel.search_label')"
                 placeholder="Search knowledge base..."
                 class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
                 @input="onSearch"
@@ -96,7 +98,7 @@ function quoteArticle(article) {
                 </div>
             </div>
 
-            <div v-else-if="failed" class="text-xs text-neutral-500">Search failed. Try again.</div>
+            <div v-else-if="failed" class="text-xs text-neutral-500">{{ t('knowledge_panel.search_failed') }}</div>
 
             <div v-else-if="searched && searchTerm.trim().length >= KB_MIN_QUERY" class="text-xs text-neutral-500">
                 No articles found.

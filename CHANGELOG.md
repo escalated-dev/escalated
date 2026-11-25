@@ -20,6 +20,9 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   `Escalated/Admin/Reports` and `Escalated/Admin/Reports/Dashboard`: a banner
   naming the jobs to schedule when the backend reports they are not running.
 - `SlaTimer` takes `stoppedAt`.
+- Translations in all 14 locales for the new strings: `sla.met`, `sla.missed`,
+  `scheduler.*` and `knowledge_panel.*`. The read-only assignee reuses
+  `ticket.assignee` and `ticket.unassigned`.
 
 ### Fixed
 - Host pages sharing a path with a package page (`Admin/Users/Index`,

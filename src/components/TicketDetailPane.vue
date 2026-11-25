@@ -531,9 +531,8 @@ function slaText(due, breached, stoppedAt = null) {
     if (!due && !breached) return null;
     // A stopped clock (responded to, resolved or closed) no longer counts down.
     const outcome = slaOutcome(due, stoppedAt, breached);
-    if (outcome === 'met') return { tone: 'var(--esc-sla-ok)', text: t('agent_panel.sla.met'), urgent: false, outcome };
-    if (outcome === 'missed')
-        return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.missed'), urgent: false, outcome };
+    if (outcome === 'met') return { tone: 'var(--esc-sla-ok)', text: t('sla.met'), urgent: false, outcome };
+    if (outcome === 'missed') return { tone: 'var(--esc-sla-breach)', text: t('sla.missed'), urgent: false, outcome };
     if (breached) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.breached'), urgent: true };
     const minutes = Math.round((new Date(due).getTime() - now.value) / 60000);
     if (minutes < 0) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.overdue'), urgent: true };

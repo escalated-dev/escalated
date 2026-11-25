@@ -1,5 +1,6 @@
 <script setup>
 import { computed, inject, unref } from 'vue';
+import { useI18n } from '../composables/useI18n';
 
 /**
  * Warns admins that the recurring jobs (SLA checks, escalation rules,
@@ -19,6 +20,7 @@ const dark = inject(
     computed(() => false),
 );
 const isDark = computed(() => unref(dark) === true);
+const { t } = useI18n();
 
 const show = computed(() => !!props.scheduler && props.scheduler.healthy === false);
 const commands = computed(() =>
@@ -44,10 +46,10 @@ const lastRun = computed(() => {
                 : 'border-amber-300 bg-amber-50 text-amber-900',
         ]"
     >
-        <p class="font-semibold">Recurring jobs are not running</p>
+        <p class="font-semibold">{{ t('scheduler.title') }}</p>
         <p v-if="scheduler.message" class="mt-1">{{ scheduler.message }}</p>
         <p :class="['mt-1 text-xs', isDark ? 'text-amber-300/80' : 'text-amber-800']">
-            {{ lastRun ? `Last SLA check: ${lastRun}.` : 'The SLA check has never run.' }}
+            {{ lastRun ? t('scheduler.last_run', { date: lastRun }) : t('scheduler.never_run') }}
         </p>
         <ul v-if="commands.length" class="mt-2 space-y-1" data-testid="esc-scheduler-commands">
             <li v-for="item in commands" :key="item.command" class="flex flex-wrap items-baseline gap-2">

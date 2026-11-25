@@ -9,6 +9,7 @@ import TicketTypeSelector from './TicketTypeSelector.vue';
 import ActivityTimeline from './ActivityTimeline.vue';
 import TicketSubjects from './TicketSubjects.vue';
 import { resolutionStoppedAt } from '../utils/sla';
+import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
     ticket: { type: Object, required: true },
@@ -18,6 +19,7 @@ const props = defineProps({
     editable: { type: Boolean, default: false },
 });
 
+const { t } = useI18n();
 const emit = defineEmits(['assign', 'tags', 'priority', 'department', 'status', 'ticket-type']);
 const escDark = inject(
     'esc-dark',
@@ -90,9 +92,11 @@ function renderStars(rating) {
                     </dd>
                 </div>
                 <div v-if="!showAssigneeSelect" class="flex justify-between" data-testid="esc-sidebar-assignee">
-                    <dt :class="escDark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'">Assigned To</dt>
+                    <dt :class="escDark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'">
+                        {{ t('ticket.assignee') }}
+                    </dt>
                     <dd :class="escDark ? 'text-[var(--esc-panel-text-secondary)]' : ''">
-                        {{ assigneeName || 'Unassigned' }}
+                        {{ assigneeName || t('ticket.unassigned') }}
                     </dd>
                 </div>
                 <div class="flex justify-between">

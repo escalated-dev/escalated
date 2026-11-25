@@ -155,7 +155,9 @@
         "overdue": "기한 초과",
         "breached": "SLA 위반",
         "first_response": "첫 응답",
-        "resolution": "해결"
+        "resolution": "해결",
+        "met": "충족",
+        "missed": "미충족"
     },
     "follow": {
         "following": "팔로잉",
@@ -723,5 +725,14 @@
             "update": "워크플로 업데이트",
             "create": "워크플로 생성"
         }
+    },
+    "scheduler": {
+        "title": "반복 작업이 실행되고 있지 않습니다",
+        "never_run": "SLA 검사가 한 번도 실행되지 않았습니다.",
+        "last_run": "마지막 SLA 검사: :date"
+    },
+    "knowledge_panel": {
+        "search_label": "지식 베이스 검색",
+        "search_failed": "검색에 실패했습니다. 다시 시도하세요."
     }
 }

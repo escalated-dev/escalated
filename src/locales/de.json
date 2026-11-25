@@ -155,7 +155,9 @@
         "overdue": "Überfällig",
         "breached": "SLA verletzt",
         "first_response": "Erste Antwort",
-        "resolution": "Lösung"
+        "resolution": "Lösung",
+        "met": "Eingehalten",
+        "missed": "Verfehlt"
     },
     "follow": {
         "following": "Beobachtet",
@@ -686,5 +688,14 @@
             "update": "Workflow aktualisieren",
             "create": "Workflow erstellen"
         }
+    },
+    "scheduler": {
+        "title": "Wiederkehrende Aufgaben laufen nicht",
+        "never_run": "Die SLA-Prüfung ist noch nie gelaufen.",
+        "last_run": "Letzte SLA-Prüfung: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Wissensdatenbank durchsuchen",
+        "search_failed": "Suche fehlgeschlagen. Bitte erneut versuchen."
     }
 }

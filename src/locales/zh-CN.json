@@ -155,7 +155,9 @@
         "overdue": "已逾期",
         "breached": "SLA 已违规",
         "first_response": "首次响应",
-        "resolution": "解决"
+        "resolution": "解决",
+        "met": "已达成",
+        "missed": "未达成"
     },
     "follow": {
         "following": "关注中",
@@ -723,5 +725,14 @@
             "update": "更新工作流",
             "create": "创建工作流"
         }
+    },
+    "scheduler": {
+        "title": "定时任务未在运行",
+        "never_run": "SLA 检查从未运行。",
+        "last_run": "上次 SLA 检查：:date"
+    },
+    "knowledge_panel": {
+        "search_label": "搜索知识库",
+        "search_failed": "搜索失败，请重试。"
     }
 }

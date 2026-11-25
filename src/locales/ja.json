@@ -155,7 +155,9 @@
         "overdue": "期限超過",
         "breached": "SLA違反",
         "first_response": "初回応答",
-        "resolution": "解決"
+        "resolution": "解決",
+        "met": "達成",
+        "missed": "未達成"
     },
     "follow": {
         "following": "フォロー中",
@@ -723,5 +725,14 @@
             "update": "ワークフローを更新",
             "create": "ワークフローを作成"
         }
+    },
+    "scheduler": {
+        "title": "定期ジョブが実行されていません",
+        "never_run": "SLAチェックは一度も実行されていません。",
+        "last_run": "最終SLAチェック: :date"
+    },
+    "knowledge_panel": {
+        "search_label": "ナレッジベースを検索",
+        "search_failed": "検索に失敗しました。もう一度お試しください。"
     }
 }

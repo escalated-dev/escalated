@@ -155,7 +155,9 @@
         "overdue": "Przeterminowane",
         "breached": "SLA Naruszone",
         "first_response": "Pierwsza odpowiedz",
-        "resolution": "Rozwiazanie"
+        "resolution": "Rozwiazanie",
+        "met": "Dotrzymano",
+        "missed": "Przekroczono"
     },
     "follow": {
         "following": "Obserwowane",
@@ -723,5 +725,14 @@
             "update": "Aktualizuj przeplyw",
             "create": "Utworz przeplyw"
         }
+    },
+    "scheduler": {
+        "title": "Zadania cykliczne nie są uruchamiane",
+        "never_run": "Sprawdzanie SLA nigdy nie zostało uruchomione.",
+        "last_run": "Ostatnie sprawdzenie SLA: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Przeszukaj bazę wiedzy",
+        "search_failed": "Wyszukiwanie nie powiodło się. Spróbuj ponownie."
     }
 }

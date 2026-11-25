@@ -155,7 +155,9 @@
         "overdue": "Achterstallig",
         "breached": "SLA Geschonden",
         "first_response": "Eerste Reactie",
-        "resolution": "Oplossing"
+        "resolution": "Oplossing",
+        "met": "Gehaald",
+        "missed": "Gemist"
     },
     "follow": {
         "following": "Volgend",
@@ -723,5 +725,14 @@
             "update": "Workflow Bijwerken",
             "create": "Workflow Aanmaken"
         }
+    },
+    "scheduler": {
+        "title": "Terugkerende taken worden niet uitgevoerd",
+        "never_run": "De SLA-controle is nog nooit uitgevoerd.",
+        "last_run": "Laatste SLA-controle: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Kennisbank doorzoeken",
+        "search_failed": "Zoeken mislukt. Probeer het opnieuw."
     }
 }

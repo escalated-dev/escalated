@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject, unref } from 'vue';
 import { slaOutcome } from '../utils/sla';
+import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
     dueAt: { type: String, default: null },
@@ -20,6 +21,7 @@ const dark = inject(
     computed(() => false),
 );
 const isDark = computed(() => unref(dark) === true);
+const { t } = useI18n();
 
 const outcome = computed(() => slaOutcome(props.dueAt, props.stoppedAt, props.breached));
 
@@ -74,8 +76,8 @@ const statusClass = computed(() => {
     >
         <div class="font-medium">{{ label }}</div>
         <div class="text-xs">
-            <span v-if="outcome === 'met'">Met</span>
-            <span v-else-if="outcome === 'missed'">Missed</span>
+            <span v-if="outcome === 'met'">{{ t('sla.met') }}</span>
+            <span v-else-if="outcome === 'missed'">{{ t('sla.missed') }}</span>
             <span v-else-if="breached">SLA Breached</span>
             <span v-else>{{ timeRemaining?.text }}</span>
         </div>

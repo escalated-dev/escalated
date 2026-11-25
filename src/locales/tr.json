@@ -155,7 +155,9 @@
         "overdue": "Gecikti",
         "breached": "SLA Ihlal Edildi",
         "first_response": "Ilk Yanit",
-        "resolution": "Cozum"
+        "resolution": "Cozum",
+        "met": "Karşılandı",
+        "missed": "Kaçırıldı"
     },
     "follow": {
         "following": "Takip Ediliyor",
@@ -723,5 +725,14 @@
             "update": "Is Akisini Guncelle",
             "create": "Is Akisi Olustur"
         }
+    },
+    "scheduler": {
+        "title": "Yinelenen görevler çalışmıyor",
+        "never_run": "SLA denetimi hiç çalışmadı.",
+        "last_run": "Son SLA denetimi: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Bilgi bankasında ara",
+        "search_failed": "Arama başarısız oldu. Tekrar deneyin."
     }
 }
