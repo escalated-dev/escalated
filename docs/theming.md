@@ -35,6 +35,12 @@ app.use(EscalatedPlugin, {
 
 `mode` picks a full set of defaults; every other key overrides one of them.
 
+`theme.panel` is optional. Without it the plugin (or `EscalatedLayout`, when
+the plugin is not installed) adds the dark defaults as a stylesheet at the top
+of `<head>`, under `:where(:root)`. It has no specificity, so any host
+stylesheet that sets the same properties wins over it, and `theme.panel`
+wins over both. A partial `theme.panel` only overrides the keys it sets.
+
 ## Panel tokens
 
 | Option | CSS custom property | What it colours |

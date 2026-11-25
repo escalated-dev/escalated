@@ -505,3 +505,52 @@ describe('Panel theming', () => {
         });
     });
 });
+
+describe('panel theme defaults', () => {
+    const PANEL_VARS = ['--esc-panel-bg', '--esc-panel-primary-bg', '--esc-panel-primary-text', '--esc-panel-accent'];
+
+    beforeEach(() => {
+        document.getElementById('escalated-panel-defaults')?.remove();
+        for (const cssVar of PANEL_VARS) document.documentElement.style.removeProperty(cssVar);
+    });
+
+    it('gives the panel a complete default theme when the host sets no theme.panel', () => {
+        installPlugin();
+        const style = document.getElementById('escalated-panel-defaults');
+
+        expect(style).not.toBeNull();
+        for (const [cssVar, value] of Object.entries(panelThemeTokens('dark'))) {
+            expect(style.textContent).toContain(`${cssVar}: ${value};`);
+        }
+        // Buttons are coloured by these two.
+        expect(style.textContent).toMatch(/--esc-panel-primary-bg: #[0-9a-f]{6};/i);
+        expect(style.textContent).toMatch(/--esc-panel-primary-text: #(000000|ffffff);/);
+    });
+
+    it('lets host stylesheets win over the defaults', () => {
+        installPlugin({ theme: { primary: '#ff0000' } });
+        const style = document.getElementById('escalated-panel-defaults');
+
+        // Zero specificity, and first in <head>.
+        expect(style.textContent.startsWith(':where(:root)')).toBe(true);
+        expect(document.head.firstChild).toBe(style);
+        // Nothing written inline, where it would beat the host's own CSS.
+        expect(document.documentElement.style.getPropertyValue('--esc-panel-primary-bg')).toBe('');
+    });
+
+    it('installs the defaults once', () => {
+        installPlugin();
+        installPlugin();
+        expect(document.querySelectorAll('#escalated-panel-defaults')).toHaveLength(1);
+    });
+
+    it('merges a partial theme.panel over the defaults', () => {
+        installPlugin({ theme: { panel: { accent: '#e94560' } } });
+        const style = document.documentElement.style;
+
+        expect(style.getPropertyValue('--esc-panel-accent')).toBe('#e94560');
+        expect(style.getPropertyValue('--esc-panel-bg')).toBe(panelThemeTokens('dark')['--esc-panel-bg']);
+        expect(style.getPropertyValue('--esc-panel-primary-bg')).toBe('#e94560');
+        expect(style.getPropertyValue('--esc-panel-primary-text')).not.toBe('');
+    });
+});

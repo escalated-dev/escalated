@@ -15,7 +15,7 @@ import { watchScrollAffordance } from '../utils/scrollAffordance';
 import AgentShell from './AgentShell.vue';
 import { escalatedNavIcons } from '../utils/adminNavIcons';
 import { startFrameBridge } from '../embed/frameBridge';
-import { applyPanelTheme } from '../plugin';
+import { applyPanelTheme, installPanelDefaults } from '../plugin';
 
 const props = defineProps({
     title: { type: String, default: 'Support' },
@@ -77,6 +77,10 @@ const rolesFlag = computed(() => page.props.escalated?.features?.roles_permissio
 const kbPublic = computed(() => page.props.escalated?.knowledge_base_public !== false);
 
 provide('esc-dark', isDark);
+
+// Hosts that mount pages without installing EscalatedPlugin still get a
+// complete panel theme; a host stylesheet or theme.panel overrides it.
+installPanelDefaults(panelConfig.mode);
 
 const { menuItems: pluginMenuItems } = usePluginExtensions();
 const { hasPermission } = usePermissions();

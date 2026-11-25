@@ -61,6 +61,12 @@ export const EscalatedPlugin = {
                 });
             }
         }
+
+        // Without theme.panel the panel tokens used to be unset, and every
+        // button coloured by them (Send, primary actions) rendered blank.
+        if (!options.theme?.panel) {
+            installPanelDefaults();
+        }
     },
 };
 
@@ -307,4 +313,27 @@ export function applyPanelTheme(panelConfig) {
             style.removeProperty(cssVar);
         }
     }
+}
+
+const PANEL_DEFAULTS_ID = 'escalated-panel-defaults';
+
+/**
+ * The default panel tokens as a stylesheet, for hosts that set no
+ * `theme.panel`. It goes first in <head> under `:where(:root)`, which has no
+ * specificity, so any host stylesheet that sets the same properties wins, and
+ * `theme.panel` (written inline by applyPanelTheme) wins over both. Installed
+ * once per document; returns the style element, or null without a DOM.
+ */
+export function installPanelDefaults(mode = 'dark') {
+    if (typeof document === 'undefined' || !document.head) return null;
+    const existing = document.getElementById(PANEL_DEFAULTS_ID);
+    if (existing) return existing;
+    const declarations = Object.entries(resolvePanelTokens({ mode }))
+        .map(([cssVar, value]) => `${cssVar}: ${value};`)
+        .join(' ');
+    const style = document.createElement('style');
+    style.id = PANEL_DEFAULTS_ID;
+    style.textContent = `:where(:root) { ${declarations} }`;
+    document.head.insertBefore(style, document.head.firstChild);
+    return style;
 }
