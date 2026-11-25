@@ -137,7 +137,7 @@ watch([search, selectedCategory], applyFilters);
                 :class="[
                     'rounded-lg px-3 py-1.5 text-sm transition-colors',
                     link.active
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-[var(--esc-primary,#4f46e5)] text-white'
                         : link.url
                           ? 'border border-gray-200 text-gray-600 hover:bg-gray-50'
                           : 'cursor-default text-gray-300',

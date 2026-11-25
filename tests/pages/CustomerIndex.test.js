@@ -35,3 +35,19 @@ describe('Customer/Index', () => {
         expect(select.attributes('aria-label')).toBe('Filter by status');
     });
 });
+
+describe('portal primary buttons', () => {
+    const sources = import.meta.glob('../../src/pages/{Customer,Guest}/**/*.vue', {
+        query: '?raw',
+        import: 'default',
+        eager: true,
+    });
+
+    it('found the customer and guest pages', () => {
+        expect(Object.keys(sources).length).toBeGreaterThan(4);
+    });
+
+    it.each(Object.keys(sources))('%s uses the theme token, not a fixed indigo fill', (path) => {
+        expect(sources[path]).not.toMatch(/bg-indigo-600|hover:bg-indigo-700/);
+    });
+});

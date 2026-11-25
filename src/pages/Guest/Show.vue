@@ -112,7 +112,7 @@ function copyLink() {
                         <button
                             type="submit"
                             :disabled="replyForm.processing"
-                            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                            class="rounded-[var(--esc-radius,0.5rem)] bg-[var(--esc-primary,#4f46e5)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--esc-primary-hover,#4338ca)] disabled:opacity-50"
                         >
                             {{ replyForm.processing ? 'Sending...' : 'Send Reply' }}
                         </button>

@@ -37,7 +37,7 @@ const staffPanelLabel = computed(() => (isAdmin.value ? 'Open admin panel' : 'Op
             </div>
             <a
                 :href="staffPanelHref"
-                class="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+                class="shrink-0 rounded-[var(--esc-radius,0.5rem)] bg-[var(--esc-primary,#4f46e5)] px-3 py-1.5 text-xs font-medium text-white hover:bg-[var(--esc-primary-hover,#4338ca)]"
             >
                 {{ staffPanelLabel }}
             </a>
