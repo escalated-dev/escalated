@@ -2,6 +2,7 @@
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import StatsCard from '../../components/StatsCard.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
+import SchedulerWarning from '../../components/SchedulerWarning.vue';
 import { router, Link } from '@inertiajs/vue3';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 
@@ -14,6 +15,8 @@ defineProps({
     by_status: Object,
     by_priority: Object,
     csat: { type: Object, default: () => ({}) },
+    /** Optional `{ healthy, last_run_at, message, commands }`: warns when the recurring jobs are not running. */
+    scheduler: { type: Object, default: null },
 });
 
 function changePeriod(days) {
@@ -29,6 +32,7 @@ const { getPageComponents } = usePluginExtensions();
 
 <template>
     <EscalatedLayout title="Reports">
+        <SchedulerWarning :scheduler="scheduler" />
         <!-- Sub-report navigation -->
         <div
             class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-[var(--esc-panel-border)] bg-[var(--esc-panel-hover)] p-3"

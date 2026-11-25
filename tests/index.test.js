@@ -97,6 +97,7 @@ describe('index.js exports', () => {
         'SideConversationList',
         'SkillTagManager',
         'SlaComplianceChart',
+        'SchedulerWarning',
         'SlaTimer',
         'StatsCard',
         'StatusBadge',
@@ -123,8 +124,8 @@ describe('index.js exports', () => {
             expect(typeof component).toBe('object');
         });
 
-        it('exports exactly 57 components', () => {
-            expect(expectedComponents).toHaveLength(57);
+        it('exports exactly 58 components', () => {
+            expect(expectedComponents).toHaveLength(58);
             for (const name of expectedComponents) {
                 expect(escalated[name]).toBeDefined();
             }
@@ -144,9 +145,9 @@ describe('index.js exports', () => {
 
         it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 58 components + 2 saved-view components + 1 plugin + 8 composables
-            // + 1 helper + 5 pages + 7 utils + 4 page-resolution = 86
-            expect(keys).toHaveLength(86);
+            // 59 components + 2 saved-view components + 1 plugin + 8 composables
+            // + 1 helper + 5 pages + 7 utils + 4 page-resolution = 87
+            expect(keys).toHaveLength(87);
         });
 
         it('every export key is a non-empty string', () => {
