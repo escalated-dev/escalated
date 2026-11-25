@@ -4,6 +4,7 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
+import { isPlainText } from '../utils/messageBody';
 import { readFlash } from '../utils/flash';
 import { toast } from '../composables/useAgentToasts';
 import { highlightMentions } from '../utils/mentionHighlight';
@@ -474,10 +475,6 @@ const EVENT_ICONS = {
 
 function bodyHtml(body) {
     return highlightMentions(sanitizeHtml(body || ''), escDark.value);
-}
-
-function isPlainText(body) {
-    return !/<[a-z][\s\S]*>/i.test(body || '');
 }
 
 function attachmentName(attachment) {

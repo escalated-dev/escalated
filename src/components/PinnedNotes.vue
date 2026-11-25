@@ -2,6 +2,7 @@
 import { ref, computed, inject } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
+import { bodyFormatClass } from '../utils/messageBody';
 import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
@@ -93,6 +94,7 @@ function formatDate(dateStr) {
                     :class="[
                         'prose prose-sm max-w-none',
                         escDark ? 'prose-invert text-[var(--esc-panel-text-secondary)]' : 'text-gray-800',
+                        bodyFormatClass(note.body),
                     ]"
                     v-html="sanitizeHtml(note.body)"
                 ></div>

@@ -37,3 +37,31 @@ describe('ReplyThread author rendering', () => {
         expect(wrapper.text()).toContain('ticket.unknown');
     });
 });
+
+describe('ReplyThread body format', () => {
+    it('keeps the line breaks of a plain-text reply', () => {
+        const wrapper = mountThread([{ id: 3, body: 'Line one\nLine two', author: null, created_at: '2026-01-01' }]);
+        const body = wrapper.get('[data-testid="esc-reply-body"]');
+
+        expect(body.classes()).toContain('whitespace-pre-line');
+        expect(body.text()).toContain('Line one\nLine two');
+    });
+
+    it('renders an HTML reply as before', () => {
+        const wrapper = mountThread([
+            { id: 4, body: '<p>One</p>\n<p>Two</p>', author: null, created_at: '2026-01-01' },
+        ]);
+        const body = wrapper.get('[data-testid="esc-reply-body"]');
+
+        expect(body.classes()).not.toContain('whitespace-pre-line');
+        expect(body.findAll('p')).toHaveLength(2);
+    });
+
+    it('still sanitises a plain-text-looking body that carries markup', () => {
+        const wrapper = mountThread([
+            { id: 5, body: 'Hi<script>alert(1)</script>\nthere', author: null, created_at: '2026-01-01' },
+        ]);
+
+        expect(wrapper.get('[data-testid="esc-reply-body"]').html()).not.toContain('<script');
+    });
+});
