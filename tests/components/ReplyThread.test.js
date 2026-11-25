@@ -47,6 +47,13 @@ describe('ReplyThread body format', () => {
         expect(body.text()).toContain('Line one\nLine two');
     });
 
+    it('keeps the line breaks of a plain-text email that quotes an address', () => {
+        const body = 'Thanks!\n\nOn Monday, Bob <bob@example.com> wrote:\n> Is it fixed?';
+        const wrapper = mountThread([{ id: 6, body, author: null, created_at: '2026-01-01' }]);
+
+        expect(wrapper.get('[data-testid="esc-reply-body"]').classes()).toContain('whitespace-pre-line');
+    });
+
     it('renders an HTML reply as before', () => {
         const wrapper = mountThread([
             { id: 4, body: '<p>One</p>\n<p>Two</p>', author: null, created_at: '2026-01-01' },
@@ -63,5 +70,20 @@ describe('ReplyThread body format', () => {
         ]);
 
         expect(wrapper.get('[data-testid="esc-reply-body"]').html()).not.toContain('<script');
+    });
+});
+
+describe('isPlainText', () => {
+    it('counts only real HTML tags as markup', async () => {
+        const { isPlainText } = await import('../../src/utils/messageBody');
+
+        expect(isPlainText('Bob <bob@example.com> wrote:')).toBe(true);
+        expect(isPlainText('a <b> c')).toBe(false);
+        expect(isPlainText('<p>Hello</p>')).toBe(false);
+        expect(isPlainText('line<br/>break')).toBe(false);
+        expect(isPlainText('<a href="https://x.test">x</a>')).toBe(false);
+        expect(isPlainText('<H2 class="t">Title</H2>')).toBe(false);
+        expect(isPlainText('if a < b and c > d')).toBe(true);
+        expect(isPlainText('')).toBe(true);
     });
 });
