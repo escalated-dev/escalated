@@ -2,7 +2,7 @@
 import { ref, computed, inject } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
-import { bodyFormatClass } from '../utils/messageBody';
+import MessageBody from './MessageBody.vue';
 import { useI18n } from '../composables/useI18n';
 
 const props = defineProps({
@@ -90,14 +90,14 @@ function formatDate(dateStr) {
                 ]"
             >
                 <!-- Note body -->
-                <div
+                <MessageBody
+                    :body="note.body"
+                    :render="sanitizeHtml"
                     :class="[
                         'prose prose-sm max-w-none',
                         escDark ? 'prose-invert text-[var(--esc-panel-text-secondary)]' : 'text-gray-800',
-                        bodyFormatClass(note.body),
                     ]"
-                    v-html="sanitizeHtml(note.body)"
-                ></div>
+                />
 
                 <!-- Meta row -->
                 <div class="mt-2 flex items-center justify-between">

@@ -4,7 +4,6 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { usePluginExtensions } from '../composables/usePluginExtensions';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
-import { isPlainText } from '../utils/messageBody';
 import { readFlash } from '../utils/flash';
 import { toast } from '../composables/useAgentToasts';
 import { highlightMentions } from '../utils/mentionHighlight';
@@ -21,6 +20,7 @@ import { ticketUrl } from '../utils/agentQueues';
 import { resolutionStoppedAt, slaOutcome } from '../utils/sla';
 import { isClosedStatus } from '../utils/constants';
 import ChatActionBar from './ChatActionBar.vue';
+import MessageBody from './MessageBody.vue';
 import ChatComposer from './ChatComposer.vue';
 import ChatThread from './ChatThread.vue';
 import Composer from './Composer.vue';
@@ -1168,13 +1168,11 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                             {{ t('reply.unpin') }}
                                         </button>
                                     </div>
-                                    <div
-                                        :class="[
-                                            'mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
-                                            isPlainText(note.body) ? 'whitespace-pre-line' : '',
-                                        ]"
-                                        v-html="bodyHtml(note.body)"
-                                    ></div>
+                                    <MessageBody
+                                        :body="note.body"
+                                        :render="bodyHtml"
+                                        class="mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]"
+                                    />
                                 </article>
                             </section>
 
@@ -1229,13 +1227,11 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                             {{ item.is_pinned ? t('reply.unpin') : t('reply.pin') }}
                                         </button>
                                     </div>
-                                    <div
-                                        :class="[
-                                            'esc-message-body mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
-                                            isPlainText(item.body) ? 'whitespace-pre-line' : '',
-                                        ]"
-                                        v-html="bodyHtml(item.body)"
-                                    ></div>
+                                    <MessageBody
+                                        :body="item.body"
+                                        :render="bodyHtml"
+                                        class="esc-message-body mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]"
+                                    />
                                     <ul v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-2">
                                         <li
                                             v-for="attachment in item.attachments"
@@ -1314,13 +1310,11 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                                 >{{ relativeTime(item.created_at, t, now) }}</time
                                             >
                                         </div>
-                                        <div
-                                            :class="[
-                                                'esc-message-body mt-0.5 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
-                                                isPlainText(item.body) ? 'whitespace-pre-line' : '',
-                                            ]"
-                                            v-html="bodyHtml(item.body)"
-                                        ></div>
+                                        <MessageBody
+                                            :body="item.body"
+                                            :render="bodyHtml"
+                                            class="esc-message-body mt-0.5 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]"
+                                        />
                                         <ul v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-2">
                                             <li
                                                 v-for="attachment in item.attachments"

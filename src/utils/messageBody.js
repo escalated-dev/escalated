@@ -1,8 +1,9 @@
 /**
  * Reply and note bodies arrive in two formats: HTML from the rich composer,
- * and plain text from email, the API and the widget. Both go through
- * sanitizeHtml unchanged; a plain-text body has no tags to carry its line
- * breaks, so it is rendered with `white-space: pre-line` instead.
+ * and plain text from email, the API and the widget. HTML is sanitised and
+ * rendered as markup; plain text is rendered as text (escaped by Vue, never
+ * through v-html) with `white-space: pre-line` for its line breaks. See
+ * MessageBody.vue.
  */
 // Tags the composer and email clients actually produce. Matching any
 // `<word...>` would count a quoted address ("Bob <bob@example.com> wrote:")
@@ -12,9 +13,4 @@ const HTML_TAG =
 
 export function isPlainText(body) {
     return !HTML_TAG.test(body || '');
-}
-
-/** The class that keeps a plain-text body's line breaks (none for HTML). */
-export function bodyFormatClass(body) {
-    return isPlainText(body) ? 'whitespace-pre-line' : '';
 }

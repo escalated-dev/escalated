@@ -64,12 +64,49 @@ describe('ReplyThread body format', () => {
         expect(body.findAll('p')).toHaveLength(2);
     });
 
-    it('still sanitises a plain-text-looking body that carries markup', () => {
+    it('shows a quoted address and the line break of a plain-text body verbatim', () => {
         const wrapper = mountThread([
-            { id: 5, body: 'Hi<script>alert(1)</script>\nthere', author: null, created_at: '2026-01-01' },
+            { id: 7, body: 'Bob <bob@example.com> wrote:\nhi', author: null, created_at: '2026-01-01' },
         ]);
+        const body = wrapper.get('[data-testid="esc-reply-body"]');
 
-        expect(wrapper.get('[data-testid="esc-reply-body"]').html()).not.toContain('<script');
+        expect(body.element.textContent).toBe('Bob <bob@example.com> wrote:\nhi');
+        expect(body.classes()).toContain('whitespace-pre-line');
+        expect(body.attributes('data-body-format')).toBe('text');
+    });
+
+    it('shows a script in a plain-text body as text and never runs it', () => {
+        window.__escalatedXss = 0;
+        const wrapper = mountThread([
+            {
+                id: 5,
+                body: 'Hi <script>window.__escalatedXss = 1</script>\nthere',
+                author: null,
+                created_at: '2026-01-01',
+            },
+        ]);
+        const body = wrapper.get('[data-testid="esc-reply-body"]');
+
+        expect(body.find('script').exists()).toBe(false);
+        expect(body.element.textContent).toContain('<script>window.__escalatedXss = 1</script>');
+        expect(window.__escalatedXss).toBe(0);
+        delete window.__escalatedXss;
+    });
+
+    it('keeps sanitising the HTML path', () => {
+        const wrapper = mountThread([
+            {
+                id: 8,
+                body: '<p>Hi</p><script>window.__escalatedXss = 3</script>',
+                author: null,
+                created_at: '2026-01-01',
+            },
+        ]);
+        const body = wrapper.get('[data-testid="esc-reply-body"]');
+
+        expect(body.attributes('data-body-format')).toBe('html');
+        expect(body.find('p').text()).toBe('Hi');
+        expect(body.html()).not.toContain('<script');
     });
 });
 

@@ -4,7 +4,7 @@ import { router } from '@inertiajs/vue3';
 import AttachmentList from './AttachmentList.vue';
 import TicketSplitDialog from './TicketSplitDialog.vue';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
-import { bodyFormatClass } from '../utils/messageBody';
+import MessageBody from './MessageBody.vue';
 import { highlightMentions } from '../utils/mentionHighlight';
 import { useI18n } from '../composables/useI18n';
 
@@ -127,15 +127,15 @@ function togglePin(reply) {
                     }}</span>
                 </div>
             </div>
-            <div
+            <MessageBody
+                :body="reply.body"
+                :render="(html) => highlightMentions(sanitizeHtml(html), escDark)"
                 :class="[
                     'prose prose-sm max-w-none',
                     escDark ? 'prose-invert text-[var(--esc-panel-text-secondary)]' : 'text-gray-700',
-                    bodyFormatClass(reply.body),
                 ]"
                 data-testid="esc-reply-body"
-                v-html="highlightMentions(sanitizeHtml(reply.body), escDark)"
-            ></div>
+            />
             <AttachmentList v-if="reply.attachments?.length" :attachments="reply.attachments" class="mt-3" />
         </div>
         <div
