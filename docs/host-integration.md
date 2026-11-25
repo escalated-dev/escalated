@@ -32,6 +32,28 @@ Guides: [frontend](embedding-admin.md) ·
 [WordPress](https://github.com/escalated-dev/escalated-wordpress/blob/main/docs/embedding-admin.md).
 Laravel is the reference implementation; the other backends are adding it.
 
+## Resolving pages
+
+Backends render Escalated pages as `Escalated/<Path>`. Wrap your Inertia
+resolver with `resolveEscalatedPage` so those names come from this package and
+everything else comes from yours:
+
+```js
+import { resolveEscalatedPage } from '@escalated-dev/escalated';
+
+createInertiaApp({
+    resolve: (name) =>
+        resolveEscalatedPage(name, () =>
+            resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
+        ),
+});
+```
+
+A name without the `Escalated/` prefix always goes to your resolver, even
+when this package ships a page at the same path (`Admin/Users/Index`,
+`Auth/TwoFactorChallenge`, `Error`), so your pages are never replaced. Only
+when you pass no resolver does an unprefixed name fall back to the package.
+
 ## Tailwind CSS
 
 Escalated components use Tailwind CSS utility classes (~hundreds of them across 140+ Vue files). **Some Tailwind-compatible class processor must be available in the host app for the UI to render correctly** — without one, every component renders as unstyled DOM with class names that don't resolve to any CSS.

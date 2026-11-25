@@ -4,6 +4,43 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Upgrading
+- **Unprefixed page names now go to your resolver first.** When the host
+  passes a fallback to `resolveEscalatedPage`, a name without `Escalated/`
+  always goes to it, even if this package ships a page at the same path. A
+  host that relied on `Admin/...` names resolving to package pages through a
+  fallback should render them as `Escalated/Admin/...` (the backends already
+  do). Hosts that pass no fallback are unaffected.
+- **Panel defaults without `theme.panel`.** The plugin (or `EscalatedLayout`
+  without the plugin) adds the default panel tokens as a zero-specificity
+  stylesheet, so host CSS and `theme.panel` still win.
+
+### Added
+- `SchedulerWarning` and an optional `scheduler` prop on `Escalated/Admin/Settings`,
+  `Escalated/Admin/Reports` and `Escalated/Admin/Reports/Dashboard`: a banner
+  naming the jobs to schedule when the backend reports they are not running.
+- `SlaTimer` takes `stoppedAt`.
+
+### Fixed
+- Host pages sharing a path with a package page (`Admin/Users/Index`,
+  `Auth/TwoFactorChallenge`, `Error`) were replaced by the package's page.
+- `SlaTimer` drew dark colours in light mode (it tested the injected
+  `esc-dark` ref instead of its value).
+- SLA cards kept counting down after the first response, resolution or
+  close. A stopped clock now shows Met or Missed.
+- `TicketSidebar` showed no assignee to viewers who cannot reassign.
+- Agent and admin ticket pages had no document title; both now use
+  "#REF Subject" for the title and the page heading.
+- `KnowledgePanel` made up "placeholder" articles for every search. It now
+  searches the host's knowledge base and renders nothing without one.
+- Plain-text replies and pinned notes lost their line breaks.
+- The portal's New Ticket and Create Ticket buttons ignored `theme.primary`.
+- `fetch()` calls sent the CSRF token only from a `csrf-token` meta tag, so
+  hosts without one got 419s (presence pings, saved views, chat, mentions).
+  They now fall back to the `XSRF-TOKEN` cookie and send same-origin
+  credentials.
+- Panel buttons rendered blank unless `theme.panel` was set.
+
 ## [0.12.10] - 2026-11-07
 
 ### Upgrading

@@ -65,9 +65,9 @@ Reusable building blocks used across the pages above.
 | `ReplyThread` | Chronological reply display |
 | `ReplyComposer` | Reply/note editor with file upload and canned response insertion |
 | `ActivityTimeline` | Audit log of ticket events |
-| `SlaTimer` | SLA countdown with breach/warning states |
+| `SlaTimer` | SLA countdown with breach/warning states; with `stoppedAt` it shows Met or Missed instead |
 | `TicketFilters` | Status, priority, agent, department filter bar |
-| `TicketSidebar` | Ticket detail sidebar (status, SLA, tags, activity) |
+| `TicketSidebar` | Ticket detail sidebar (status, assignee, SLA, tags, activity) |
 | `AssigneeSelect` | Agent assignment dropdown |
 | `TagSelect` | Multi-select tag picker |
 | `FileDropzone` | Drag-and-drop file upload |
@@ -82,6 +82,8 @@ Reusable building blocks used across the pages above.
 | `KeyboardShortcutHelp` | Modal overlay showing all available keyboard shortcuts |
 | `PinnedNotes` | Display pinned internal notes at the top of the thread |
 | `PresenceIndicator` | Real-time indicator showing who is viewing a ticket |
+| `KnowledgePanel` | Knowledge-base search beside a ticket; renders only when the host has `escalated.agent.kb.search` (or a `searchUrl`) |
+| `SchedulerWarning` | Admin banner shown when the `scheduler` prop says the recurring jobs are not running |
 
 ### Composables
 
