@@ -316,13 +316,16 @@ export function applyPanelTheme(panelConfig) {
 }
 
 const PANEL_DEFAULTS_ID = 'escalated-panel-defaults';
+export const PANEL_DEFAULTS_LAYER = 'escalated-defaults';
 
 /**
  * The default panel tokens as a stylesheet, for hosts that set no
- * `theme.panel`. It goes first in <head> under `:where(:root)`, which has no
- * specificity, so any host stylesheet that sets the same properties wins, and
- * `theme.panel` (written inline by applyPanelTheme) wins over both. Installed
- * once per document; returns the style element, or null without a DOM.
+ * `theme.panel`. The rules sit in their own cascade layer, declared first in
+ * <head>, which gives them the lowest priority of any author style: a host's
+ * unlayered `:root` rules and its own layers (Tailwind v4's `@layer theme`,
+ * an `@layer base { :root { ... } }`) all win over them, and `theme.panel`
+ * (written inline by applyPanelTheme) wins over everything. Installed once
+ * per document; returns the style element, or null without a DOM.
  */
 export function installPanelDefaults(mode = 'dark') {
     if (typeof document === 'undefined' || !document.head) return null;
@@ -333,7 +336,7 @@ export function installPanelDefaults(mode = 'dark') {
         .join(' ');
     const style = document.createElement('style');
     style.id = PANEL_DEFAULTS_ID;
-    style.textContent = `:where(:root) { ${declarations} }`;
+    style.textContent = `@layer ${PANEL_DEFAULTS_LAYER} { :root { ${declarations} } }`;
     document.head.insertBefore(style, document.head.firstChild);
     return style;
 }

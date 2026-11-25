@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createApp } from 'vue';
-import { EscalatedPlugin, panelThemeTokens } from '../src/plugin.js';
+import { EscalatedPlugin, installPanelDefaults, panelThemeTokens } from '../src/plugin.js';
 
 /**
  * Helper: create a fresh Vue app, install the plugin, and return the app.
@@ -527,12 +527,13 @@ describe('panel theme defaults', () => {
         expect(style.textContent).toMatch(/--esc-panel-primary-text: #(000000|ffffff);/);
     });
 
-    it('lets host stylesheets win over the defaults', () => {
+    it('puts the defaults in the lowest-priority cascade layer', () => {
         installPlugin({ theme: { primary: '#ff0000' } });
         const style = document.getElementById('escalated-panel-defaults');
 
-        // Zero specificity, and first in <head>.
-        expect(style.textContent.startsWith(':where(:root)')).toBe(true);
+        // Its own cascade layer, declared before any host stylesheet, so host
+        // tokens in a layer (Tailwind v4 @theme, @layer base) or unlayered win.
+        expect(style.textContent.startsWith('@layer escalated-defaults { :root {')).toBe(true);
         expect(document.head.firstChild).toBe(style);
         // Nothing written inline, where it would beat the host's own CSS.
         expect(document.documentElement.style.getPropertyValue('--esc-panel-primary-bg')).toBe('');
@@ -552,5 +553,27 @@ describe('panel theme defaults', () => {
         expect(style.getPropertyValue('--esc-panel-bg')).toBe(panelThemeTokens('dark')['--esc-panel-bg']);
         expect(style.getPropertyValue('--esc-panel-primary-bg')).toBe('#e94560');
         expect(style.getPropertyValue('--esc-panel-primary-text')).not.toBe('');
+    });
+});
+
+describe('panel defaults against host layers', () => {
+    it('declares its layer before a host layer added earlier', () => {
+        document.getElementById('escalated-panel-defaults')?.remove();
+        const host = document.createElement('style');
+        host.textContent = '@layer theme { :root { --esc-panel-primary-bg: #123456; } }';
+        document.head.appendChild(host);
+
+        installPanelDefaults();
+        const styles = [...document.head.querySelectorAll('style')];
+
+        // The first layer declared has the lowest priority.
+        expect(styles.indexOf(document.getElementById('escalated-panel-defaults'))).toBe(0);
+        expect(styles.indexOf(host)).toBeGreaterThan(0);
+        host.remove();
+    });
+
+    it('still lets a partial theme.panel override the defaults inline', () => {
+        installPlugin({ theme: { panel: { accent: '#e94560' } } });
+        expect(document.documentElement.style.getPropertyValue('--esc-panel-accent')).toBe('#e94560');
     });
 });

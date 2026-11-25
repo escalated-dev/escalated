@@ -12,8 +12,9 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   fallback should render them as `Escalated/Admin/...` (the backends already
   do). Hosts that pass no fallback are unaffected.
 - **Panel defaults without `theme.panel`.** The plugin (or `EscalatedLayout`
-  without the plugin) adds the default panel tokens as a zero-specificity
-  stylesheet, so host CSS and `theme.panel` still win.
+  without the plugin) adds the default panel tokens in a cascade layer
+  (`escalated-defaults`) declared first, so host CSS, layered or not, and
+  `theme.panel` still win.
 
 ### Added
 - `SchedulerWarning` and an optional `scheduler` prop on `Escalated/Admin/Settings`,
