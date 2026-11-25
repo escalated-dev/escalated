@@ -248,7 +248,7 @@ useKeyboardShortcuts({
                 </div>
             </div>
             <div class="space-y-6">
-                <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" />
+                <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" :agents="agents || []" />
                 <!-- Plugin: ticket show sidebar slot -->
                 <PluginSlot slot="ticket.show.sidebar" :components="getPageComponents('ticket.show', 'sidebar')" />
             </div>

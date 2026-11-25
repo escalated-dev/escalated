@@ -34,6 +34,19 @@ describe('Admin/Tickets/Show', () => {
     });
 });
 
+describe('Admin/Tickets/Show sidebar', () => {
+    it('passes its agents to the sidebar so an assignee id can be named', async () => {
+        const { default: TicketSidebar } = await import('../../src/components/TicketSidebar.vue');
+        const agents = [{ id: 4, name: 'Dana Agent' }];
+        const wrapper = shallowMount(TicketShow, {
+            props: { ticket: { ...ticket, assigned_to: 4 }, departments: [], tags: [], cannedResponses: [], agents },
+            global: { mocks: { route: () => '/x' }, stubs: { EscalatedLayout: { template: '<div><slot /></div>' } } },
+        });
+
+        expect(wrapper.findComponent(TicketSidebar).props('agents')).toEqual(agents);
+    });
+});
+
 describe('ticketPageTitle', () => {
     it('joins the reference and subject without doubling a leading #', () => {
         expect(ticketPageTitle({ reference: 'ESC-1', subject: 'Hi' })).toBe('#ESC-1 Hi');

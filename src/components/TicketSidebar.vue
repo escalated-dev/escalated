@@ -35,13 +35,26 @@ const cardClass = computed(() =>
 // The select is only offered to someone who can edit; everyone else still
 // needs to see who has the ticket.
 const showAssigneeSelect = computed(() => props.editable && props.agents.length > 0);
+// Backends send the assignee as `assignee: { name }`, as `assigned_to:
+// { id, name }`, or only as an `assigned_to` id to look up in `agents`.
+const isAssigned = computed(() => {
+    const ticket = props.ticket;
+    if (ticket.assignee) return true;
+    const to = ticket.assigned_to;
+    return to !== null && to !== undefined && to !== '';
+});
 const assigneeName = computed(() => {
     const ticket = props.ticket;
     if (ticket.assignee?.name) return ticket.assignee.name;
-    if (ticket.assigned_to == null || ticket.assigned_to === '') return null;
-    const agent = props.agents.find((a) => String(a.id) === String(ticket.assigned_to));
+    const to = ticket.assigned_to;
+    if (to && typeof to === 'object') return to.name || null;
+    if (!isAssigned.value) return null;
+    const agent = props.agents.find((a) => String(a.id) === String(to));
     return agent?.name || null;
 });
+// "Unassigned" only when nobody is; an assignee whose name this page cannot
+// resolve hides the row rather than claim the ticket is unassigned.
+const showAssigneeRow = computed(() => !showAssigneeSelect.value && (!isAssigned.value || !!assigneeName.value));
 
 function renderStars(rating) {
     return Array.from({ length: 5 }, (_, i) => (i < rating ? 'filled' : 'empty'));
@@ -91,7 +104,7 @@ function renderStars(rating) {
                         }}
                     </dd>
                 </div>
-                <div v-if="!showAssigneeSelect" class="flex justify-between" data-testid="esc-sidebar-assignee">
+                <div v-if="showAssigneeRow" class="flex justify-between" data-testid="esc-sidebar-assignee">
                     <dt :class="escDark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'">
                         {{ t('ticket.assignee') }}
                     </dt>

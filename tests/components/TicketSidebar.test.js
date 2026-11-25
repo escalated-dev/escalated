@@ -30,6 +30,21 @@ describe('TicketSidebar assignee', () => {
         expect(wrapper.get('[data-testid="esc-sidebar-assignee"]').text()).toContain('Unassigned');
     });
 
+    it('reads the name from an object-shaped assigned_to', () => {
+        // Django sends `assigned_to: { id, name, email }` and no `assignee`.
+        const wrapper = mountSidebar({
+            ticket: ticket({ assigned_to: { id: 4, name: 'Dana Agent', email: 'd@x.test' } }),
+        });
+        expect(wrapper.get('[data-testid="esc-sidebar-assignee"]').text()).toContain('Dana Agent');
+    });
+
+    it('hides the row rather than say Unassigned when the assignee cannot be named', () => {
+        // Adonis' admin page sends only the id and no agents to look it up in.
+        const wrapper = mountSidebar({ ticket: ticket({ assigned_to: 4 }) });
+        expect(wrapper.find('[data-testid="esc-sidebar-assignee"]').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('Unassigned');
+    });
+
     it('finds the name in the agent list when only the id is sent', () => {
         const wrapper = mountSidebar({ ticket: ticket({ assigned_to: 4 }), agents: [{ id: 4, name: 'Dana Agent' }] });
         expect(wrapper.get('[data-testid="esc-sidebar-assignee"]').text()).toContain('Dana Agent');
@@ -52,6 +67,20 @@ describe('TicketSidebar SLA cards', () => {
             ticket: ticket({ first_response_due_at: hoursFromNow(2), first_response_at: hoursFromNow(-1) }),
         });
         expect(wrapper.get('[role="timer"]').text()).toContain('Met');
+    });
+
+    it('runs the resolution clock again on a reopened ticket with old timestamps', () => {
+        const wrapper = mountSidebar({
+            ticket: ticket({
+                status: 'open',
+                resolution_due_at: hoursFromNow(5),
+                resolved_at: hoursFromNow(-3),
+                closed_at: hoursFromNow(-2),
+            }),
+        });
+        const timer = wrapper.get('[role="timer"]');
+        expect(timer.text()).toMatch(/\dh \d+m/);
+        expect(timer.attributes('data-sla-outcome')).toBeUndefined();
     });
 
     it('stops the resolution clock at closed_at', () => {
