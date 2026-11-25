@@ -13,6 +13,15 @@ export const TICKET_STATUSES = [
     'closed',
 ];
 
+/** Statuses in which a ticket is done: its resolution SLA clock has stopped. */
+export const CLOSED_STATUSES = ['resolved', 'closed'];
+
+/** Whether a status (a string, or `{ value }` / `{ slug }`) is resolved or closed. */
+export function isClosedStatus(status) {
+    const value = status && typeof status === 'object' ? (status.value ?? status.slug ?? status.name) : status;
+    return CLOSED_STATUSES.includes(String(value ?? '').toLowerCase());
+}
+
 export const TICKET_PRIORITIES = ['low', 'medium', 'high', 'urgent', 'critical'];
 
 export const TICKET_TYPES = [

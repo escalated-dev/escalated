@@ -1,3 +1,5 @@
+import { isClosedStatus } from './constants';
+
 /**
  * SLA clocks stop: first response at `first_response_at`, resolution at
  * `resolved_at` or `closed_at`, whichever came first.
@@ -19,8 +21,13 @@ export function earliest(...values) {
     return first;
 }
 
-/** When a ticket's resolution clock stopped, or null while it runs. */
+/**
+ * When a ticket's resolution clock stopped, or null while it runs. The
+ * timestamps count only while the ticket is resolved or closed: a reopened
+ * ticket can still carry old ones, and its clock is running again.
+ */
 export function resolutionStoppedAt(ticket) {
+    if (!isClosedStatus(ticket?.status)) return null;
     return earliest(ticket?.resolved_at, ticket?.closed_at);
 }
 

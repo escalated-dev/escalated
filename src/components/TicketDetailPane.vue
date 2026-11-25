@@ -19,6 +19,7 @@ import {
 } from '../utils/agentTicket';
 import { ticketUrl } from '../utils/agentQueues';
 import { resolutionStoppedAt, slaOutcome } from '../utils/sla';
+import { isClosedStatus } from '../utils/constants';
 import ChatActionBar from './ChatActionBar.vue';
 import ChatComposer from './ChatComposer.vue';
 import ChatThread from './ChatThread.vue';
@@ -90,7 +91,6 @@ const STATUS_OPTIONS = [
     'closed',
 ];
 const PRIORITY_OPTIONS = ['low', 'medium', 'high', 'urgent', 'critical'];
-const CLOSED_STATUSES = ['resolved', 'closed'];
 
 function statusColor(status) {
     return (
@@ -141,7 +141,7 @@ const statusOpen = ref(false);
 const priorityOpen = ref(false);
 const canEditStatus = computed(() => !props.notesOnly && !!props.routes.status);
 const canEditPriority = computed(() => !props.notesOnly && !!props.routes.priority);
-const isClosed = computed(() => CLOSED_STATUSES.includes(props.ticket.status));
+const isClosed = computed(() => isClosedStatus(props.ticket.status));
 
 const statusItems = computed(() =>
     STATUS_OPTIONS.map((status) => ({

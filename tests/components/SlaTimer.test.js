@@ -61,13 +61,28 @@ describe('SlaTimer clock', () => {
 
 describe('sla helpers', () => {
     it('stops the resolution clock at whichever of resolved_at and closed_at came first', () => {
-        expect(resolutionStoppedAt({ resolved_at: '2026-01-02T00:00:00Z', closed_at: '2026-01-01T00:00:00Z' })).toBe(
-            '2026-01-01T00:00:00Z',
+        expect(
+            resolutionStoppedAt({
+                status: 'closed',
+                resolved_at: '2026-01-02T00:00:00Z',
+                closed_at: '2026-01-01T00:00:00Z',
+            }),
+        ).toBe('2026-01-01T00:00:00Z');
+        expect(resolutionStoppedAt({ status: 'resolved', resolved_at: '2026-01-02T00:00:00Z', closed_at: null })).toBe(
+            '2026-01-02T00:00:00Z',
         );
-        expect(resolutionStoppedAt({ resolved_at: '2026-01-02T00:00:00Z', closed_at: null })).toBe(
+        expect(resolutionStoppedAt({ status: { value: 'closed' }, closed_at: '2026-01-02T00:00:00Z' })).toBe(
             '2026-01-02T00:00:00Z',
         );
         expect(resolutionStoppedAt({})).toBeNull();
+    });
+
+    it('ignores stale resolved_at and closed_at once the ticket is reopened', () => {
+        for (const status of ['open', 'in_progress', 'waiting_on_customer', 'reopened', undefined]) {
+            expect(
+                resolutionStoppedAt({ status, resolved_at: '2026-01-02T00:00:00Z', closed_at: '2026-01-03T00:00:00Z' }),
+            ).toBeNull();
+        }
         expect(earliest(null, 'not a date')).toBeNull();
     });
 
