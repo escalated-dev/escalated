@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import { requestHeaders } from '../utils/http';
 
 /**
  * The signed-in agent's own availability: online, away or offline.
@@ -69,12 +70,8 @@ function post(value, previous) {
     if (!url || typeof fetch !== 'function') return;
     fetch(url, {
         method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-        },
+        credentials: 'same-origin',
+        headers: requestHeaders({ json: true }),
         body: JSON.stringify({ status: value }),
     })
         .then(async (response) => {

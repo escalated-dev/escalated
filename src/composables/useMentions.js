@@ -1,5 +1,6 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { routeOr } from '../utils/agentApi';
+import { requestHeaders } from '../utils/http';
 
 /**
  * Composable that detects `@` typed in a text input/textarea,
@@ -88,11 +89,8 @@ export function useMentions(options = {}) {
                 options.searchEndpoint || routeOr('escalated.admin.agents.search') || '/support/admin/agents/search';
             const url = `${endpoint}?q=${encodeURIComponent(searchQuery)}`;
             const response = await fetch(url, {
-                headers: {
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
+                credentials: 'same-origin',
+                headers: requestHeaders(),
             });
             const results = response.ok ? await response.json() : [];
             if (version === requestVersion) {

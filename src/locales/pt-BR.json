@@ -155,7 +155,9 @@
         "overdue": "Atrasado",
         "breached": "SLA Violado",
         "first_response": "Primeira Resposta",
-        "resolution": "Resolucao"
+        "resolution": "Resolucao",
+        "met": "Cumprido",
+        "missed": "Descumprido"
     },
     "follow": {
         "following": "Seguindo",
@@ -723,5 +725,14 @@
             "update": "Atualizar Fluxo",
             "create": "Criar Fluxo"
         }
+    },
+    "scheduler": {
+        "title": "As tarefas recorrentes não estão em execução",
+        "never_run": "A verificação de SLA nunca foi executada.",
+        "last_run": "Última verificação de SLA: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Pesquisar na base de conhecimento",
+        "search_failed": "A pesquisa falhou. Tente novamente."
     }
 }

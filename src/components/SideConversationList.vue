@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SideConversation from './SideConversation.vue';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     ticketReference: { type: String, required: true },
@@ -22,11 +23,8 @@ onMounted(() => {
 async function fetchConversations() {
     try {
         const response = await fetch(route('escalated.admin.tickets.side-conversations.index', props.ticketReference), {
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders(),
         });
         if (response.ok) {
             const data = await response.json();

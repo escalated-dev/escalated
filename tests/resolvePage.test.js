@@ -46,6 +46,31 @@ describe('resolveEscalatedPage', () => {
         expect(component).toEqual({ name: 'HostPage' });
     });
 
+    it('hands a host page to the fallback even when the package ships the same path', async () => {
+        // A host with its own `Admin/Users/Index`, `Auth/TwoFactorChallenge`
+        // or `Error` page must get that page, not this package's.
+        const fallback = vi.fn((name) => Promise.resolve({ name: `Host:${name}` }));
+
+        for (const name of ['Admin/Users/Index', 'Auth/TwoFactorChallenge', 'Error']) {
+            expect(await resolveEscalatedPage(name, fallback)).toEqual({ name: `Host:${name}` });
+            expect(fallback).toHaveBeenCalledWith(name);
+        }
+    });
+
+    it('resolves a prefixed name to the package page without asking the fallback', async () => {
+        const fallback = vi.fn();
+        const component = await resolveEscalatedPage('Escalated/Admin/Users/Index', fallback);
+
+        expect(component).toBeTruthy();
+        expect(fallback).not.toHaveBeenCalled();
+    });
+
+    it('still resolves an unprefixed package path when the host passes no fallback', async () => {
+        const component = await resolveEscalatedPage('Admin/Users/Index');
+
+        expect(component).toBeTruthy();
+    });
+
     it('still complains about an unknown Escalated name even with a fallback', () => {
         // A host resolver cannot supply an Escalated page, so falling through
         // would just move the blank screen somewhere harder to find.

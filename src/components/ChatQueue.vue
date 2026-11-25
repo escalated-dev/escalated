@@ -3,6 +3,7 @@ import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { useChat } from '../composables/useChat';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     sessions: { type: Array, default: () => [] },
@@ -54,12 +55,8 @@ async function acceptChat(session) {
         try {
             await fetch(props.acceptEndpoint.replace(':id', session.id), {
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
+                credentials: 'same-origin',
+                headers: requestHeaders({ json: true }),
             });
         } catch {
             // handled by caller

@@ -1,6 +1,7 @@
 <script setup>
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { requestHeaders } from '../../../utils/http';
 
 const props = defineProps({
     platform: String,
@@ -23,10 +24,8 @@ async function testConnection() {
     try {
         const response = await fetch(route('escalated.admin.import.test-connection', props.platform), {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders({ json: true }),
             body: JSON.stringify({ credentials: credentials.value }),
         });
 

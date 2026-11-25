@@ -15,8 +15,9 @@ import PluginSlot from '../../../components/PluginSlot.vue';
 import SnoozeButton from '../../../components/SnoozeButton.vue';
 import { useKeyboardShortcuts } from '../../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../../composables/usePluginExtensions';
-import { router, useForm, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { ticketPageTitle } from '../../../utils/ticketTitle';
 
 const props = defineProps({
     ticket: Object,
@@ -29,6 +30,8 @@ const props = defineProps({
     followers_count: { type: Number, default: 0 },
     is_snoozed: { type: Boolean, default: false },
 });
+// "#ESC-1042 Unable to export": the page heading and the browser tab.
+const pageTitle = computed(() => ticketPageTitle(props.ticket));
 
 const page = usePage();
 const activeTab = ref('reply');
@@ -92,7 +95,8 @@ useKeyboardShortcuts({
 </script>
 
 <template>
-    <EscalatedLayout :title="ticket.subject">
+    <EscalatedLayout :title="pageTitle">
+        <Head :title="pageTitle" />
         <!-- Plugin: ticket show header slot -->
         <PluginSlot slot="ticket.show.header" :components="getPageComponents('ticket.show', 'header')" />
 
@@ -244,7 +248,7 @@ useKeyboardShortcuts({
                 </div>
             </div>
             <div class="space-y-6">
-                <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" />
+                <TicketSidebar :ticket="ticket" :tags="tags" :departments="departments" :agents="agents || []" />
                 <!-- Plugin: ticket show sidebar slot -->
                 <PluginSlot slot="ticket.show.sidebar" :components="getPageComponents('ticket.show', 'sidebar')" />
             </div>

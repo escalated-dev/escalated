@@ -155,7 +155,9 @@
         "overdue": "متأخر",
         "breached": "تم خرق SLA",
         "first_response": "الاستجابة الأولى",
-        "resolution": "الحل"
+        "resolution": "الحل",
+        "met": "تم الوفاء",
+        "missed": "لم يتم الوفاء"
     },
     "follow": {
         "following": "متابَع",
@@ -723,5 +725,14 @@
             "update": "تحديث سير العمل",
             "create": "إنشاء سير العمل"
         }
+    },
+    "scheduler": {
+        "title": "المهام المتكررة لا تعمل",
+        "never_run": "لم يُشغَّل فحص SLA قط.",
+        "last_run": "آخر فحص لـ SLA: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "البحث في قاعدة المعرفة",
+        "search_failed": "فشل البحث. حاول مرة أخرى."
     }
 }

@@ -409,6 +409,7 @@
                 "csat",
                 "period_days",
                 "resolved_tickets",
+                "scheduler",
                 "sla_breach_count",
                 "total_tickets"
             ],
@@ -488,6 +489,7 @@
                 "by_status",
                 "csat_average",
                 "period_days",
+                "scheduler",
                 "sla_compliance",
                 "volume"
             ],
@@ -565,6 +567,7 @@
         "Escalated/Admin/Settings": {
             "props": [
                 "departments",
+                "scheduler",
                 "settings",
                 "supported_settings",
                 "update_url"

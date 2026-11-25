@@ -1,6 +1,7 @@
 <script setup>
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import PluginSlot from '../../components/PluginSlot.vue';
+import SchedulerWarning from '../../components/SchedulerWarning.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
@@ -10,6 +11,8 @@ const props = defineProps({
     departments: Array,
     supported_settings: { type: Array, default: null },
     update_url: { type: String, default: null },
+    /** Optional `{ healthy, last_run_at, message, commands }`: warns when the recurring jobs are not running. */
+    scheduler: { type: Object, default: null },
 });
 const supported = computed(() => (props.supported_settings === null ? null : new Set(props.supported_settings)));
 const supports = (key) => supported.value === null || supported.value.has(key);
@@ -116,6 +119,7 @@ function submit() {
 
 <template>
     <EscalatedLayout title="Settings">
+        <SchedulerWarning :scheduler="scheduler" class="mx-auto max-w-2xl" />
         <form class="mx-auto max-w-2xl space-y-6" @submit.prevent="submit">
             <div
                 v-if="form.hasErrors"

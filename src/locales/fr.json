@@ -155,7 +155,9 @@
         "overdue": "En retard",
         "breached": "SLA dépassé",
         "first_response": "Première réponse",
-        "resolution": "Résolution"
+        "resolution": "Résolution",
+        "met": "Respecté",
+        "missed": "Manqué"
     },
     "follow": {
         "following": "Suivi",
@@ -687,5 +689,14 @@
             "update": "Mettre à jour",
             "create": "Créer"
         }
+    },
+    "scheduler": {
+        "title": "Les tâches récurrentes ne s'exécutent pas",
+        "never_run": "La vérification des SLA n'a jamais été exécutée.",
+        "last_run": "Dernière vérification des SLA : :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Rechercher dans la base de connaissances",
+        "search_failed": "La recherche a échoué. Réessayez."
     }
 }

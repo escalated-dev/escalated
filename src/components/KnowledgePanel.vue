@@ -1,52 +1,29 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useKbSearch, KB_MIN_QUERY } from '../composables/useKbSearch';
+import { routeOr } from '../utils/agentApi';
+import { useI18n } from '../composables/useI18n';
 
-defineProps({
+/**
+ * Knowledge-base search beside a ticket. It searches the host's real
+ * knowledge base (`escalated.agent.kb.search`, or `searchUrl`) and renders
+ * nothing when there is none to search: it never shows made-up articles.
+ */
+const props = defineProps({
     ticketReference: { type: String, required: true },
+    /** The KB search URL. Defaults to the host's `escalated.agent.kb.search` route. */
+    searchUrl: { type: String, default: null },
 });
 
 const emit = defineEmits(['insert-link', 'quote']);
-const searchTerm = ref('');
+const { t } = useI18n();
 const expanded = ref(true);
 
-// Placeholder results for knowledge base integration
-const results = ref([]);
-const loading = ref(false);
-let debounceTimer = null;
+const url = computed(() => props.searchUrl ?? routeOr('escalated.agent.kb.search'));
+const { query: searchTerm, results, loading, failed, searched, search } = useKbSearch(() => url.value);
 
-function onSearch(val) {
-    window.clearTimeout(debounceTimer);
-    if (!val || val.length < 2) {
-        results.value = [];
-        return;
-    }
-    debounceTimer = window.setTimeout(() => search(val), 300);
-}
-
-function search(term) {
-    loading.value = true;
-    // Placeholder: in production, this would call a knowledge base API
-    results.value = [
-        {
-            id: 1,
-            title: `How to resolve "${term}" issues`,
-            excerpt: `This article explains common solutions for ${term}-related problems that customers frequently encounter.`,
-            url: '#',
-        },
-        {
-            id: 2,
-            title: `${term} - FAQ`,
-            excerpt: `Frequently asked questions about ${term} and related features.`,
-            url: '#',
-        },
-        {
-            id: 3,
-            title: `Troubleshooting ${term}`,
-            excerpt: `Step-by-step troubleshooting guide for ${term} problems.`,
-            url: '#',
-        },
-    ];
-    loading.value = false;
+function onSearch(event) {
+    search(event.target.value);
 }
 
 function insertLink(article) {
@@ -59,7 +36,11 @@ function quoteArticle(article) {
 </script>
 
 <template>
-    <div class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4">
+    <div
+        v-if="url"
+        class="rounded-xl border border-white/[0.06] bg-neutral-900/60 p-4"
+        data-testid="esc-knowledge-panel"
+    >
         <button
             class="flex w-full items-center justify-between text-sm font-semibold text-neutral-200"
             @click="expanded = !expanded"
@@ -78,11 +59,12 @@ function quoteArticle(article) {
 
         <div v-if="expanded" class="mt-3 space-y-3">
             <input
-                v-model="searchTerm"
-                type="text"
+                :value="searchTerm"
+                type="search"
+                :aria-label="t('knowledge_panel.search_label')"
                 placeholder="Search knowledge base..."
                 class="w-full rounded-lg border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 placeholder-neutral-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/10"
-                @input="onSearch(searchTerm)"
+                @input="onSearch"
             />
 
             <div v-if="loading" class="text-xs text-neutral-500">Searching...</div>
@@ -94,9 +76,13 @@ function quoteArticle(article) {
                     class="rounded-lg border border-white/[0.04] bg-white/[0.02] p-3"
                 >
                     <h4 class="text-sm font-medium text-neutral-200">{{ article.title }}</h4>
-                    <p class="mt-1 text-xs text-neutral-400 line-clamp-2">{{ article.excerpt }}</p>
-                    <div class="mt-2 flex gap-2">
+                    <p v-if="article.excerpt" class="mt-1 text-xs text-neutral-400 line-clamp-2">
+                        {{ article.excerpt }}
+                    </p>
+                    <!-- Internal (agent-only) articles are never offered for the reply. -->
+                    <div v-if="!article.internal" class="mt-2 flex gap-2">
                         <button
+                            v-if="article.url"
                             class="rounded px-2 py-0.5 text-[10px] font-medium text-cyan-400 ring-1 ring-cyan-500/20 transition-colors hover:bg-cyan-500/10"
                             @click="insertLink(article)"
                         >
@@ -112,7 +98,9 @@ function quoteArticle(article) {
                 </div>
             </div>
 
-            <div v-else-if="searchTerm.length >= 2 && !loading" class="text-xs text-neutral-500">
+            <div v-else-if="failed" class="text-xs text-neutral-500">{{ t('knowledge_panel.search_failed') }}</div>
+
+            <div v-else-if="searched && searchTerm.trim().length >= KB_MIN_QUERY" class="text-xs text-neutral-500">
                 No articles found.
             </div>
 

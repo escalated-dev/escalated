@@ -17,7 +17,10 @@ import {
     snoozePresets,
 } from '../utils/agentTicket';
 import { ticketUrl } from '../utils/agentQueues';
+import { resolutionStoppedAt, slaOutcome } from '../utils/sla';
+import { isClosedStatus } from '../utils/constants';
 import ChatActionBar from './ChatActionBar.vue';
+import MessageBody from './MessageBody.vue';
 import ChatComposer from './ChatComposer.vue';
 import ChatThread from './ChatThread.vue';
 import Composer from './Composer.vue';
@@ -88,7 +91,6 @@ const STATUS_OPTIONS = [
     'closed',
 ];
 const PRIORITY_OPTIONS = ['low', 'medium', 'high', 'urgent', 'critical'];
-const CLOSED_STATUSES = ['resolved', 'closed'];
 
 function statusColor(status) {
     return (
@@ -139,7 +141,7 @@ const statusOpen = ref(false);
 const priorityOpen = ref(false);
 const canEditStatus = computed(() => !props.notesOnly && !!props.routes.status);
 const canEditPriority = computed(() => !props.notesOnly && !!props.routes.priority);
-const isClosed = computed(() => CLOSED_STATUSES.includes(props.ticket.status));
+const isClosed = computed(() => isClosedStatus(props.ticket.status));
 
 const statusItems = computed(() =>
     STATUS_OPTIONS.map((status) => ({
@@ -475,10 +477,6 @@ function bodyHtml(body) {
     return highlightMentions(sanitizeHtml(body || ''), escDark.value);
 }
 
-function isPlainText(body) {
-    return !/<[a-z][\s\S]*>/i.test(body || '');
-}
-
 function attachmentName(attachment) {
     return attachment.original_filename || attachment.filename || attachment.name || '';
 }
@@ -529,8 +527,12 @@ watch(
 );
 
 // --- SLA ---------------------------------------------------------------------------
-function slaText(due, breached) {
+function slaText(due, breached, stoppedAt = null) {
     if (!due && !breached) return null;
+    // A stopped clock (responded to, resolved or closed) no longer counts down.
+    const outcome = slaOutcome(due, stoppedAt, breached);
+    if (outcome === 'met') return { tone: 'var(--esc-sla-ok)', text: t('sla.met'), urgent: false, outcome };
+    if (outcome === 'missed') return { tone: 'var(--esc-sla-breach)', text: t('sla.missed'), urgent: false, outcome };
     if (breached) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.breached'), urgent: true };
     const minutes = Math.round((new Date(due).getTime() - now.value) / 60000);
     if (minutes < 0) return { tone: 'var(--esc-sla-breach)', text: t('agent_panel.sla.overdue'), urgent: true };
@@ -545,11 +547,18 @@ function slaText(due, breached) {
 const slaItems = computed(() => {
     const ticket = props.ticket;
     const items = [];
-    const first = isClosed.value ? null : slaText(ticket.first_response_due_at, ticket.sla_first_response_breached);
-    if (first && !ticket.first_response_at) {
-        items.push({ key: 'first_response', label: t('agent_panel.ticket.first_response'), ...first });
-    }
-    const resolution = isClosed.value ? null : slaText(ticket.resolution_due_at, ticket.sla_resolution_breached);
+    const firstStop = ticket.first_response_at || null;
+    const resolutionStop = resolutionStoppedAt(ticket);
+    // A closed ticket with no stop time to judge by shows no SLA, as before.
+    const first =
+        isClosed.value && !firstStop
+            ? null
+            : slaText(ticket.first_response_due_at, ticket.sla_first_response_breached, firstStop);
+    if (first) items.push({ key: 'first_response', label: t('agent_panel.ticket.first_response'), ...first });
+    const resolution =
+        isClosed.value && !resolutionStop
+            ? null
+            : slaText(ticket.resolution_due_at, ticket.sla_resolution_breached, resolutionStop);
     if (resolution) items.push({ key: 'resolution', label: t('agent_panel.ticket.resolution'), ...resolution });
     return items;
 });
@@ -1159,13 +1168,11 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                             {{ t('reply.unpin') }}
                                         </button>
                                     </div>
-                                    <div
-                                        :class="[
-                                            'mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
-                                            isPlainText(note.body) ? 'whitespace-pre-line' : '',
-                                        ]"
-                                        v-html="bodyHtml(note.body)"
-                                    ></div>
+                                    <MessageBody
+                                        :body="note.body"
+                                        :render="bodyHtml"
+                                        class="mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]"
+                                    />
                                 </article>
                             </section>
 
@@ -1220,13 +1227,11 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                             {{ item.is_pinned ? t('reply.unpin') : t('reply.pin') }}
                                         </button>
                                     </div>
-                                    <div
-                                        :class="[
-                                            'esc-message-body mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
-                                            isPlainText(item.body) ? 'whitespace-pre-line' : '',
-                                        ]"
-                                        v-html="bodyHtml(item.body)"
-                                    ></div>
+                                    <MessageBody
+                                        :body="item.body"
+                                        :render="bodyHtml"
+                                        class="esc-message-body mt-1 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]"
+                                    />
                                     <ul v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-2">
                                         <li
                                             v-for="attachment in item.attachments"
@@ -1305,13 +1310,11 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                                 >{{ relativeTime(item.created_at, t, now) }}</time
                                             >
                                         </div>
-                                        <div
-                                            :class="[
-                                                'esc-message-body mt-0.5 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]',
-                                                isPlainText(item.body) ? 'whitespace-pre-line' : '',
-                                            ]"
-                                            v-html="bodyHtml(item.body)"
-                                        ></div>
+                                        <MessageBody
+                                            :body="item.body"
+                                            :render="bodyHtml"
+                                            class="esc-message-body mt-0.5 break-words text-[14px] leading-[22px] text-[var(--esc-panel-text)]"
+                                        />
                                         <ul v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-2">
                                             <li
                                                 v-for="attachment in item.attachments"

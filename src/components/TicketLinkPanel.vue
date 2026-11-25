@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     ticketReference: { type: String, required: true },
@@ -27,11 +28,8 @@ onMounted(() => {
 async function fetchLinks() {
     try {
         const response = await fetch(route('escalated.admin.tickets.links.index', props.ticketReference), {
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders(),
         });
         if (response.ok) {
             const data = await response.json();
@@ -55,11 +53,8 @@ async function searchTickets(term) {
     loading.value = true;
     try {
         const response = await fetch(route('escalated.admin.tickets.merge-search', { q: term }), {
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders(),
         });
         if (response.ok) {
             const data = await response.json();

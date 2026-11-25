@@ -43,6 +43,33 @@ agent identity/display names, with requester access limited to private ticket
 updates. Deploy a frontend version containing this support before enabling a
 backend's account-scoped channels.
 
+### Scheduler health on the admin pages
+
+`Escalated/Admin/Settings`, `Escalated/Admin/Reports` and
+`Escalated/Admin/Reports/Dashboard` accept an optional `scheduler` prop:
+
+```js
+{
+    healthy: false,              // false when the SLA check's heartbeat is missing or older than 15 minutes
+    last_run_at: null,           // ISO 8601, or null when it has never run
+    message: 'The recurring jobs are not running.',
+    commands: [{ command: 'php artisan escalated:check-sla', interval: 'every minute' }],
+}
+```
+
+When it is present and `healthy` is false, those pages show a warning banner
+with the message and the commands to schedule. Omit it (or send `null`) when
+the backend cannot tell; nothing is shown then, or when `healthy` is true.
+
+### Requests the package makes itself
+
+Components that call the backend with `fetch()` (presence, saved views, chat,
+typing indicators, mentions, imports, the agent panel's optional routes) send
+`credentials: 'same-origin'`, `X-Requested-With: XMLHttpRequest` and the CSRF
+token: `X-CSRF-TOKEN` from a `csrf-token` meta tag when the page has one,
+otherwise the URL-decoded `XSRF-TOKEN` cookie as `X-XSRF-TOKEN`. A token is
+never sent to another origin.
+
 If you're building a new backend integration, this package is available on npm:
 
 ```bash

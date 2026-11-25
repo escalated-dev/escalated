@@ -4,6 +4,7 @@ import KpiCard from '../../../components/KpiCard.vue';
 import ChartWidget from '../../../components/ChartWidget.vue';
 import PeriodSelector from '../../../components/PeriodSelector.vue';
 import ReportExportButton from '../../../components/ReportExportButton.vue';
+import SchedulerWarning from '../../../components/SchedulerWarning.vue';
 import { router, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -17,6 +18,8 @@ defineProps({
     sla_compliance: Number,
     csat_average: Number,
     agent_performance: Array,
+    /** Optional `{ healthy, last_run_at, message, commands }`: warns when the recurring jobs are not running. */
+    scheduler: { type: Object, default: null },
 });
 
 const activeTab = ref('overview');
@@ -44,6 +47,7 @@ function changePeriod(days) {
 
 <template>
     <EscalatedLayout title="Reports Dashboard">
+        <SchedulerWarning :scheduler="scheduler" />
         <!-- Period selector & export -->
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <PeriodSelector :model-value="period_days" @update:model-value="changePeriod" />

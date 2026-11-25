@@ -3,6 +3,7 @@ import { ref, computed, inject } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import MentionDropdown from './MentionDropdown.vue';
 import { useMentions } from '../composables/useMentions';
+import { requestHeaders } from '../utils/http';
 
 const props = defineProps({
     sessionId: { type: [String, Number], default: null },
@@ -71,12 +72,8 @@ async function sendTypingIndicator() {
     try {
         await fetch(props.typingEndpoint, {
             method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders({ json: true }),
         });
     } catch {
         // silently ignore
@@ -130,12 +127,8 @@ async function submit() {
         try {
             await fetch(props.sendEndpoint, {
                 method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
+                credentials: 'same-origin',
+                headers: requestHeaders({ json: true }),
                 body: JSON.stringify(payload),
             });
         } catch {

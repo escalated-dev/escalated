@@ -10,6 +10,7 @@ import KbArticleSearch from './KbArticleSearch.vue';
 import MentionDropdown from './MentionDropdown.vue';
 import PanelIcon from './PanelIcon.vue';
 import PanelMenu from './PanelMenu.vue';
+import { requestHeaders } from '../utils/http';
 
 /**
  * The agent composer: Reply / Internal note tabs, a formatting toolbar,
@@ -238,11 +239,8 @@ function sendTyping() {
     lastTypingSent = now;
     fetch(props.typingEndpoint, {
         method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-        },
+        credentials: 'same-origin',
+        headers: requestHeaders(),
     }).catch(() => {});
 }
 

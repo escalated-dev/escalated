@@ -1,5 +1,6 @@
 import { ref, readonly } from 'vue';
 import { useRealtime } from './useRealtime';
+import { requestHeaders } from '../utils/http';
 
 /**
  * Composable for live chat functionality.
@@ -22,19 +23,11 @@ export function useChat(options = {}) {
 
     const { echoAvailable, listenScoped } = useRealtime(options);
 
-    function csrfToken() {
-        return typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.content || '' : '';
-    }
-
     async function apiRequest(method, path, body = null) {
         const opts = {
             method,
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken(),
-            },
+            credentials: 'same-origin',
+            headers: requestHeaders({ json: true, url: path }),
         };
         if (body) opts.body = JSON.stringify(body);
         const res = await fetch(path, opts);

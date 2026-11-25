@@ -187,7 +187,7 @@ async function findTickets() {
                     <button
                         type="submit"
                         :disabled="form.processing || verification.state.pending"
-                        class="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                        class="rounded-[var(--esc-radius,0.5rem)] bg-[var(--esc-primary,#4f46e5)] px-6 py-2 text-sm font-medium text-white hover:bg-[var(--esc-primary-hover,#4338ca)] disabled:opacity-50"
                     >
                         {{
                             form.processing
@@ -230,7 +230,7 @@ async function findTickets() {
                 <button
                     type="submit"
                     :disabled="lookup.pending || lookupVerification.state.pending"
-                    class="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+                    class="rounded-[var(--esc-radius,0.5rem)] bg-[var(--esc-primary,#4f46e5)] px-4 py-2 text-sm text-white disabled:opacity-50"
                 >
                     {{ lookupVerification.state.id ? 'Find tickets' : 'Send verification code' }}
                 </button>

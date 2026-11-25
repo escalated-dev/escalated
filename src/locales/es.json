@@ -155,7 +155,9 @@
         "overdue": "Vencido",
         "breached": "SLA Incumplido",
         "first_response": "Primera Respuesta",
-        "resolution": "Resolución"
+        "resolution": "Resolución",
+        "met": "Cumplido",
+        "missed": "Incumplido"
     },
     "follow": {
         "following": "Siguiendo",
@@ -687,5 +689,14 @@
             "update": "Actualizar flujo de trabajo",
             "create": "Crear flujo de trabajo"
         }
+    },
+    "scheduler": {
+        "title": "Las tareas periódicas no se están ejecutando",
+        "never_run": "La comprobación de SLA no se ha ejecutado nunca.",
+        "last_run": "Última comprobación de SLA: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Buscar en la base de conocimientos",
+        "search_failed": "La búsqueda falló. Inténtalo de nuevo."
     }
 }

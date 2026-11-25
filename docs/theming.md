@@ -35,6 +35,17 @@ app.use(EscalatedPlugin, {
 
 `mode` picks a full set of defaults; every other key overrides one of them.
 
+`theme.panel` is optional. Without it the plugin (or `EscalatedLayout`, when
+the plugin is not installed) adds the dark defaults as a `<style>` at the top
+of `<head>`, inside a cascade layer named `escalated-defaults`. Being the
+first layer declared, it has the lowest priority of any stylesheet, so the
+same properties set by the host win over it whether they are unlayered
+(`:root { ... }`) or in a layer of their own (Tailwind v4's `@theme`, which
+compiles to `@layer theme`, or `@layer base { :root { ... } }`). Values in
+`theme.panel` are written inline on `<html>` and win over all of these. A
+partial `theme.panel` only overrides the keys it sets; the rest keep their
+defaults.
+
 ## Panel tokens
 
 | Option | CSS custom property | What it colours |

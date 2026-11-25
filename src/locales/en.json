@@ -160,7 +160,9 @@
         "overdue": "Overdue",
         "breached": "SLA Breached",
         "first_response": "First Response",
-        "resolution": "Resolution"
+        "resolution": "Resolution",
+        "met": "Met",
+        "missed": "Missed"
     },
     "follow": {
         "following": "Following",
@@ -1210,5 +1212,14 @@
             "system": "System",
             "ticket_split": ":name split the ticket"
         }
+    },
+    "scheduler": {
+        "title": "Recurring jobs are not running",
+        "never_run": "The SLA check has never run.",
+        "last_run": "Last SLA check: :date."
+    },
+    "knowledge_panel": {
+        "search_label": "Search knowledge base",
+        "search_failed": "Search failed. Try again."
     }
 }

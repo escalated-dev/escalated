@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createApp } from 'vue';
-import { EscalatedPlugin, panelThemeTokens } from '../src/plugin.js';
+import { EscalatedPlugin, installPanelDefaults, panelThemeTokens } from '../src/plugin.js';
 
 /**
  * Helper: create a fresh Vue app, install the plugin, and return the app.
@@ -503,5 +503,77 @@ describe('Panel theming', () => {
             expect(style.getPropertyValue('--esc-priority-urgent')).toBe('#ff0000');
             expect(style.getPropertyValue('--esc-sla-breach')).toBe('#ff1111');
         });
+    });
+});
+
+describe('panel theme defaults', () => {
+    const PANEL_VARS = ['--esc-panel-bg', '--esc-panel-primary-bg', '--esc-panel-primary-text', '--esc-panel-accent'];
+
+    beforeEach(() => {
+        document.getElementById('escalated-panel-defaults')?.remove();
+        for (const cssVar of PANEL_VARS) document.documentElement.style.removeProperty(cssVar);
+    });
+
+    it('gives the panel a complete default theme when the host sets no theme.panel', () => {
+        installPlugin();
+        const style = document.getElementById('escalated-panel-defaults');
+
+        expect(style).not.toBeNull();
+        for (const [cssVar, value] of Object.entries(panelThemeTokens('dark'))) {
+            expect(style.textContent).toContain(`${cssVar}: ${value};`);
+        }
+        // Buttons are coloured by these two.
+        expect(style.textContent).toMatch(/--esc-panel-primary-bg: #[0-9a-f]{6};/i);
+        expect(style.textContent).toMatch(/--esc-panel-primary-text: #(000000|ffffff);/);
+    });
+
+    it('puts the defaults in the lowest-priority cascade layer', () => {
+        installPlugin({ theme: { primary: '#ff0000' } });
+        const style = document.getElementById('escalated-panel-defaults');
+
+        // Its own cascade layer, declared before any host stylesheet, so host
+        // tokens in a layer (Tailwind v4 @theme, @layer base) or unlayered win.
+        expect(style.textContent.startsWith('@layer escalated-defaults { :root {')).toBe(true);
+        expect(document.head.firstChild).toBe(style);
+        // Nothing written inline, where it would beat the host's own CSS.
+        expect(document.documentElement.style.getPropertyValue('--esc-panel-primary-bg')).toBe('');
+    });
+
+    it('installs the defaults once', () => {
+        installPlugin();
+        installPlugin();
+        expect(document.querySelectorAll('#escalated-panel-defaults')).toHaveLength(1);
+    });
+
+    it('merges a partial theme.panel over the defaults', () => {
+        installPlugin({ theme: { panel: { accent: '#e94560' } } });
+        const style = document.documentElement.style;
+
+        expect(style.getPropertyValue('--esc-panel-accent')).toBe('#e94560');
+        expect(style.getPropertyValue('--esc-panel-bg')).toBe(panelThemeTokens('dark')['--esc-panel-bg']);
+        expect(style.getPropertyValue('--esc-panel-primary-bg')).toBe('#e94560');
+        expect(style.getPropertyValue('--esc-panel-primary-text')).not.toBe('');
+    });
+});
+
+describe('panel defaults against host layers', () => {
+    it('declares its layer before a host layer added earlier', () => {
+        document.getElementById('escalated-panel-defaults')?.remove();
+        const host = document.createElement('style');
+        host.textContent = '@layer theme { :root { --esc-panel-primary-bg: #123456; } }';
+        document.head.appendChild(host);
+
+        installPanelDefaults();
+        const styles = [...document.head.querySelectorAll('style')];
+
+        // The first layer declared has the lowest priority.
+        expect(styles.indexOf(document.getElementById('escalated-panel-defaults'))).toBe(0);
+        expect(styles.indexOf(host)).toBeGreaterThan(0);
+        host.remove();
+    });
+
+    it('still lets a partial theme.panel override the defaults inline', () => {
+        installPlugin({ theme: { panel: { accent: '#e94560' } } });
+        expect(document.documentElement.style.getPropertyValue('--esc-panel-accent')).toBe('#e94560');
     });
 });

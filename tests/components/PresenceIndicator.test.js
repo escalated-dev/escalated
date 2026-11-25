@@ -70,3 +70,37 @@ describe('presence account navigation', () => {
         expect(vi.getTimerCount()).toBe(0);
     });
 });
+
+describe('presence ping', () => {
+    afterEach(() => {
+        document.head.innerHTML = '';
+        document.cookie = 'XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    });
+
+    it('sends the XSRF-TOKEN cookie when the host has no csrf-token meta tag', async () => {
+        vi.stubGlobal('route', () => '/presence');
+        document.cookie = 'XSRF-TOKEN=abc%3D';
+        const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ viewers: [] }) });
+        vi.stubGlobal('fetch', fetch);
+        const wrapper = mount(PresenceIndicator, { props });
+        await flushPromises();
+
+        const options = fetch.mock.calls[0][1];
+        expect(options.credentials).toBe('same-origin');
+        expect(options.headers).toMatchObject({ 'X-XSRF-TOKEN': 'abc=', 'X-Requested-With': 'XMLHttpRequest' });
+        expect(options.headers['X-CSRF-TOKEN']).toBeUndefined();
+        wrapper.unmount();
+    });
+
+    it('sends the meta tag token when there is one', async () => {
+        vi.stubGlobal('route', () => '/presence');
+        document.head.innerHTML = '<meta name="csrf-token" content="tok">';
+        const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ viewers: [] }) });
+        vi.stubGlobal('fetch', fetch);
+        const wrapper = mount(PresenceIndicator, { props });
+        await flushPromises();
+
+        expect(fetch.mock.calls[0][1].headers['X-CSRF-TOKEN']).toBe('tok');
+        wrapper.unmount();
+    });
+});

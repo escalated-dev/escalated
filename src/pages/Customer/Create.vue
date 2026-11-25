@@ -82,7 +82,7 @@ function submit() {
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    class="px-6 py-2 text-sm font-medium bg-[var(--esc-primary,#4f46e5)] text-white hover:bg-[var(--esc-primary-hover,#4338ca)] rounded-[var(--esc-radius,0.5rem)] disabled:opacity-50"
                 >
                     {{ form.processing ? 'Creating...' : 'Create Ticket' }}
                 </button>
