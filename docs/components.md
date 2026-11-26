@@ -90,6 +90,8 @@ Reusable building blocks used across the pages above.
 | Composable | Description |
 |------------|-------------|
 | `useKeyboardShortcuts` | Registers and manages keyboard shortcuts for ticket actions |
+| `useAgentStatus` | The signed-in agent's Online / Away / Offline status, shared and saved (see [agent panel](agent-panel.md#the-agents-own-status)); `AGENT_STATUSES` lists the values |
+| `useRealtime` | Echo channel subscriptions (`window.Echo` or the plugin's `echo`); see [real-time updates](agent-panel.md#real-time-updates) |
 
 ### Plugin
 

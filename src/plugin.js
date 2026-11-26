@@ -1,4 +1,5 @@
 import { markRaw } from 'vue';
+import { configureRealtime } from './composables/useRealtime';
 
 /**
  * EscalatedPlugin — Vue plugin for integrating Escalated into your app's design system.
@@ -26,10 +27,20 @@ import { markRaw } from 'vue';
  *       layout: AdminLayout,
  *       layoutScope: ['customer', 'admin'],
  *   })
+ *
+ * Real-time updates use Laravel Echo from `window.Echo`, or the instance
+ * passed as `echo`. Without Echo the agent ticket list reloads every
+ * `pollInterval` ms (default 30000; 0 turns it off).
+ *
+ *   app.use(EscalatedPlugin, { echo, pollInterval: 15000 })
  */
 export const EscalatedPlugin = {
     install(app, options = {}) {
         installRouteShim();
+
+        if (options.echo !== undefined || options.pollInterval !== undefined) {
+            configureRealtime({ echo: options.echo, pollInterval: options.pollInterval });
+        }
 
         if (options.layout) {
             app.provide('escalated-layout', markRaw(options.layout));

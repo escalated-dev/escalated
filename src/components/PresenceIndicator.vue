@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, inject, onUnmounted, watch } from 'vue';
 import { requestHeaders } from '../utils/http';
+import { resolveEcho } from '../composables/useRealtime';
 
 const props = defineProps({
     ticketReference: { type: String, required: true },
@@ -12,7 +13,8 @@ const props = defineProps({
 });
 
 const effectiveInterval = computed(() => Math.max(props.pollInterval, 5000));
-const echoAvailable = typeof window !== 'undefined' && !!window.Echo;
+const echo = resolveEcho();
+const echoAvailable = !!echo;
 
 const escDark = inject(
     'esc-dark',
@@ -61,7 +63,7 @@ function initPresenceChannel() {
     try {
         const currentGeneration = generation;
         joinedChannelName = `${props.channelPrefix}.tickets.${props.ticketId}`;
-        presenceChannel = window.Echo.join(joinedChannelName);
+        presenceChannel = echo.join(joinedChannelName);
 
         presenceChannel
             .here((users) => {
@@ -124,8 +126,8 @@ function teardown() {
     }
     if (presenceChannel) {
         try {
-            if (window.Echo.leaveChannel) window.Echo.leaveChannel(`presence-${joinedChannelName}`);
-            else window.Echo.leave(`presence-${joinedChannelName}`);
+            if (echo.leaveChannel) echo.leaveChannel(`presence-${joinedChannelName}`);
+            else echo.leave(`presence-${joinedChannelName}`);
         } catch {
             // ignore
         }

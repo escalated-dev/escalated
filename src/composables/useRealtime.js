@@ -19,9 +19,34 @@ function retainChannel(echo, name, presence) {
     };
 }
 
+export const DEFAULT_POLL_INTERVAL = 30000;
+
+// Set through EscalatedPlugin's `echo` and `pollInterval` options.
+let configuredEcho = null;
+let configuredPollInterval = DEFAULT_POLL_INTERVAL;
+
+/**
+ * `echo`: a Laravel Echo instance for apps that keep it in a module rather
+ * than on window.Echo. `pollInterval`: how often (ms) screens that would
+ * otherwise wait for Echo reload instead; 0 turns that off.
+ */
+export function configureRealtime({ echo, pollInterval } = {}) {
+    if (echo !== undefined) configuredEcho = echo || null;
+    if (pollInterval !== undefined) {
+        const ms = Number(pollInterval);
+        configuredPollInterval = Number.isFinite(ms) && ms > 0 ? Math.max(ms, 5000) : 0;
+    }
+}
+
+/** The Echo instance to use: the one given to the plugin, else window.Echo. */
+export function resolveEcho() {
+    if (configuredEcho) return configuredEcho;
+    return typeof window !== 'undefined' && window.Echo ? window.Echo : null;
+}
+
 /** Optional channelPrefix accepts a value, ref or getter. Older backends use escalated. */
 export function useRealtime(options = {}) {
-    const echoAvailable = ref(typeof window !== 'undefined' && !!window.Echo);
+    const echoAvailable = ref(!!resolveEcho());
     const subscriptions = new Set();
 
     function track(cleanup) {
@@ -39,7 +64,7 @@ export function useRealtime(options = {}) {
     // Raw channel names remain literal for existing integrations.
     function listen(channelName, eventName, callback) {
         if (!echoAvailable.value) return () => {};
-        const echo = window.Echo;
+        const echo = resolveEcho();
         const channel = echo.private(channelName);
         const release = retainChannel(echo, channelName, false);
         let active = true;
@@ -63,7 +88,7 @@ export function useRealtime(options = {}) {
             },
             (name, previous, onCleanup) => {
                 if (!name || !echoAvailable.value) return;
-                const echo = window.Echo;
+                const echo = resolveEcho();
                 const channel = presence ? echo.join(name) : echo.private(name);
                 currentChannel = channel;
                 const release = retainChannel(echo, name, presence);
@@ -133,6 +158,8 @@ export function useRealtime(options = {}) {
 
     return {
         echoAvailable: readonly(echoAvailable),
+        // Without Echo, how often (ms) a screen should reload instead; 0 = never.
+        pollInterval: configuredPollInterval,
         listen,
         listenScoped,
         subscribeToTicket,

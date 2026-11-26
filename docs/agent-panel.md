@@ -222,6 +222,12 @@ The shapes are fixed by the developer-context ADR
 `decisions/2026-11-05-agent-panel-data.md`. The status is the same field
 live-chat routing uses, so there is one stored status per agent.
 
+A host that builds its own agent layout instead of using the package's can
+reuse this: `import { useAgentStatus, AGENT_STATUSES } from '@escalated-dev/escalated'`.
+`useAgentStatus({ initial, allowed })` returns `{ status, statuses, setStatus }`,
+with `initial` the shared `escalated.agent_status` and `allowed` the shared
+`escalated.agent_statuses`. Every caller shares one status.
+
 ## Notifications
 
 A bell in the top bar shows the agent's unread notifications and, on click,
@@ -278,3 +284,28 @@ two lines of the excerpt. Articles marked `"internal": true` show a lock and
 not offer insertion. Without the route, or with the knowledge base off,
 neither the search box nor the toolbar button appears; the "Search the
 knowledge base" link stays as before.
+
+## Real-time updates
+
+The agent screens update live through [Laravel Echo](https://laravel.com/docs/broadcasting#client-side-installation).
+The backend has to broadcast its events and authorise the `escalated.*`
+channels (escalated-laravel: `ESCALATED_BROADCASTING_ENABLED=true` and a
+broadcasting driver). In the browser the package uses `window.Echo`, or the
+instance passed to the plugin, for apps that keep Echo in a module:
+
+```js
+import echo from './echo';
+
+app.use(EscalatedPlugin, { echo });
+```
+
+Without Echo:
+
+- the agent ticket list (`Escalated/Agent/TicketIndex`) reloads its `tickets`
+  and `inbox` props every 30 seconds while the tab is visible. Change that
+  with `pollInterval` in milliseconds (5000 at least), or turn it off with
+  `pollInterval: 0`;
+- an open ticket, live chat (new chats, messages, typing) and the
+  notification bell only update on a reload. Live chat needs Echo.
+
+The support widget does not use Echo; it polls for chat messages itself.
