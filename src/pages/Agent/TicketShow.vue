@@ -9,6 +9,8 @@ import { useKeyboardShortcuts } from '../../composables/useKeyboardShortcuts';
 import { usePluginExtensions } from '../../composables/usePluginExtensions';
 import { useRealtime } from '../../composables/useRealtime';
 import { useChat } from '../../composables/useChat';
+import { chatRoute } from '../../composables/useAgentChats';
+import { requestHeaders } from '../../utils/http';
 import { useI18n } from '../../composables/useI18n';
 import { useAgentCommands } from '../../composables/useAgentCommands';
 import { markRoute, markSeen, useUnread } from '../../composables/useUnread';
@@ -95,7 +97,8 @@ const routes = computed(() => {
 
 // Live chat mode detection
 const isChatMode = computed(() => props.ticket.channel === 'chat' && props.ticket.status === 'live');
-const chatMessages = ref(props.ticket.chat_messages || []);
+// A copy, so the thread grows without changing the ticket prop.
+const chatMessages = ref([...(props.ticket.chat_messages || [])]);
 const chatTypingUser = ref(null);
 
 // Subscribe to chat channel for real-time messages. Pass widgetPath so
@@ -114,11 +117,56 @@ let chatUnsubscribe = null;
 watch(
     () => [props.ticket.id, page.props.escalated?.broadcasting?.channel_prefix],
     () => {
-        chatMessages.value = props.ticket.chat_messages || [];
+        chatMessages.value = [...(props.ticket.chat_messages || [])];
         chatTypingUser.value = null;
         clearTimeout(chatTypingTimer);
     },
 );
+
+/**
+ * A `chat.message` broadcast as a thread message. escalated-laravel sends
+ * `{ reply_id, body, author, is_agent, created_at }` with `author` a name; a
+ * backend that wraps the message as `{ message: {...} }` is read too.
+ */
+function chatMessageFromEvent(data) {
+    if (!data || typeof data !== 'object') return null;
+    if (data.message && typeof data.message === 'object') return data.message;
+    if (typeof data.body !== 'string') return null;
+    const author =
+        data.author && typeof data.author === 'object' ? data.author : data.author ? { name: data.author } : null;
+    return {
+        id: data.reply_id ?? data.id ?? null,
+        body: data.body,
+        is_internal_note: false,
+        is_agent: data.is_agent === true,
+        author,
+        created_at: data.created_at ?? new Date().toISOString(),
+    };
+}
+
+function receiveChatMessage(data) {
+    const message = chatMessageFromEvent(data);
+    if (!message) return;
+    const list = chatMessages.value;
+    if (message.id != null && list.some((m) => !m.pending && String(m.id) === String(message.id))) return;
+    // The agent's own message comes back on the channel: it replaces the one
+    // shown when it was sent rather than appearing twice.
+    if (message.is_agent) {
+        const index = list.findIndex(
+            (m) => m.pending && (String(m.id) === String(message.id) || m.body === message.body),
+        );
+        if (index !== -1) {
+            list.splice(index, 1, { ...list[index], id: message.id ?? list[index].id, pending: false });
+            return;
+        }
+    }
+    list.push(message);
+    // The visitor sent something: they are no longer typing.
+    if (!message.is_agent) chatTypingUser.value = null;
+}
+
+// The visitor's name for the typing line when the backend sends none.
+const chatCustomerName = computed(() => props.ticket.guest_name || props.ticket.requester?.name || t('chat.customer'));
 
 // (Re)subscribe to the chat channel whenever the live chat session changes,
 // including navigating from a non-chat ticket to a chat ticket. The old
@@ -131,11 +179,11 @@ function setupChatSubscription() {
     }
     if (!isChatMode.value || !props.ticket.chat_session_id) return;
     chatUnsubscribe = subscribeToChat(props.ticket.chat_session_id, {
-        onMessage(data) {
-            chatMessages.value.push(data.message);
-        },
+        onMessage: receiveChatMessage,
         onTyping(data) {
-            chatTypingUser.value = data.name;
+            // An agent typing (this one, or a colleague) is not the visitor.
+            if (data?.is_agent === true) return;
+            chatTypingUser.value = data?.user_name || data?.name || chatCustomerName.value;
             clearTimeout(chatTypingTimer);
             chatTypingTimer = setTimeout(() => {
                 chatTypingUser.value = null;
@@ -145,6 +193,9 @@ function setupChatSubscription() {
             router.reload({ preserveScroll: true });
         },
         onAssigned() {
+            router.reload({ preserveScroll: true });
+        },
+        onTransferred() {
             router.reload({ preserveScroll: true });
         },
     });
@@ -159,40 +210,74 @@ onUnmounted(() => {
     clearTimeout(chatTypingTimer);
 });
 
-function onChatSend(payload) {
-    // Optimistically add message to thread
-    chatMessages.value.push({
-        id: Date.now(),
-        body: payload.body,
-        is_internal_note: payload.is_internal_note,
-        is_agent: true,
-        author: { id: page.props.auth?.user?.id, name: page.props.auth?.user?.name },
-        created_at: new Date().toISOString(),
-    });
+// The chat routes (`escalated.agent.chat.*`, then `escalated.admin.chat.*` for
+// an admin) by name. A host whose route() helper has neither either throws or
+// (the non-Laravel shims) returns '#'; that action then gets no endpoint and
+// the page still renders. The visitor's widget routes are never used: they
+// take the visitor's token and would record the agent as the customer.
+function chatSessionRoute(action) {
+    if (!props.ticket.chat_session_id) return '';
+    return chatRoute(action, props.ticket.chat_session_id, { isAdmin: page.props.escalated?.is_admin === true });
 }
 
-// The chat action bar posts to the backend's `escalated.admin.chat.transfer`
-// and `escalated.admin.chat.end` routes (escalated-laravel's names). A host
-// whose route() helper has no such name either throws or (the non-Laravel
-// shims) returns '#'; either way the bar gets no endpoint for that action and
-// only emits, rather than breaking the page.
-function chatSessionRoute(name) {
-    if (!props.ticket.chat_session_id) return '';
-    return routeOr(name, props.ticket.chat_session_id);
+/**
+ * Where a chat line goes: the chat message route (which also takes
+ * `is_internal_note`), or, on a host without one, the ticket's reply or note
+ * route, which the visitor's widget reads too.
+ */
+function chatSendTarget(isNote) {
+    const chatUrl = chatSessionRoute('message');
+    if (chatUrl) return chatUrl;
+    return (isNote ? routes.value.note : routes.value.reply) || '';
+}
+
+async function onChatSend(payload) {
+    const isNote = !!payload.is_internal_note;
+    const local = {
+        id: `local-${Date.now()}`,
+        body: payload.body,
+        is_internal_note: isNote,
+        is_agent: true,
+        pending: !isNote,
+        author: { id: page.props.auth?.user?.id, name: page.props.auth?.user?.name },
+        created_at: new Date().toISOString(),
+    };
+    // Shown at once; a note stays in this view only (the thread lists no notes).
+    chatMessages.value.push(local);
+
+    const url = chatSendTarget(isNote);
+    if (!url) {
+        toast(t('chat.send_failed'), 'error');
+        return;
+    }
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: requestHeaders({ json: true, url }),
+            body: JSON.stringify({ body: payload.body, is_internal_note: isNote }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json().catch(() => null);
+        const shown = chatMessages.value.find((m) => m.id === local.id);
+        if (shown && data?.reply_id != null) shown.id = data.reply_id;
+    } catch {
+        chatMessages.value = chatMessages.value.filter((m) => m.id !== local.id);
+        toast(t('chat.send_failed'), 'error');
+    }
 }
 
 const chat = computed(() => ({
     active: isChatMode.value,
     messages: chatMessages.value,
     typingUser: chatTypingUser.value,
-    sendEndpoint: props.ticket.chat_session_id
-        ? `${widgetPath.value}/chat/${props.ticket.chat_session_id}/messages`
-        : '',
-    typingEndpoint: props.ticket.chat_session_id
-        ? `${widgetPath.value}/chat/${props.ticket.chat_session_id}/typing`
-        : '',
-    endEndpoint: chatSessionRoute('escalated.admin.chat.end'),
-    transferEndpoint: chatSessionRoute('escalated.admin.chat.transfer'),
+    // TicketShow sends the messages itself (onChatSend); the composer only
+    // posts the typing indicator.
+    sendEndpoint: '',
+    typingEndpoint: chatSessionRoute('typing'),
+    endEndpoint: chatSessionRoute('end'),
+    transferEndpoint: chatSessionRoute('transfer'),
+    allowAttachments: false,
 }));
 
 function onEndChat() {

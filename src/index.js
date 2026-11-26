@@ -75,6 +75,7 @@ export { useMentions } from './composables/useMentions';
 export { usePluginExtensions } from './composables/usePluginExtensions';
 export { usePluginHooks } from './composables/usePluginHooks';
 export { useChat } from './composables/useChat';
+export { useAgentChats, chatRoute } from './composables/useAgentChats';
 export { useRealtime } from './composables/useRealtime';
 // The admin menu for a host's own sidebar (embedding the admin; ADR 2026-11-05).
 export { useEscalatedNavigation } from './composables/useEscalatedNavigation';

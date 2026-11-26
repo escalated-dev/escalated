@@ -546,7 +546,10 @@
         "chat_ended": "Chat Finalizado",
         "thank_you": "Gracias por tu opinion!",
         "submit_rating": "Enviar Calificacion",
-        "live_chats": "Chats en Vivo"
+        "live_chats": "Chats en Vivo",
+        "waiting": "En espera",
+        "send_failed": "Mensaje no enviado. Inténtalo de nuevo.",
+        "accept_failed": "No se pudo aceptar el chat."
     },
     "common": {
         "change_status": "Cambiar Estado...",

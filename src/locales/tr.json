@@ -569,7 +569,10 @@
         "chat_ended": "Sohbet Sona Erdi",
         "thank_you": "Geri bildiriminiz icin tesekkurler!",
         "submit_rating": "Degerlendirme Gonder",
-        "live_chats": "Canli Sohbetler"
+        "live_chats": "Canli Sohbetler",
+        "waiting": "Bekleyen",
+        "send_failed": "Mesaj gönderilemedi. Tekrar deneyin.",
+        "accept_failed": "Sohbet kabul edilemedi."
     },
     "common": {
         "change_status": "Durumu Degistir...",

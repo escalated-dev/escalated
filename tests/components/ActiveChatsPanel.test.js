@@ -4,9 +4,13 @@ import { computed, ref, readonly } from 'vue';
 import ActiveChatsPanel from '../../src/components/ActiveChatsPanel.vue';
 
 // Mock useChat composable to prevent real WebSocket subscriptions
+const queueCallbacks = { current: null };
 vi.mock('../../src/composables/useChat', () => ({
     useChat: () => ({
-        subscribeToChatQueue: () => () => {},
+        subscribeToChatQueue: (callbacks) => {
+            queueCallbacks.current = callbacks;
+            return () => {};
+        },
         connectionState: readonly(ref('disconnected')),
         messageBuffer: readonly(ref([])),
     }),
@@ -139,5 +143,46 @@ describe('ActiveChatsPanel', () => {
                 expect(wrapper.emitted('navigate')[0][0]).toEqual(chat);
             }
         });
+    });
+
+    describe('waiting chats', () => {
+        const waiting = { id: 9, customer_name: 'Walt', first_message: 'Is anyone there?' };
+
+        it('lists the queue with an Accept button that emits accept', async () => {
+            const wrapper = mountPanel({ queue: [waiting] });
+            await wrapper.find('button.fixed').trigger('click');
+
+            const item = wrapper.get('[data-testid="esc-chat-queue-item"]');
+            expect(item.text()).toContain('Walt');
+            expect(item.text()).toContain('Is anyone there?');
+            await item.get('button').trigger('click');
+            expect(wrapper.emitted('accept')[0][0]).toEqual(waiting);
+        });
+
+        it('counts waiting chats on the toggle button', () => {
+            const wrapper = mountPanel({ queue: [waiting, { ...waiting, id: 10 }] });
+            expect(wrapper.get('[data-testid="esc-chat-queue-badge"]').text()).toBe('2');
+        });
+
+        it('shows no queue without one', async () => {
+            const wrapper = mountPanel();
+            await wrapper.find('button.fixed').trigger('click');
+            expect(wrapper.find('[data-testid="esc-chat-queue-item"]').exists()).toBe(false);
+        });
+
+        it('asks for a refresh on the events the backend sends on the queue channel', () => {
+            const wrapper = mountPanel();
+            queueCallbacks.current.onStarted({ session_id: 1 });
+            queueCallbacks.current.onAssigned({ session_id: 1 });
+            queueCallbacks.current.onNewChat({});
+            expect(wrapper.emitted('refresh')).toHaveLength(3);
+        });
+    });
+
+    it('follows the agent status it is given', async () => {
+        const wrapper = mountPanel({ agentStatus: 'away' });
+        await wrapper.setProps({ agentStatus: 'offline' });
+        await wrapper.find('button.fixed').trigger('click');
+        expect(wrapper.text()).toContain('Offline');
     });
 });

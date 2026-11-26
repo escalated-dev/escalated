@@ -569,7 +569,10 @@
         "chat_ended": "Chat Beindigd",
         "thank_you": "Bedankt voor uw feedback!",
         "submit_rating": "Beoordeling Indienen",
-        "live_chats": "Live Chats"
+        "live_chats": "Live Chats",
+        "waiting": "Wachtend",
+        "send_failed": "Bericht niet verzonden. Probeer het opnieuw.",
+        "accept_failed": "De chat kon niet worden aangenomen."
     },
     "common": {
         "change_status": "Status Wijzigen...",
