@@ -187,7 +187,7 @@ This package is the shared Vue 3 + Inertia frontend. You don't install it on its
 
 - [All features](docs/features.md)
 - [Getting started with each backend](docs/getting-started.md)
-- [Integrating with your app: Tailwind, theming, embedding the admin](docs/host-integration.md)
+- [Integrating with your app: Tailwind (v3 `content`, v4 `@source`), theming, embedding the admin](docs/host-integration.md#tailwind-css)
 - [Theming tokens](docs/theming.md) · [Agent panel](docs/agent-panel.md) · [Embedding the widget](docs/embedding-the-widget.md)
 - [Pages and components in this package](docs/components.md)
 - [Plugin development](docs/plugin-development.md)

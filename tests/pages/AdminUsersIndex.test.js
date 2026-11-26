@@ -148,3 +148,40 @@ describe('Admin/Users/Index roles picker', () => {
         expect(router.put.mock.calls[0][1]).toEqual({ role_ids: [3] });
     });
 });
+
+/**
+ * A backend that cannot change agent / admin access (the host app decides it)
+ * sends `roleToggles: false`: the switches show each user's access but are
+ * disabled and send nothing.
+ */
+describe('Admin/Users/Index read-only access switches', () => {
+    const cal = { id: 9, name: null, email: 'cal@example.com', is_admin: false, is_agent: true };
+
+    beforeEach(() => router.patch.mockClear());
+
+    it('disables the switches and sends nothing with roleToggles false', async () => {
+        const wrapper = mount(UsersIndex, { props: { users: { data: [cal] }, roleToggles: false }, ...mountOptions });
+        const switches = wrapper.findAll('tbody button');
+
+        expect(switches).toHaveLength(2);
+        switches.forEach((button) => expect(button.attributes('disabled')).toBeDefined());
+        expect(switches[1].classes()).toContain('bg-indigo-600');
+        await switches[1].trigger('click');
+        expect(router.patch).not.toHaveBeenCalled();
+    });
+
+    it('keeps the switches working by default', async () => {
+        const wrapper = mount(UsersIndex, { props: { users: { data: [cal] } }, ...mountOptions });
+        const switches = wrapper.findAll('tbody button');
+
+        expect(switches[1].attributes('disabled')).toBeUndefined();
+        await switches[1].trigger('click');
+        expect(router.patch).toHaveBeenCalledWith(
+            '/escalated.admin.users.role/9',
+            { role: 'agent', value: false },
+            {
+                preserveScroll: true,
+            },
+        );
+    });
+});

@@ -77,6 +77,8 @@ export { usePluginHooks } from './composables/usePluginHooks';
 export { useChat } from './composables/useChat';
 export { useAgentChats, chatRoute } from './composables/useAgentChats';
 export { useRealtime } from './composables/useRealtime';
+// The agent's own Online / Away / Offline status, for hosts with their own agent layout.
+export { useAgentStatus, AGENT_STATUSES } from './composables/useAgentStatus';
 // The admin menu for a host's own sidebar (embedding the admin; ADR 2026-11-05).
 export { useEscalatedNavigation } from './composables/useEscalatedNavigation';
 

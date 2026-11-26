@@ -13,6 +13,9 @@ const props = defineProps({
     // Escalated roles ([{id, name, slug}]), sent only while roles &
     // permissions is switched on. Each user row then carries `roles` (slugs).
     roles: { type: Array, default: null },
+    // False when the backend cannot change agent / admin access here (the host
+    // decides it): the switches then only show each user's access.
+    roleToggles: { type: Boolean, default: true },
 });
 
 const showRoles = computed(() => Array.isArray(props.roles));
@@ -29,6 +32,7 @@ function applySearch() {
 }
 
 function toggleRole(user, role) {
+    if (!props.roleToggles) return;
     const value = role === 'admin' ? !user.is_admin : !user.is_agent;
     router.patch(route('escalated.admin.users.role', user.id), { role, value }, { preserveScroll: true });
 }
@@ -141,7 +145,7 @@ function isSelf(user) {
                         <td class="px-4 py-3">
                             <button
                                 type="button"
-                                :disabled="isSelf(user) && user.is_admin"
+                                :disabled="!roleToggles || (isSelf(user) && user.is_admin)"
                                 :title="isSelf(user) && user.is_admin ? 'You cannot remove your own admin role.' : ''"
                                 class="inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                 :class="user.is_admin ? 'bg-indigo-600' : 'bg-gray-300'"
@@ -156,7 +160,8 @@ function isSelf(user) {
                         <td class="px-4 py-3">
                             <button
                                 type="button"
-                                class="inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                                :disabled="!roleToggles"
+                                class="inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                 :class="user.is_agent ? 'bg-indigo-600' : 'bg-gray-300'"
                                 @click="toggleRole(user, 'agent')"
                             >

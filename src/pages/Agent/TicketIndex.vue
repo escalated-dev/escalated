@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import EscalatedLayout from '../../components/EscalatedLayout.vue';
 import TicketQueueList from '../../components/TicketQueueList.vue';
@@ -141,12 +141,29 @@ useKeyboardShortcuts({
 const { getPageComponents } = usePluginExtensions();
 
 // Real-time updates - refresh the ticket list when new tickets arrive or statuses change
-const { echoAvailable, subscribeToTickets, subscribeToAgent } = useRealtime({
+const { echoAvailable, pollInterval, subscribeToTickets, subscribeToAgent } = useRealtime({
     channelPrefix: () => page.props.escalated?.broadcasting?.channel_prefix,
 });
 
+// Without Echo (broadcasting off, or no window.Echo), reload the list on a
+// timer instead, skipping while the tab is hidden.
+let pollTimer = null;
+function startPolling() {
+    if (!pollInterval || typeof window === 'undefined') return;
+    pollTimer = window.setInterval(() => {
+        if (typeof document !== 'undefined' && document.hidden) return;
+        router.reload({ only: ['tickets', 'inbox'], preserveScroll: true });
+    }, pollInterval);
+}
+onBeforeUnmount(() => {
+    if (pollTimer) window.clearInterval(pollTimer);
+});
+
 onMounted(() => {
-    if (!echoAvailable.value) return;
+    if (!echoAvailable.value) {
+        startPolling();
+        return;
+    }
 
     subscribeToTickets({
         onTicketCreated() {

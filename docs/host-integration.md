@@ -60,19 +60,29 @@ Escalated components use Tailwind CSS utility classes (~hundreds of them across 
 
 ### Recommended: Tailwind in your existing build
 
-If your host app already uses Tailwind via Vite / PostCSS / Tailwind CLI, just add this package to your `content` config so its classes aren't purged:
+If your host app already uses Tailwind via Vite / PostCSS / Tailwind CLI, your build has to scan this package's source. Without that the built CSS silently misses most of its classes (many are arbitrary values such as `bg-[var(--esc-panel-surface)]`): the admin sidebar stays hidden and buttons lose their backgrounds, often only in production builds.
+
+**Tailwind 3 and earlier:** add the package to your `content` config so its classes aren't purged:
 
 ```js
 // tailwind.config.js
 export default {
     content: [
         // ... your existing paths
-        './node_modules/@escalated-dev/escalated/src/**/*.vue',
+        './node_modules/@escalated-dev/escalated/src/**/*.{vue,js}',
     ],
 }
 ```
 
-> **Tailwind 4+ users:** `content` globs are auto-detected from imported modules — you usually don't need to add anything. Skip this step if you're on v4.
+**Tailwind 4:** there is no `content` array, and automatic source detection skips `node_modules`, so name the package with `@source` in your app's CSS:
+
+```css
+/* resources/css/app.css */
+@import 'tailwindcss';
+@source '../../node_modules/@escalated-dev/escalated/src';
+```
+
+The path is relative to the CSS file. Both snippets include the `.js` files: some badge colours are defined there.
 
 ### Using Escalated without a Tailwind build step
 

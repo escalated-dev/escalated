@@ -23,6 +23,10 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   (it had none).
 - The chat composer on the agent ticket page no longer offers attachments,
   which were never sent.
+- The Tailwind setup in docs/host-integration.md said Tailwind 4 needs no
+  setup. It does: v4 skips `node_modules`, so add
+  `@source '../../node_modules/@escalated-dev/escalated/src';` to your CSS.
+  The v3 `content` glob now includes `.js` files too (#261).
 
 ### Added
 - `useAgentChats()` and `chatRoute()` (src/composables/useAgentChats.js), and
@@ -30,6 +34,18 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   emits `accept` and `refresh`.
 - Translations in all 14 locales for `chat.waiting`, `chat.send_failed` and
   `chat.accept_failed`.
+- `useAgentStatus` and `AGENT_STATUSES` are exported from the package root,
+  for hosts that build their own agent layout (#261).
+- `EscalatedPlugin` takes `echo`, a Laravel Echo instance for apps that do
+  not put it on `window.Echo`, and `pollInterval` (ms, default 30000, 0 off).
+- Without Echo, the agent ticket list reloads its tickets every
+  `pollInterval` while the tab is visible, instead of only on a manual
+  refresh. Open tickets and live chat still need Echo.
+- `Escalated/Admin/Users/Index` takes `roleToggles` (default true). With
+  `false` the Admin and Agent switches show each user's access but are
+  read-only, for backends whose host app decides staff access.
+- `Escalated/Admin/Settings` takes `inbound_email_notice`, shown in place of
+  the inbound email controls when the backend cannot receive email yet.
 
 ## [0.12.11] - 2026-11-25
 
