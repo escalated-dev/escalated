@@ -569,7 +569,10 @@
         "chat_ended": "チャット終了",
         "thank_you": "フィードバックありがとうございます！",
         "submit_rating": "評価を送信",
-        "live_chats": "ライブチャット"
+        "live_chats": "ライブチャット",
+        "waiting": "待機中",
+        "send_failed": "メッセージを送信できませんでした。もう一度お試しください。",
+        "accept_failed": "チャットを受け付けできませんでした。"
     },
     "common": {
         "change_status": "ステータスを変更...",

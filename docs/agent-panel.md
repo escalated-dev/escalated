@@ -228,6 +228,49 @@ reuse this: `import { useAgentStatus, AGENT_STATUSES } from '@escalated-dev/esca
 with `initial` the shared `escalated.agent_status` and `allowed` the shared
 `escalated.agent_statuses`. Every caller shares one status.
 
+## Live chat
+
+Everything here is optional; a backend that sends none of it gets no chat
+panel and a ticket page that still renders.
+
+**Shared props.** The chat panel (bottom right) appears while
+`escalated.chat_enabled` is `true`. It lists `escalated.active_chats`, the
+agent's own active chats, and `escalated.chat_queue`, the chats waiting for an
+agent, each with an Accept button. A chat is `{ id, ticket_reference,
+customer_name, last_message, last_message_at, ... }` where `id` is the chat
+session id; a plain chat session with its `ticket` (`{ id, ticket: {
+reference, guest_name, ... } }`) is read too. The rail's Live chats link counts
+the active chats and opens the ticket list with `live_chat=1`.
+
+**Routes, by name.** Every chat action goes through the host's `route()`
+helper: first `escalated.agent.chat.<action>`, then, for an admin,
+`escalated.admin.chat.<action>`. A name the helper does not know (or a shim's
+`'#'`) leaves that action out. The visitor's widget routes are never used from
+the agent side: they take the visitor's token and would record the agent as
+the customer.
+
+| Action | Route name | Used for |
+|---|---|---|
+| `active`, `queue` | `escalated.agent.chat.active` / `.queue` | refreshing the panel's lists (`{ sessions: [chat] }`); without them the panel keeps the shared lists |
+| `accept` | `escalated.agent.chat.accept` | Accept in the panel; then the chat's ticket opens |
+| `message` | `escalated.agent.chat.message` | the chat composer: `{ body, is_internal_note }` |
+| `typing` | `escalated.agent.chat.typing` | the typing indicator |
+| `end`, `transfer` | `escalated.agent.chat.end` / `.transfer` | End Chat and Transfer in the chat bar (`{ agent_id }` or `{ department_id }`) |
+
+A host without a chat message route gets the composer's lines through the
+ticket's reply route (`escalated.agent.tickets.reply`), and notes through its
+note route. The chat composer takes no attachments.
+
+**Broadcasts.** On `chat.{sessionId}` the ticket page reads `chat.message` as
+`{ reply_id, body, author, is_agent, created_at }` (a backend that sends
+`{ message: {...} }` is read too). The agent's own message coming back replaces
+the copy shown when it was sent. `chat.typing` is `{ is_agent, user_name }`:
+an agent typing is not shown, and the visitor is named with `user_name`, else
+the ticket's `guest_name`. `chat.ended`, `chat.assigned` and `chat.transferred`
+reload the page. The panel refreshes on `chat.started` / `chat.assigned` on
+`chat.queue` (and the older `chat.new` / `chat.accepted`), and on
+`chat.started`, `chat.assigned` and `chat.transferred` on `agents.{id}`.
+
 ## Notifications
 
 A bell in the top bar shows the agent's unread notifications and, on click,

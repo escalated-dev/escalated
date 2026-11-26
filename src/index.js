@@ -75,6 +75,7 @@ export { useMentions } from './composables/useMentions';
 export { usePluginExtensions } from './composables/usePluginExtensions';
 export { usePluginHooks } from './composables/usePluginHooks';
 export { useChat } from './composables/useChat';
+export { useAgentChats, chatRoute } from './composables/useAgentChats';
 export { useRealtime } from './composables/useRealtime';
 // The agent's own Online / Away / Offline status, for hosts with their own agent layout.
 export { useAgentStatus, AGENT_STATUSES } from './composables/useAgentStatus';

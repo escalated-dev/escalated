@@ -20,6 +20,8 @@ import {
     workspaceQueues,
 } from '../utils/agentQueues';
 import ActiveChatsPanel from './ActiveChatsPanel.vue';
+import { useAgentChats } from '../composables/useAgentChats';
+import { useChat } from '../composables/useChat';
 import AgentToasts from './AgentToasts.vue';
 import CommandPalette from './CommandPalette.vue';
 import NotificationBell from './NotificationBell.vue';
@@ -57,7 +59,15 @@ const isAdmin = computed(() => escalated.value.is_admin === true);
 const showPoweredBy = computed(() => escalated.value.show_powered_by !== false);
 const kbEnabled = computed(() => escalated.value.knowledge_base_enabled !== false);
 const chatEnabled = computed(() => escalated.value.chat_enabled === true);
-const activeChats = computed(() => escalated.value.active_chats || []);
+// The agent's own active chats and the waiting queue: shared as
+// `escalated.active_chats` / `escalated.chat_queue`, refreshed from the chat
+// list routes when the host has them. See useAgentChats.
+const {
+    activeChats,
+    queue: chatQueue,
+    refresh: refreshChats,
+    accept: acceptChatRequest,
+} = useAgentChats({ shared: () => escalated.value, isAdmin: () => isAdmin.value });
 // The bell needs the shared count and the feed's route; hosts without either get none.
 const notificationsEnabled = computed(
     () =>
@@ -274,6 +284,55 @@ const currentStatus = computed(() => ({
 function setStatus(item) {
     setAgentStatus(item.key);
 }
+
+// --- Live chats ------------------------------------------------------------------
+function chatTicketUrl(chat) {
+    const reference = chat?.ticket_reference ?? chat?.ticket_id;
+    return reference == null ? '' : ticketUrl(prefix.value, reference);
+}
+
+function openChat(chat) {
+    const url = chatTicketUrl(chat);
+    if (url) router.visit(url);
+}
+
+async function acceptChat(chat) {
+    if (await acceptChatRequest(chat)) {
+        openChat(chat);
+    } else {
+        toast(t('chat.accept_failed'), 'error');
+    }
+    refreshChats();
+}
+
+function onChatPanelStatus(status) {
+    if (agentStatuses.value.includes(status)) setAgentStatus(status);
+}
+
+// Chats routed to this agent arrive on their own channel.
+const { subscribeToAgentChats } = useChat({
+    channelPrefix: () => escalated.value.broadcasting?.channel_prefix,
+    widgetPath: `/${escalated.value.prefix || 'support'}/widget`,
+});
+let stopAgentChats = null;
+watch(
+    () => [chatEnabled.value, userId.value],
+    ([enabled, id]) => {
+        if (stopAgentChats) stopAgentChats();
+        stopAgentChats = null;
+        if (enabled && id != null) {
+            stopAgentChats = subscribeToAgentChats(id, {
+                onStarted: refreshChats,
+                onAssigned: refreshChats,
+                onTransferred: refreshChats,
+            });
+        }
+    },
+    { immediate: true },
+);
+onBeforeUnmount(() => {
+    if (stopAgentChats) stopAgentChats();
+});
 
 // --- Flash messages ------------------------------------------------------------
 // Each Inertia visit brings a new props object; a flash on it becomes a toast.
@@ -654,7 +713,17 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
             @close="showSaveView = false"
             @saved="onViewSaved"
         />
-        <ActiveChatsPanel v-if="chatEnabled && userId" :chats="activeChats" :agent-id="userId" />
+        <ActiveChatsPanel
+            v-if="chatEnabled && userId"
+            :chats="activeChats"
+            :queue="chatQueue"
+            :agent-id="userId"
+            :agent-status="agentStatus"
+            @navigate="openChat"
+            @accept="acceptChat"
+            @refresh="refreshChats"
+            @status-change="onChatPanelStatus"
+        />
         <AgentToasts />
     </div>
 </template>

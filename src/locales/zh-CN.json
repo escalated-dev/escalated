@@ -569,7 +569,10 @@
         "chat_ended": "聊天已结束",
         "thank_you": "感谢您的反馈！",
         "submit_rating": "提交评价",
-        "live_chats": "在线聊天"
+        "live_chats": "在线聊天",
+        "waiting": "等待中",
+        "send_failed": "消息未发送，请重试。",
+        "accept_failed": "无法接受该聊天。"
     },
     "common": {
         "change_status": "更改状态...",

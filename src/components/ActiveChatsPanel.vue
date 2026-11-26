@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
+import { ref, computed, inject, onMounted, onUnmounted, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useI18n } from '../composables/useI18n';
 import { useChat } from '../composables/useChat';
@@ -7,12 +7,15 @@ import { timeAgo } from '../utils/formatting';
 
 const props = defineProps({
     chats: { type: Array, default: () => [] },
+    /** Optional. Chats waiting for an agent; each gets an Accept button. */
+    queue: { type: Array, default: () => [] },
     agentId: { type: [String, Number], default: null },
     agentStatus: { type: String, default: 'online' },
     navigateRoute: { type: String, default: '' },
 });
 
-const emit = defineEmits(['navigate', 'status-change']);
+// `refresh` when the chat queue channel reports a new or accepted chat.
+const emit = defineEmits(['navigate', 'status-change', 'accept', 'refresh']);
 
 const escDark = inject(
     'esc-dark',
@@ -22,6 +25,12 @@ const { t } = useI18n();
 
 const isOpen = ref(false);
 const currentStatus = ref(props.agentStatus);
+watch(
+    () => props.agentStatus,
+    (status) => {
+        currentStatus.value = status;
+    },
+);
 
 const statusOptions = [
     { value: 'online', label: 'Online', color: 'bg-emerald-500' },
@@ -74,6 +83,18 @@ function navigateToChat(chat) {
     emit('navigate', chat);
 }
 
+const accepting = ref(null);
+function acceptChat(chat) {
+    accepting.value = chat.id;
+    emit('accept', chat);
+}
+watch(
+    () => props.queue,
+    () => {
+        accepting.value = null;
+    },
+);
+
 function truncate(str, len = 40) {
     if (!str) return '';
     return str.length > len ? str.slice(0, len) + '...' : str;
@@ -100,12 +121,20 @@ const { subscribeToChatQueue } = useChat({
     widgetPath: `/${routePrefix}/widget`,
 });
 
+// escalated-laravel broadcasts chat.started / chat.assigned on the queue
+// channel; chat.new / chat.accepted are the older names.
+let stopQueue = null;
 onMounted(() => {
-    subscribeToChatQueue({
-        onNewChat() {
-            // Parent should refresh chat list
-        },
+    const refresh = () => emit('refresh');
+    stopQueue = subscribeToChatQueue({
+        onNewChat: refresh,
+        onChatAccepted: refresh,
+        onStarted: refresh,
+        onAssigned: refresh,
     });
+});
+onUnmounted(() => {
+    if (typeof stopQueue === 'function') stopQueue();
 });
 </script>
 
@@ -134,6 +163,13 @@ onMounted(() => {
             class="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white"
         >
             {{ totalUnread > 99 ? '99+' : totalUnread }}
+        </span>
+        <span
+            v-else-if="queue.length > 0"
+            class="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white"
+            data-testid="esc-chat-queue-badge"
+        >
+            {{ queue.length > 99 ? '99+' : queue.length }}
         </span>
     </button>
 
@@ -244,6 +280,46 @@ onMounted(() => {
                     </div>
                 </div>
             </button>
+
+            <!-- Waiting for an agent -->
+            <template v-if="queue.length">
+                <div
+                    :class="[
+                        'border-t px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider',
+                        escDark ? 'border-white/[0.06] text-neutral-500' : 'border-gray-200 text-gray-500',
+                    ]"
+                >
+                    {{ t('chat.waiting') }} ({{ queue.length }})
+                </div>
+                <div
+                    v-for="waiting in queue"
+                    :key="`queue-${waiting.id}`"
+                    class="flex items-center gap-3 px-4 py-2"
+                    data-testid="esc-chat-queue-item"
+                >
+                    <div class="min-w-0 flex-1">
+                        <div :class="['truncate text-sm font-medium', escDark ? 'text-neutral-200' : 'text-gray-900']">
+                            {{ waiting.customer_name || t('ticket.unknown') }}
+                        </div>
+                        <div :class="['truncate text-xs', escDark ? 'text-neutral-500' : 'text-gray-500']">
+                            {{ truncate(waiting.last_message || waiting.first_message || waiting.subject) }}
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        :disabled="accepting === waiting.id"
+                        :class="[
+                            'flex-shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium text-white transition-all disabled:opacity-60',
+                            escDark
+                                ? 'bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400'
+                                : 'bg-blue-600 hover:bg-blue-500',
+                        ]"
+                        @click="acceptChat(waiting)"
+                    >
+                        {{ t('chat.accept') }}
+                    </button>
+                </div>
+            </template>
         </div>
     </div>
 </template>
