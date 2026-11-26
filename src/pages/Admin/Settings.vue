@@ -13,6 +13,11 @@ const props = defineProps({
     update_url: { type: String, default: null },
     /** Optional `{ healthy, last_run_at, message, commands }`: warns when the recurring jobs are not running. */
     scheduler: { type: Object, default: null },
+    /**
+     * Optional server-worded note shown in place of the inbound email controls
+     * when the backend cannot receive email yet (e.g. its config switch is off).
+     */
+    inbound_email_notice: { type: String, default: null },
 });
 const supported = computed(() => (props.supported_settings === null ? null : new Set(props.supported_settings)));
 const supports = (key) => supported.value === null || supported.value.has(key);
@@ -270,6 +275,16 @@ function submit() {
                         />
                     </div>
                 </div>
+            </div>
+
+            <!-- Inbound Email, unavailable on this backend -->
+            <div
+                v-if="inbound_email_notice"
+                class="rounded-xl border border-[var(--esc-panel-border)] bg-[var(--esc-panel-surface)] p-6"
+                data-testid="inbound-email-notice"
+            >
+                <h3 class="mb-2 text-sm font-semibold text-[var(--esc-panel-text)]">Inbound Email</h3>
+                <p class="text-sm text-[var(--esc-panel-text-muted)]">{{ inbound_email_notice }}</p>
             </div>
 
             <!-- Inbound Email -->

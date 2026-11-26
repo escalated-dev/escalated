@@ -567,6 +567,7 @@
         "Escalated/Admin/Settings": {
             "props": [
                 "departments",
+                "inbound_email_notice",
                 "scheduler",
                 "settings",
                 "supported_settings",
@@ -708,6 +709,7 @@
                 "currentUserId",
                 "filters",
                 "notice",
+                "roleToggles",
                 "roles",
                 "users"
             ],

@@ -318,3 +318,19 @@ describe('backend settings capabilities', () => {
         wrapper.unmount();
     });
 });
+
+describe('Admin/Settings - inbound email notice', () => {
+    it('shows the backend notice when it cannot receive email yet', () => {
+        const notice = 'Inbound email is switched off in the application config.';
+        const wrapper = mountSettings(
+            {},
+            { inbound_email_notice: notice, supported_settings: ['guest_tickets_enabled'] },
+        );
+
+        expect(wrapper.get('[data-testid="inbound-email-notice"]').text()).toContain(notice);
+    });
+
+    it('shows no notice by default', () => {
+        expect(mountSettings().find('[data-testid="inbound-email-notice"]').exists()).toBe(false);
+    });
+});
