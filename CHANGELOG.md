@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.11] - 2026-11-25
+
 ### Upgrading
 - **Unprefixed page names now go to your resolver first.** When the host
   passes a fallback to `resolveEscalatedPage`, a name without `Escalated/`
@@ -15,6 +17,9 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   without the plugin) adds the default panel tokens in a cascade layer
   (`escalated-defaults`) declared first, so host CSS, layered or not, and
   `theme.panel` still win.
+- The widget bundle now builds its CSRF headers through the shared helper.
+  It sends the same headers as before, so the backends' vendored widgets do
+  not need updating for this release.
 
 ### Added
 - `SchedulerWarning` and an optional `scheduler` prop on `Escalated/Admin/Settings`,
