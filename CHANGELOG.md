@@ -4,6 +4,33 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+- **Agent live chat works with the backend's events and routes (#260).** The
+  agent ticket page now shows incoming `chat.message` broadcasts (it pushed
+  `undefined`), names the visitor from `chat.typing`'s `user_name` and ignores
+  agents typing, and no longer shows the agent's own message twice. Sending,
+  typing, ending and transferring go through the chat routes by name
+  (`escalated.agent.chat.*`, then `escalated.admin.chat.*` for an admin)
+  instead of the visitor's widget routes, which took the visitor's token. A
+  host without a chat message route sends through the ticket's reply or note
+  route. Internal notes written in the chat composer are sent as notes.
+- **The live chats panel lists the agent's chats and the queue.** It reads
+  `escalated.active_chats` and the new `escalated.chat_queue`, accepts a
+  waiting chat through `escalated.agent.chat.accept`, opens a chat's ticket on
+  click, follows the agent's status, and refreshes on the queue and agent
+  channels. See docs/agent-panel.md#live-chat.
+- The chat bar's Transfer menu lists the agents the ticket can be assigned to
+  (it had none).
+- The chat composer on the agent ticket page no longer offers attachments,
+  which were never sent.
+
+### Added
+- `useAgentChats()` and `chatRoute()` (src/composables/useAgentChats.js), and
+  `subscribeToAgentChats()` on `useChat()`. `ActiveChatsPanel` takes `queue` and
+  emits `accept` and `refresh`.
+- Translations in all 14 locales for `chat.waiting`, `chat.send_failed` and
+  `chat.accept_failed`.
+
 ## [0.12.11] - 2026-11-25
 
 ### Upgrading
