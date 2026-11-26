@@ -7,7 +7,8 @@ import SchedulerWarning from '../src/components/SchedulerWarning.vue';
 import TicketSidebar from '../src/components/TicketSidebar.vue';
 
 // Strings added for the SLA outcome, the read-only assignee, the scheduler
-// banner and the knowledge-base panel. Every shipped locale translates them.
+// banner, the knowledge-base panel and the agent live chats. Every shipped
+// locale translates them.
 const KEYS = [
     'sla.met',
     'sla.missed',
@@ -18,6 +19,9 @@ const KEYS = [
     'scheduler.last_run',
     'knowledge_panel.search_label',
     'knowledge_panel.search_failed',
+    'chat.waiting',
+    'chat.send_failed',
+    'chat.accept_failed',
 ];
 
 const get = (messages, key) => key.split('.').reduce((acc, part) => acc?.[part], messages);

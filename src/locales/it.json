@@ -569,7 +569,10 @@
         "chat_ended": "Chat Terminata",
         "thank_you": "Grazie per il tuo feedback!",
         "submit_rating": "Invia Valutazione",
-        "live_chats": "Chat Live"
+        "live_chats": "Chat Live",
+        "waiting": "In attesa",
+        "send_failed": "Messaggio non inviato. Riprova.",
+        "accept_failed": "Impossibile accettare la chat."
     },
     "common": {
         "change_status": "Cambia Stato...",

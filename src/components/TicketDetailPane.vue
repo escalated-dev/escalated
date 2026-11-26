@@ -219,6 +219,11 @@ const assignedToMe = computed(
 );
 const canAssign = computed(() => !props.notesOnly && !!props.routes.assign);
 const canAssignToMe = computed(() => canAssign.value && props.currentUserId != null && !assignedToMe.value);
+// A live chat can go to any agent the ticket can be assigned to but the one
+// running it.
+const chatTransferAgents = computed(() =>
+    props.agents.filter((agent) => String(agent.id) !== String(props.currentUserId)),
+);
 const canReassign = computed(() => canAssign.value && props.agents.length > 0);
 
 const assigneeItems = computed(() =>
@@ -1118,7 +1123,7 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                     email: ticket.requester?.email,
                     page_url: ticket.chat_metadata?.page_url,
                 }"
-                :agents="[]"
+                :agents="chatTransferAgents"
                 :departments="departments"
                 :end-endpoint="chat.endEndpoint || ''"
                 :transfer-endpoint="chat.transferEndpoint || ''"
@@ -1380,6 +1385,7 @@ const ghostControl = `flex h-7 items-center gap-1.5 rounded-[var(--esc-radius,6p
                                 :session-id="ticket.chat_session_id"
                                 :send-endpoint="chat.sendEndpoint || ''"
                                 :typing-endpoint="chat.typingEndpoint || ''"
+                                :allow-attachments="chat.allowAttachments !== false"
                                 allow-notes
                                 @send="emit('chat-send', $event)"
                             />

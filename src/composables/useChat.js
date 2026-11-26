@@ -112,6 +112,7 @@ export function useChat(options = {}) {
      * @param {Function} [callbacks.onTyping]
      * @param {Function} [callbacks.onEnded]
      * @param {Function} [callbacks.onAssigned]
+     * @param {Function} [callbacks.onTransferred]
      * @returns {Function} Unsubscribe function
      */
     function subscribeToChat(sessionId, callbacks = {}) {
@@ -122,6 +123,7 @@ export function useChat(options = {}) {
             '.chat.typing': callbacks.onTyping,
             '.chat.ended': callbacks.onEnded,
             '.chat.assigned': callbacks.onAssigned,
+            '.chat.transferred': callbacks.onTransferred,
         });
 
         connectionState.value = 'connected';
@@ -137,6 +139,8 @@ export function useChat(options = {}) {
      * @param {Object} callbacks
      * @param {Function} [callbacks.onNewChat]
      * @param {Function} [callbacks.onChatAccepted]
+     * @param {Function} [callbacks.onStarted]  `chat.started` (escalated-laravel)
+     * @param {Function} [callbacks.onAssigned]  `chat.assigned` (escalated-laravel)
      * @returns {Function} Unsubscribe function
      */
     function subscribeToChatQueue(callbacks = {}) {
@@ -145,6 +149,28 @@ export function useChat(options = {}) {
         return listenScoped('chat.queue', {
             '.chat.new': callbacks.onNewChat,
             '.chat.accepted': callbacks.onChatAccepted,
+            '.chat.started': callbacks.onStarted,
+            '.chat.assigned': callbacks.onAssigned,
+        });
+    }
+
+    /**
+     * Subscribe to the chats routed to one agent, on their own channel
+     * (`agents.{id}`): a chat assigned, started with them or transferred.
+     * @param {string|number} agentId
+     * @param {Object} callbacks
+     * @param {Function} [callbacks.onStarted]
+     * @param {Function} [callbacks.onAssigned]
+     * @param {Function} [callbacks.onTransferred]
+     * @returns {Function} Unsubscribe function
+     */
+    function subscribeToAgentChats(agentId, callbacks = {}) {
+        if (!echoAvailable.value || agentId === null || agentId === undefined) return () => {};
+
+        return listenScoped(`agents.${agentId}`, {
+            '.chat.started': callbacks.onStarted,
+            '.chat.assigned': callbacks.onAssigned,
+            '.chat.transferred': callbacks.onTransferred,
         });
     }
 
@@ -159,5 +185,6 @@ export function useChat(options = {}) {
         checkAvailability,
         subscribeToChat,
         subscribeToChatQueue,
+        subscribeToAgentChats,
     };
 }

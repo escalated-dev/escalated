@@ -545,7 +545,10 @@
         "chat_ended": "Chat Beendet",
         "thank_you": "Danke fuer Ihr Feedback!",
         "submit_rating": "Bewertung abgeben",
-        "live_chats": "Live Chats"
+        "live_chats": "Live Chats",
+        "waiting": "Wartend",
+        "send_failed": "Nachricht nicht gesendet. Bitte erneut versuchen.",
+        "accept_failed": "Der Chat konnte nicht angenommen werden."
     },
     "common": {
         "change_status": "Status ändern...",

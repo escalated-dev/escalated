@@ -546,7 +546,10 @@
         "chat_ended": "Chat Termine",
         "thank_you": "Merci pour votre avis !",
         "submit_rating": "Soumettre l'evaluation",
-        "live_chats": "Chats en Direct"
+        "live_chats": "Chats en Direct",
+        "waiting": "En attente",
+        "send_failed": "Message non envoyé. Réessayez.",
+        "accept_failed": "Impossible d'accepter la discussion."
     },
     "common": {
         "change_status": "Changer le statut...",

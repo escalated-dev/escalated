@@ -569,7 +569,10 @@
         "chat_ended": "채팅 종료됨",
         "thank_you": "피드백 감사합니다!",
         "submit_rating": "평가 제출",
-        "live_chats": "실시간 채팅"
+        "live_chats": "실시간 채팅",
+        "waiting": "대기 중",
+        "send_failed": "메시지를 보내지 못했습니다. 다시 시도하세요.",
+        "accept_failed": "채팅을 수락하지 못했습니다."
     },
     "common": {
         "change_status": "상태 변경...",

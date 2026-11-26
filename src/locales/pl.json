@@ -569,7 +569,10 @@
         "chat_ended": "Czat zakonczony",
         "thank_you": "Dziekujemy za opinie!",
         "submit_rating": "Wyslij ocene",
-        "live_chats": "Czaty na zywo"
+        "live_chats": "Czaty na zywo",
+        "waiting": "Oczekujące",
+        "send_failed": "Nie wysłano wiadomości. Spróbuj ponownie.",
+        "accept_failed": "Nie udało się przyjąć czatu."
     },
     "common": {
         "change_status": "Zmien status...",
