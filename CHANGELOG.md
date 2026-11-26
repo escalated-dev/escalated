@@ -4,6 +4,8 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.12] - 2026-11-26
+
 ### Fixed
 - **Agent live chat works with the backend's events and routes (#260).** The
   agent ticket page now shows incoming `chat.message` broadcasts (it pushed
