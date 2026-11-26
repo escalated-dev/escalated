@@ -34,6 +34,11 @@ describe('index.js exports', () => {
         it('usePluginExtensions is a function', () => {
             expect(typeof escalated.usePluginExtensions).toBe('function');
         });
+
+        it('exports useAgentStatus and AGENT_STATUSES for hosts with their own agent layout', () => {
+            expect(typeof escalated.useAgentStatus).toBe('function');
+            expect(escalated.AGENT_STATUSES).toEqual(['online', 'away', 'offline']);
+        });
     });
 
     // ----------------------------------------------------------------
@@ -145,9 +150,9 @@ describe('index.js exports', () => {
 
         it('total named exports equals components + plugin + composables + helper', () => {
             const keys = Object.keys(escalated);
-            // 59 components + 2 saved-view components + 1 plugin + 8 composables
-            // + 1 helper + 5 pages + 7 utils + 4 page-resolution = 87
-            expect(keys).toHaveLength(87);
+            // 59 components + 2 saved-view components + 1 plugin + 9 composables
+            // + 1 helper + 5 pages + 8 utils (AGENT_STATUSES) + 4 page-resolution = 89
+            expect(keys).toHaveLength(89);
         });
 
         it('every export key is a non-empty string', () => {
