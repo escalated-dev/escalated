@@ -56,6 +56,12 @@ const userId = computed(() => user.value?.id ?? null);
 const userName = computed(() => user.value?.name || t('agent_panel.nav.agent'));
 const userInitial = computed(() => userName.value.charAt(0).toUpperCase());
 const isAdmin = computed(() => escalated.value.is_admin === true);
+// The agent's own browser extensions page. Only a backend that serves it
+// shares the URL, so no other backend gets a dead link.
+const browserExtensionsUrl = computed(() => {
+    const url = escalated.value.browser_extensions_url;
+    return typeof url === 'string' && url !== '' ? url : null;
+});
 const showPoweredBy = computed(() => escalated.value.show_powered_by !== false);
 const kbEnabled = computed(() => escalated.value.knowledge_base_enabled !== false);
 const chatEnabled = computed(() => escalated.value.chat_enabled === true);
@@ -86,6 +92,12 @@ const countsOpen = computed(() => !!inbox.value?.counts);
 
 const currentUrl = computed(() => page.url || '');
 const path = computed(() => currentUrl.value.split(/[?#]/)[0]);
+const onBrowserExtensions = computed(() => {
+    if (!browserExtensionsUrl.value) return false;
+    // The backend may share an absolute URL; compare paths.
+    const target = browserExtensionsUrl.value.replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i, '').split(/[?#]/)[0];
+    return path.value === target;
+});
 
 const queueLabels = computed(() => ({
     mine: t('agent_panel.nav.inbox'),
@@ -543,6 +555,16 @@ defineExpose({ openPalette: () => (paletteOpen.value = true) });
 
             <!-- Footer -->
             <div class="shrink-0 border-t border-[var(--esc-panel-border)] p-2.5">
+                <Link
+                    v-if="browserExtensionsUrl"
+                    :href="browserExtensionsUrl"
+                    :class="[navItemClass(onBrowserExtensions), 'whitespace-nowrap']"
+                    :aria-current="onBrowserExtensions ? 'page' : undefined"
+                    data-testid="esc-rail-browser-extensions"
+                >
+                    <PanelIcon name="link" class="h-4 w-4 shrink-0 opacity-80" />
+                    {{ t('browser_extensions.title') }}
+                </Link>
                 <Link v-if="isAdmin" :href="`${prefix}/admin/reports`" :class="navItemClass(false)">
                     <PanelIcon name="cog" class="h-4 w-4 shrink-0 opacity-80" />
                     {{ t('agent_panel.nav.admin') }}
