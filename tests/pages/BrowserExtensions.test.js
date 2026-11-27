@@ -73,6 +73,12 @@ describe('Agent/BrowserExtensions', () => {
         expect(rows[1].text()).toContain('Never used');
     });
 
+    it('says what each connected extension can do', () => {
+        const text = mountPage().text();
+        expect(text).toContain('Each one can read and act on tickets as you until you revoke it.');
+        expect(text).not.toContain('read and answer tickets');
+    });
+
     it('shows the empty state', () => {
         const wrapper = mountPage({ tokens: [] });
         expect(wrapper.text()).toContain('No browser extensions connected.');

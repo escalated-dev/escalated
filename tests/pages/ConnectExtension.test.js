@@ -45,7 +45,11 @@ describe('Agent/ConnectExtension', () => {
     });
 
     it('tells the agent what approving allows', () => {
-        expect(mountPage().text()).toContain('read and answer tickets as you until you revoke it');
+        const text = mountPage().text();
+        expect(text).toContain('read and act on tickets as you until you revoke it');
+        // An agent token also changes status, priority and assignment, so the
+        // notice must not narrow it to answering.
+        expect(text).not.toContain('read and answer tickets');
     });
 
     it('escapes a hostile client name rather than rendering it as markup', () => {
