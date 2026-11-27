@@ -326,7 +326,6 @@
             "needs_attention": "Aufmerksamkeit erforderlich",
             "back_to_rankings": "Zurück zum Ranking",
             "response_percentiles": "Antwortzeit-Perzentile",
-            "productivity": "Produktivität (Antworten & Lösungen pro Tag)",
             "productivity": "Produktivität",
             "workload_over_time": "Arbeitsbelastung im Zeitverlauf",
             "csat_breakdown": "CSAT-Aufschlüsselung",
@@ -700,5 +699,26 @@
     "knowledge_panel": {
         "search_label": "Wissensdatenbank durchsuchen",
         "search_failed": "Suche fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "browser_extensions": {
+        "connect_title": "Browser-Erweiterung verbinden",
+        "connect_intro": ":name möchte sich mit Ihrem Helpdesk verbinden.",
+        "unnamed_client": "Eine Browser-Erweiterung",
+        "extension_id": "Erweiterungs-ID",
+        "returns_to": "Rückkehr zu",
+        "approve_notice": "Wenn Sie zustimmen, kann diese Erweiterung Tickets in Ihrem Namen lesen und beantworten, bis Sie den Zugriff widerrufen. Stimmen Sie nur zu, wenn die Erweiterungs-ID oben die erwartete ist.",
+        "approve": "Genehmigen",
+        "deny": "Ablehnen",
+        "title": "Browser-Erweiterungen",
+        "intro": "Mit Ihrem Konto verbundene Erweiterungen. Jede kann Tickets in Ihrem Namen lesen und beantworten, bis Sie den Zugriff widerrufen.",
+        "empty": "Keine Browser-Erweiterungen verbunden.",
+        "connected": "Verbunden :date",
+        "last_used": "Zuletzt verwendet :time",
+        "never_used": "Nie verwendet",
+        "expires": "Läuft ab :date",
+        "revoke": "Widerrufen",
+        "revoke_confirm": "Diese Erweiterung widerrufen?",
+        "revoke_yes": "Ja, widerrufen",
+        "cancel": "Abbrechen"
     }
 }

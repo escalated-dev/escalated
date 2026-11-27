@@ -737,5 +737,26 @@
     "knowledge_panel": {
         "search_label": "지식 베이스 검색",
         "search_failed": "검색에 실패했습니다. 다시 시도하세요."
+    },
+    "browser_extensions": {
+        "connect_title": "브라우저 확장 프로그램 연결",
+        "connect_intro": ":name 이(가) 헬프데스크에 연결하려고 합니다.",
+        "unnamed_client": "브라우저 확장 프로그램",
+        "extension_id": "확장 프로그램 ID",
+        "returns_to": "돌아갈 주소",
+        "approve_notice": "승인하면 이 확장 프로그램은 승인을 취소할 때까지 사용자 대신 티켓을 읽고 답변할 수 있습니다. 위의 확장 프로그램 ID가 예상한 것과 같을 때만 승인하세요.",
+        "approve": "승인",
+        "deny": "거부",
+        "title": "브라우저 확장 프로그램",
+        "intro": "계정에 연결된 확장 프로그램입니다. 각 프로그램은 승인을 취소할 때까지 사용자 대신 티켓을 읽고 답변할 수 있습니다.",
+        "empty": "연결된 브라우저 확장 프로그램이 없습니다.",
+        "connected": "연결일 :date",
+        "last_used": "마지막 사용 :time",
+        "never_used": "사용한 적 없음",
+        "expires": "만료 :date",
+        "revoke": "취소",
+        "revoke_confirm": "이 확장 프로그램을 취소하시겠습니까?",
+        "revoke_yes": "예, 취소",
+        "cancel": "닫기"
     }
 }

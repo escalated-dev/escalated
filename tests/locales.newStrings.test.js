@@ -22,6 +22,25 @@ const KEYS = [
     'chat.waiting',
     'chat.send_failed',
     'chat.accept_failed',
+    'browser_extensions.connect_title',
+    'browser_extensions.connect_intro',
+    'browser_extensions.unnamed_client',
+    'browser_extensions.extension_id',
+    'browser_extensions.returns_to',
+    'browser_extensions.approve_notice',
+    'browser_extensions.approve',
+    'browser_extensions.deny',
+    'browser_extensions.title',
+    'browser_extensions.intro',
+    'browser_extensions.empty',
+    'browser_extensions.connected',
+    'browser_extensions.last_used',
+    'browser_extensions.never_used',
+    'browser_extensions.expires',
+    'browser_extensions.revoke',
+    'browser_extensions.revoke_confirm',
+    'browser_extensions.revoke_yes',
+    'browser_extensions.cancel',
 ];
 
 const get = (messages, key) => key.split('.').reduce((acc, part) => acc?.[part], messages);
@@ -43,6 +62,8 @@ describe('new strings in every locale', () => {
             }
         }
         expect(get(locales[locale], 'scheduler.last_run')).toContain(':date');
+        expect(get(locales[locale], 'browser_extensions.connect_intro')).toContain(':name');
+        expect(get(locales[locale], 'browser_extensions.last_used')).toContain(':time');
     });
 });
 

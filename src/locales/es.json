@@ -300,7 +300,6 @@
             "warning": "Advertencia",
             "watch": "Vigilancia",
             "hours_remaining": ":count h restantes",
-            "no_at_risk": "No hay tickets en riesgo de incumplimiento SLA.",
             "no_at_risk": "No hay tickets en riesgo.",
             "avg_frt": "Promedio de Primera Respuesta",
             "median_frt": "Mediana de Primera Respuesta",
@@ -327,7 +326,6 @@
             "needs_attention": "Necesita Atención",
             "back_to_rankings": "Volver al Ranking",
             "response_percentiles": "Percentiles de Tiempo de Respuesta",
-            "productivity": "Productividad (Respuestas y Resoluciones por Día)",
             "productivity": "Productividad",
             "workload_over_time": "Carga de Trabajo en el Tiempo",
             "csat_breakdown": "Desglose de CSAT",
@@ -701,5 +699,26 @@
     "knowledge_panel": {
         "search_label": "Buscar en la base de conocimientos",
         "search_failed": "La búsqueda falló. Inténtalo de nuevo."
+    },
+    "browser_extensions": {
+        "connect_title": "Conectar extensión del navegador",
+        "connect_intro": ":name quiere conectarse a su helpdesk.",
+        "unnamed_client": "Una extensión del navegador",
+        "extension_id": "ID de la extensión",
+        "returns_to": "Vuelve a",
+        "approve_notice": "Si aprueba, esta extensión podrá leer y responder tickets como usted hasta que la revoque. Apruébela solo si el ID de extensión de arriba es el que espera.",
+        "approve": "Aprobar",
+        "deny": "Denegar",
+        "title": "Extensiones del navegador",
+        "intro": "Extensiones conectadas a su cuenta. Cada una puede leer y responder tickets como usted hasta que la revoque.",
+        "empty": "No hay extensiones del navegador conectadas.",
+        "connected": "Conectada :date",
+        "last_used": "Último uso :time",
+        "never_used": "Nunca usada",
+        "expires": "Caduca :date",
+        "revoke": "Revocar",
+        "revoke_confirm": "¿Revocar esta extensión?",
+        "revoke_yes": "Sí, revocar",
+        "cancel": "Cancelar"
     }
 }

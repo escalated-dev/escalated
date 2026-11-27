@@ -737,5 +737,26 @@
     "knowledge_panel": {
         "search_label": "Pesquisar na base de conhecimento",
         "search_failed": "A pesquisa falhou. Tente novamente."
+    },
+    "browser_extensions": {
+        "connect_title": "Conectar extensão do navegador",
+        "connect_intro": ":name quer se conectar ao seu helpdesk.",
+        "unnamed_client": "Uma extensão do navegador",
+        "extension_id": "ID da extensão",
+        "returns_to": "Retorna para",
+        "approve_notice": "Se você aprovar, esta extensão poderá ler e responder tickets como você até que você a revogue. Aprove apenas se o ID da extensão acima for o esperado.",
+        "approve": "Aprovar",
+        "deny": "Negar",
+        "title": "Extensões do navegador",
+        "intro": "Extensões conectadas à sua conta. Cada uma pode ler e responder tickets como você até que você a revogue.",
+        "empty": "Nenhuma extensão do navegador conectada.",
+        "connected": "Conectada :date",
+        "last_used": "Último uso :time",
+        "never_used": "Nunca usada",
+        "expires": "Expira :date",
+        "revoke": "Revogar",
+        "revoke_confirm": "Revogar esta extensão?",
+        "revoke_yes": "Sim, revogar",
+        "cancel": "Cancelar"
     }
 }

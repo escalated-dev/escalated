@@ -300,7 +300,6 @@
             "warning": "Avertissement",
             "watch": "Surveillance",
             "hours_remaining": ":count h restantes",
-            "no_at_risk": "Aucun ticket à risque de dépassement SLA.",
             "no_at_risk": "Aucun ticket à risque.",
             "avg_frt": "Temps moyen de première réponse",
             "median_frt": "Médiane première réponse",
@@ -327,7 +326,6 @@
             "needs_attention": "Nécessite attention",
             "back_to_rankings": "Retour au classement",
             "response_percentiles": "Percentiles du temps de réponse",
-            "productivity": "Productivité (réponses et résolutions par jour)",
             "productivity": "Productivité",
             "workload_over_time": "Charge de travail dans le temps",
             "csat_breakdown": "Répartition CSAT",
@@ -701,5 +699,26 @@
     "knowledge_panel": {
         "search_label": "Rechercher dans la base de connaissances",
         "search_failed": "La recherche a échoué. Réessayez."
+    },
+    "browser_extensions": {
+        "connect_title": "Connecter une extension de navigateur",
+        "connect_intro": ":name souhaite se connecter à votre helpdesk.",
+        "unnamed_client": "Une extension de navigateur",
+        "extension_id": "ID de l'extension",
+        "returns_to": "Retour vers",
+        "approve_notice": "Si vous approuvez, cette extension pourra lire et répondre aux tickets à votre place jusqu'à ce que vous la révoquiez. N'approuvez que si l'ID d'extension ci-dessus est bien celui attendu.",
+        "approve": "Approuver",
+        "deny": "Refuser",
+        "title": "Extensions de navigateur",
+        "intro": "Extensions connectées à votre compte. Chacune peut lire et répondre aux tickets à votre place jusqu'à sa révocation.",
+        "empty": "Aucune extension de navigateur connectée.",
+        "connected": "Connectée :date",
+        "last_used": "Dernière utilisation :time",
+        "never_used": "Jamais utilisée",
+        "expires": "Expire :date",
+        "revoke": "Révoquer",
+        "revoke_confirm": "Révoquer cette extension ?",
+        "revoke_yes": "Oui, révoquer",
+        "cancel": "Annuler"
     }
 }

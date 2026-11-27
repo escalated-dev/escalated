@@ -737,5 +737,26 @@
     "knowledge_panel": {
         "search_label": "搜索知识库",
         "search_failed": "搜索失败，请重试。"
+    },
+    "browser_extensions": {
+        "connect_title": "连接浏览器扩展",
+        "connect_intro": ":name 想要连接到您的服务台。",
+        "unnamed_client": "一个浏览器扩展",
+        "extension_id": "扩展 ID",
+        "returns_to": "返回至",
+        "approve_notice": "如果您批准，该扩展可以以您的身份读取和回复工单，直到您撤销为止。只有在上方的扩展 ID 与您预期的一致时才批准。",
+        "approve": "批准",
+        "deny": "拒绝",
+        "title": "浏览器扩展",
+        "intro": "已连接到您账户的扩展。每个扩展都可以以您的身份读取和回复工单，直到您撤销为止。",
+        "empty": "没有已连接的浏览器扩展。",
+        "connected": "连接于 :date",
+        "last_used": "上次使用 :time",
+        "never_used": "从未使用",
+        "expires": "到期 :date",
+        "revoke": "撤销",
+        "revoke_confirm": "撤销此扩展？",
+        "revoke_yes": "是，撤销",
+        "cancel": "取消"
     }
 }

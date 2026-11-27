@@ -4,6 +4,17 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+### Added
+- **Browser extension pages for agents.** `Escalated/Agent/ConnectExtension` is
+  the consent screen a backend renders when a browser extension asks to
+  connect: it shows the extension ID next to the name the extension gave
+  itself, says what approving allows, and posts the original request back to
+  the backend's `approve_url` or `deny_url` only when the agent clicks (never
+  automatically). `Escalated/Agent/BrowserExtensions` lists the agent's
+  connected extensions with their extension ID, last use and expiry, and
+  revokes one after an inline confirmation. Strings are in all 14 locales
+  under `browser_extensions.*`.
+
 ## [0.12.12] - 2026-11-26
 
 ### Fixed

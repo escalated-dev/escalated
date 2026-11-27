@@ -737,5 +737,26 @@
     "knowledge_panel": {
         "search_label": "Bilgi bankasında ara",
         "search_failed": "Arama başarısız oldu. Tekrar deneyin."
+    },
+    "browser_extensions": {
+        "connect_title": "Tarayıcı uzantısını bağla",
+        "connect_intro": ":name yardım masanıza bağlanmak istiyor.",
+        "unnamed_client": "Bir tarayıcı uzantısı",
+        "extension_id": "Uzantı kimliği",
+        "returns_to": "Dönüş adresi",
+        "approve_notice": "Onaylarsanız, bu uzantı siz iptal edene kadar talepleri sizin adınıza okuyabilir ve yanıtlayabilir. Yalnızca yukarıdaki uzantı kimliği beklediğiniz kimlikse onaylayın.",
+        "approve": "Onayla",
+        "deny": "Reddet",
+        "title": "Tarayıcı uzantıları",
+        "intro": "Hesabınıza bağlı uzantılar. Her biri siz iptal edene kadar talepleri sizin adınıza okuyabilir ve yanıtlayabilir.",
+        "empty": "Bağlı tarayıcı uzantısı yok.",
+        "connected": "Bağlandı :date",
+        "last_used": "Son kullanım :time",
+        "never_used": "Hiç kullanılmadı",
+        "expires": "Bitiş :date",
+        "revoke": "İptal et",
+        "revoke_confirm": "Bu uzantı iptal edilsin mi?",
+        "revoke_yes": "Evet, iptal et",
+        "cancel": "Vazgeç"
     }
 }

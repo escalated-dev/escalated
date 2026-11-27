@@ -737,5 +737,26 @@
     "knowledge_panel": {
         "search_label": "ナレッジベースを検索",
         "search_failed": "検索に失敗しました。もう一度お試しください。"
+    },
+    "browser_extensions": {
+        "connect_title": "ブラウザ拡張機能を接続",
+        "connect_intro": ":name がヘルプデスクへの接続を求めています。",
+        "unnamed_client": "ブラウザ拡張機能",
+        "extension_id": "拡張機能ID",
+        "returns_to": "戻り先",
+        "approve_notice": "承認すると、この拡張機能は、あなたが取り消すまで、あなたとしてチケットの閲覧と返信ができます。上の拡張機能IDが想定どおりの場合のみ承認してください。",
+        "approve": "承認",
+        "deny": "拒否",
+        "title": "ブラウザ拡張機能",
+        "intro": "アカウントに接続されている拡張機能です。いずれも、あなたが取り消すまで、あなたとしてチケットの閲覧と返信ができます。",
+        "empty": "接続されているブラウザ拡張機能はありません。",
+        "connected": "接続日 :date",
+        "last_used": "最終使用 :time",
+        "never_used": "未使用",
+        "expires": "有効期限 :date",
+        "revoke": "取り消す",
+        "revoke_confirm": "この拡張機能を取り消しますか?",
+        "revoke_yes": "はい、取り消す",
+        "cancel": "キャンセル"
     }
 }
