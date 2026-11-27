@@ -4,6 +4,7 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
 
 ## [Unreleased]
 
+## [0.12.13] - 2026-11-26
 ### Added
 - **Browser extension pages for agents.** `Escalated/Agent/ConnectExtension` is
   the consent screen a backend renders when a browser extension asks to
