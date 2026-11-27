@@ -737,5 +737,27 @@
     "knowledge_panel": {
         "search_label": "Kennisbank doorzoeken",
         "search_failed": "Zoeken mislukt. Probeer het opnieuw."
+    },
+    "browser_extensions": {
+        "connect_title": "Browserextensie koppelen",
+        "connect_intro": ":name wil verbinding maken met je helpdesk.",
+        "unnamed_client": "Een browserextensie",
+        "extension_id": "Extensie-ID",
+        "returns_to": "Keert terug naar",
+        "approve_notice": "Als je goedkeurt, kan deze extensie tickets lezen en behandelen als jij, totdat je de toegang intrekt. Keur alleen goed als het extensie-ID hierboven het verwachte ID is.",
+        "approve": "Goedkeuren",
+        "deny": "Weigeren",
+        "title": "Browserextensies",
+        "intro": "Extensies gekoppeld aan je account. Elke extensie kan tickets lezen en behandelen als jij, totdat je de toegang intrekt.",
+        "empty": "Geen browserextensies gekoppeld.",
+        "connected": "Gekoppeld :date",
+        "last_used": "Laatst gebruikt :time",
+        "never_used": "Nooit gebruikt",
+        "expires": "Verloopt :date",
+        "revoke": "Intrekken",
+        "revoke_confirm": "Deze extensie intrekken?",
+        "revoke_yes": "Ja, intrekken",
+        "cancel": "Annuleren",
+        "kind_badge": "Browserextensie"
     }
 }

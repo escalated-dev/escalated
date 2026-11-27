@@ -44,6 +44,8 @@ All the Vue 3 + Inertia.js components that power the Escalated UI. These are ide
 - `pages/Agent/Dashboard.vue` — Stats overview and recent tickets
 - `pages/Agent/TicketIndex.vue` — Filterable ticket queue
 - `pages/Agent/TicketShow.vue` — Full ticket view with sidebar, internal notes, canned responses
+- `pages/Agent/ConnectExtension.vue` — Consent screen for connecting a browser extension
+- `pages/Agent/BrowserExtensions.vue` — The agent's connected browser extensions, with revoke
 
 **Admin Panel** — System configuration
 - `pages/Admin/Reports.vue` — Analytics dashboard

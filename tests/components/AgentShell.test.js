@@ -7,6 +7,8 @@ import { registerAgentCommands } from '../../src/composables/useAgentCommands';
 import { forgetInbox, rememberInbox } from '../../src/utils/agentQueues';
 import { resetAgentStatus } from '../../src/composables/useAgentStatus';
 import { clearToasts, toast } from '../../src/composables/useAgentToasts';
+import { setLocale } from '../../src/composables/useI18n';
+import locales from '../../src/locales/index.js';
 
 const usePage = vi.fn();
 const visit = vi.fn();
@@ -208,6 +210,40 @@ describe('AgentShell rail', () => {
                 .find((a) => a.text() === 'Admin')
                 .attributes('href'),
         ).toBe('/support/admin/reports');
+    });
+
+    it('links to the browser extensions page only when the backend shares its URL', () => {
+        mountLayout('/support/agent/tickets');
+        expect(wrapper.find('[data-testid="esc-rail-browser-extensions"]').exists()).toBe(false);
+        wrapper.unmount();
+
+        mountLayout('/support/agent/tickets', {}, { browser_extensions_url: '/support/agent/browser-extensions' });
+        const link = wrapper.get('[data-testid="esc-rail-browser-extensions"]');
+        expect(link.attributes('href')).toBe('/support/agent/browser-extensions');
+        expect(link.text()).toBe('Browser extensions');
+        expect(link.attributes('aria-current')).toBeUndefined();
+    });
+
+    it('ignores a browser extensions URL that is not a non-empty string', () => {
+        for (const value of ['', null, 42, { href: '/x' }]) {
+            mountLayout('/support/agent/tickets', {}, { browser_extensions_url: value });
+            expect(wrapper.find('[data-testid="esc-rail-browser-extensions"]').exists()).toBe(false);
+            wrapper.unmount();
+        }
+        wrapper = null;
+    });
+
+    it('marks the browser extensions link current on its page and translates it', () => {
+        setLocale('fr');
+        mountLayout(
+            '/support/agent/browser-extensions',
+            {},
+            { browser_extensions_url: '/support/agent/browser-extensions' },
+        );
+        const link = wrapper.get('[data-testid="esc-rail-browser-extensions"]');
+        expect(link.attributes('aria-current')).toBe('page');
+        expect(link.text()).toBe(locales.fr.browser_extensions.title);
+        setLocale('en');
     });
 
     it('shows the agent with an online status and a status menu, chat or not', async () => {

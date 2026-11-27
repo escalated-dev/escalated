@@ -737,5 +737,27 @@
     "knowledge_panel": {
         "search_label": "Przeszukaj bazę wiedzy",
         "search_failed": "Wyszukiwanie nie powiodło się. Spróbuj ponownie."
+    },
+    "browser_extensions": {
+        "connect_title": "Połącz rozszerzenie przeglądarki",
+        "connect_intro": ":name chce połączyć się z Twoim helpdeskiem.",
+        "unnamed_client": "Rozszerzenie przeglądarki",
+        "extension_id": "ID rozszerzenia",
+        "returns_to": "Powrót do",
+        "approve_notice": "Jeśli zatwierdzisz, to rozszerzenie będzie mogło czytać i obsługiwać zgłoszenia w Twoim imieniu, dopóki go nie odwołasz. Zatwierdź tylko wtedy, gdy powyższy ID rozszerzenia jest oczekiwany.",
+        "approve": "Zatwierdź",
+        "deny": "Odrzuć",
+        "title": "Rozszerzenia przeglądarki",
+        "intro": "Rozszerzenia połączone z Twoim kontem. Każde może czytać i obsługiwać zgłoszenia w Twoim imieniu, dopóki go nie odwołasz.",
+        "empty": "Brak połączonych rozszerzeń przeglądarki.",
+        "connected": "Połączono :date",
+        "last_used": "Ostatnio użyte :time",
+        "never_used": "Nigdy nie użyto",
+        "expires": "Wygasa :date",
+        "revoke": "Odwołaj",
+        "revoke_confirm": "Odwołać to rozszerzenie?",
+        "revoke_yes": "Tak, odwołaj",
+        "cancel": "Anuluj",
+        "kind_badge": "Rozszerzenie przeglądarki"
     }
 }

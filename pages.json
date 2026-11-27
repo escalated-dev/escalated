@@ -80,6 +80,8 @@
         "Escalated/Admin/Workflows/Form",
         "Escalated/Admin/Workflows/Index",
         "Escalated/Admin/Workflows/Logs",
+        "Escalated/Agent/BrowserExtensions",
+        "Escalated/Agent/ConnectExtension",
         "Escalated/Agent/Dashboard",
         "Escalated/Agent/TicketIndex",
         "Escalated/Agent/TicketShow",
@@ -765,6 +767,27 @@
                 "workflows"
             ],
             "required": []
+        },
+        "Escalated/Agent/BrowserExtensions": {
+            "props": [
+                "revoke_url_template",
+                "tokens"
+            ],
+            "required": []
+        },
+        "Escalated/Agent/ConnectExtension": {
+            "props": [
+                "approve_url",
+                "client_name",
+                "deny_url",
+                "extension_id",
+                "origin_host",
+                "params"
+            ],
+            "required": [
+                "approve_url",
+                "deny_url"
+            ]
         },
         "Escalated/Agent/Dashboard": {
             "props": [
