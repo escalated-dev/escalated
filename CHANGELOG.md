@@ -12,8 +12,20 @@ All notable changes to `@escalated-dev/escalated` will be documented in this fil
   the backend's `approve_url` or `deny_url` only when the agent clicks (never
   automatically). `Escalated/Agent/BrowserExtensions` lists the agent's
   connected extensions with their extension ID, last use and expiry, and
-  revokes one after an inline confirmation. Strings are in all 14 locales
-  under `browser_extensions.*`.
+  revokes one after an inline confirmation. Both pages tell the agent that a
+  connected extension can read and act on tickets as them (an agent token can
+  also change status, priority and assignment, apply macros, add notes and
+  create tickets), not only read and answer them. Strings are in all 14
+  locales under `browser_extensions.*`.
+- **Browser extensions link in the agent rail.** When the backend shares
+  `escalated.browser_extensions_url`, the agent rail footer links to that page
+  and marks it current while it is open. A backend that does not share the
+  key (or serves no such page) gets no link.
+- **Token kind on the admin API tokens page.** `Escalated/Admin/ApiTokens/Index`
+  reads optional `kind` and `extension_id` fields on each token: a
+  `browser_extension` token gets a translated "Browser extension" badge
+  (`browser_extensions.kind_badge`) and its extension ID, and any other kind
+  is shown as sent. Tokens without the fields render as before.
 
 ## [0.12.12] - 2026-11-26
 
