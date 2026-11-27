@@ -757,6 +757,7 @@
         "revoke": "취소",
         "revoke_confirm": "이 확장 프로그램을 취소하시겠습니까?",
         "revoke_yes": "예, 취소",
-        "cancel": "닫기"
+        "cancel": "닫기",
+        "kind_badge": "브라우저 확장 프로그램"
     }
 }

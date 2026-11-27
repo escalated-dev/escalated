@@ -757,6 +757,7 @@
         "revoke": "Intrekken",
         "revoke_confirm": "Deze extensie intrekken?",
         "revoke_yes": "Ja, intrekken",
-        "cancel": "Annuleren"
+        "cancel": "Annuleren",
+        "kind_badge": "Browserextensie"
     }
 }

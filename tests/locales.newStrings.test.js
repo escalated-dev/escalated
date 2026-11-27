@@ -41,6 +41,7 @@ const KEYS = [
     'browser_extensions.revoke_confirm',
     'browser_extensions.revoke_yes',
     'browser_extensions.cancel',
+    'browser_extensions.kind_badge',
 ];
 
 const get = (messages, key) => key.split('.').reduce((acc, part) => acc?.[part], messages);

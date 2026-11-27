@@ -757,6 +757,7 @@
         "revoke": "取り消す",
         "revoke_confirm": "この拡張機能を取り消しますか?",
         "revoke_yes": "はい、取り消す",
-        "cancel": "キャンセル"
+        "cancel": "キャンセル",
+        "kind_badge": "ブラウザ拡張機能"
     }
 }

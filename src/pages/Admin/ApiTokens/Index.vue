@@ -4,12 +4,21 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { trimTrailingSlashes } from '../../../embed/protocol';
 import EscalatedLayout from '../../../components/EscalatedLayout.vue';
 import { readFlash } from '../../../utils/flash';
+import { useI18n } from '../../../composables/useI18n';
 
 defineProps({
     tokens: Array,
     users: Array,
     api_enabled: Boolean,
 });
+
+const { t } = useI18n();
+
+// A token's kind, as the backend reports it ('browser_extension' for one
+// minted by the extension sign-in). Older backends send no kind at all.
+function kindLabel(kind) {
+    return kind === 'browser_extension' ? t('browser_extensions.kind_badge') : kind;
+}
 
 const dark = inject(
     'esc-dark',
@@ -319,6 +328,7 @@ function formatDate(iso) {
                         <tr
                             v-for="token in tokens"
                             :key="token.id"
+                            :data-testid="`api-token-${token.id}`"
                             :class="[
                                 dark ? 'hover:bg-[var(--esc-panel-hover)]' : 'hover:bg-gray-50',
                                 token.is_expired ? 'opacity-50' : '',
@@ -329,6 +339,26 @@ function formatDate(iso) {
                                 class="px-4 py-3 font-medium"
                             >
                                 {{ token.name }}
+                                <span
+                                    v-if="token.kind"
+                                    data-testid="api-token-kind"
+                                    :class="
+                                        dark
+                                            ? 'border-sky-500/30 bg-sky-500/10 text-sky-300'
+                                            : 'border-sky-200 bg-sky-50 text-sky-700'
+                                    "
+                                    class="ml-2 rounded border px-1.5 py-0.5 text-xs font-normal"
+                                    >{{ kindLabel(token.kind) }}</span
+                                >
+                                <div
+                                    v-if="token.extension_id"
+                                    data-testid="api-token-extension-id"
+                                    :class="dark ? 'text-[var(--esc-panel-text-muted)]' : 'text-gray-500'"
+                                    class="mt-0.5 text-xs font-normal"
+                                >
+                                    {{ t('browser_extensions.extension_id') }}:
+                                    <code class="font-mono">{{ token.extension_id }}</code>
+                                </div>
                             </td>
                             <td
                                 :class="dark ? 'text-[var(--esc-panel-text-tertiary)]' : 'text-gray-600'"

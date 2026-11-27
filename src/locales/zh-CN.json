@@ -757,6 +757,7 @@
         "revoke": "撤销",
         "revoke_confirm": "撤销此扩展？",
         "revoke_yes": "是，撤销",
-        "cancel": "取消"
+        "cancel": "取消",
+        "kind_badge": "浏览器扩展"
     }
 }

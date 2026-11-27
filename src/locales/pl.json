@@ -757,6 +757,7 @@
         "revoke": "Odwołaj",
         "revoke_confirm": "Odwołać to rozszerzenie?",
         "revoke_yes": "Tak, odwołaj",
-        "cancel": "Anuluj"
+        "cancel": "Anuluj",
+        "kind_badge": "Rozszerzenie przeglądarki"
     }
 }

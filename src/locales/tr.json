@@ -757,6 +757,7 @@
         "revoke": "İptal et",
         "revoke_confirm": "Bu uzantı iptal edilsin mi?",
         "revoke_yes": "Evet, iptal et",
-        "cancel": "Vazgeç"
+        "cancel": "Vazgeç",
+        "kind_badge": "Tarayıcı uzantısı"
     }
 }

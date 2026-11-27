@@ -719,6 +719,7 @@
         "revoke": "Widerrufen",
         "revoke_confirm": "Diese Erweiterung widerrufen?",
         "revoke_yes": "Ja, widerrufen",
-        "cancel": "Abbrechen"
+        "cancel": "Abbrechen",
+        "kind_badge": "Browser-Erweiterung"
     }
 }

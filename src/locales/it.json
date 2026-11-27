@@ -757,6 +757,7 @@
         "revoke": "Revoca",
         "revoke_confirm": "Revocare questa estensione?",
         "revoke_yes": "Sì, revoca",
-        "cancel": "Annulla"
+        "cancel": "Annulla",
+        "kind_badge": "Estensione del browser"
     }
 }

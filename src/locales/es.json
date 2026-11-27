@@ -719,6 +719,7 @@
         "revoke": "Revocar",
         "revoke_confirm": "¿Revocar esta extensión?",
         "revoke_yes": "Sí, revocar",
-        "cancel": "Cancelar"
+        "cancel": "Cancelar",
+        "kind_badge": "Extensión del navegador"
     }
 }
